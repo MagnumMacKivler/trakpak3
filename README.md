@@ -3,7 +3,9 @@
 ## Legend
 
 Curve Radii: R(Radius) Ex. R2048 -> 2048-Radius Curve
+
 Grades: G(% Grade x 10) Ex. G32 -> 3.2% Grade (Sunset Gulch Standard)
+
 Angles: Ang(Slope / 4) Ex. Ang2 -> Horizontal (Y/X) Slope of 2/4 = 1/2
 
 ## Master To-Do List:

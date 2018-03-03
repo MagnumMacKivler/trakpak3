@@ -1,12 +1,14 @@
 # Trakpak 3 Developer Resources
 
 Master To-Do List:
+  _Italicized Items_ are Optional/Uncertain.
+  ~~Struckthrough Items~~ are Done.
 
 ### Basic Track
    * Straights Ang0
    * Straights Ang1
    * Straights Ang2
-   * Straights Ang4
+   * Straights Ang4
    * Curves R1536
    * Curves R2048/2240
    * Curves R3072/3264
@@ -96,3 +98,15 @@ Master To-Do List:
    * _Inner Radius Third Rail_
    * _Outer Radius Third Rail_
 ### Roads
+   * Basic Roads
+   * Single Track Streetrunning
+   * Double Track Streetrunning
+   * Basic Sidewalks
+   * STS Sidewalks
+   * DTS Sidewalks
+   * Grade Crossings (Wood, Asphalt, Rubber, Concrete)
+   * Crossing Gates (Animated)
+   * Griswold Signals (Animated)
+   * Wig-Wags (Animated)
+   * _Street Signs_
+   * _Traffic Lights_

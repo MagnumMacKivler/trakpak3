@@ -1,36 +1,37 @@
 # Trakpak 3 Developer Resources
 
 Master To-Do List:
+
 _Italicized Items_ are Optional/Uncertain.
 
 ~~Struckthrough Items~~ are Done.
 
 ### Basic Track
-   * Straights Ang0
-   * Straights Ang1
-   * Straights Ang2
-   * Straights Ang4
-   * Curves R1536
-   * Curves R2048/2240
-   * Curves R3072/3264
-   * Curves R4096/4288
-   * Curves R8192
+   * ~~Straights Ang0~~
+   * ~~Straights Ang1~~
+   * ~~Straights Ang2~~
+   * ~~Straights Ang4~~
+   * ~~Curves R1536~~
+   * ~~Curves R2048/2240~~
+   * ~~Curves R3072/3264~~
+   * ~~Curves R4096/4288~~
+   * ~~Curves R8192~~
    * Straight Grades G16
    * Straight Grades G32
    * Curved Grades R2048/2240
    * Curved Grades R3072/3264
    * Curved Grades R4096/4288
 ### Switches
-   * Switches R1536
+   * ~~Switches R1536~~
    * Switches R2048
    * _Switches R2240_
    * Switches R3072
    * _Switches R3264_
    * Switches R4096
 ### Bridges
-   * Half-Through Plate Girder Bridges Ang0
+   * ~~Half-Through Plate Girder Bridges Ang0~~
    * Half-Through Plate Girder Bridges Ang4
-   * Deck Plate Girder Bridges Ang0
+   * ~~Deck Plate Girder Bridges Ang0~~
    * Pratt Truss Bridges Ang0
    * Pratt Truss Bridges Ang4
    * Inverted Pratt Truss Bridges Ang0
@@ -95,6 +96,7 @@ _Italicized Items_ are Optional/Uncertain.
    * Triple Metal Overhead Gantry
    * Quadruple Metal Overhead Gantry
    * _Double Wooden Overhead Gantry_
+   * Overhead Wires for all basic track pieces
    * _Straight Third Rail_
    * _Inner Radius Third Rail_
    * _Outer Radius Third Rail_

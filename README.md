@@ -1,8 +1,9 @@
 # Trakpak 3 Developer Resources
 
 Master To-Do List:
-  _Italicized Items_ are Optional/Uncertain.
-  ~~Struckthrough Items~~ are Done.
+_Italicized Items_ are Optional/Uncertain.
+
+~~Struckthrough Items~~ are Done.
 
 ### Basic Track
    * Straights Ang0

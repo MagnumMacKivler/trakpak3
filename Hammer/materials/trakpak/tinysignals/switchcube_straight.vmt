@@ -1,0 +1,10 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak/tinysignals/switchcube_straight"
+	"$surfaceprop" "MetalVent"
+	
+	"$detail" "detail\metal_detail_01"
+	"$detailscale" "1"
+	"$detailblendfactor" ".65"
+	"$detailblendmode" "0"
+}

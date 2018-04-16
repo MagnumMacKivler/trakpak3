@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak/tinysignals/signal_off"
+	"$surfaceprop" "Glass"
+	"$color" "{0 127 0}"
+	"$color2" "{0 127 0}"
+	//"$basetexturetransform" "center .5 .5 scale 2 2 rotate 0 translate 0 0"
+}

@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak/whistlepost_front"
+	"$surfaceprop" "Metal"
+	"$alphatest" 1
+}

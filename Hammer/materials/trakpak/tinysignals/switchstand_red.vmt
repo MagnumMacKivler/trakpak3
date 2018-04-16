@@ -1,0 +1,14 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "metal/metalhull010b"
+	"$surfaceprop" "metal"
+	"$color" "{223 127 127}"
+	"$color2" "{223 127 127}"
+	//"$basetexturetransform" "center .5 .5 scale 2 2 rotate 0 translate 0 0"
+	"$detail" "detail\metal_detail_01"
+	"$detailscale" "2"
+	"$detailblendfactor" ".65"
+	"$detailblendmode" "0"
+	
+	"$nocull" "1"
+}

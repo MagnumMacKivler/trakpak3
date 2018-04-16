@@ -14,6 +14,8 @@ _Italicized Items_ are Optional/Uncertain.
 
 ~~Struckthrough Items~~ are Done.
 
+`Code-Blocked Items` are being worked on.
+
 ### Basic Track
 
 All straight track lengths will be Powers of Two (or simple multiples of Powers of Two). For Angled track, this applies to both the X and Y distances. Curves are to be the three principle radii (2048, 3072, 4096) plus their double track radii (principle radii + 192) plus 1536 and 8192.

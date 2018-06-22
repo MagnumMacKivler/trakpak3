@@ -52,7 +52,7 @@ All Switch Types, in order of priority:
    * `Switches R1536`
    * `Switches R2048`
    * _Switches R2240_
-   * Switches R3072
+   * `Switches R3072`
    * _Switches R3264_
    * Switches R4096
    

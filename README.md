@@ -63,7 +63,7 @@ All Switch Types, in order of priority:
    * ~~Deck Plate Girder Bridges Ang0~~
    * `Pratt Truss Bridges Ang0`
    * Pratt Truss Bridges Ang4
-   * Inverted Pratt Truss Bridges Ang0
+   * `Inverted Pratt Truss Bridges Ang0`
    * Warren Truss Bridges Ang0
    * Warren Truss Bridges Ang4
    * Pennsylvania Petit Truss Bridges Ang0

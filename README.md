@@ -31,7 +31,7 @@ All straight track lengths will be Powers of Two (or simple multiples of Powers 
    * ~~Curves R8192~~
    * Straight Grades G16
    * Straight Grades G32
-   * Curved Grades R2048/2240
+   * `Curved Grades R2048/2240`
    * Curved Grades R3072/3264
    * Curved Grades R4096/4288
    
@@ -54,7 +54,8 @@ All Switch Types, in order of priority:
    * _Switches R2240_
    * `Switches R3072`
    * _Switches R3264_
-   * Switches R4096
+   * _Switches R4096_
+   * `Switches R8192`
    
 ### Bridges
 

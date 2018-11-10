@@ -29,8 +29,9 @@ All straight track lengths will be Powers of Two (or simple multiples of Powers 
    * `Curves R3072/3264`
    * `Curves R4096/4288`
    * ~~Curves R8192~~
-   * Straight Grades G16
-   * Straight Grades G32
+   * ~~Straight Grades G16~~
+   * ~~Straight Grades G24~~
+   * ~~Straight Grades G32~~
    * `Curved Grades R2048/2240`
    * Curved Grades R3072/3264
    * Curved Grades R4096/4288

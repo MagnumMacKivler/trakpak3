@@ -76,9 +76,9 @@ All Switch Types, in order of priority:
    * Wooden Trestle R3072
    * Wooden Trestle Pylons
    * Strauss Bascule Bridges (Animated?)
-   * Rolling Bascule Bridges (Animated?)
+   * ~~Rolling Bascule Bridges~~
    * Swing Bridges
-   * _Lift Bridges_
+   * Lift Bridges
    * _Concrete Abutments_
    
 ### Tunnels

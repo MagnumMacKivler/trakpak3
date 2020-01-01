@@ -15,7 +15,7 @@ This is a list of everything I want to release trakpak3 with as soon as possible
 * A full set of color-light (CL) and position-light (PL) signals, as well as a few poles or gantries for them to use.
 * A few miscellaneous models like Crossing Gates and Switch Throws.
 * All available road textures for the construction of road brushes/models.
-* All the lua required to make trakpak3's signals and switches working.
+* All the lua required to get trakpak3's signals and switches working.
 * Enough documentation in the wiki to actually use the stuff in the list above.
 
 ### Updates as we go:

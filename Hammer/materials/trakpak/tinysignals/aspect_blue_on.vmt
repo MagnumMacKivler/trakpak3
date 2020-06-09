@@ -1,8 +1,0 @@
-"UnlitGeneric"
-{
-	"$basetexture" "trakpak/tinysignals/signal_on"
-	"$surfaceprop" "Glass"
-	"$color" "{0 63 255}"
-	"$color2" "{0 63 255}"
-	//"$basetexturetransform" "center .5 .5 scale 2 2 rotate 0 translate 0 0"
-}

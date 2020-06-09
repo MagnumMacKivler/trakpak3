@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/metal/carmetal_white"
+	"$surfaceprop" "Metal"
+	"$halflambert" "1"
+	
+	//"$blendtintbybasealpha" "1"
+}

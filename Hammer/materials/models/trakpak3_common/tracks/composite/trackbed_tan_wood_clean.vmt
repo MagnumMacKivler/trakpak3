@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/composite/trackbed_tan_wood_clean"
+	"$surfaceprop" "Gravel"
+}

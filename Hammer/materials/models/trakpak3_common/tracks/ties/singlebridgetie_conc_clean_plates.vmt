@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/ties/singlebridgetie_conc_clean_plates"
+	"$surfaceprop" "wood"
+	$alphatest 1
+}

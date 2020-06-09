@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/rails/rail_top_rusty"
+	//"$envmap" "env_cubemap"
+	//"$envmapmask" "trakpak3_common/tracks/rails/rail_top_mask"
+	"$surfaceprop" "Metal"
+	//"$color" "[0.8 0.8 0.8]"
+	//"$color2" "[0.8 0.8 0.8]"
+}

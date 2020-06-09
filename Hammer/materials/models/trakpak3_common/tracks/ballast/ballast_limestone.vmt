@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/ballast/ballast_limestone"
+	"$surfaceprop" "Gravel"
+}

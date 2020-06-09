@@ -1,0 +1,17 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/metal/carmetal_yellow"
+	"$surfaceprop" "Metal"
+	"$halflambert" "1"
+	
+	$override "{255 255 255}"
+	Proxies
+	{
+		Equals
+		{
+			srcVar1 $override
+			resultVar $color
+		}
+	
+	}
+}

@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/rails/rail_side"
+	"$surfaceprop" "Metal"
+}

@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "trakpak3_common/misc/invisible"
+	"$alphatest" 1
+	"$nodecal" 1
+}

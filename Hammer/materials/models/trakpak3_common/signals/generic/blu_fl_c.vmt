@@ -1,0 +1,16 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/signals/generic/anim/blu_fl_c"
+	"$selfillum" "1"
+	
+	Proxies
+	{
+		AnimatedTexture
+		{
+			animatedtexturevar $basetexture
+			animatedtextureframenumvar $frame
+			animatedtextureframerate "1"
+			
+		}
+	}
+}

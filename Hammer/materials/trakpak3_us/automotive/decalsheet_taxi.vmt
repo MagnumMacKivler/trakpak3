@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_us/automotive/decalsheet_taxi" //EYY BADDA BING
+	"$surfaceprop" "Metal"
+	"$alphatest" "1"
+}

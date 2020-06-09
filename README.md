@@ -8,25 +8,110 @@ Trakpak3 is currently in development. This will be the master list for materials
 
 ### The Day 1 To-Do List:
 
-This is a list of everything I want to release trakpak3 with as soon as possible, to allow people to learn and figure out how things work.
+This is a list of everything I want to include in Trakpak3 for the Day 1 release to let people start mapping as soon as possible.
 
-* John Henry, the Expression 2-based Track Generator, which takes care of the bulk of normal track generation.
-* A decent set of 56" (Realistic Standard Gauge) tracks, including a few bridges, diamonds, and some other special track.
-* A full set of color-light (CL) and position-light (PL) signals, as well as a few poles or gantries for them to use.
-* A few miscellaneous models like Crossing Gates and Switch Throws.
-* All available road textures for the construction of road brushes/models.
-* All the lua required to get trakpak3's signals and switches working.
-* Enough documentation in the wiki to actually use the stuff in the list above.
+Track, 56" RSG:
+* (X) Straights, including grades
+* (X) Arc Curves, including grades
+* ( ) Banked Arc Curves
+* (X) Switches, Turnout
+* (-) Switches, Crossover
+* (X) Switches, Siding
+* ( ) Switches, Slips
+* (-) Diamonds
+* (X) Bridge Track (JH by Config)
 
-### Updates as we go:
+Track Accessories, 56" RSG:
+* (X) Pratt Truss Bridges, Thru and Deck types
+* ( ) Parker Truss Bridges, Thru and Deck types
+* (X) Pennsylvania Petit Truss Bridges, Thru type
+* (X) Plate Girder Bridges, Half-Through and deck types
+* ( ) Arch Truss Bridge, Deck type
+* ( ) Timber Trestle Bridge, Deck type
+* (-) Bascule Bridge, Strauss and Rolling types
+* (X) Guard Rails (JH by Config)
+* (X) Switch Stand, Bethlehem Steel 51A
+* (X) Switch Stand, Bethlehem Steel 112E
+* ( ) Switch Machine
+* (X) Car Stop, Coupler type
+* (X) Car Stop, Wheel type
+* (X) Derail
+* ( ) Highway Crossings, various materials
+* (X) Turntable, modern
+* ( ) Turntable, old
+* ( ) Transfer Table, modern
+* ( ) Transfer Table, old
 
-This is a list of everything I plan to make after trakpak3's release, either to support the conversion of Sunset Gulch or my next map, Amber Waves, or because I promised to make them or thought they'd be handy to have.
+Signals, North American:
+* (X) Color Light (CL)
+* (X) Searchlight (SL)
+* (X) PRR Position Light (PL)
+* (X) Upper-Quadrant Semaphore (UQ)
+* ( ) CL Dwarf Signals
+* ( ) SL Dwarf Signals
+* ( ) PL Dwarf and Pedestal Signals (PL4/5)
+* (-) Generic Masts
+* ( ) Semaphore Masts
+* ( ) PL Masts (To Be Evaluated)
+* ( ) Signal Bridges
+* ( ) Cantilever Masts
+* ( ) Bracket Posts
+* ( ) Doll Arms/Posts
 
-* More signal styles (CPL, Searchlight, Tri-Light, Semaphore).
-* Packs of models for other gauges, including 2' and 3' Narrow Gauges.
-* More crossing and switch throw models.
-* Random/AI Cars for driving on all those fancy roads and getting stuck at all those fancy crossings - system is also planned to include some automobile models to go with it.
-* More stuff will be added as I think of it.
+Tools/Code:
+* (X) John Henry Track Generator
+* ( ) Wiki Documentation
+* (-) Lua Operated Switches
+* (-) Lua Operated Signals and Track Circuits
+* (-) Lua Operated Driveable Turntables and Transfer Tables
+* ( ) Lua Operated Driveable Moveable Bridges
+* ( ) Lua Operated CTC Boards
+* ( ) Lua Operated Cab Signaling
+
+Miscellaneous, North American:
+* (X) MoW Blue Flags, clamp-on type
+* (X) AAR Plate C and H gauge plates
+* (X) Trackside scrap rails and ties
+* (X) Crossing Gate, single
+* ( ) Crossing Gate, cantilever
+* ( ) Crossing Gate, crossbuck only
+* ( ) Crossing Gate, Griswold
+* (X) Roads and Pavement Markings
+
+### The Future To-Do List
+
+While this stuff isn't an immediate priority, I plan to work on them after I've released it initially. Items may not be as well defined as the Day 1 list. Any items marked as complete will be included in the Day 1 release.
+
+Track Accessories, 56" RSG:
+* ( ) Lift Bridges
+* ( ) Spin Bridges
+* ( ) Suspension Bridges (To Be Evaluated)
+
+Signals, North American:
+* ( ) B&O Color Position Light (CPL)
+* ( ) CPL Dwarf Signals
+* ( ) CPL Masts
+* ( ) Triangular Light (TL)
+* ( ) Hall Disc (Banjo) Signals (HD)
+* ( ) Ball Signals (BA)
+
+Tools/Code:
+* ( ) Tresselator Bridge Generator
+* ( ) Lua Operated Hump Retarders
+* ( ) Lua Operated Scenery Vehicles
+* ( ) Lua Placed Overhead Electrical Wire
+* ( ) Lua Placed Third Rail
+
+Misccellaneous, North American:
+* (-) Road Signage
+* (-) North American Road Vehicles
+
+Miscellaneous, Generic:
+* ( ) Electric Poles for Catenary
+
+Other Big, Nebulous Mini-Projects:
+* ( ) 2' Gauge Track and Accessories
+* ( ) 3' Gauge Track and Accessories
 
 ### Community Contribution
 

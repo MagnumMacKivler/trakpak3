@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_us/semaphore/semaphore_blades"
+	"$surfaceprop" "MetalVent"
+}

@@ -1,0 +1,15 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_common/signals/crossing/xlight_1b_on"
+	"$surfaceprop" "Glass"
+	"$selfillum" "1"
+	"Proxies"
+	{
+		"AnimatedTexture"
+		{
+			"animatedTextureVar" "$basetexture"
+			"animatedTextureFrameNumVar" "$frame"
+			"animatedTextureFrameRate" "8"
+		}
+	} 
+}

@@ -1,8 +1,0 @@
-"LightmappedGeneric"
-{
-	"$basetexture" "trakpak/railtop"
-	"$envmap" "env_cubemap"
-	"$surfaceprop" "Metal"
-	//"$color" "[0.8 0.8 0.8]"
-	//"$color2" "[0.8 0.8 0.8]"
-}

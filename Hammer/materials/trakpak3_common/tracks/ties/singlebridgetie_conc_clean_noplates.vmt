@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/ties/singlebridgetie_conc_clean_noplates"
+	"$surfaceprop" "wood"
+	//$alphatest 1
+}

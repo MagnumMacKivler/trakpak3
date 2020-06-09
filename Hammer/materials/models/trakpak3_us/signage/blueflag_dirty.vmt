@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_us/signage/blueflag_dirty"
+	"$surfaceprop" "MetalVent"
+	
+	"$halflambert" "1"
+	
+	$detail "detail/metal_detail_01"
+	$detailscale "0.5"
+	$detailblendfactor "0.75"
+	$detailblendmode 0
+}

@@ -1,0 +1,15 @@
+VertexLitGeneric
+{
+	$basetexture "trakpak3_common/rubber/cartire_tread"
+	
+	$override "{255 255 255}"
+	Proxies
+	{
+		Equals
+		{
+			srcVar1 $override
+			resultVar $color
+		}
+	
+	}
+}

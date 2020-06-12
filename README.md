@@ -54,7 +54,7 @@ Signals, North American:
 * ( ) Semaphore Masts
 * ( ) PL Masts (To Be Evaluated)
 * ( ) Signal Bridges
-* ( ) Cantilever Masts
+* (-) Cantilever Masts
 * ( ) Bracket Posts
 * ( ) Doll Arms/Posts
 
@@ -109,7 +109,7 @@ Misccellaneous, North American:
 Miscellaneous, Generic:
 * ( ) Electric Poles for Catenary
 
-Other Big, Nebulous Mini-Projects:
+Other Big, Nebulous *Mini*-Projects:
 * ( ) 2' Gauge Track and Accessories
 * ( ) 3' Gauge Track and Accessories
 

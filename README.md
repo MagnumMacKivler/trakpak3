@@ -46,6 +46,7 @@ Signals, North American:
 * (X) Color Light (CL)
 * (X) Searchlight (SL)
 * (X) PRR Position Light (PL)
+* (X) Amtrak Position Color Light (PCL)
 * (X) Upper-Quadrant Semaphore (UQ)
 * ( ) CL Dwarf Signals
 * ( ) SL Dwarf Signals
@@ -91,7 +92,7 @@ Signals, North American:
 * ( ) B&O Color Position Light (CPL)
 * ( ) CPL Dwarf Signals
 * ( ) CPL Masts
-* ( ) Triangular Light (TL)
+* (X) Triangular Light (TL)
 * ( ) Hall Disc (Banjo) Signals (HD)
 * ( ) Ball Signals (BA)
 

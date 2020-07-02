@@ -26,7 +26,7 @@ Track Accessories, 56" RSG:
 * ( ) Parker Truss Bridges, Thru and Deck types
 * (X) Pennsylvania Petit Truss Bridges, Thru type
 * (X) Plate Girder Bridges, Half-Through and deck types
-* ( ) Arch Truss Bridge, Deck type
+* (X) Arch Truss Bridge, Deck type
 * ( ) Timber Trestle Bridge, Deck type
 * (-) Bascule Bridge, Strauss and Rolling types
 * (X) Guard Rails (JH by Config)

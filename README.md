@@ -48,7 +48,7 @@ Signals, North American:
 * (X) PRR Position Light (PL)
 * (X) Amtrak Position Color Light (PCL)
 * (X) Upper-Quadrant Semaphore (UQ)
-* ( ) CL Dwarf Signals
+* (X) CL Dwarf Signals
 * ( ) SL Dwarf Signals
 * ( ) PL Dwarf and Pedestal Signals (PL4/5)
 * (-) Generic Masts

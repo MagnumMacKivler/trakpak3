@@ -31,16 +31,15 @@ Track Accessories, 56" RSG:
 * (-) Bascule Bridge, Strauss and Rolling types
 * (X) Guard Rails (JH by Config)
 * (X) Switch Stand, Bethlehem Steel 51A
-* (X) Switch Stand, Bethlehem Steel 112E
+* (X) Switch Stand, Racor 112E
+* ( ) Switch Stand, Racor 22E
 * ( ) Switch Machine
 * (X) Car Stop, Coupler type
 * (X) Car Stop, Wheel type
-* (X) Derail
+* ( ) Derail
 * ( ) Highway Crossings, various materials
 * (X) Turntable, modern
-* ( ) Turntable, old
 * ( ) Transfer Table, modern
-* ( ) Transfer Table, old
 
 Signals, North American:
 * (X) Color Light (CL)
@@ -73,7 +72,7 @@ Miscellaneous, North American:
 * (X) MoW Blue Flags, clamp-on type
 * (X) AAR Plate C and H gauge plates
 * (X) Trackside scrap rails and ties
-* (X) Crossing Gate, single
+* (-) Crossing Gate, single
 * ( ) Crossing Gate, cantilever
 * ( ) Crossing Gate, crossbuck only
 * ( ) Crossing Gate, Griswold
@@ -87,6 +86,8 @@ Track Accessories, 56" RSG:
 * ( ) Lift Bridges
 * ( ) Spin Bridges
 * ( ) Suspension Bridges (To Be Evaluated)
+* ( ) Turntable, old
+* ( ) Transfer Table, old
 
 Signals, North American:
 * ( ) B&O Color Position Light (CPL)

@@ -50,7 +50,7 @@ Signals, North American:
 * (X) Upper-Quadrant Semaphore (UQ)
 * (X) CL Dwarf Signals
 * ( ) SL Dwarf Signals
-* ( ) PL Dwarf and Pedestal Signals (PL4/5)
+* (-) PL Dwarf and Pedestal Signals (PL4/5)
 * (-) Generic Masts
 * ( ) Semaphore Masts
 * ( ) PL Masts (To Be Evaluated)

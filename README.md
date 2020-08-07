@@ -23,7 +23,6 @@ Track, 56" RSG:
 
 Track Accessories, 56" RSG:
 * (X) Pratt Truss Bridges, Thru and Deck types
-* ( ) Parker Truss Bridges, Thru and Deck types
 * (X) Pennsylvania Petit Truss Bridges, Thru type
 * (X) Plate Girder Bridges, Half-Through and deck types
 * (X) Arch Truss Bridge, Deck type
@@ -66,7 +65,7 @@ Tools/Code:
 * (-) Lua Operated Driveable Turntables and Transfer Tables
 * ( ) Lua Operated Driveable Moveable Bridges
 * ( ) Lua Operated CTC Boards
-* ( ) Lua Operated Cab Signaling
+* (X) Lua Operated Cab Signaling
 
 Miscellaneous, North American:
 * (X) MoW Blue Flags, clamp-on type
@@ -83,6 +82,7 @@ Miscellaneous, North American:
 While this stuff isn't an immediate priority, I plan to work on them after I've released it initially. Items may not be as well defined as the Day 1 list. Any items marked as complete will be included in the Day 1 release.
 
 Track Accessories, 56" RSG:
+* ( ) Parker Truss Bridges, Thru and Deck types
 * ( ) Lift Bridges
 * ( ) Spin Bridges
 * ( ) Suspension Bridges (To Be Evaluated)
@@ -94,7 +94,7 @@ Signals, North American:
 * ( ) CPL Dwarf Signals
 * ( ) CPL Masts
 * (X) Triangular Light (TL)
-* ( ) Hall Disc (Banjo) Signals (HD)
+* (X) Hall Disc (Banjo) Signals (HD)
 * ( ) Ball Signals (BA)
 
 Tools/Code:

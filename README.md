@@ -32,6 +32,7 @@ Track Accessories, 56" RSG:
 * (X) Switch Stand, Bethlehem Steel 51A
 * (X) Switch Stand, Racor 112E
 * ( ) Switch Stand, Racor 22E
+* ( ) Switch Stand, Recessed (51A?)
 * (-) Switch Machine, GRS Model 5
 * (X) Car Stop, Coupler type
 * (X) Car Stop, Wheel type

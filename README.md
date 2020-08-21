@@ -15,7 +15,7 @@ Track, 56" RSG:
 * (X) Arc Curves, including grades
 * ( ) Banked Arc Curves
 * (X) Switches, Turnout
-* (-) Switches, Crossover
+* (X) Switches, Crossover
 * (X) Switches, Siding
 * ( ) Switches, Slips
 * (-) Diamonds
@@ -32,7 +32,7 @@ Track Accessories, 56" RSG:
 * (X) Switch Stand, Bethlehem Steel 51A
 * (X) Switch Stand, Racor 112E
 * ( ) Switch Stand, Racor 22E
-* ( ) Switch Machine
+* (-) Switch Machine, GRS Model 5
 * (X) Car Stop, Coupler type
 * (X) Car Stop, Wheel type
 * ( ) Derail
@@ -59,13 +59,14 @@ Signals, North American:
 
 Tools/Code:
 * (X) John Henry Track Generator
-* ( ) Wiki Documentation
-* (-) Lua Operated Switches
-* (-) Lua Operated Signals and Track Circuits
+* (-) Wiki Documentation
+* (X) Lua Operated Switches
+* (X) Lua Operated Signals and Track Circuits
 * (-) Lua Operated Driveable Turntables and Transfer Tables
 * ( ) Lua Operated Driveable Moveable Bridges
 * ( ) Lua Operated CTC Boards
 * (X) Lua Operated Cab Signaling
+* (X) Lua Signal System Editor (SigEdit)
 
 Miscellaneous, North American:
 * (X) MoW Blue Flags, clamp-on type

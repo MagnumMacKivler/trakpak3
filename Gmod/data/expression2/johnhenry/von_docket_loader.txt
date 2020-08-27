@@ -1,0 +1,97 @@
+@name johnhenry/von_docket_loader
+@inputs Start NextFrame
+@outputs InputVons:array VonGo Index
+@persist Index EndIndex Ready DocketFrames:table NumFrames StartTime TextColor:vector Docketname:string
+@trigger 
+@model models/props_lab/reciever01d.mdl
+
+if(first()){
+    Docketname = "turnouts_r8384"
+    fileLoad("johnhenry_saves/dockets/"+Docketname+".txt") #Pick the VON Docket file you want to use.
+    Index = 1 #Begin by loading this piece from the docket.
+    EndIndex = 0 #Stop after running this piece. If 0, don't stop (continue to end of docket)
+    
+    setName("John Henry VON Docket Loader\n"+Docketname+" Index "+Index)
+    
+    function number findLastBracket(Line:string){
+        local LR = Line:reverse()
+        return Line:length()-LR:find("}")+1
+    }
+    TextColor = vec(127,255,0)
+    runOnFile(1)
+    Ready = 0
+}elseif(fileClk()){
+    local FileText = fileRead()
+    if(FileText:length()>0){
+        local Lines = FileText:explode("\n")
+        DocketFrames = table()
+        local Frame = array()
+        NumFrames = 0
+        #print(Lines:count())
+        for(N=1,Lines:count()){
+            local L = Lines[N,string]
+            if((L:left(2)=="//") | L==""){ #Skip
+                continue
+            }elseif(L:find("%END%")){
+                NumFrames++
+                DocketFrames[NumFrames,array] = Frame
+                Frame = array()
+                #print("End")
+            }else{
+                Frame:pushString(L:left(findLastBracket(L)))
+                #print("Line")
+            }
+        }
+        #print("VON"+DocketFrames[1,array][1,string]+"VON")
+        if(NumFrames>0){
+            if(Index<=NumFrames){
+                printColor(TextColor,"Loaded Docket with "+NumFrames+" Frames. Ready to Start!")
+                setName("John Henry VON Docket Loader\n"+Docketname+" Index "+Index+"/"+(EndIndex>0 ? min(EndIndex,NumFrames) : NumFrames))
+                entity():setColor(vec(0,255,0))
+                Ready = 1
+            }else{
+                printColor(TextColor,"Starting Index ("+Index+") exceeds the number of frames in the docket ("+NumFrames+")")
+                entity():setColor(vec(127,0,0))
+            }
+        }else{
+            printColor(TextColor,"Could not find any usable information in the docket!")
+            entity():setColor(vec(127,0,0))
+        }
+    }else{
+        printColor(TextColor,"File not found! Double check your spelling.")
+        entity():setColor(vec(127,0,0))
+    }
+}elseif(Start & ~Start){
+    if(Ready==1){
+        timer("start",100)
+        Ready = 2
+        StartTime = curtime()
+    }else{
+        printColor(TextColor,"Cannot Start.")
+    }
+}elseif((clk("start") | (NextFrame & ~NextFrame)) & (Ready==2)){
+    local ShouldLoad = 0
+    if(EndIndex>0){ #Specified end point
+        if(Index<=min(EndIndex,NumFrames)){ShouldLoad = 1}
+    }else{ #Check end only
+        if(Index<=NumFrames){ShouldLoad = 1}
+    }
+    if(ShouldLoad){
+        InputVons = DocketFrames[Index,array]
+        printColor(TextColor,"Loading Docket Frame "+Index+"...")
+        setName("John Henry VON Docket Loader\n"+Docketname+" Index "+Index+"/"+(EndIndex>0 ? min(EndIndex,NumFrames) : NumFrames))
+        Index++
+        
+        timer("vongo",100)
+    }else{
+        local Elapsed = curtime()-StartTime
+        local Minutes = floor(Elapsed/60)
+        local Seconds = round(Elapsed%60)
+        printColor(TextColor,"Docket Compile Finished! Total Compile Time: "+Minutes+"m, "+Seconds+"s!")
+    }
+}elseif(clk("vongo")){
+    VonGo = 1
+    timer("resetvongo",500)
+}elseif(clk("resetvongo")){
+    VonGo = 0
+}

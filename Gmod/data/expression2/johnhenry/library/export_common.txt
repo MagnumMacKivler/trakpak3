@@ -1,0 +1,112 @@
+@name johnhenry/library/export_common
+@persist HoloID
+#High-Precision Direction-From-Angle functions
+function vector angle:hpforward(){
+    local Pit = This:pitch()
+    local Yaw = This:yaw()
+    local Rol = This:roll()
+    local X = cos(Yaw)*cos(Pit)
+    local Y = sin(Yaw)*cos(Pit)
+    local Z = -sin(Pit)
+    
+    return vec(X,Y,Z)
+}
+function vector angle:hpright(){
+    local Pit = This:pitch()
+    local Yaw = This:yaw()
+    local Rol = This:roll()
+    local X = sin(Yaw)*cos(Rol)
+    local Y = -cos(Yaw)*cos(Rol)
+    local Z = -sin(Rol)
+    
+    return vec(X,Y,Z)
+}
+function vector angle:hpup(){ #Requires Roll=0 but whatevs
+    local Pit = This:pitch()
+    local Yaw = This:yaw()
+    local X = sin(Pit)*cos(Yaw)
+    local Y = sin(Pit)*sin(Yaw)
+    local Z = cos(Pit)
+    
+    return vec(X,Y,Z)
+}
+
+#Convexity Checking
+function vector getTriNormal(A:vector, B:vector, C:vector){
+    #A
+    #|\
+    #B-C
+    return (B-A):cross(C-A):normalized()
+}
+
+function table getConvexPolys(P1:vector, P2:vector, P3:vector, P4:vector){
+    
+    #Assume P1-P4 are counterclockwise
+    
+    local Center = P1/4 + P2/4 + P3/4 + P4/4
+    
+    local Out = table()
+    
+    #1-4 1-4 
+    #|\| |/|
+    #2-3 2-3
+    
+    local N123 = getTriNormal(P1,P2,P3)
+    local N134 = getTriNormal(P1,P3,P4)
+    
+    if((N123:dot(Center-P1) <= 0) & (N134:dot(Center-P1) <= 0)){
+        Out["convex",number] = 1
+        Out["t1",array] = array(P1,P2,P3)
+        Out["t2",array] = array(P1,P3,P4)
+    }else{
+        local N412 = getTriNormal(P4,P1,P2)
+        local N423 = getTriNormal(P4,P2,P3)
+        if((N412:dot(Center-P4) <= 0) & (N423:dot(Center-P4) <= 0)){
+            Out["convex",number] = 1
+            Out["t1",array] = array(P4,P1,P2)
+            Out["t2",array] = array(P4,P2,P3)
+        }else{
+            Out["convex",number] = 0
+        }
+    }
+    
+    return Out
+    
+}
+
+#Point Pack
+function array pointPack(TrackID,Index,Plots:table,JointsLists:table){
+    local Points = Plots[TrackID,array]
+    local Joints = JointsLists[TrackID,table]
+    local As = Joints["A",array]
+    local Bs = Joints["B",array]
+    local Cs = Joints["C",array]
+    local Ds = Joints["D",array]
+    local Es = Joints["E",array]
+    local Fs = Joints["F",array]
+    local Gs = Joints["G",array]
+    local Hs = Joints["H",array]
+    local Is = Joints["I",array]
+    local Js = Joints["J",array]
+    local Ks = Joints["K",array]
+    local Ls = Joints["L",array]
+    local Ms = Joints["M",array]
+    local Ns = Joints["N",array]
+    return array(Points[Index,vector],As[Index,vector],Bs[Index,vector],Cs[Index,vector],Ds[Index,vector],Es[Index,vector],Fs[Index,vector],Gs[Index,vector],Hs[Index,vector],Is[Index,vector],Js[Index,vector],Ks[Index,vector],Ls[Index,vector],Ms[Index,vector],Ns[Index,vector])
+}
+
+#Axis Functions
+function vector ax(Start:vector, End:vector){
+    return (End-Start):normalized()
+}
+function vector2 ax2(Start:vector2, End:vector2){
+    return (End-Start):normalized()
+}
+#Debug
+function debugHoloBW(Pos:vector){
+    holoCreate(HoloID)
+    holoPos(HoloID,entity():toWorld(Pos))
+    holoScale(HoloID,vec(0.25))
+    holoColor(HoloID,vec(255,0,0))
+    HoloID++
+}

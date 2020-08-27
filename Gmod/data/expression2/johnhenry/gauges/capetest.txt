@@ -1,0 +1,264 @@
+@name johnhenry/gauges/capetest
+#-------------------
+#Big Important Stuff
+#-------------------
+
+GaugeName = "cape_test" #Short abbreviation for the gauge, used for auto-naming.
+Scale = 2 #Overall scale factor for brush generation. Model will be scaled back down in the QC. Should be a power of two (1, 2, 4, etc).
+# !!! Be careful about using large numbers with large track pieces. An 8192-radius 90 degree curve at 2x scale will go off the hammer grid !!!
+RidiculousTies = 3 #Changes how ties and roadbed are handled. Note that switches will use whatever they need to in order to look correct.
+#0 - Composite Textures: Uses one texture for the roadbed and ties. Cheapest option but limits the number of skins.
+#1 - 2D Ties: Splits the ties and roadbed into two textures, placing the ties a small distance above the other. This greatly increases skin limit but adds a small number of extra polygons.
+#2 - 2.5D Ties: Each tie is its own flat rectangle. This eliminates a lot of tiling issues seen with the above two modes, but adds a modest amount to the polygon count.
+#3 - 3D Ties: Each tie is a 5-faced box. The most realistic tie option, but adds a lot of extra polygons.
+MakeBallast = 2 #0 for No Ballast, 1 for Trapezoidal Ballast, 2 for Peaked Ballast.
+AnimateSwitches = 1 #Give the switches animations? This applies only to models compiled in SMD mode.
+
+#----------------
+#Basic Dimensions
+#----------------
+
+#Ballast/Origin
+OriginHeight = 40 #Height of the model origin off the ground - This should be higher than the top of the railhead.
+BallastHeight = 22 #Height of ballast trapezoid off the ground.
+PeakHeight = 23 #Height of the ballast peak, if used.
+
+#Rails
+RailTopHeight = 32 #Height from ground to top of rail (railhead).
+RailBottomHeight = 24 #Height from ground to bottom of rail.
+BankHeight = 4 #Height of the outer rail above the inner rail for banked track.
+CheckLength = 64 #Length of check rails (For switches).
+
+#Ties
+TieTopHeight = 24 #Height from ground to top of tie (3D or Tie Plane)
+TieBottomHeight = 18 #Height from ground to bottom of tie (3D or Tie Plane)
+TieSeparation = 20 #Distance between the centers of ties (3D ties only)
+TieWidth = 76 #Nominal width of a tie
+TieThickness = 8 #Nominal thickness of a tie
+TiePlateWidth = 14 #Nominal width of a tie plate
+TiePlateCenter = 30 #Distance from tie plate center to tie center
+
+#Misc
+SwitchThrow = 4 #Distance for switch points to move
+
+#---------------------
+#Track Face Dimensions
+#---------------------
+
+#You should make demo pieces in hammer and measure from that.
+#Each entry is a top-down 2D box drawn from the center of the track face to the respective point.
+#All the points have to be collinear (on the same line)!
+
+#Ang0 (North, 0 Right / 4 Forward)
+TrackFace_Ang0 = table()
+TrackFace_Ang0["rail_inner",vector2] = vec2(21,0)
+TrackFace_Ang0["rail_outer",vector2] = vec2(25,0)
+TrackFace_Ang0["ballast_corner",vector2] = vec2(64,0)
+TrackFace_Ang0["ballast_edge",vector2] = vec2(128,0)
+
+#Ang1 (Northeast, 1 Right / 4 Forward, about 14 degrees)
+TrackFace_Ang1 = table()
+TrackFace_Ang1["rail_inner",vector2] = vec2(21,6)
+TrackFace_Ang1["rail_outer",vector2] = vec2(35,7)
+TrackFace_Ang1["ballast_corner",vector2] = vec2(60,15)
+TrackFace_Ang1["ballast_edge",vector2] = vec2(124,31)
+
+#Ang2 (Northeast, 2 Right / 4 Forward, about 28 degrees)
+TrackFace_Ang2 = table()
+TrackFace_Ang2["rail_inner",vector2] = vec2(19,10)
+TrackFace_Ang2["rail_outer",vector2] = vec2(23,12)
+TrackFace_Ang2["ballast_corner",vector2] = vec2(58,29)
+TrackFace_Ang2["ballast_edge",vector2] = vec2(114,57)
+
+#Ang2 (Northeast, 4 Right / 4 Forward, exactly 45 degrees)
+TrackFace_Ang4 = table()
+TrackFace_Ang4["rail_inner",vector2] = vec2(15,15)
+TrackFace_Ang4["rail_outer",vector2] = vec2(18,18)
+TrackFace_Ang4["ballast_corner",vector2] = vec2(42,42)
+TrackFace_Ang4["ballast_edge",vector2] = vec2(90,90)
+
+#The rest of the angles will be auto-generated based on these.
+
+#---------------
+#Track Materials
+#---------------
+
+#Don't touch these unless you really know what you're doing.
+
+#Skins
+BallastSkins = array( #Used for the sides of the ballast trapezoid
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE"
+)
+BallastTrackbedSkins = array( #Used for the blended parts of switches, or for roadbed with UseTiePlane enabled.
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_BROWN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_GRAY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_TAN",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/BALLAST/BALLAST_LIMESTONE"
+)
+BallastTiesSkins = array( #Used for the center part of non-blended (normal) track ballast
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_BROWN_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_BROWN_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_BROWN_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_BROWN_CONC_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_GRAY_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_GRAY_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_GRAY_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_GRAY_CONC_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_TAN_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_TAN_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_TAN_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_TAN_CONC_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_LIMESTONE_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_LIMESTONE_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_LIMESTONE_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/COMPOSITE/TRACKBED_LIMESTONE_CONC_CLEAN"
+)
+TiesSkins = array(
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_WOOD_CLEAN",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_DIRTY",
+    "TRAKPAK3_COMMON/TRACKS/TIES/TIES_CONC_CLEAN"
+    
+)
+TieNoPlateSkins = array( #Used for 3D ties (Switches only)
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_NOPLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_NOPLATES"
+)
+TiePlateSkins = array( #Used for all 3D ties
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_WOOD_CLEAN_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_DIRTY_PLATES",
+    "TRAKPAK3_COMMON/TRACKS/TIES/SINGLETIE_CONC_CLEAN_PLATES"
+)
+
+#Rail Materials - Not Skinned
+Mat_RailSide = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_SIDE"
+Mat_RailTop = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_TOP_SHINY"
+Mat_RailTop_Rusty = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_TOP_RUSTY"
+
+#Texture Dimensions
+#U is the width of the texture, V is the height
+#Scale is the texture scale that will be applied in hammer (Overall Scale will auto-compensate this)
+BallastU = 512
+BallastV = 512
+BallastScale = 0.1875
+RailSideU = 512
+RailSideV = 32
+RailSideScale = 0.25
+RailTopU = 512
+RailTopV = 32
+RailTopScale = 0.25
+TieU = 512
+TieV = 64
+TieScale = 0.1875
+
+#-----------------------------------------------------------
+#End of User Config - Don't touch anything after this point!
+#-----------------------------------------------------------
+
+#Scaling
+
+if(Scale<1){Scale = 1}
+
+BallastScale *= Scale
+RailSideScale *= Scale
+RailTopScale *= Scale
+TieScale *= Scale
+
+foreach(K,V:vector2=TrackFace_Ang0){
+    V *= Scale
+    TrackFace_Ang0[K,vector2] = V
+}
+foreach(K,V:vector2=TrackFace_Ang1){
+    V *= Scale
+    TrackFace_Ang1[K,vector2] = V
+}
+foreach(K,V:vector2=TrackFace_Ang2){
+    V *= Scale
+    TrackFace_Ang2[K,vector2] = V
+}
+foreach(K,V:vector2=TrackFace_Ang4){
+    V *= Scale
+    TrackFace_Ang4[K,vector2] = V
+}
+
+OriginHeight *= Scale
+BallastHeight *= Scale
+RailBottomHeight *= Scale
+RailTopHeight *= Scale
+TieBottomHeight *= Scale
+TieTopHeight *= Scale
+BankHeight *= Scale
+CheckLength *= Scale
+TieSeparation *= Scale
+PeakHeight *= Scale
+
+TieWidth *= Scale
+TieThickness *= Scale
+TiePlateWidth *= Scale
+TiePlateCenter *= Scale

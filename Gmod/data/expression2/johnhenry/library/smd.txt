@@ -1,0 +1,1491 @@
+@name johnhenry/library/smd
+@persist PolyGroups:table WeldingThreshold WSQ ConvexID
+
+#include "johnhenry/library/export_common"
+
+WeldingThreshold = 0.5
+WSQ = WeldingThreshold*WeldingThreshold
+ConvexID = 1
+
+#SMD number padder, still works, isn't used
+
+function string pad6(N){
+    local NS = toString(round(N,6))
+    if(NS:find("e")){ #If for some reason E2 decides to use scientific notation, give up a little precision to save your soul.
+        NS=toString(round(N,3))
+        print("Fixing Scientific Notation -> "+NS)
+    } 
+    local NA = NS:explode(".")
+    local Frac = NA[2,string]
+    if(Frac==""){
+        Frac = "000000"
+    }else{
+        local L = Frac:length()
+        if(L>6){
+            Frac = Frac:left(6)
+        }elseif(L<6){
+            Frac = Frac + "0":repeat(6-L)
+        }
+    }
+    return NA[1,string]+"."+Frac
+}
+
+function array pad6Array(Nums:array){ #takes array of numbers, returns array of strings
+    local Out = array()
+    for(Ind=1,Nums:count()){
+        local NS = toString(round(Nums[Ind,number],6))
+        if(NS:find("e")){ #If for some reason E2 decides to use scientific notation, give up a little precision to save your soul.
+            NS=toString(round(Nums[Ind,number],3))
+            print("Fixing Scientific Notation -> "+NS)
+        } 
+        local NA = NS:explode(".")
+        local Frac = NA[2,string]
+        if(Frac==""){
+            Frac = "000000"
+        }else{
+            local L = Frac:length()
+            if(L<6){
+                Frac = Frac:left(6)
+            }elseif(L<6){
+                Frac = Frac + "0":repeat(6-L)
+            }
+        }
+        Out[Ind,string] = NA[1,string]+"."+Frac
+    }
+    return Out
+}
+
+function string smd_header(Animated){
+    local Hdr = "//Track Mesh created with John Henry\nversion 1\n"
+    local Node0 = "nodes\n0 \"static_prop\" -1\n"
+    local Node1 = Animated ? "1 \"blades\" -1\nend\n" : "end\n"
+    local Skel1 = "skeleton\ntime 0\n0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000\n"
+    local Skel2 = Animated ? "1 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000\nend\n" : "end\n"
+    local Tris = "triangles"
+    return Hdr + Node0 + Node1 + Skel1 + Skel2 + Tris
+}
+
+function string smd_anim(ThrowVector:vector2){
+    local SMD = "//Skeletal Animation created with John Henry\nversion 1\nnodes\n0 \"static_prop\" -1\n1 \"blades\" -1\nend\nskeleton\ntime 0\n0 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000\n1 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000\n"
+    local X = pad6(ThrowVector:x())
+    local Y = pad6(ThrowVector:y())
+    SMD += "time 1\n1 "+X+" "+Y+" 0.000000 0.000000 0.000000 0.000000\nend"
+    return SMD
+}
+
+function string smd_end(){
+    return "\nend"
+}
+
+#formats vertex for smd
+function string smd_vertex(Position:vector,Normal:vector,UV:vector2,Weight){
+    local Padded = pad6Array(array(Position:x(),Position:y(),Position:z(),Normal:x(),Normal:y(),Normal:z(),UV:x(),UV:y()))
+    local WeightInsert = ""
+    if(Weight>0){
+        WeightInsert = " 2 0 "+pad6(1-Weight)+" 1 "+pad6(Weight)
+    }
+    return "0 "+Padded[1,string]+" "+Padded[2,string]+" "+Padded[3,string]+" "+Padded[4,string]+" "+Padded[5,string]+" "+Padded[6,string]+" "+Padded[7,string]+" "+Padded[8,string]+WeightInsert
+}
+
+function string smd_writepoly(Poly:table){ #Feed it RHR, spits out LHR
+    local Verts = Poly["Verts",array]
+    local Norms = Poly["Norms",array]
+    local UVs = Poly["UVs",array]
+    local Weights = Poly["Weights",array]
+    
+    local V1 = smd_vertex(Verts[1,vector],Norms[1,vector],UVs[1,vector2],Weights[1,number])
+    local V2 = smd_vertex(Verts[2,vector],Norms[2,vector],UVs[2,vector2],Weights[2,number])
+    local V3 = smd_vertex(Verts[3,vector],Norms[3,vector],UVs[3,vector2],Weights[3,number])
+    return "\n"+Poly["Material",string]+"\n"+V1+"\n"+V2+"\n"+V3
+}
+#$attachment "autopoint1" "" 176.000000 1022.000000 0.000000 absolute rigid rotate 0.000000 0.000000 0.000000
+function string smd_attachment(Name:string, Position:vector){
+    return "$attachment \""+Name+"\" \"static_prop\" "+pad6(Position:x())+" "+pad6(Position:y())+" "+pad6(Position:z())+" absolute rigid rotate 0.000000 0.000000 0.000000"
+}
+
+#The structure of a polygroup (smoothing group):
+#PolyGroups:table (string keys)
+    #PolyGroup:table (integer keys)
+        #0: count (integer)
+        #1+: Polygon:table (string keys)
+            #Material:string
+            #PNorm:vector
+            #Verts:array of vecs
+            #Norms:array of vecs
+            #UVs:array of vec2s
+
+#Creates a new triangle
+function new_triangle(Material:string,V1:vector,V2:vector,V3:vector,TexData:array,GroupName:string){
+    #Create new group if necessary
+    if(!PolyGroups:exists(GroupName)){
+        PolyGroups[GroupName,table] = table()
+        PolyGroups[GroupName,table][0,number] = 1
+        #print("Making new smoothing group: "+GroupName)
+    }
+    local PG = PolyGroups[GroupName,table]
+    
+    local Poly = table()
+    Poly["Material",string] = Material
+    local PNorm = (V2-V1):cross(V3-V1):normalized()
+    Poly["PNorm",vector] = PNorm
+    
+    Poly["Verts",array] = array(V1,V2,V3)
+    Poly["Norms",array] = array(PNorm,PNorm,PNorm)
+    local V0 = vec2()
+    Poly["UVs",array] = array(V0,V0,V0)
+    Poly["TexData",array] = TexData #Stores the Hammer Texture Info (DimU, DimV, UA, VA, UT, VT, Scale)
+    Poly["Weights",array] = array() #Array of Number giving weights for each sequential bone
+    
+    #Store Poly
+    PG[PG[0,number],table] = Poly
+    PG[0,number] = PG[0,number] + 1
+}
+function new_triangle_w(Material:string,V1:vector,V2:vector,V3:vector,W1,W2,W3,TexData:array,GroupName:string){
+    #Create new group if necessary
+    if(!PolyGroups:exists(GroupName)){
+        PolyGroups[GroupName,table] = table()
+        PolyGroups[GroupName,table][0,number] = 1
+        #print("Making new smoothing group: "+GroupName)
+    }
+    local PG = PolyGroups[GroupName,table]
+    
+    local Poly = table()
+    Poly["Material",string] = Material
+    local PNorm = (V2-V1):cross(V3-V1):normalized()
+    Poly["PNorm",vector] = PNorm
+    
+    Poly["Verts",array] = array(V1,V2,V3)
+    Poly["Norms",array] = array(PNorm,PNorm,PNorm)
+    local V0 = vec2()
+    Poly["UVs",array] = array(V0,V0,V0)
+    Poly["TexData",array] = TexData #Stores the Hammer Texture Info (DimU, DimV, UA, VA, UT, VT, Scale)
+    Poly["Weights",array] = array(W1,W2,W3) #Array of Number giving weights for each sequential bone
+    
+    #Store Poly
+    PG[PG[0,number],table] = Poly
+    PG[0,number] = PG[0,number] + 1
+}
+
+
+#Creates a new "flat" quad, can be concave but reference meshes don't care
+function new_flatquad(Material:string, V1:vector, V2:vector, V3:vector, V4:vector, TexData:array, GroupName:string){
+    new_triangle(Material,V1,V2,V3,TexData,GroupName)
+    new_triangle(Material,V1,V3,V4,TexData,GroupName)
+}
+
+function new_flatquad_w(Material:string, V1:vector, V2:vector, V3:vector, V4:vector, W1, W2, W3, W4, TexData:array, GroupName:string){
+    new_triangle_w(Material,V1,V2,V3,W1,W2,W3,TexData,GroupName)
+    new_triangle_w(Material,V1,V3,V4,W1,W3,W4,TexData,GroupName)
+}
+
+#Performs convexity check and returns whatever triangle arrangement gives a convex surface
+function new_convquad(Material:string, V1:vector, V2:vector, V3:vector, V4:vector, TexData:array, GroupName:string){
+    local ConvexResult = getConvexPolys(V1,V2,V3,V4)
+    if(ConvexResult["convex",number]){
+        local T1 = ConvexResult["t1",array]
+        local T2 = ConvexResult["t2",array]
+        new_triangle(Material,T1[1,vector],T1[2,vector],T1[3,vector],TexData,GroupName)
+        new_triangle(Material,T2[1,vector],T2[2,vector],T2[3,vector],TexData,GroupName)
+    }
+}
+
+#Texturing should be done AFTER smoothing. For that reason, Hammer Texture Data (Axes and Translations) should be stored with the polygon and operated on afterwards.
+
+#Planar Projections
+
+function array roadUVa(DimU,DimV,Scale,Center:vector,Angle:angle){
+    local UA = Angle:hpright()
+    local VA = -Angle:hpforward()
+    
+    #World Coordinate of the texture origin
+    local TexOrigin = Center - Scale*UA*DimU/2 - Scale*VA*DimV/2
+    
+    return array(DimU,DimV,Scale,UA,VA,TexOrigin)
+}
+function array railUVa(DimU,DimV,Scale,Center:vector,Angle:angle){
+    local UA = Angle:hpforward()
+    local VA = Angle:hpup()
+    
+    #World Coordinate of the texture origin
+    local TexOrigin = Center - Scale*UA*DimU/2 - Scale*VA*DimV/2
+    
+    return array(DimU,DimV,Scale,UA,VA,TexOrigin)
+}
+
+
+#Eyy Planar Texture Projection - assigns UV coordinates to vertices within a poly
+function table:texPoly(Simple){ #Takes Poly
+    if(Simple){ #Don't care, give it basic ass UV maps
+        local UVs = This["UVs",array]
+        UVs[1,vector2] = vec2(0,0)
+        UVs[2,vector2] = vec2(0,1)
+        UVs[3,vector2] = vec2(1,0)
+    }else{
+        #Extract data from array
+        local TexData = This["TexData",array]
+        local DimU = TexData[1,number]
+        local DimV = TexData[2,number]
+        local Scale = TexData[3,number]
+        local UA = TexData[4,vector]
+        local VA = TexData[5,vector]
+        local TexOrigin = TexData[6,vector]
+        
+        #Scale = Units/Pixels
+        #Scale = Units/(Dim*UV)
+        #UV = Units/(Dim*Scale)
+        #Units = Scale*Dim*UV
+        
+        #Get the texture space (pixel) coordinates of each vertex
+        local Verts = This["Verts",array]    
+        local P1 = (Verts[1,vector] - TexOrigin)/Scale
+        local P2 = (Verts[2,vector] - TexOrigin)/Scale
+        local P3 = (Verts[3,vector] - TexOrigin)/Scale
+        
+        #Calculate UV coordinates by vector projection along the U and V axes
+        local UV1=vec2(P1:dot(UA)/DimU, P1:dot(VA)/DimV)
+        local UV2=vec2(P2:dot(UA)/DimU, P2:dot(VA)/DimV)
+        local UV3=vec2(P3:dot(UA)/DimU, P3:dot(VA)/DimV)
+        
+        
+        #Assign UV values to polygon
+        local UVs = This["UVs",array]
+        UVs[1,vector2] = UV1
+        UVs[2,vector2] = UV2
+        UVs[3,vector2] = UV3
+    }
+}
+
+#UV map all polygons in the polygroup
+function table:uvmap(Simple){ #takes PolyGroup
+    for(N=1,This:count()){
+        This[N,table]:texPoly(Simple)
+    }
+}
+
+#Process for welding and smoothing vertices:
+#For Each Poly:
+    #For Each Vertex in that polygon:
+        #Snap to world by rounding
+        #Compare with every other polygon
+        #If distance2<0.25 (distance<0.5), add vertex to smoothing list:
+            #vec2(PolygonID, VertexID)
+            #store the PNorm
+        #When you run out of polygons, smooth them:
+            #Calculate new average Norm
+            #Set Norms & Smoothed
+
+#Get Smooth Target Array
+function table vector:compareVerts(PolyGroup:table){ #Takes vertex pos, returns SmoothTable
+    local PolyCount = PolyGroup[0,number] - 1
+    local Count = 0
+    local NormArray = array()
+    local Targets = array()
+    for(N=1,PolyCount){ #For every other polygon:
+        local Poly = PolyGroup[N,table]
+        local Verts = Poly["Verts",array]
+        
+        if(This:distance2(Verts[1,vector]) < WSQ){
+            Count++
+            Targets[Count,vector2] = vec2(N,1)
+            NormArray[Count,vector] = Poly["PNorm",vector]
+        }elseif(This:distance2(Verts[2,vector]) < WSQ){
+            Count++
+            Targets[Count,vector2] = vec2(N,2)
+            NormArray[Count,vector] = Poly["PNorm",vector]
+        }elseif(This:distance2(Verts[3,vector]) < WSQ){
+            Count++
+            Targets[Count,vector2] = vec2(N,3)
+            NormArray[Count,vector] = Poly["PNorm",vector]
+        }
+    }
+    local Out = table()
+    Out["Count",number] = Count
+    Out["Targets",array] = Targets
+    Out["Norms",array] = NormArray
+    return Out
+}
+
+#Smooth'em
+function table:smoothVerts(SmoothTable:table){ #Takes PolyGroup
+    local Count = SmoothTable["Count",number]
+    local Targets = SmoothTable["Targets",array]
+    local NormArray = SmoothTable["Norms",array]
+    
+    #Calculate New Normal
+    local NewNorm = vec()
+    foreach(K,PNorm:vector=NormArray){
+        NewNorm += PNorm/Count
+    }
+    NewNorm = NewNorm:normalized()
+    #print(Count, NormArray:count())
+    #Set Norms
+    foreach(K,Target:vector2=Targets){
+        local Poly = This[Target:x(),table]
+        local VertexID = Target:y()
+        Poly["Norms",array][VertexID,vector] = NewNorm
+    }
+}
+
+#Clear everything for a new entity
+function smd_clear(){
+    PolyGroups = table()
+    ConvexID = 1
+}
+
+#Mesh Generation Time!
+
+function buildSingleMarkerMesh(Point:vector2,Textures:table){
+    local Mat_Invis = "invisible"
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    
+    local Center1 = vec(Point,-OriginHeight + BallastHeight/2)
+    
+    new_flatquad(Mat_Invis,Center1+vec(-8,8,0),Center1+vec(-8,-8,0),Center1+vec(8,-8,0),Center1+vec(8,8,0),array(64,64,0.25,vec(1,0,0),vec(0,-1,0),Center1),"markers")
+}
+
+function buildMarkerMeshes(Points:array,Textures:table){
+    local Mat_Invis = "invisible"
+    local Start = Points[0,vector]
+    local End = Points[Points:count(),vector]
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local Center1 = Start+vec(0,0,-OriginHeight + BallastHeight/2)
+    local Center2 = End+vec(0,0,-OriginHeight + BallastHeight/2)
+    
+    new_flatquad(Mat_Invis,Center1+vec(-8,8,0),Center1+vec(-8,-8,0),Center1+vec(8,-8,0),Center1+vec(8,8,0),array(64,64,0.25,vec(1,0,0),vec(0,-1,0),Center1),"markers")
+    new_flatquad(Mat_Invis,Center2+vec(-8,8,0),Center2+vec(-8,-8,0),Center2+vec(8,-8,0),Center2+vec(8,8,0),array(64,64,0.25,vec(1,0,0),vec(0,-1,0),Center2),"markers")
+}
+
+function buildMesh(Type:string, NearPoints:array, FarPoints:array, Textures:table, Ties, AddPlane, AddBallast){
+    
+    #local Offset = Type:find("phys") ? vec(0,0,-128) : vec()
+    
+    local PN = NearPoints[1,vector] #+ Offset
+    local AN = NearPoints[2,vector] #+ Offset
+    local BN = NearPoints[3,vector] #+ Offset
+    local CN = NearPoints[4,vector] #+ Offset
+    local DN = NearPoints[5,vector] #+ Offset
+    local EN = NearPoints[6,vector] #+ Offset
+    local FN = NearPoints[7,vector] #+ Offset
+    local GN = NearPoints[8,vector] #+ Offset
+    local HN = NearPoints[9,vector] #+ Offset
+    local IN = NearPoints[10,vector] #+ Offset
+    local JN = NearPoints[11,vector] #+ Offset
+    local KN = NearPoints[12,vector] #+ Offset
+    local LN = NearPoints[13,vector] #+ Offset
+    local MN = NearPoints[14,vector] #+ Offset
+    local NN = NearPoints[15,vector] #+ Offset
+    
+    local PF = FarPoints[1,vector] #+ Offset
+    local AF = FarPoints[2,vector] #+ Offset
+    local BF = FarPoints[3,vector] #+ Offset
+    local CF = FarPoints[4,vector] #+ Offset
+    local DF = FarPoints[5,vector] #+ Offset
+    local EF = FarPoints[6,vector] #+ Offset
+    local FF = FarPoints[7,vector] #+ Offset
+    local GF = FarPoints[8,vector] #+ Offset
+    local HF = FarPoints[9,vector] #+ Offset
+    local IF = FarPoints[10,vector] #+ Offset
+    local JF = FarPoints[11,vector] #+ Offset
+    local KF = FarPoints[12,vector] #+ Offset
+    local LF = FarPoints[13,vector] #+ Offset
+    local MF = FarPoints[14,vector] #+ Offset
+    local NF = FarPoints[15,vector] #+ Offset
+    
+    local SegmentAngle = -heading(vec(),ang(),PF-PN)
+    
+    local BallastU = Textures["BallastU",number]
+    local BallastV = Textures["BallastV",number]
+    local BallastScale = Textures["BallastScale",number]
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+    
+    local Mat_Ballast = Textures["Mat_Ballast",string]
+    local Mat_Trackbed_NoTies = Textures["Mat_Trackbed_NoTies",string]
+    local Mat_Trackbed_Ties = Textures["Mat_Trackbed_Ties",string]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Tie = Textures["Mat_Tie",string]
+    local Mat_Tie_Plates = Textures["Mat_Tie_Plates",string]
+    local Mat_Phys = "phys"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    
+    local GX = ax(PN,PF)
+    local GY = ax(AN,BN)
+    local GZ = vec(0,0,-1)
+    
+    switch(Type){
+        case "ballast_trapezoid_ref",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            if(AddBallast){
+                new_flatquad(Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,EF,EN,FN,FF,Tex,"ballast_ref")
+                new_flatquad(Mat_Ballast,AF,AN,EN,EF,Tex,"ballast_ref")
+                new_flatquad(Mat_Ballast,FF,FN,BN,BF,Tex,"ballast_ref")
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                
+                new_flatquad(Mat_Ties,EF2,EN2,FN2,FF2,Tex,"tieplane_ref")
+            }
+        break
+        case "ballast_peaked_ref",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            if(AddBallast){
+                new_flatquad(Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,EF,EN,QN,QF,Tex,"ballast_ref")
+                new_flatquad(Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,QF,QN,FN,FF,Tex,"ballast_ref")
+                new_flatquad(Mat_Ballast,AF,AN,EN,EF,Tex,"ballast_ref")
+                new_flatquad(Mat_Ballast,FF,FN,BN,BF,Tex,"ballast_ref")
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                
+                new_flatquad(Mat_Ties,EF2,EN2,FN2,FF2,Tex,"tieplane_ref")
+            }
+            
+        break
+        case "ballast_peaked_left_ref",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            if(AddBallast){
+                new_flatquad(Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,EF,EN,QN,QF,Tex,"ballast_ref")
+                new_flatquad(Mat_Ballast,AF,AN,EN,EF,Tex,"ballast_ref")
+            }
+            
+        break
+        case "ballast_peaked_right_ref",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            if(AddBallast){
+                new_flatquad(Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,QF,QN,FN,FF,Tex,"ballast_ref")
+                new_flatquad(Mat_Ballast,FF,FN,BN,BF,Tex,"ballast_ref")
+            }
+            
+        break
+        case "rail_1_ref",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local InnerAngle = -heading(vec(),ang(),MF-MN)
+            local OuterAngle = -heading(vec(),ang(),KF-KN)
+            local InnerCenter = (MN/4 + IN/4 + MF/4 + IF/4)
+            local OuterCenter = (KN/4 + GN/4 + KF/4 + GF/4)
+            local TopCenter = (KN/4 + MN/4 + KF/4 + MF/4)
+            
+            local TexTop = roadUVa(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+            local TexInner = railUVa(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+            local TexOuter = railUVa(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+            
+            new_flatquad(Mat_RailTop,KF,KN,MN,MF,TexTop,"rail_top_ref")
+            new_flatquad(Mat_RailSide,GF,GN,KN,KF,TexInner,"rail_side_r_ref")
+            new_flatquad(Mat_RailSide,MF,MN,IN,IF,TexOuter,"rail_side_l_ref")
+            if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,IF,IN,GN,GF,TexTop,"rail_bottom_ref")}
+        break
+        case "rail_2_ref",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local InnerAngle = -heading(vec(),ang(),NF-NN)
+            local OuterAngle = -heading(vec(),ang(),LF-LN)
+            local InnerCenter = (NN/4 + JN/4 + NF/4 + JF/4)
+            local OuterCenter = (LN/4 + HN/4 + LF/4 + HF/4)
+            local TopCenter = (NN/4 + LN/4 + NF/4 + LF/4)
+            
+            local TexTop = roadUVa(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+            local TexInner = railUVa(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+            local TexOuter = railUVa(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+            
+            new_flatquad(Mat_RailTop,NF,NN,LN,LF,TexTop,"rail_top_ref")
+            new_flatquad(Mat_RailSide,JF,JN,NN,NF,TexInner,"rail_side_l_ref")
+            new_flatquad(Mat_RailSide,LF,LN,HN,HF,TexOuter,"rail_side_r_ref")
+            if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,HF,HN,JN,JF,TexTop,"rail_bottom_ref")}
+        break
+        case "ballast_convex_phys", #May have some problems with physics bugs - trying ballast block instead
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            local GName = "phys_convex_"+ConvexID
+            new_convquad(Mat_Phys,EF,EN,FN,FF,array(512,512,GX,GY,0,0,0.25),GName) #Top
+            new_convquad(Mat_Phys,BF,BN,AN,AF,array(512,512,GX,GY,0,0,0.25),GName) #Bottom
+            new_convquad(Mat_Phys,AF,AN,EN,EF,array(512,512,GX,GY,0,0,0.25),GName) #Left
+            new_convquad(Mat_Phys,FF,FN,BN,BF,array(512,512,GX,GY,0,0,0.25),GName) #Right
+            new_convquad(Mat_Phys,BN,FN,EN,AN,array(512,512,GY,GZ,0,0,0.25),GName) #Front
+            new_convquad(Mat_Phys,AF,EF,FF,BF,array(512,512,GY,GZ,0,0,0.25),GName) #Back
+            
+            ConvexID++
+        break
+        case "ballast_block_phys", #Also a convex don't worry
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            local GName = "phys_convex_"+ConvexID
+            new_convquad(Mat_Phys,EF,EN,FN,FF,array(512,512,GX,GY,0,0,0.25),GName) #Top
+            new_convquad(Mat_Phys,DF,DN,CN,CF,array(512,512,GX,GY,0,0,0.25),GName) #Bottom
+            new_convquad(Mat_Phys,CF,CN,EN,EF,array(512,512,GX,GZ,0,0,0.25),GName) #Left
+            new_convquad(Mat_Phys,FF,FN,DN,DF,array(512,512,GX,GZ,0,0,0.25),GName) #Right
+            new_convquad(Mat_Phys,DN,FN,EN,CN,array(512,512,GY,GZ,0,0,0.25),GName) #Front
+            new_convquad(Mat_Phys,CF,EF,FF,DF,array(512,512,GY,GZ,0,0,0.25),GName) #Back
+            
+            ConvexID++
+        break
+        case "rail_convex_phys_1",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            local GName = "phys_convex_"+ConvexID
+            new_convquad(Mat_Phys,KF,KN,MN,MF,array(512,512,GX,GY,0,0,0.25),GName) #Top
+            new_convquad(Mat_Phys,IF,IN,GN,GF,array(512,512,GX,GY,0,0,0.25),GName) #Bottom
+            new_convquad(Mat_Phys,GF,GN,KN,KF,array(512,512,GX,GY,0,0,0.25),GName) #Left
+            new_convquad(Mat_Phys,MF,MN,IN,IF,array(512,512,GX,GY,0,0,0.25),GName) #Right
+            new_convquad(Mat_Phys,IN,MN,KN,GN,array(512,512,GY,GZ,0,0,0.25),GName) #Front
+            new_convquad(Mat_Phys,GF,KF,MF,IF,array(512,512,GY,GZ,0,0,0.25),GName) #Back
+            
+            ConvexID++
+            
+        break
+        case "rail_convex_phys_2",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            local GName = "phys_convex_"+ConvexID
+            new_convquad(Mat_Phys,NF,NN,LN,LF,array(512,512,GX,GY,0,0,0.25),GName) #Top
+            new_convquad(Mat_Phys,HF,HN,JN,JF,array(512,512,GX,GY,0,0,0.25),GName) #Bottom
+            new_convquad(Mat_Phys,JF,JN,NN,NF,array(512,512,GX,GY,0,0,0.25),GName) #Left
+            new_convquad(Mat_Phys,LF,LN,HN,HF,array(512,512,GX,GY,0,0,0.25),GName) #Right
+            new_convquad(Mat_Phys,HN,LN,NN,JN,array(512,512,GY,GZ,0,0,0.25),GName) #Front
+            new_convquad(Mat_Phys,JF,NF,LF,HF,array(512,512,GY,GZ,0,0,0.25),GName) #Back
+            
+            ConvexID++
+            
+        break
+    }
+}
+
+function buildGenericBallastBlock(Verts:array,Textures:table,SegmentCenter:vector,SegmentAngle:angle,Ties,AddBallast){
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        #Assume Verts is a list of 2D vectors, must be counterclockwise
+        local Lines = array()
+        local Ts = array()
+        local Cnt = Verts:count()
+        
+        for(N=1,Cnt){
+            Ts[N,vector] = vec(Verts[N,vector2],-OriginHeight+BallastHeight)
+        }
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        local Mat_Trackbed_Ties = Textures["Mat_Trackbed_Ties",string]
+        local Mat_Trackbed_NoTies = Textures["Mat_Trackbed_NoTies",string]
+        
+        local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+        
+        local Com = Ts[1,vector]
+        for(N=2,Cnt-1){
+            new_triangle((Ties ? Mat_Trackbed_Ties :Mat_Trackbed_NoTies),Com,Ts[N,vector],Ts[N+1,vector],Tex,"ballast_ref")
+        }
+    }
+}
+
+function buildGenericBallastEdges(P1:vector2,P2:vector2,OP1:vector2,OP2:vector2,Textures:table,SegmentCenter:vector,SegmentAngle:angle,AddBallast){ #Assumes coming up on lefthand side
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        
+        local Mat_Ballast = Textures["Mat_Ballast",string]
+        
+        local EN = vec(P1,-OriginHeight + BallastHeight)
+        local EF = vec(P2,-OriginHeight + BallastHeight)
+        
+        local AN = vec(OP1,-OriginHeight)
+        local AF = vec(OP2,-OriginHeight)
+        
+        local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle) 
+        
+        new_flatquad(Mat_Ballast,AF,AN,EN,EF,Tex,"ballast_ref")
+    }
+}
+
+function buildBallastPatchR(B:vector2,D:vector2,Isect:vector2,Textures:table,SegmentCenter:vector,SegmentAngle:angle,AddBallast){
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        
+        local Mat_Ballast = Textures["Mat_Ballast",string]
+        
+        local BF = vec(B,-OriginHeight)
+        local DF = vec(D,-OriginHeight)
+        local FF = vec(D,-OriginHeight+BallastHeight)
+        local DN = vec(Isect,-OriginHeight)
+        local FN = vec(Isect,-OriginHeight+BallastHeight)
+        local BN = BF + (DN-DF)
+        
+        local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+        
+        #          K M      N L
+        #          G I      J H
+        #       E----------------F
+        #   /   |                |   \
+        # A-----C----------------D-----B
+        
+        #o--o
+        #| /
+        #o
+        
+        new_flatquad(Mat_Ballast,BF,FF,FN,BN,Tex,"ballast_ref")
+    }
+}
+
+function buildBallastPatchL(A:vector2,C:vector2,Isect:vector2,Textures:table,SegmentCenter:vector,SegmentAngle:angle,AddBallast){
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        
+        local Mat_Ballast = Textures["Mat_Ballast",string]
+        
+        local AF = vec(A,-OriginHeight)
+        local CF = vec(C,-OriginHeight)
+        local EF = vec(C,-OriginHeight+BallastHeight)
+        local CN = vec(Isect,-OriginHeight)
+        local EN = vec(Isect,-OriginHeight+BallastHeight)
+        local AN = AF + (CN-CF)
+        
+        local Tex = roadUVa(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle) 
+        
+        #          K M      N L
+        #          G I      J H
+        #       E----------------F
+        #   /   |                |   \
+        # A-----C----------------D-----B
+        
+        #o--o
+        # \ |
+        #   o
+        
+        new_flatquad(Mat_Ballast,EN,EF,AF,AN,Tex,"ballast_ref")
+    }
+}
+
+function fuseRails(N:vector2,L:vector2,K:vector2,M:vector2,Top:vector2,Bottom:vector2,Textures:table,AddBallast){
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    local KF = vec(K,-OriginHeight+RailTopHeight)
+    local MF = vec(M,-OriginHeight+RailTopHeight)
+    local NF = vec(N,-OriginHeight+RailTopHeight)
+    local LF = vec(L,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    local JF = NF+vec(0,0,-RailHeight)
+    local HF = LF+vec(0,0,-RailHeight)
+    
+    local KN = vec(Top,-OriginHeight+RailTopHeight)
+    local MN = vec(Bottom,-OriginHeight+RailTopHeight)
+    local NN = MN
+    local LN = KN
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    local JN = IN
+    local HN = GN
+    
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #Left Rail of Right Path
+    
+    local InnerAngle = -heading(vec(),ang(),MF-MN)
+    local OuterAngle = -heading(vec(),ang(),KF-KN)
+    local InnerCenter = (MN/4 + IN/4 + MF/4 + IF/4)
+    local OuterCenter = (KN/4 + GN/4 + KF/4 + GF/4)
+    local TopCenter = (KN/4 + MN/4 + KF/4 + MF/4)
+    
+    local TexTop = roadUVa(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+    local TexInner = railUVa(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    local TexOuter = railUVa(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    new_flatquad(Mat_RailTop,KF,KN,MN,MF,TexTop,"rail_top_ref")
+    new_flatquad(Mat_RailSide,MF,MN,IN,IF,TexInner,"rail_side_r_ref")
+    new_flatquad(Mat_RailSide,GF,GN,KN,KF,TexOuter,"rail_side_l_ref")
+    if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,IF,IN,GN,GF,TexTop,"rail_bottom_ref")}
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #Right Rail of Left Path
+    
+    InnerAngle = -heading(vec(),ang(),NF-NN)
+    OuterAngle = -heading(vec(),ang(),LF-LN)
+    InnerCenter = (NN/4 + JN/4 + NF/4 + JF/4)
+    OuterCenter = (LN/4 + HN/4 + LF/4 + HF/4)
+    TopCenter = (NN/4 + LN/4 + NF/4 + LF/4)
+    
+    TexTop = roadUVa(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+    TexInner = railUVa(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    TexOuter = railUVa(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    new_flatquad(Mat_RailTop,NF,NN,LN,LF,TexTop,"rail_top_ref")
+    new_flatquad(Mat_RailSide,JF,JN,NN,NF,TexInner,"rail_side_l_ref")
+    new_flatquad(Mat_RailSide,LF,LN,HN,HF,TexOuter,"rail_side_r_ref")
+    if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,HF,HN,JN,JF,TexTop,"rail_bottom_ref")}
+}
+
+function buildPointTip(Verts:array,Textures:table,TextureLeft,TextureRight,LeftRail,AddBallast,Animate){
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    #B---A
+    # \ /
+    #  C
+    
+    local AT = round(vec(Verts[1,vector2],-OriginHeight+RailTopHeight))
+    local BT = round(vec(Verts[2,vector2],-OriginHeight+RailTopHeight))
+    local CT = round(vec(Verts[3,vector2],-OriginHeight+RailTopHeight))
+    local AB = AT + vec(0,0,-RailHeight)
+    local BB = BT + vec(0,0,-RailHeight)
+    local CB = CT + vec(0,0,-RailHeight)
+    
+    local TopCenter = (BT+AT)/2
+    local LeftCenter = (BB+BT+CB+CT)/4
+    local RightCenter = (CB+CT+AB+AT)/4
+    
+    local TopAngle = -heading(vec(),ang(),LeftRail ? (AT-CT) : (BT-CT))
+    local LeftAngle = -heading(vec(),ang(),BT-CT)
+    local RightAngle = -heading(vec(),ang(),AT-CT)
+    
+    local TexTop = roadUVa(RailTopU,RailTopV,RailTopScale,TopCenter,TopAngle+ang(0,90,0))
+    local TexLeft = railUVa(RailSideU,RailSideV,RailSideScale,LeftCenter,LeftAngle)
+    local TexRight = railUVa(RailSideU,RailSideV,RailSideScale,RightCenter,RightAngle)
+    
+    #B---A
+    # \ /
+    #  C
+    
+    new_triangle_w(Mat_RailTop,AT,BT,CT,1,1,1,TexTop,"rail_top_ref")
+    if(!AddBallast){new_triangle_w(Mat_RailTop_Rusty,AB,CB,BB,1,1,1,TexTop,"rail_bottom_ref")}
+    
+    if(TextureLeft|Animate){new_flatquad_w(Mat_RailSide,CB,CT,BT,BB,1,1,1,1,TexLeft,"rail_side_l_ref")}
+    if(TextureRight|Animate){new_flatquad_w(Mat_RailSide,AB,AT,CT,CB,1,1,1,1,TexRight,"rail_side_r_ref")}
+}
+
+function buildGenericRailMesh(Verts:array,WF,WN,Textures:table,TextureBack,TextureFront,RustyTop,HalfThickness,AddBallast){
+    #Order is: MF,KF,KN,MN
+    local M2 = Verts[1,vector2]
+    local K2 = Verts[2,vector2]
+    local K1 = Verts[3,vector2]
+    local M1 = Verts[4,vector2]
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = (RustyTop==0) ? Textures["Mat_RailTop",string] : (RustyTop==1) ? Textures["Mat_RailTop_Rusty",string] : "TOOLS/TOOLSCLIP"
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local KF = vec(K2,-OriginHeight+RailTopHeight)
+    local MF = vec(M2,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    
+    local KN = vec(K1,-OriginHeight+RailTopHeight)
+    local MN = vec(M1,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    local InnerAngle = -heading(vec(),ang(),MF-MN)
+    local OuterAngle = -heading(vec(),ang(),KF-KN)
+    local InnerCenter = (MN+IN+MF+IF)*0.25
+    local OuterCenter = (KN+GN+KF+GF)*0.25
+    local TopCenter = (KN+MN+KF+MF)*0.25
+    
+    local TexTop = roadUVa(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+    local TexInner = railUVa(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    local TexOuter = railUVa(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    new_flatquad_w(Mat_RailTop,KF,KN,MN,MF, WF,WN,WN,WF,TexTop,"rail_top_ref")
+    new_flatquad_w(Mat_RailSide,GF,GN,KN,KF, WF,WN,WN,WF,TexOuter,"rail_side_l_ref")
+    new_flatquad_w(Mat_RailSide,MF,MN,IN,IF, WF,WN,WN,WF, TexInner,"rail_side_r_ref")
+    if(!AddBallast){new_flatquad_w(Mat_RailTop_Rusty,IF,IN,GN,GF, WF,WN,WN,WF,TexTop,"rail_bottom_ref")}
+    if(TextureFront){
+        local Center = (KN+MN+GN+IN)*0.25
+        local Angle = -heading(vec(),ang(),KN-MN)
+        local Tex = railUVa(RailSideU, RailSideV, RailSideScale, Center, Angle)
+        new_flatquad_w(Mat_RailSide,IN,MN,KN,GN, WN,WN,WN,WN,Tex,"none")
+    }
+    if(TextureBack){
+        local Center = (KF+MF+GF+IF)*0.25
+        local Angle = -heading(vec(),ang(),KF-MF)
+        local Tex = railUVa(RailSideU, RailSideV, RailSideScale, Center, Angle) 
+        new_flatquad_w(Mat_RailSide,GF,KF,MF,IF, WF,WF,WF,WF,Tex,"none")
+    }
+    
+}
+
+function buildOverrideRailMesh(Verts:array,Textures:table,SegmentCenter:vector,SegmentAngle:angle,TextureBack,TextureFront,RustyTop,HalfThickness,AddBallast){
+    local M2 = Verts[1,vector2]
+    local K2 = Verts[2,vector2]
+    local K1 = Verts[3,vector2]
+    local M1 = Verts[4,vector2]
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = !RustyTop ? Textures["Mat_RailTop",string] : Textures["Mat_RailTop_Rusty",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local KF = vec(K2,-OriginHeight+RailTopHeight)
+    local MF = vec(M2,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    
+    local KN = vec(K1,-OriginHeight+RailTopHeight)
+    local MN = vec(M1,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    
+    local InnerAngle = -heading(vec(),ang(),MF-MN)
+    local OuterAngle = -heading(vec(),ang(),KF-KN)
+    local InnerCenter = (MN+IN+MF+IF)*0.25
+    local OuterCenter = (KN+GN+KF+GF)*0.25
+    local TopCenter = SegmentCenter#(KN+MN+KF+MF)*0.25
+    
+    local TexTop = roadUVa(RailTopU, RailTopV, RailTopScale, TopCenter, SegmentAngle+ang(0,90,0))
+    local TexInner = railUVa(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    local TexOuter = railUVa(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    new_flatquad(Mat_RailTop,KF,KN,MN,MF,TexTop,"rail_top_ref")
+    new_flatquad(Mat_RailSide,GF,GN,KN,KF,TexOuter,"rail_side_l_ref")
+    new_flatquad(Mat_RailSide,MF,MN,IN,IF,TexInner,"rail_side_r_ref")
+    if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,IF,IN,GN,GF,TexTop,"rail_bottom_ref")}
+    if(TextureFront){
+        local Center = (KN+MN+GN+IN)*0.25
+        local Angle = -heading(vec(),ang(),KN-MN)
+        local Tex = railUVa(RailSideU, RailSideV, RailSideScale, Center, Angle)
+        new_flatquad(Mat_RailSide,IN,MN,KN,GN,Tex,"none")
+    }
+    if(TextureBack){
+        local Center = (KF+MF+GF+IF)*0.25
+        local Angle = -heading(vec(),ang(),KF-MF)
+        local Tex = railUVa(RailSideU, RailSideV, RailSideScale, Center, Angle)
+        new_flatquad(Mat_RailSide,GF,KF,MF,IF,Tex,"none")
+    }
+    
+}
+
+function buildFrog(MainLeft,OMN:vector2,IMN:vector2,CMN:vector2,ODV:vector2,IDV:vector2,CDV:vector2,CheckLength,Textures:table,AddBallast){
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    local RailWidth = Textures["RailWidth",number]
+    
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #O     O
+    #|\   /|
+    #C-I I-C
+    
+    #DV   MN
+    
+    #TRIANGLES
+    
+    local LF = vec(MainLeft ? OMN : ODV,-OriginHeight+RailTopHeight)
+    local HF = LF+vec(0,0,-RailHeight)
+    local KF = vec(!MainLeft ? OMN : ODV,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    
+    local LN = vec(MainLeft ? CMN : CDV,-OriginHeight+RailTopHeight)
+    local HN = LN+vec(0,0,-RailHeight)
+    local KN = vec(!MainLeft ? CMN : CDV,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    
+    local NN = vec(MainLeft ? IMN : IDV,-OriginHeight+RailTopHeight)
+    local JN = NN+vec(0,0,-RailHeight)
+    local MN = vec(!MainLeft ? IMN : IDV,-OriginHeight+RailTopHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    local RAngle = -heading(vec(),ang(),LF-LN)
+    local LAngle = -heading(vec(),ang(),KF-KN)
+    local RCenterSide = (LF+HF+NN+JN)*0.25
+    local LCenterSide = (KF+GF+MN+IN)*0.25
+    local RCenterTop = (NN+LN)*0.5
+    local LCenterTop = (KN+MN)*0.5
+    
+    local TexTopR = roadUVa(RailTopU, RailTopV, RailTopScale, RCenterTop, RAngle+ang(0,90,0))
+    local TexSideR = railUVa(RailSideU, RailSideV, RailSideScale, RCenterSide, RAngle)
+    local TexTopL = roadUVa(RailTopU, RailTopV, RailTopScale, LCenterTop, LAngle+ang(0,90,0))
+    local TexSideL = railUVa(RailSideU, RailSideV, RailSideScale, LCenterSide, LAngle)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #O     O
+    #|\   /|
+    #C-I I-C
+    
+    #DV   MN
+    
+    #Right (MN normally)
+    
+    new_triangle(Mat_RailTop,LN,LF,NN,TexTopR,"rail_top_ref")
+    new_flatquad(Mat_RailSide,JN,NN,LF,HF,TexSideR,"rail_side_l_ref")
+    if(!AddBallast){new_triangle(Mat_RailTop,HN,JN,HF,TexTopR,"rail_bottom_ref")}
+    
+    #Left (DV Normally)
+    
+    new_triangle(Mat_RailTop,MN,KF,KN,TexTopL,"rail_top_ref")
+    new_flatquad(Mat_RailSide,GF,KF,MN,IN,TexSideL,"rail_side_r_ref")
+    if(!AddBallast){new_triangle(Mat_RailTop,IN,GN,GF,TexTopR,"rail_bottom_ref")}
+    
+    #FROG MAIN
+    
+    local NFU = LF + round(ax(KN,KF)*CheckLength/4)
+    local LFU = NFU + (MN-KN)
+    
+    local MFU = KF + round(ax(LN,LF)*CheckLength/4)
+    local KFU = MFU + (NN-LN)
+    
+    local VR = array(vec2(LFU),vec2(NFU),vec2(LF),vec2(LN))
+    local VL = array(vec2(MFU),vec2(KFU),vec2(KN),vec2(KF))
+    
+    buildGenericRailMesh(VR,0,0,Textures,0,0,1,1,AddBallast)
+    buildGenericRailMesh(VL,0,0,Textures,0,0,1,1,AddBallast)
+    
+    #FROG TIPS
+    
+    local LFT = LFU + round(ax(KN,KF)*CheckLength/8)
+    local NFT = LFT + round((KN-MN)*0.75)
+    local KFT = KFU + round(ax(LN,LF)*CheckLength/8)
+    local MFT = KFT + round((LN-NN)*0.75)
+    
+    VR = array(vec2(LFT),vec2(NFT),vec2(NFU),vec2(LFU))
+    VL = array(vec2(MFT),vec2(KFT),vec2(KFU),vec2(MFU))
+    local CL = (KFU+MFU)/2
+    local CR = (LFU+NFU)/2
+    local AL = -heading(vec(),ang(),KFT-KFU)
+    local AR = -heading(vec(),ang(),LFT-LFU)
+    
+    buildOverrideRailMesh(VR,Textures,CR,AR,1,0,1,1,AddBallast)
+    buildOverrideRailMesh(VL,Textures,CL,AL,1,0,1,1,AddBallast)
+    
+    #FROG BASE
+    
+    #EGHF
+    #A  B
+    #C  D
+    
+    local AT = KFU+vec(0,0,-RailHeight/2)
+    local AB = AT+vec(0,0,-RailHeight/2)
+    
+    local BT = LFU+vec(0,0,-RailHeight/2)
+    local BB = BT+vec(0,0,-RailHeight/2)
+    
+    local CT = KN+vec(0,0,-RailHeight/2)
+    local CB = CT+vec(0,0,-RailHeight/2)
+    
+    local DT = LN+vec(0,0,-RailHeight/2)
+    local DB = DT+vec(0,0,-RailHeight/2)
+    
+    local ET = KFT+vec(0,0,-RailHeight/2)
+    local EB = ET+vec(0,0,-RailHeight/2)
+    
+    local FT = LFT+vec(0,0,-RailHeight/2)
+    local FB = FT+vec(0,0,-RailHeight/2)
+    
+    local GT = MFT+vec(0,0,-RailHeight/2)
+    local GB = GT+vec(0,0,-RailHeight/2)
+    
+    local HT = NFT+vec(0,0,-RailHeight/2)
+    local HB = HT+vec(0,0,-RailHeight/2)
+
+    
+    local TopCenter = (AT+BT+CT+DT)*0.25
+    local TopAngle = -heading(vec(),ang(),(AT+BT)/2 - (CT+DT)/2)
+    local TexTop = roadUVa(RailTopU, RailTopV, RailTopScale*4, TopCenter, TopAngle+ang(0,90,0))
+    
+    local FrontCenter = ((CT+DT+CB+DB)*0.25)+vec(0,0,RailHeight/4)
+    local FrontAngle = -heading(vec(),ang(),DT-CT)
+    local TexFront = railUVa(RailSideU, RailSideV, RailSideScale, FrontCenter, FrontAngle)
+    
+    local BackCenter = ((AT+BT+AB+BB)*0.25)+vec(0,0,RailHeight/4)
+    local BackAngle = -heading(vec(),ang(),AT-BT)
+    local TexBack = railUVa(RailSideU, RailSideV, RailSideScale, BackCenter, BackAngle)
+    
+    local LeftCenter = ((AT+AB+CT+CB)*0.25)+vec(0,0,RailHeight/4)
+    local LeftAngle = -heading(vec(),ang(),AT-CT)
+    local TexLeft = railUVa(RailSideU, RailSideV, RailSideScale, LeftCenter, LeftAngle)
+    
+    local RightCenter = ((BT+BB+DT+DB)*0.25)+vec(0,0,RailHeight/4)
+    local RightAngle = -heading(vec(),ang(),BT-DT)
+    local TexRight = railUVa(RailSideU, RailSideV, RailSideScale, RightCenter, RightAngle)
+    
+    #EGHF
+    #A  B
+    #C  D
+    
+    #Front Block
+    new_flatquad(Textures["Mat_RailTop_Rusty",string],AT,CT,DT,BT,TexTop,"none")
+    new_flatquad(Mat_RailSide,DT,CT,CB,DB,TexFront,"none")
+    new_flatquad(Mat_RailSide,CT,AT,AB,CB,TexLeft,"rail_side_l_ref")
+    new_flatquad(Mat_RailSide,BT,DT,DB,BB,TexRight,"rail_side_r_ref")
+    if(!AddBallast){new_flatquad(Textures["Mat_RailTop_Rusty",string],AB,BB,DB,CB,TexTop,"none")}
+    #Left Triangle
+    new_triangle(Textures["Mat_RailTop_Rusty",string],AT,GT,ET,TexTop,"none")
+    new_flatquad(Mat_RailSide,ET,GT,GB,EB,TexBack,"frog_back_ref")
+    new_flatquad(Mat_RailSide,AT,ET,EB,AB,TexLeft,"rail_side_l_ref")
+    if(!AddBallast){new_triangle(Textures["Mat_RailTop_Rusty",string],AB,EB,GB,TexTop,"none")}
+    #Right Triangle
+    new_triangle(Textures["Mat_RailTop_Rusty",string],BT,FT,HT,TexTop,"none")
+    new_flatquad(Mat_RailSide,FT,FB,HB,HT,TexBack,"frog_back_ref")
+    new_flatquad(Mat_RailSide,BT,BB,FB,FT,TexRight,"rail_side_r_ref")
+    if(!AddBallast){new_triangle(Textures["Mat_RailTop_Rusty",string],BB,HB,FB,TexTop,"none")}
+    #Middle Trapezoid
+    new_flatquad(Textures["Mat_RailTop_Rusty",string],BT,HT,GT,AT,TexTop,"none")
+    new_flatquad(Mat_RailSide,HT,HB,GB,GT,TexBack,"frog_back_ref")
+    if(!AddBallast){new_flatquad(Textures["Mat_RailTop_Rusty",string],AB,GB,HB,BB,TexTop,"none")}
+}
+function buildSingleTie(Center:vector,Angle:angle,Textures:table,HeightOffset,Full3D,AddBallast){
+    local TieU = Textures["TieU",number]
+    local TieV = Textures["TieV",number]
+    local TieScale = Textures["TieScale",number]
+    
+    local Mat_Tie_Plates = Textures["Mat_Tie_Plates",string]
+    local Mat_Tie = Textures["Mat_Tie",string]
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    
+    local TieBottomHeight = Textures["TieBottomHeight",number]
+    local TieTopHeight = Textures["TieTopHeight",number]
+    
+    local TieWidth = Textures["TieWidth",number]
+    local TieThickness = Textures["TieThickness",number]
+    local TiePlateWidth = Textures["TiePlateWidth",number]
+    local TiePlateCenter = Textures["TiePlateCenter",number]
+    
+    local GX = Angle:forward()
+    local GY = Angle:right()
+    local GZ = -Angle:up()
+    
+    #local HT = TieTopHeight - BallastHeight
+    local HB = vec(0,0,TieTopHeight - TieBottomHeight)
+    
+    #Center = round(Center + vec(0,0,HT))
+    #local CZ = ceil(Center:z())
+    #Center = round(Center):setZ(CZ)
+    local TL = GX*TieThickness/2
+    local TW = GY*TieWidth/2
+    
+    #A---B
+    #C---D
+    
+    local AT = round(Center + TL - TW,2)
+    local BT = round(Center + TL + TW,2)
+    local CT = round(Center - TL - TW,2)
+    local DT = round(Center - TL + TW,2)
+    
+    #print(AT,CT,DT,BT)
+    
+    local AB = AT-HB
+    local BB = BT-HB
+    local CB = CT-HB
+    local DB = DT-HB
+    
+    local TexTop = roadUVa(TieU, TieV, TieScale, Center,Angle)
+    local AngleFB = -heading(AT,ang(),BT)
+    local TexFB = railUVa(TieU, TieV, TieScale, Center - HB/2,AngleFB)
+    
+    local CenterL = (AT+CT)/2 + vec(0,0,TiePlateCenter)
+    local CenterR = (BT+DT)/2 + vec(0,0,TiePlateCenter)
+    local AngLR = Angle:rotateAroundAxis(GX,90)
+    local TexL = railUVa(TieU, TieV, TieScale, CenterL, AngLR)
+    local TexR = railUVa(TieU, TieV, TieScale, CenterR, AngLR)
+    
+    new_flatquad(Mat_Tie_Plates,AT,CT,DT,BT,TexTop,"none")
+    if(Full3D){
+        new_flatquad(Mat_Tie,DB,DT,CT,CB,TexFB,"none")
+        new_flatquad(Mat_Tie,AB,AT,BT,BB,TexFB,"none")
+        new_flatquad(Mat_Tie,CB,CT,AT,AB,TexL,"none")
+        new_flatquad(Mat_Tie,BB,BT,DT,DB,TexR,"none")
+        if(!AddBallast){new_flatquad(Mat_Tie,AB,BB,DB,CB,TexTop,"none")}
+    }
+}
+
+function buildTieMeshOverride(Verts:array,Center:vector2,Angle:angle,Textures:table,Plates,SideState,Full3D,AddBallast){
+    local TieU = Textures["TieU",number]
+    local TieV = Textures["TieV",number]
+    local TieScale = Textures["TieScale",number]
+    
+    local Mat_Tie_Plates = Textures["Mat_Tie_Plates",string]
+    local Mat_Tie = Textures["Mat_Tie",string]
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    
+    local TieBottomHeight = Textures["TieBottomHeight",number]
+    local TieTopHeight = Textures["TieTopHeight",number]
+    
+    local TieWidth = Textures["TieWidth",number]
+    local TieThickness = Textures["TieThickness",number]
+    local TiePlateWidth = Textures["TiePlateWidth",number]
+    local TiePlateCenter = Textures["TiePlateCenter",number]
+    
+    local GX = Angle:forward()
+    local GY = Angle:right()
+    local GZ = vec(0,0,-1)
+    
+    local HT = -OriginHeight+TieTopHeight
+    local HB = vec(0,0,TieTopHeight-TieBottomHeight)
+    
+    #A---B
+    #C---D
+    
+    local AT = vec(Verts[2,vector2],HT)
+    local BT = vec(Verts[1,vector2],HT)
+    local CT = vec(Verts[3,vector2],HT)
+    local DT = vec(Verts[4,vector2],HT)
+    
+    local AB = AT-HB
+    local BB = BT-HB
+    local CB = CT-HB
+    local DB = DT-HB
+    
+    local TexTop = roadUVa(TieU, TieV, TieScale, vec(Center,HT),Angle)
+    
+    local TexFB = railUVa(TieU, TieV, TieScale, vec(Center,HT) - HB/2,Angle:rotateAroundAxis(GZ,-90))
+    
+    local CenterLR = (AT+CT)/2 + vec(0,0,TiePlateCenter)
+    local AngLR = Angle:rotateAroundAxis(GX,90)
+    local TexLR = railUVa(TieU, TieV, TieScale, CenterLR, AngLR)
+    
+    new_flatquad((Plates ? Mat_Tie_Plates : Mat_Tie),DT,BT,AT,CT,TexTop,"none")
+    if(Full3D){
+        new_flatquad(Mat_Tie,DB,DT,CT,CB,TexFB,"none")
+        new_flatquad(Mat_Tie,AB,AT,BT,BB,TexFB,"none")
+        if(SideState==-1){
+            new_flatquad(Mat_Tie,CB,CT,AT,AB,TexLR,"none")
+        }elseif(SideState==1){
+            new_flatquad(Mat_Tie,BB,BT,DT,DB,TexLR,"none")
+        }
+        if(!AddBallast){new_flatquad(Mat_Tie,AB,BB,DB,CB,TexTop,"none")}
+    }
+    
+}
+
+#Texture Processing
+function array smd_texture(Textures:array){
+    local Out = array()
+    foreach(K,Tex:string=Textures){
+        local SA = Tex:explode("/")
+        Out[K,string] = SA[SA:count(),string]:lower()
+    }
+    return Out
+}
+function string smd_texture(Texture:string){ #also works with mesh names, see below
+    local SA = Texture:explode("/")
+    return SA[SA:count(),string]:lower()
+}
+
+#QC File Functions
+
+#Skin Table: (Integer Keys)
+    #0+: Material Array
+    
+function string string:kv(KV:string){ #NOT the same as the VMF kv function
+    return "\n"+This+" \""+KV+"\""
+}
+
+
+function string qc(Modelname:string,HammerScale,Skins:table,Attachments:array,Animate){
+    local Out = "//Created with John Henry\n"
+    if(!Animate){Out+="$staticprop"}
+    Out += "$modelname":kv(Modelname)
+    Out += "$scale":kv(pad6(1/HammerScale))
+    local RefMesh = smd_texture(Modelname)
+    Out += "$body \"Body\"":kv(RefMesh+"_ref")
+    Out += "$sequence \"idle\"":kv(RefMesh+"_ref")
+    Out += "\n$cdmaterials \"models/trakpak3_common/tracks/rails\"\n$cdmaterials \"models/trakpak3_common/tracks/ballast\"\n$cdmaterials \"models/trakpak3_common/tracks/ties\"\n$cdmaterials \"models/trakpak3_common/tracks/composite\"\n$cdmaterials \"models/trakpak3_common/misc\""
+    Out += "$surfaceprop":kv("metal")
+    Out += "$collisionmodel":kv(smd_texture(Modelname)+"_phys")+" {\n\t$concave"+"\t$mass":kv("50000.000000")+"\n\t$maxconvexpieces 256\n}"
+    
+    #Attachments
+    for(N=1,Attachments:count()){
+        Out += "\n"+Attachments[N,string]
+    }
+    
+    #Skins
+    local SkinBody = ""
+    local NumMaterials = Skins:count()
+    local NumSkins = Skins[1,array]:count()
+    for(N=1,NumSkins){
+        SkinBody += "\n\t{ "
+        for(M=1,NumMaterials){
+            SkinBody += "\""+Skins[M,array][N,string]+"\" "
+        }
+        SkinBody += "}"
+    }
+    Out += "\n$texturegroup \"skins\" {"+SkinBody+"\n}"
+    
+    #Animation
+    if(Animate){
+        Out += ("\n$sequence \"throw\" \""+RefMesh+"_throw\" {\n\tfps 2\n\tframe 0 1\n}")
+    }
+    
+    return Out
+}

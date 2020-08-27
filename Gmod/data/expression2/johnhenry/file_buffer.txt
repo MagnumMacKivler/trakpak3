@@ -1,0 +1,55 @@
+@name johnhenry/file_buffer
+@inputs 
+@outputs FileBuffer:entity FilesLeft FilesGiven FilesWritten
+@persist FileNames:array FileTexts:array Writing GracePeriod MaxGracePeriod
+@trigger 
+@model models/props_lab/reciever01b.mdl
+
+if(first()){
+    
+    MaxGracePeriod = 1
+    
+    Writing = 0
+    FilesWritten = 0
+    FilesGiven = 0
+    FileBuffer = entity()
+    signalSetGroup("john_henry")
+    runOnSignal("push_file",1,1)
+    timer("clk",1000)
+}elseif(clk("clk")){
+    FilesLeft = FileNames:count()
+    if((FilesLeft>0) & !Writing){
+        Writing = 1
+        local Name = FileNames:removeString(1)
+        local Text = FileTexts:removeString(1)
+        FilesLeft--
+        soundPlay(0,0.5,"buttons/button3.wav")
+        fileWrite(Name,Text)
+    }elseif(Writing & fileCanWrite() & (GracePeriod<MaxGracePeriod)){
+        GracePeriod += 1
+    }elseif(Writing & fileCanWrite() & (GracePeriod==MaxGracePeriod)){
+        GracePeriod = 0
+        Writing = 0
+        FilesWritten++
+    }
+    timer("clk",1000)
+}elseif(signalClk("push_file")){
+    
+    local Ent = signalSender()
+    print("Signal Received from "+Ent:toString())
+    local W = Ent:wirelink()
+    
+    local Name = W["FileName",string]
+    local Text = W["FileText",string]
+    
+    if((Name!="") & (Text!="")){
+        FileNames:pushString(Name)
+        FileTexts:pushString(Text)
+        #soundPlay(0,0.5,"buttons/bell1.wav")
+        FilesGiven++
+        signalSendDirect("ack_file", Ent)
+    }else{
+        print("Invalid data from Signal sent by "+Ent:toString())
+        #soundPlay(0,0.5,"buttons/button10.wav")
+    }
+}

@@ -1,0 +1,84 @@
+//STRAIGHT, DIR 0, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR 0 to 1, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n0;'EndDir":n1;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n4;'StartPos":{n0;0}'Height":n0;'EndPos":{n-160;1280}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR -0, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-0;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR -0 to -1, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n-0;'EndDir":n-1;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n4;'StartPos":{n0;0}'Height":n0;'EndPos":{n160;1280}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR 0 to 2, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n0;'EndDir":n2;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n8;'StartPos":{n0;0}'Height":n0;'EndPos":{n-512;2112}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR -0, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-0;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR -0 to -2, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n-0;'EndDir":n-2;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n8;'StartPos":{n0;0}'Height":n0;'EndPos":{n512;2112}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 1536, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n1536;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR 0 to 4, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n0;'EndDir":n4;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n12;'StartPos":{n0;0}'Height":n0;'EndPos":{n-1312;3168}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR -0, LENGTH 1536, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-0;'Type":'straight"'Length":n1536;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR -0 to -4, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n-0;'EndDir":n-4;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n12;'StartPos":{n0;0}'Height":n0;'EndPos":{n1312;3168}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR 1 to 0, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n1;'EndDir":n0;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n4;'StartPos":{n0;0}'Height":n0;'EndPos":{n-160;1280}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR -1 to -0, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n-1;'EndDir":n-0;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n4;'StartPos":{n0;0}'Height":n0;'EndPos":{n160;1280}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR 2 to 0, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n2;'EndDir":n0;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n8;'StartPos":{n0;0}'Height":n0;'EndPos":{n-512;2112}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 1024, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n1024;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR -2 to -0, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n-2;'EndDir":n-0;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n8;'StartPos":{n0;0}'Height":n0;'EndPos":{n512;2112}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR 4 to 0, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n4;'EndDir":n0;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n12;'StartPos":{n0;0}'Height":n0;'EndPos":{n-1312;3168}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%
+//STRAIGHT, DIR -4, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-4;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+//ARC, DIR -4 to -0, RADIUS 4096, HEIGHT 0
+~'ntypes":{}'size":n9;'n":{}'s":{~'StartDir":n-4;'EndDir":n-0;'Index":n2;'Type":'arc"'Radius":n4096;'Segments":n12;'StartPos":{n0;0}'Height":n0;'EndPos":{n1312;3168}}'stypes":{~'StartDir":'n"'EndDir":'n"'Index":'n"'Type":'s"'Radius":'n"'Segments":'n"'StartPos":'xv2"'Height":'n"'EndPos":'xv2"}
+//SWITCH
+~'ntypes":{}'size":n5;'n":{}'s":{~'DivPiece":n2;'Split":'main"'Index":n3;'Type":'switch"'MainPiece":n1}'stypes":{~'DivPiece":'n"'Split":'s"'Index":'n"'Type":'s"'MainPiece":'n"}
+%END%

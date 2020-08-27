@@ -1,0 +1,447 @@
+// Trakpak3 FGD File
+
+@include "base.fgd"
+
+
+
+//Switch
+@PointClass base(Angles) studioprop() = tp3_switch : "A simple switch. Swaps between two models to change tracks. All Input/Output and Control functions are handled by the Switch Stand."
+[
+	model(studio) : "Model (Main)" : "" : "The model path for this switch when in its main (closed) position."
+	model_div(studio) : "Model (Diverging, Optional)" : "" : "The model path for this switch when in its diverging (open) position. If left blank, it will be picked automatically based on the main (closed) model."
+	skin(integer) : "Skin" : 0 : "The skin to apply to the switch models."
+	lever(target_destination) : "Switch Stand" : : "The name of the tp3_switch_lever_anim or tp3_switch_lever_bg that controls this switch."
+	animated(choices) : "Animate Switch?" : 1 : "Does this switch use smooth throwing animations?" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	//opensound(sound) : "Open Sound" : "buttons/lever6.wav" : "The sound the lever makes when the switch is thrown diverging (open). If blank, no sound will be played."
+	//closesound(sound) : "Close Sound" : "" : "The sound the lever makes when the switch is thrown main (closed). If blank, uses whatever the Open Sound is set to."
+	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
+	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer" : "Disables the toolgun on this entity except for the tools listed here."
+]
+
+//Switch Lever
+@PointClass base(Targetname, Angles) studioprop() = tp3_switch_lever_anim : "An animated lever to control switches."
+[
+	model(studio) : "Model" : "" : "The model path for the switch lever."
+	//switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
+	bodygroups(string) : "Bodygroups" : "" : "The switch stand's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	skin(integer) : "Skin" : 0 : "The skin to apply to the switch lever."
+	
+	seq_idle_close(string) : "Idle Closed Seq" : "idle_close" : "The default sequence to use when the switch is locked in its main (closed) position."
+	seq_throw_open(string) : "Throw Open Seq" : "throw_open" : "The sequence to use when the switch is being thrown diverging (open)."
+	seq_idle_open(string) : "Idle Open Seq" : "idle_open" : "The sequence to use when the switch is locked in its diverging (open) position."
+	seq_throw_close(string) : "Throw Closed Seq" : "throw_close" : "The sequence to use when the switch is being thrown main (closed)."
+	
+	behavior(choices) : "Trailing Switch Behavior" : 1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
+	[
+		0 : "Manual, Derail"
+		1 : "Manual, Break"
+		2 : "Safety Throw"
+		3 : "Spring Switch"
+	]
+	
+	autoreset(choices) : "Auto-Reset?" : 0 : "Should this switch automatically reset back to main (closed) position after the train has passed over it? Great for heavily-trafficked, mainline switches." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	
+	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
+	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv" : "Disables the toolgun on this entity except for the tools listed here."
+	
+	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
+	input ThrowMain(void) : "Throws the switch to main (closed)."
+	input ThrowDiverging(void) : "Throws the switch to diverging (open)."
+	
+	output OnThrownMain(void) : "Fires when the switch is thrown main (closed)."
+	output OnThrownDiverging(void) : "Fires when the switch is thrown diverging (open)."
+	
+	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
+]
+
+@PointClass base(Angles) studioprop() = tp3_switch_lever_bg : "A bodygrouped/skinned lever to control switches."
+[
+	model(studio) : "Model" : "" : "The model path for the switch lever."
+	switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
+	bg_target_close(integer) : "Target Bgrp Closed" : 0 : "The bodygroup value for the switch target/position indicator (BGRP ID 1) when the switch is main (closed)."
+	bg_target_open(integer) : "Target Bgrp Open" : 1 : "The bodygroup value for the switch target/position indicator (BGRP ID 1) when the switch is diverging (open)."
+	
+	bg_lever_close(integer) : "Lever Bgrp Closed" : 0 : "The bodygroup value for the lever handle (BGRP ID 2) when the switch is main (closed)."
+	bg_lever_open(integer) : "Lever Bgrp Open" : 1 : "The bodygroup value for the lever handle (BGRP ID 2) when the switch is diverging (open)."
+	
+	skin(integer) : "Skin Closed" : 0 : "The model's skin when the switch is main (closed)."
+	skin_open(integer) : "Skin Open" : 0 : "The model's skin when the switch is diverging (open)."
+	
+	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
+]
+
+//Turntable Test
+@PointClass base(Targetname, Angles) studioprop() = tp3_turntable : "A piece of track that rotates to allow reversing of rolling stock and changing tracks."
+[
+	model(studio) : "Model" : "" : "The model path for the turntable."
+	skin(integer) : "Skin" : 0 : "The skin for the turntable model."
+	
+	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the turntable."
+	exitpoint(origin) : "Seat Exit Point" : : "Teleport the player here when they get out of the seat."
+	
+	stops(string) : "Stop Angles" : "0 45 90 135 180" : "Angles for the turntable to stop at, separated by spaces. Angles 180 degrees from given stops will be auto-created, so you don't need  to specify 90 and 270. Duplicate angles are also handled properly. Values will be normalized from -180 to +180."
+	maxspeed(float) : "Max Speed" : "7.5" : "Max rotational speed, in degrees per second."
+	//creepspeed(float) : "Creep Speed" : "2.5" : "Minimum speed turntable will assume when approaching a stop. You probably don't need to change this."
+	acceleration(float) : "Acceleration Factor" : "2.5" : "Acceleration/Deceleration rate in degrees per second per second. You probably don't need to change this."
+	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the turntable makes when it starts to move."
+	sound_stop(sound) : "Start Move Sound" : "doors/garage_stop1.wav" : "The sound the turntable makes when it comes to a complete stop."
+	
+]
+
+//Transfer Table
+@PointClass base(Targetname, Angles) studioprop() = tp3_transfertable : "A table that slides back and forth to move rolling stock from one track onto another."
+[
+	model(studio) : "Model" : "" : "The model path for the turntable."
+	skin(integer) : "Skin" : 0 : "The skin for the turntable model."
+	
+	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the turntable."
+	exitpoint(origin) : "Seat Exit Point" : : "Teleport the player here when they get out of the seat."
+	
+	table_axis(vector) : "Table Axis (X Y Z)" : "1 0 0" : "Axis of table movement. '1 0 0' is East, '0 -1 0' is South, etc. The move distances scale to the magnitude of the vector (Magnitude =  sqrt(X^2 + Y^2 + Z^2). For transfer tables that move pure North, South, East, or West that should be 1. For transfer tables that move diagonally, it's okay to use a vector like '1 0.5 0', which makes it easier to snap to grid on diagonals."
+	startpos(float) : "Initial Point" : "0.0" : "Where along the table axis is this table starting in? Note that the hammer position won't change; changing this value moves the axis accordingly."
+	stops(string) : "Stop Points" : "0 192 384 576 768 960 1152 1344 1536" : "Points along the table's track where the table should stop."
+	maxspeed(float) : "Max Speed" : "30" : "Max linear speed, in inches per second."
+	//creepspeed(float) : "Creep Speed" : "2.5" : "Minimum speed table will assume when approaching a stop. You probably don't need to change this."
+	acceleration(float) : "Acceleration Factor" : "10" : "Acceleration/Deceleration rate in inches per second per second. You probably don't need to change this."
+	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the table makes when it starts to move."
+	sound_stop(sound) : "Start Move Sound" : "doors/garage_stop1.wav" : "The sound the table makes when it comes to a complete stop."
+	sound_crash(sound) : "Crash Sound" : "plats/tram_hit4.wav" : "The sound the table makes when it comes to a complete stop due to being slammed into the track ends."
+	
+]
+
+//Signal Block
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_signal_block.vmt") line(255 255 255, targetname, targetname, targetname, startnode) = tp3_signal_block :
+	"Signal Block Controller. This entity scans a stretch of track nodes to determine block occupancy state. Track nodes are set in Gmod."
+[
+	blockmode(choices) : "Starting Mode" : 0 : "How should this signal block behave?" =
+	[
+		0 : "Automatic (Test Occupancy)"
+		1 : "Force Occupied"
+		2 : "Force Clear"
+	]
+	
+	scaninterval(choices) : "Scan Speed" : 100 : "Block Scan Speed, for performance optimization. \n\nSluggish is 2 nodes per second, really only good for special circumstances where you have a REALLY short block with a handful of nodes. \n\nSlow is 5 nodes per second, good for short blocks with a smaller number of nodes. \n\nNormal is 10 nodes per second, good for medium-length blocks. \n\nFast is 20 nodes per second, better for longer blocks with lots of nodes. \n\nInsane is 50 nodes per second and should only be used for hilariously long blocks with enormous amounts of nodes. Use with caution." =
+	[
+		500 : "Sluggish (2/s)"
+		200 : "Slow (5/s)"
+		100 : "Normal (10/s)"
+		50 : "Fast (20/s)"
+		20 : "Insane (50/s)"
+	]
+	
+	hull_lw(integer) : "Trace Width" : 96 : "The width of the box that will be used to scan the track."
+	hull_h(integer) : "Trace Height" : 192 : "The height of the box that will be used to scan the track."
+	hull_offset(integer) : "Trace Offset" : 0 : "The amount of additional height to move the trace box up by. A value of 0 means the bottom sits on top of the ballast."
+	
+	// Inputs
+	input ForceOccupancy(integer) : "Force this signal block to show up as occupied (1) or clear (0) based on the provided parameter. This stops normal occupancy measurement."
+	input UnForceOccupancy(void) : "Stop forcing the signal block to report a specific occupancy status and return to measuring block occupancy normally."
+	input TestOccupancy(void) : "Fires either OnTestedOccupied or OnTestedClear depending on the current block state. Similar to the TouchTest input on a trigger."
+	
+	// Outputs
+	output OnOccupied(void) : "Fires when the block state changes from clear to occupied, either naturally or due to being forced."
+	output OnOccupiedNatural(void) : "Fires when the block state changes from clear to occupied. Unlike OnOccupied, forcing block state does not fire this input."
+	
+	output OnClear(void) : "Fires when the block state changes from occupied to clear, either naturally or due to being forced."
+	output OnClearNatural(void) : "Fires when the block state changes from occupied to clear. Unlike OnClear, forcing block state does not fire this input."
+	
+	output OnTestedOccupied(void) : "Fires when the TestOccupancy input is triggered, if the block state is occupied. Otherwise, OnTestedClear fires."
+	output OnTestedClear(void) : "Fires when the TestOccupancy input is triggered, if the block state is clear. Otherwise, OnTestedOccupied fires."
+]
+
+
+//Master Signal
+@PointClass base(Targetname) vecline(cs_pos) studioprop() = tp3_signal_master :
+	"A scripted signal prop. Can control two other props (extra 'heads' or other parts needed to make a signal work, such as the B&O CPL Marker Lamps) and can interface with the Hammer and Wiremod I/O systems."
+[
+		//Model Info
+	model(studio) : "Model" : "" : "The model path for the signal prop."
+	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The signal prop's orientation in the world."
+	skin(integer) : "Skin" : 0 : "The signal model's default skin."
+	bodygroups(string) : "Bodygroups" : "" : "The signal model's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	up_powered(choices): "Animation Behavior (Up)" : 0 : "(Animated Signals Only) how should this signal behave moving up/forward through its animation?" =
+	[
+		0 : "Motorized"
+		1 : "Magnetized"
+		2 : "Damped Jerk"
+		3 : "Bouncy Jerk"
+	]
+	
+	dn_powered(choices): "Animation Behavior (Down)" : 2 : "(Animated Signals Only) how should this signal behave moving down/backward through its animation?" =
+	[
+		0 : "Motorized"
+		1 : "Magnetized"
+		2 : "Damped Jerk"
+		3 : "Bouncy Jerk"
+	]
+	
+		//Signal Info
+	sysname(string) : "Signal System Name" : "" : "The name of the Signal System that this signal will comply with."
+	sigtype(string) : "Signal Type" : "" : "The signal type for this signal. Signal Types are defined by the Signal System."
+	tags(string) : "Tags" : "" : "Special Signal Tags, used to give the signal code more information. Tags are separated by spaces."
+	slave_1(target_destination) : "Slave Signal 1" : : "(Optional) A tp3_signal_slave that this signal will control."
+	slave_2(target_destination) : "Slave Signal 2" : : "(Optional) A tp3_signal_slave that this signal will control."
+	block(target_destination) : "Signal Block" : : "The tp3_signal_block that this signal governs."
+	nextsignal(target_destination) : "Next Signal" : : "The tp3_signal_master that comes after this one."
+	automatic(choices) : "Start Mode" : 1 : "Should this signal start in automatic (reading the block) or manual mode?" =
+	[
+		0 : "Manual"
+		1 : "Automatic"
+	]
+	ctc_state(choices) : "Starting CTC State" : 2 : "What is this signal's initial CTC state? 'Hold' will stop trains at this signal even if the track ahead is clear. 'Allow' will allow trains to pass depending on the track/route/other signals. CTC state can be changed with Hammer I/O and from a dispatch board. Typically, this should be 'Allow' for automatic signals and 'Hold' for interlocking signals." =
+	[
+		0 : "Hold"
+		2 : "Allow"
+	]
+	cs_pos(vector) : "Cab Signal Pos" : : "When a tp3_cabsignal_box passes over this point (moving in the correct direction), it will register as having passed this signal. Place it roughly level with the railheads, in the center of the two rails, and at least one locomotive length before the signal."
+	nickname(string) : "Nickname" : "" : "(Optional) The signal's nickname, used in-game to describe what it does. Unlike the targetname, this doesn't have to be unique."
+	
+	input SetManual(string) : "Forces a signal to display the given aspect name (if given) and stops all automatic behavior."
+	input SetAutomatic(void) : "Forces the signal to resume responding to the signaling system normally."
+	
+	//Inputs and Outputs
+	input SetCTC_Hold(void) : "Set the signal's CTC state to Hold. The signal will not let trains pass in this state."
+	input SetCTC_Once(void) : "Set the signal's CTC state to Once. The signal will allow one train to pass (depending on track conditions) and then revert to Hold."
+	input SetCTC_Allow(void) : "Set the signal's CTC state to Allow. The signal will allow all trains (depending on track conditions)."
+	input SetCTC_Force(void) : "Set the signal's CTC state to Force. The signal will allow all trains with a restrictive aspect regardless of track conditions."
+	
+	output OnChangedColor(integer) : "Fires whenever this specific signal head changes color, and passes that color code as a parameter."
+	output OnChangedAspect(string) : "Fires whenever the signal (including slave signals) changed aspect, and passes that aspect as a parameter."
+]
+
+//Slave Signal
+@PointClass base(Targetname) studioprop() = tp3_signal_slave :
+	"A dummy/supervised signal prop. Has very limited I/O capability and usually only responds to controls from a tp3_signal_master."
+[
+	model(studio) : "Model" : "" : "The model path for the signal prop."
+	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The signal prop's orientation in the world."
+	
+	skin(integer) : "Skin" : 0 : "The signal model's default skin."
+	bodygroups(string) : "Bodygroups" : "" : "The signal model's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	up_powered(choices): "Animation Behavior (Up)" : 0 : "(Animated Signals Only) how should this signal behave moving up/forward through its animation?" =
+	[
+		0 : "Motorized"
+		1 : "Magnetized"
+		2 : "Damped Jerk"
+		3 : "Bouncy Jerk"
+	]
+	
+	dn_powered(choices): "Animation Behavior (Down)" : 2 : "(Animated Signals Only) how should this signal behave moving down/backward through its animation?" =
+	[
+		0 : "Motorized"
+		1 : "Magnetized"
+		2 : "Damped Jerk"
+		3 : "Bouncy Jerk"
+	]
+	
+	
+	input SetColor(integer) : "Force the signal head to show this color (integer code for a signal bodygroup or skin)."
+	output OnChangedColor(integer) : "Fires whenever this specific signal head changes color, and passes that color code as a parameter."
+]
+
+//Path Loader
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_path_loader.vmt") line(targetname, targetname, targetname, target) = tp3_path_loader : "An entity that modifies a signal (or two). Can be used to monitor switch stands and give different indications for diverging routes, or to modify a single signal path. Additional stand_x and state_x keyvalues can be added by disabling SmartEdit. NOTE: all stand_x and state_x keyvalues must have only one character after the underscore. Use a-z if you need more than 10."
+[
+	target(target_destination) : "Signal to Modify" : : "The signal this path applies to."
+	block(target_destination) : "Signal Block" : : "The tp3_signal_block that this signal governs."
+	nextsignal(target_destination) : "Next Signal" : : "The tp3_signal_master that comes after this one."
+	
+	target2(target_destination) : "Signal to Modify (Reverse)" : : "The opposing signal this path applies to."
+	block2(target_destination) : "Signal Block (Reverse)" : : "The opposing tp3_signal_block that this signal governs."
+	nextsignal2(target_destination) : "Next Signal (Reverse)" : : "The opposing tp3_signal_master that comes after this one."
+	
+	diverging(choices) : "Path Main/Diverging" : 0 : "Is this path a main or a diverging path?" = 
+	[
+		0 : "Main"
+		1 : "Diverging"
+	]
+	speed(choices) : "Path Speed" : 5 : "The maximum allowable speed through this path." = 
+	[
+		5 : "Full Rated"
+		4 : "Limited"
+		3 : "Medium"
+		2 : "Slow"
+		1 : "Restricted"
+	]
+	
+	stand_1(target_destination) : "Switch Stand 1" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_1(choices) : "Switch Stand 1 State" : 0 : "Switch Stand 1's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_2(target_destination) : "Switch Stand 2" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_2(choices) : "Switch Stand 2 State" : 0 : "Switch Stand 2's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_3(target_destination) : "Switch Stand 3" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_3(choices) : "Switch Stand 3 State" : 0 : "Switch Stand 3's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_4(target_destination) : "Switch Stand 4" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_4(choices) : "Switch Stand 4 State" : 0 : "Switch Stand 4's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	
+	input SetSpeed(integer) : "Set this path's maximum speed code, an integer from 1-5."
+	
+	output OnPathTrue(void) : "Fires when this Path Loader's path becomes selected."
+	output OnPathFalse(void) : "Fires when this Path Loader's path becomes de-selected."
+]
+
+//Bidirectional Track Controller
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_bidirectional.vmt") = tp3_bidirectional :
+"An entity that allows safe, bi-directional operation of multi-block single track. When a train enters from the bottom (lowest block number) or the top (highest block number), you can use Hammer outputs to set the CTC state of the signals at the other end to Hold, thus preventing another train from entering the block and causing a cornfield meet. At the same time, it will allow multiple trains to follow each other in the same direction. Once all of the blocks are clear, Hammer Outputs can set the CTC state back to Allow, if desired."
+[
+	block_1(target_destination) : "Block 1" : : "The 1st tp3_signal_block in the chain."
+	block_2(target_destination) : "Block 2" : : "The 2nd tp3_signal_block in the chain."
+	block_3(target_destination) : "Block 3" : : "The 3rd tp3_signal_block in the chain."
+	block_4(target_destination) : "Block 4" : : "The 4th tp3_signal_block in the chain."
+	block_5(target_destination) : "Block 5" : : "The 5th tp3_signal_block in the chain."
+	block_6(target_destination) : "Block 6" : : "The 6th tp3_signal_block in the chain."
+	block_7(target_destination) : "Block 7" : : "The 7th tp3_signal_block in the chain."
+	block_8(target_destination) : "Block 8" : : "The 8th tp3_signal_block in the chain."
+	
+	enabled(choices) : "Start Disabled" : 1 : "Should this entity start disabled?" =
+	[
+		0 : "Yes"
+		1 : "No"
+	]
+	
+	input Enable(void) : "Turn this entity on and allow it to monitor blocks normally."
+	input Disable(void) : "Turn this entity off, forcing to rely on their normal ABS logic."
+	output OnBottomOccupied(void) : "Fires when a train enters from the bottom (the lowest block number in the chain). This output will not fire again until the whole chain is clear."
+	output OnTopOccupied(void) : "Fires when a train enters from the top (the highest block number in the chain). This output will not fire again until the whole chain is clear."
+	output OnMiddleOccupied(void) : "Fires when a train enters one of the intermediate blocks. This output will not fire again until the whole chain is clear."
+	output OnChainClear(void) : "Fires when all the blocks become cleared."
+]
+
+//Crossing Controller
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_crossing.vmt") = tp3_crossing :
+"An entity that controls railroad crossings at grade. It will monitor tp3_signal_blocks and control tp3_crossing_gates.\n\nCrossings can support any number of tracks. Each track requires two blocks, A and B. Each block's nodes should start AT the edge crossing and go AWAY from it. This is to ensure that the block entities find the 'first' prop in the block.\n\nIf you need more than two tracks, add extra block keyvalues following the existing format, 'block_a_n' and  'block_b_n'. There is also the 'Island' block which covers the area inside the crossing (where the road and rails overlap), that the A and B blocks don't touch."
+[
+	predicting(choices) : "Use Predictor Circuit?" : 1 : "Sets whether the crossing will use the train's speed and position to determine when to lower the gates. This is to prevent trains from holding the gates down too long if they are approaching slowly. If disabled, gates will go down as soon as something enters the block. Predictor circuits are used on most crossings after the late 1960s. NOTE: Distance is measured between the first detected prop in a signal block and THIS entity, so be smart about where you put it!" =
+	[
+		0 : "Disabled"
+		1 : "Enabled"
+	]
+	arrivaltarget(float) : "Predictor Target" : "15.0" : "The approximate time, in seconds, before the train reaches the crossing that the gates will start to go down. Does nothing if Predictor Circuit is disabled."
+	
+	//timeout(float) : "Crossing Timeout" : "60.0" : "If the crossing triggers and nothing actually passes over it, the crossing will reset after this many seconds. If 0 or less, the timeout timer is disabled."
+	
+	block_island(target_destination) : "Island Block" : : "A tp3_signal_block that will cover all the track in the area of the crossing itself. The A and B blocks should not cover the crossing area."
+	
+	block_a_1(target_destination) : "Block (A) 1" : : "The tp3_signal_block on the 'A' side of Track 1."
+	block_b_1(target_destination) : "Block (B) 1" : : "The tp3_signal_block on the 'B' side of Track 1."
+	block_a_2(target_destination) : "Block (A) 2" : : "The tp3_signal_block on the 'A' side of Track 2."
+	block_b_2(target_destination) : "Block (B) 2" : : "The tp3_signal_block on the 'B' side of Track 2."
+	
+	input ForceTrigger(void) : "Manually force the crossing to trigger until manually cleared."
+	input ForceClear(void) : "Manually force the crossing to clear, even if there is a train on them. Resumes automatic behavior."
+	input RemoveForce(void) : "Removes force conditions, allowing the crossing to judge for itself whether to stay triggered or clear. Resumes automatic behavior."
+	
+	output OnTrigger(void) : "Fires when the crossing triggers."
+	output OnClear(void) : "Fires when the crossing clears."
+]
+
+//Crossing Gate
+@PointClass base(Targetname) studioprop() = tp3_crossing_gate : 
+"A prop that responds to commands from a tp3_crossing entity. Gate not actually required.\n\nThe model assumes the skin controls the light status, and bodygroups control the configuration/gate state, and animations control the gate state."
+[
+	xing(target_destination) : "Controller Entity" : : "The tp3_crossing that this gate will listen to."
+	
+	model(studio) : "Model" : "" : "The model path for the gate prop."
+	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The gate prop's orientation in the world."
+	
+	skin(integer) : "Skin (Open)" : 0 : "The gate model's skin when the lights are off."
+	skin2(integer) : "Skin (Closed)" : 1 : "The gate model's skin when the lights are on."
+	bodygroups(string) : "Bodygroups (Open)" : "0 0 0 0 0" : "The gate model's bodygroups when the gate is open. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	bodygroups2(string) : "Bodygroups (Closed)" : "0 0 0 0 0" : "The gate model's bodygroups when the gate is closed. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1. If blank, bodygroups will not be changed."
+	anim_trans(string) : "Transition Anim (Open)" : "up" : "The gate's transition-to-open animation (sequence). If blank, model will not be animated."
+	anim_trans2(string) : "Transition Anim (Closed)" : "down" : "The gate's transition-to-closed animation (sequence). If blank, model will not be animated."
+	anim_idle(string) : "Idle Anim (Open)" : "idle_up" : "The gate's default animation (sequence) when open. If blank, model will not be animated."
+	anim_idle2(string) : "Idle Anim (Closed)" : "idle_down" : "The gate's default animation (sequence) when down. If blank, model will not be animated."
+	
+	bellsound(sound) : "Bell Sound" : "" : "The sound to play and loop when the gates start to close."
+	bellmode(choices) : "Bell Mode" : 2 : "When should the bell stop ringing?" =
+	[
+		0 : "Bell doesn't ring"
+		1 : "Bell rings until gate closed"
+		2 : "Bell rings until lights off"
+	]
+	
+	warning(float) : "Warning Delay" : "4.0" : "After the lights/bell come on, the gate will wait this many seconds before closing."
+	
+	output OnLightsOn(void) : "Fired when the lights turn on."
+	output OnGateClose(void) : "Fired when the gate starts closing."
+	output OnLightsOff(void) : "Fired when the lights turn off."
+	output OnGateOpen(void) : "Fired when the gate starts opening."
+]
+
+//Cab Signal Trigger
+@SolidClass base(Targetname) line(255 255 255, targetname, targetname, targetname, homesignal) = tp3_trigger_cabsignal : "An entity for use with Cab Signaling and ATS (Automatic Train Stop). Interacts with tp3_cabsignal_box entities that pass through its volume and is moving along the specified direction."
+
+[
+	homesignal(target_destination) : "Home Signal" : : "The signal that the train 'passes' when it passes through this trigger. Next Signal is retrieved automatically."
+	angles(angle) : "Trigger Direction (P Y R)" : "0 0 0" : "This is the direction the cab signal box must be traveling in to receive an update. Prevents trains from getting the wrong signal updates if traveling in the wrong direction."
+	angtolerance(float) : "Angle Tolerance" : "45.0" : "Interact with the cab signal box if the box's velocity vector matches the Trigger Direction plus or minus this many degrees. Clamped to [5, 175] in game."
+]
+
+// Track Node - Deprecated
+//@MoveClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_track_node.vmt") line(255 255 255, targetname, targetname, targetname, target) wirebox(hullmin, hullmax) = tp3_track_node :
+//	"Track Node, used for defining track blocks. "+
+//	"You may find it easier to make the path using path_tracks, then change all back to this class. "+
+//	"This is because Hammer's auto-renaming feature is hard-coded to work only with specific entities."
+//[
+//	target(target_destination) : "Next Node" : : "The next node in the chain."
+//	notrace(choices) : "Skip Trace?" : 0 : "Skip to the next node instead of tracing to it (useful for intermittent non-signal-scanned track such as road crossings)?" =
+//	[
+//		0 : "No"
+//		1 : "Yes"
+//	]
+//	hullmin(vector) : "Hull Minimum" : "-48 -48 -96" : "The minimum corner of the hull (box) that will be traced to the next node."
+//	hullmax(vector) : "Hull Maximum" : "48 48 96" : "The maximum corner of the hull (box) that will be traced to the next node."
+//]
+
+//Switch Controller - Deprecated
+//@PointClass base(Targetname) = tp3_switch_old : "Switch Controller. Changes Switches."
+//[
+//	startopen(choices) : "Start Open" : 0 : "Starting State for the Switch." =
+//	[
+//		0 : "Main (Closed)"
+//		1 : "Diverging (Open)"
+//	]
+//	
+//	prop_mn(target_destination) : "Main Prop" : : "The name of a prop_dynamic track piece that will be used when the switch is thrown main (closed)."
+//	prop_dv(target_destination) : "Diverging Prop" : : "The name of a prop_dynamic track piece that will be used when the switch is thrown diverging (open)."
+//	lever(target_destination) : "Throw Lever" : : "The name of a prop_dynamic switch stand, ground throw, or actuator box."
+//	opensound(sound) : "Open Sound" : "buttons/lever6.wav" : "The sound the lever makes when the switch is thrown diverging (open). If blank, no sound will be played."
+//	closesound(sound) : "Close Sound" : "" : "The sound the lever makes when the switch is thrown main (closed). If blank, uses whatever the Open Sound is set to."
+//	
+//	autothrow(choices) : "Auto-Throw?" : 1 : "Should this switch automatically throw if the switch is misaligned? (aka 'Autoswitches')?" =
+//	[
+//		0 : "No - Manual Only"
+//		1 : "Yes"
+//	]
+//	
+//	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
+//	input ThrowMain(void) : "Throws the switch to main (closed)."
+//	input ThrowDiverging(void) : "Throws the switch to diverging (open)."
+//	
+//	output OnThrownMain(void) : "Fires when the switch is thrown main (closed). NOTE: You do not need to wire this to the switch props, Lua will handle that automatically."
+//	output OnThrownDiverging(void) : "Fires when the switch is thrown diverging (open). NOTE: You do not need to wire this to the switch props, Lua will handle that automatically."
+//]

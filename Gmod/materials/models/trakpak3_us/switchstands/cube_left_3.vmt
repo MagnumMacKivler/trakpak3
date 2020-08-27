@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_us/switchstands/cube_left_3"
+	"$halflambert" "1"
+}

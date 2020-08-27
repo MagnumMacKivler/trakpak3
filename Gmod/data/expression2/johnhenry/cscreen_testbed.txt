@@ -1,0 +1,148 @@
+@name johnhenry/cscreen_testbed
+@inputs Active
+@outputs 
+@persist Driver:entity WQ AQ SQ DQ M1Q M2Q UpQ DnQ SpaceQ ActiveQ RepeatDelay RepeatPrd
+@persist Script:array
+@trigger
+@model models/props_lab/harddrive02.mdl
+
+if(first()){
+    #include "johnhenry/library/consolescreen"
+    CS:initPage(0)
+    EGP:egpInitPage(0)
+    if(Active){
+        ActiveQ = 1
+        Driver = Pod:driver()
+        runOnKeys(Driver,1)
+    }
+    RepeatDelay = 500
+    RepeatPrd = 100
+    
+    TrackGauge = 56
+    BallastBlockWidth = 128
+}
+if(inputClk()){
+    if(Active & !ActiveQ){
+        ActiveQ = 1
+        Driver = Pod:driver()
+        runOnKeys(Driver,1)
+    }elseif(!Active & ActiveQ){
+        ActiveQ = 0
+        runOnKeys(Driver,0)
+    }
+}elseif(keyClk(Driver)){
+    local W = Driver:keyPressed("W")
+    local A = Driver:keyPressed("A")
+    local S = Driver:keyPressed("S")
+    local D = Driver:keyPressed("D")
+    local Up = Driver:keyPressed("up")
+    local Dn = Driver:keyPressed("down")
+    local Mouse1 = Driver:keyPressed("mouse_left") | Driver:keyPressed("enter")
+    local Mouse2 = Driver:keyPressed("mouse_right")
+    local Space = Driver:keyPressed("space")
+    
+    if(W & !WQ){
+        WQ = 1
+        CS:pressW()
+        timer("rept",RepeatDelay)
+    }elseif(!W & WQ){
+        WQ = 0
+        stoptimer("rept")
+    }
+    if(S & !SQ){
+        SQ = 1
+        CS:pressS()
+        timer("rept",RepeatDelay)
+    }elseif(!S & SQ){
+        SQ = 0
+        stoptimer("rept")
+    }
+    if(A & !AQ){
+        AQ = 1
+        CS:pressA()
+        timer("rept",RepeatDelay)
+    }elseif(!A & AQ){
+        AQ = 0
+        stoptimer("rept")
+    }
+    if(D & !DQ){
+        DQ = 1
+        CS:pressD()
+        timer("rept",RepeatDelay)
+    }elseif(!D & DQ){
+        DQ = 0
+        stoptimer("rept")
+    }
+    if(Up & !UpQ){
+        UpQ = 1
+        CS:pressUp()
+    }elseif(!Up & UpQ){
+        UpQ = 0
+    }
+    if(Dn & !DnQ){
+        DnQ = 1
+        CS:pressDn()
+    }elseif(!Dn & DnQ){
+        DnQ = 0
+    }
+    if(Mouse1 & !M1Q){
+        M1Q = 1
+        CS:pressContinue()
+    }elseif(!Mouse1 & M1Q){
+        M1Q = 0
+    }
+    if(Mouse2 & !M2Q){
+        M2Q = 1
+        CS:pressBack()
+    }elseif(!Mouse2 & M2Q){
+        M2Q = 0
+    }
+    if(Space & !SpaceQ){
+        SpaceQ = 1
+        CS:pressSpace()
+    }elseif(!Space & SpaceQ){
+        SpaceQ = 0
+    }
+}elseif(clk("rept")){
+    local W = Driver:keyPressed("W")
+    local A = Driver:keyPressed("A")
+    local S = Driver:keyPressed("S")
+    local D = Driver:keyPressed("D")
+    if(W){
+        CS:pressW()
+        timer("rept",RepeatPrd)
+    }
+    if(S){
+        CS:pressS()
+        timer("rept",RepeatPrd)
+    }
+    if(A){
+        CS:pressA()
+        timer("rept",RepeatPrd)
+    }
+    if(D){
+        CS:pressD()
+        timer("rept",RepeatPrd)
+    }
+}elseif(clk("updatemanifest")){
+    fileWrite("johnhenry_saves/manifest.txt",vonEncode(Manifest))
+    timer("reloadmanifest",1000)
+}elseif(clk("loadcfg")){
+    EGP_Datas = table()
+    CS_Data = vonDecodeTable(fileRead())
+    CS_Pieces = CS_Data:count()
+    CS:genAll()
+    timer("reloadmanifest",1000)
+}elseif(clk("reloadmanifest")){
+    fileLoad("johnhenry_saves/manifest.txt")
+    if(!AutoSaving){
+        CS:initPage(0)
+    }
+    AutoSaving = 0
+}
+#For Testbed only
+if(clk(".runscript")){
+    print("///START SCRIPT///")
+    printTable(Script)
+    print("///END SCRIPT///")
+}

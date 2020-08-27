@@ -1,0 +1,2690 @@
+@name johnhenry/library/vmf
+@persist SideID BrushID DebugQ
+
+#include "johnhenry/library/export_common"
+
+function string string:block(Contents:string){
+    return This+"\n{\n"+Contents+"\n}\n"
+}
+function string string:kv(KV:string){
+    return "\""+This+"\" \""+KV+"\"\n"
+}
+function string initBlocks(VGs:array){
+    local VersionInfo = "versioninfo":block("editorversion":kv("400") + "editorbuild":kv("4715") + "mapversion":kv("1") + "formatversion":kv("100") + "prefab":kv("0"))
+    local VGC = ""
+    for(N=1,VGs:count()){
+        local Name = VGs[N,string]
+        local ID = toString(N)
+        local Color = "140 93 242"
+        VGC += "visgroup":block("name":kv(Name) + "visgroupid":kv(ID) + "color":kv(Color))
+    }
+    local VisGroups = "visgroups":block(VGC)
+    local ViewSettings = "viewsettings":block("bSnapToGrid":kv("1") + "bShowGrid":kv("1") + "bShowLogicalGrid":kv("0") + "nGridSpacing":kv("32") + "bShow3DGrid":kv("0"))
+    local World = "world":block("id":kv("1") + "mapversion":kv("5") + "classname":kv("worldspawn") + "detailmaterial":kv("detail/detailsprites") + "detailvbsp":kv("detail.vbsp") + "maxpropscreenwidth":kv("-1") + "skyname":kv("sky_day01_01"))
+    #print(VersionInfo)
+    #print(VisGroups)
+    #print(ViewSettings)
+    #print(World)
+    return VersionInfo+VisGroups+ViewSettings+World
+}
+function string side(SideID,Point1:vector,Point2:vector,Point3:vector,Material:string,U_Axis:vector,V_Axis:vector,UTranslation,VTranslation,Scale,Rotation){
+    local ID = "id":kv(toString(SideID))
+    local Plane = "plane":kv("("+Point3:x()+" "+Point3:y()+" "+Point3:z()+") ("+Point2:x()+" "+Point2:y()+" "+Point2:z()+") ("+Point1:x()+" "+Point1:y()+" "+Point1:z()+")")
+    local Material = "material":kv(Material)
+    
+    U_Axis = round(U_Axis,4)
+    V_Axis = round(V_Axis,4)
+    UTranslation = round(UTranslation,4)
+    VTranslation = round(VTranslation,4)
+    local U = "uaxis":kv("["+U_Axis:x()+" "+U_Axis:y()+" "+U_Axis:z()+" "+UTranslation+"] "+Scale)
+    local V = "vaxis":kv("["+V_Axis:x()+" "+V_Axis:y()+" "+V_Axis:z()+" "+VTranslation+"] "+Scale)
+    local Rot = "rotation":kv(toString(Rotation))
+    local LM = "lightmapscale":kv("16")
+    local SG = "smoothing_groups":kv("0")
+    #print(ID)
+    #print(Plane)
+    #print(Material)
+    #print(U)
+    #print(V)
+    #print(Rot)
+    #print(LM)
+    #print(SG)
+    return "side":block(ID+Plane+Material+U+V+Rot+LM+SG)
+}
+function string solid(SolidID,Contents:string){
+    local Color = vec(255)
+    local ID = "id":kv(toString(SolidID))
+    local Col = "color":kv(Color:x()+" "+Color:y()+" "+Color:y())
+    local Vis = "visgroupshown":kv("1") + "visgroupautoshown":kv("1")
+    local Editor = "editor":block(Col+Vis)
+    return "solid":block(ID+Contents+Editor)
+}
+function string propper_model(EntID,Modelname:string,Scale,Contents:string,VisGroupID){
+    local Color = vec(255)
+    local ID = "id":kv(toString(EntID))
+    local Class = "classname":kv("propper_model")
+    local Junk1 = "targetname":kv(Modelname) + "autocenter":kv("0") + "concave":kv("1") + "disp_nowarp":kv("0") + "mass":kv("50000") + "mat_nonormal":kv("0") + "materialpath":kv("models/trakpak3_common/tracks/rails")
+    local Model = "modelname":kv(Modelname)
+    local Origin = "origin":kv("0 0 0")
+    
+    local ScaleString = "1.0"
+    if(Scale != 0){
+        ScaleString = (1/Scale==int(1/Scale)) ? toString(round(1/Scale))+".0" : toString(1/Scale)
+    }
+    
+    local Junk2 = "physmodel":kv(Modelname:find("_mn") ? "mn_phys" : Modelname:find("_dv") ? "dv_phys" : "phys") + "scale":kv(ScaleString) + "smoothangle":kv("45") + "smoothing":kv("1") + "snaptogrid":kv("1") + "sourcefolder":kv("C:/propsource") + "surfaceprop":kv("solidmetal") + "weldvertices":kv("0.9")
+    local Col = "color":kv(Color:x()+" "+Color:y()+" "+Color:y())
+    local Vis = ((VisGroupID>0) ? "visgroupid":kv(toString(VisGroupID)) : "") +"visgroupshown":kv("1") + "visgroupautoshown":kv("1")
+    local Editor = "editor":block(Col+Vis)
+    return "entity":block(ID+Class+Junk1+Model+Origin+Junk2+Contents+Editor)
+}
+function string func_brush(EntID,Modelname:string,Contents:string,VisGroupID){
+    local Color = vec(255)
+    local ID = "id":kv(toString(EntID))
+    local Class = "classname":kv("func_brush")
+    local Junk1 = "disablereceiveshadows":kv("0") + "disableshadows":kv("0") + "InputFilter":kv("0") + "invert_exclusion":kv("0")
+    local Origin = "origin":kv("0 0 -128") 
+    local Junk2 = "renderamt":kv("255") + "rendercolor":kv("255 255 255") + "renderfx":kv("0") + "rendermode":kv("0") + "solidbsp":kv("0") + "Solidity":kv("0") + "spawnflags":kv("2")
+    local Junk3 = "StartDisabled":kv("0") + "targetname":kv(Modelname) + "vrad_brush_cast_shadows":kv("0")
+    local Col = "color":kv(Color:x()+" "+Color:y()+" "+Color:y())
+    local Vis = ((VisGroupID>0) ? "visgroupid":kv(toString(VisGroupID)) : "") +"visgroupshown":kv("1") + "visgroupautoshown":kv("1")
+    local Editor = "editor":block(Col+Vis)
+    return "entity":block(ID+Class+Junk1+Origin+Junk2+Junk3+Contents+Editor)
+}
+function string propper_attachment(EntID,AttName:string,Target:string,Position:vector,VisGroupID){
+    local Color = vec(255)
+    local ID = "id":kv(toString(EntID))
+    local Class = "classname":kv("propper_attachment")
+    local Origin = "origin":kv(Position:x()+" "+Position:y()+" "+Position:z())
+    local Angles = "angles":kv("0 0 0")
+    local Targetname = "targetname":kv(AttName)
+    local MyModel = "my_model":kv(Target)
+    local Col = "color":kv(Color:x()+" "+Color:y()+" "+Color:y())
+    local Vis = ((VisGroupID>0) ? "visgroupid":kv(toString(VisGroupID)) : "") +"visgroupshown":kv("1") + "visgroupautoshown":kv("1")
+    local Editor = "editor":block(Col+Vis)
+    
+    return "entity":block(ID+Class+Targetname+MyModel+Origin+Angles+Editor)
+}
+function string propper_skins(EntID,Target:string,Mats:array,VisGroupID){
+    local Color = vec(255)
+    local ID = "id":kv(toString(EntID))
+    local Class = "classname":kv("propper_skins")
+    local Origin = "origin":kv("0 0 0")
+    local MyModel = "my_model":kv(Target)
+    local Col = "color":kv(Color:x()+" "+Color:y()+" "+Color:y())
+    local Vis = ((VisGroupID>0) ? "visgroupid":kv(toString(VisGroupID)) : "") +"visgroupshown":kv("1") + "visgroupautoshown":kv("1")
+    local Editor = "editor":block(Col+Vis)
+    
+    local MatString = ""
+    for(N=1,Mats:count()){
+        MatString = MatString + ("mat"+(N-1)):kv(Mats[N,string])
+    }
+    return "entity":block(ID+Class+MyModel+Origin+MatString+Editor)
+}
+function string endBlocks(){
+    local Cameras = "cameras":block("activecamera":kv("-1"))
+    local Cordon = "cordon":block("mins":kv("(-1024 -1024 -1024)") + "maxs":kv("(1024 1024 1024)") + "active":kv("0"))
+    return Cameras + Cordon
+}
+
+function void validate(){
+    if(BrushID==0){BrushID = 1}
+    if(SideID==0){SideID = 1}
+    return void
+}
+
+#Planar Projections
+function table roadUV(DimU,DimV,Scale,Center:vector,Angle:angle){
+    local Out = table()
+    
+    local UA = Angle:hpright()
+    local VA = -Angle:hpforward()
+    
+    local DU = (UA:dot(Center))/Scale
+    local UT = (-DU + DimU/2)%DimU #X Translation
+    
+    local DV = (VA:dot(Center))/Scale
+    local VT = (-DV + DimV/2)%DimV #Y Translation
+    
+    Out["U_Axis",vector] = UA
+    Out["V_Axis",vector] = VA
+    
+    Out["UTranslation",number] = UT
+    Out["VTranslation",number] = VT
+    
+    return Out
+}
+function table railUV(DimU,DimV,Scale,Center:vector,Angle:angle){
+    local Out = table()
+    
+    local UA = Angle:hpforward()
+    local VA = -Angle:hpup()
+    
+    local DU = (UA:dot(Center))/Scale
+    local UT = (-DU + DimU/2)%DimU #X Translation
+    
+    local DV = (VA:dot(Center))/Scale
+    local VT = (-DV + DimV/2)%DimV #Y Translation
+    
+    Out["U_Axis",vector] = UA
+    Out["V_Axis",vector] = VA
+    
+    Out["UTranslation",number] = UT
+    Out["VTranslation",number] = VT
+    
+    return Out
+}
+
+function number maxBrushID(){return BrushID}
+function void array:clearBrushes(){
+    This = array()
+    BrushID = 1
+    return void
+}
+function array array:buildSingleMarkerBrush(Point:vector2,Textures:table,Xover){
+    validate()
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    local Mat_Invis = "TRAKPAK3_COMMON/MISC/INVISIBLE"
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    
+    local Center1 = vec(Point,-OriginHeight + BallastHeight/2)
+    local Sides = ""
+    Sides += side(SideID,Center1+vec(-8,-8,0),Center1+vec(8,-8,0),Center1+vec(8,8,0),Mat_Invis,vec(1,0,0),vec(0,-1,0),0,0,0.25,0) #Top
+    SideID++
+    
+    
+    if(Xover){
+        Sides += side(SideID,Center1+vec(-8,0,0),Center1+vec(-8,0,-4),Center1+vec(0,-8,0),Mat_Nodraw,vec(1,0,0),vec(0,0,-1),0,0,0.25,0) #Front-Left
+        SideID++
+        
+        Sides += side(SideID,Center1+vec(0,8,-4),Center1+vec(0,8,0),Center1+vec(8,0,0),Mat_Nodraw,vec(-1,0,0),vec(0,0,-1),0,0,0.25,0) #Back-Right
+        SideID++
+        
+        Sides += side(SideID,Center1+vec(-8,0,-4),Center1+vec(-8,0,0),Center1+vec(0,8,0),Mat_Nodraw,vec(0,-1,0),vec(0,0,-1),0,0,0.25,0) #Back-Left
+        SideID++
+        
+        Sides += side(SideID,Center1+vec(8,0,-4),Center1+vec(8,0,0),Center1+vec(0,-8,0),Mat_Nodraw,vec(0,1,0),vec(0,0,-1),0,0,0.25,0) #Front-Right
+        SideID++
+    }else{
+        Sides += side(SideID,Center1+vec(-8,-8,0),Center1+vec(-8,-8,-4),Center1+vec(8,-8,0),Mat_Nodraw,vec(1,0,0),vec(0,0,-1),0,0,0.25,0) #Front
+        SideID++
+        
+        Sides += side(SideID,Center1+vec(-8,8,0),Center1+vec(8,8,0),Center1+vec(8,8,-4),Mat_Nodraw,vec(-1,0,0),vec(0,0,-1),0,0,0.25,0) #Back
+        SideID++
+        
+        Sides += side(SideID,Center1+vec(-8,-8,0),Center1+vec(-8,8,0),Center1+vec(-8,8,-4),Mat_Nodraw,vec(0,-1,0),vec(0,0,-1),0,0,0.25,0) #Left
+        SideID++
+        
+        Sides += side(SideID,Center1+vec(8,8,0),Center1+vec(8,-8,0),Center1+vec(8,-8,-4),Mat_Nodraw,vec(0,1,0),vec(0,0,-1),0,0,0.25,0) #Right
+        SideID++
+    }
+    
+    Sides += side(SideID,Center1+vec(8,-8,-4),Center1+vec(-8,-8,-4),Center1+vec(-8,8,-4),Mat_Nodraw,vec(1,0,0),vec(0,-1,0),0,0,0.25,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
+function array array:buildMarkerBrushes(Points:array, Textures:table){
+    validate()
+    local Sides = ""
+    
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    local Mat_Invis = "TRAKPAK3_COMMON/MISC/INVISIBLE"
+    
+    local Start = Points[0,vector]
+    local End = Points[Points:count(),vector]
+    
+    #if(Xover){End = Points[ceil(Points:count()/2),vector]}
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local Center1 = Start+vec(0,0,-OriginHeight + BallastHeight/2)
+    local Center2 = End+vec(0,0,-OriginHeight + BallastHeight/2)
+    
+    #Make start marker brush
+    
+    Sides += side(SideID,Center1+vec(-8,-8,0),Center1+vec(8,-8,0),Center1+vec(8,8,0),Mat_Invis,vec(1,0,0),vec(0,-1,0),0,0,0.25,0) #Top
+    SideID++
+    
+    Sides += side(SideID,Center1+vec(-8,-8,0),Center1+vec(-8,-8,-4),Center1+vec(8,-8,0),Mat_Nodraw,vec(1,0,0),vec(0,0,-1),0,0,0.25,0) #Front
+    SideID++
+    
+    Sides += side(SideID,Center1+vec(-8,8,0),Center1+vec(8,8,0),Center1+vec(8,8,-4),Mat_Nodraw,vec(-1,0,0),vec(0,0,-1),0,0,0.25,0) #Back
+    SideID++
+    
+    Sides += side(SideID,Center1+vec(-8,-8,0),Center1+vec(-8,8,0),Center1+vec(-8,8,-4),Mat_Nodraw,vec(0,-1,0),vec(0,0,-1),0,0,0.25,0) #Left
+    SideID++
+    
+    Sides += side(SideID,Center1+vec(8,8,0),Center1+vec(8,-8,0),Center1+vec(8,-8,-4),Mat_Nodraw,vec(0,1,0),vec(0,0,-1),0,0,0.25,0) #Right
+    SideID++
+    
+    Sides += side(SideID,Center1+vec(8,-8,-4),Center1+vec(-8,-8,-4),Center1+vec(-8,8,-4),Mat_Nodraw,vec(1,0,0),vec(0,-1,0),0,0,0.25,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    Sides = ""
+    
+    #Make End marker brush
+    
+    Sides += side(SideID,Center2+vec(-8,-8,0),Center2+vec(8,-8,0),Center2+vec(8,8,0),Mat_Invis,vec(1,0,0),vec(0,-1,0),0,0,0.25,0) #Top
+    SideID++
+    
+    Sides += side(SideID,Center2+vec(-8,-8,0),Center2+vec(-8,-8,-4),Center2+vec(8,-8,0),Mat_Nodraw,vec(1,0,0),vec(0,0,-1),0,0,0.25,0) #Front
+    SideID++
+    
+    Sides += side(SideID,Center2+vec(-8,8,0),Center2+vec(8,8,0),Center2+vec(8,8,-4),Mat_Nodraw,vec(-1,0,0),vec(0,0,-1),0,0,0.25,0) #Back
+    SideID++
+    
+    Sides += side(SideID,Center2+vec(-8,-8,0),Center2+vec(-8,8,0),Center2+vec(-8,8,-4),Mat_Nodraw,vec(0,-1,0),vec(0,0,-1),0,0,0.25,0) #Left
+    SideID++
+    
+    Sides += side(SideID,Center2+vec(8,8,0),Center2+vec(8,-8,0),Center2+vec(8,-8,-4),Mat_Nodraw,vec(0,1,0),vec(0,0,-1),0,0,0.25,0) #Right
+    SideID++
+    
+    Sides += side(SideID,Center2+vec(8,-8,-4),Center2+vec(-8,-8,-4),Center2+vec(-8,8,-4),Mat_Nodraw,vec(1,0,0),vec(0,-1,0),0,0,0.25,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    
+    return This
+}
+function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, Textures:table, Ties, AddPlane, AddBallast){
+    #1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+    #P A B C D E F G H I  J  K  L  M  N
+    validate()
+    local Sides = ""
+    
+    local Offset = Type:find("phys") ? vec(0,0,-128) : vec()
+    
+    local PN = NearPoints[1,vector] + Offset
+    local AN = NearPoints[2,vector] + Offset
+    local BN = NearPoints[3,vector] + Offset
+    local CN = NearPoints[4,vector] + Offset
+    local DN = NearPoints[5,vector] + Offset
+    local EN = NearPoints[6,vector] + Offset
+    local FN = NearPoints[7,vector] + Offset
+    local GN = NearPoints[8,vector] + Offset
+    local HN = NearPoints[9,vector] + Offset
+    local IN = NearPoints[10,vector] + Offset
+    local JN = NearPoints[11,vector] + Offset
+    local KN = NearPoints[12,vector] + Offset
+    local LN = NearPoints[13,vector] + Offset
+    local MN = NearPoints[14,vector] + Offset
+    local NN = NearPoints[15,vector] + Offset
+    
+    local PF = FarPoints[1,vector] + Offset
+    local AF = FarPoints[2,vector] + Offset
+    local BF = FarPoints[3,vector] + Offset
+    local CF = FarPoints[4,vector] + Offset
+    local DF = FarPoints[5,vector] + Offset
+    local EF = FarPoints[6,vector] + Offset
+    local FF = FarPoints[7,vector] + Offset
+    local GF = FarPoints[8,vector] + Offset
+    local HF = FarPoints[9,vector] + Offset
+    local IF = FarPoints[10,vector] + Offset
+    local JF = FarPoints[11,vector] + Offset
+    local KF = FarPoints[12,vector] + Offset
+    local LF = FarPoints[13,vector] + Offset
+    local MF = FarPoints[14,vector] + Offset
+    local NF = FarPoints[15,vector] + Offset
+    
+    local SegmentAngle = -heading(vec(),ang(),PF-PN)
+    
+    local BallastU = Textures["BallastU",number]
+    local BallastV = Textures["BallastV",number]
+    local BallastScale = Textures["BallastScale",number]
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+    
+    local Mat_Ballast = Textures["Mat_Ballast",string]
+    local Mat_Trackbed_NoTies = Textures["Mat_Trackbed_NoTies",string]
+    local Mat_Trackbed_Ties = Textures["Mat_Trackbed_Ties",string]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Tie = Textures["Mat_Tie",string]
+    local Mat_Tie_Plates = Textures["Mat_Tie_Plates",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    local Mat_Phys = "TOOLS/TOOLSCLIP"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    
+    local GX = ax(PN,PF)
+    local GY = ax(AN,BN)
+    local GZ = vec(0,0,-1)
+    
+    switch(Type){
+        case "ballast_trapezoid",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            if(AddBallast){
+                Sides += side(SideID,FN,FF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,EN,EF,AF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Left Slope
+                SideID++
+                Sides += side(SideID,BN,BF,FF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Right Slope
+                SideID++
+                Sides += side(SideID,BN,FN,EN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,AF,EF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,BN,AN,AF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                Sides = ""
+                
+                Sides += side(SideID,FN2,FF2,EF2,Mat_Ties,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top Face
+                SideID++
+                Sides += side(SideID,FF2,FN2,DN2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Side
+                SideID++
+                Sides += side(SideID,EN2,EF2,CF2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Side
+                SideID++
+                Sides += side(SideID,FN2,EN2,CN2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front side
+                SideID++
+                Sides += side(SideID,EF2,FF2,DF2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back side
+                SideID++
+                Sides += side(SideID,DN2,CN2,CF2,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            break
+        case "ballast_block",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){
+                Sides += side(SideID,FN,FF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,EN,EF,CF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,FF,FN,DN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,DN,FN,EN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,CF,EF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,DN,CN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                Sides = ""
+                
+                Sides += side(SideID,FN2,FF2,EF2,Mat_Ties,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top Face
+                SideID++
+                Sides += side(SideID,FF2,FN2,DN2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Side
+                SideID++
+                Sides += side(SideID,EN2,EF2,CF2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Side
+                SideID++
+                Sides += side(SideID,FN2,EN2,CN2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front side
+                SideID++
+                Sides += side(SideID,EF2,FF2,DF2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back side
+                SideID++
+                Sides += side(SideID,DN2,CN2,CF2,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            break
+        case "ballast_convex", #Note: DOES NOT WORK PROPERLY due to hammer precision :( But... good for SMD edition perhaps?
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            #local SegmentCenter = (PN/2 + PF/2)
+            #local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            #local ConvexResult = getConvexPolys(EF,EN,FN,FF)
+            #if(ConvexResult["convex",number]){
+            #    local Tri1 = ConvexResult["t1",array]
+            #    local Tri2 = ConvexResult["t2",array]
+            #    
+            #    Sides += side(SideID,Tri1[1,vector],Tri1[2,vector],Tri1[3,vector],Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+            #    SideID++
+            #    Sides += side(SideID,Tri2[1,vector],Tri2[2,vector],Tri2[3,vector],Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+            #    SideID++
+            #}else{
+            #    Sides += side(SideID,FN,FF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+            #    SideID++
+            #}
+            
+            #Sides += side(SideID,EN,EF,CF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+            #SideID++
+            #Sides += side(SideID,FF,FN,DN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+            #SideID++
+            #Sides += side(SideID,DN,FN,EN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            #SideID++
+            #Sides += side(SideID,CF,EF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            #SideID++
+            
+            #local ConvexResult = getConvexPolys(DF,DN,CN,CF)
+            
+            #if(ConvexResult["convex",number]){
+            #    local Tri1 = ConvexResult["t1",array]
+            #    local Tri2 = ConvexResult["t2",array]
+            #    
+            #    Sides += side(SideID,Tri1[1,vector],Tri1[2,vector],Tri1[3,vector],Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+            #    SideID++
+            #    Sides += side(SideID,Tri2[1,vector],Tri2[2,vector],Tri2[3,vector],Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+            #    SideID++
+            #}else{
+            #    Sides += side(SideID,DN,CN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+            #    SideID++
+            #}
+            
+            #This[BrushID,string] = solid(BrushID,Sides)
+            #BrushID++
+            
+            break
+        case "ballast_triangles",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){
+                Sides += side(SideID,FN,FF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,DN,FN,EF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,FF,FN,DN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,CF,EF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,DN,CF,DF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                Sides = ""
+                
+                Sides += side(SideID,FN,EF,EN,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,CF,EF,FN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,CN,EN,EF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,DN,FN,EN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,DN,CN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                Sides = ""
+                
+                Sides += side(SideID,FN2,FF2,EF2,Mat_Ties,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,DN2,FN2,EF2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,FF2,FN2,DN2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,CF2,EF2,FF2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,DN2,CF2,DF2,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                Sides = ""
+                
+                Sides += side(SideID,FN2,EF2,EN2,Mat_Ties,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,CF2,EF2,FN2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,CN2,EN2,EF2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,DN2,FN2,EN2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,DN2,CN2,CF2,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            break
+        case "ballast_peaked_simple",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){ #AddBallast is gonna be 2 in order to even get here
+                Sides += side(SideID,QN,QF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,EN,EF,AF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Left Slope
+                SideID++
+                Sides += side(SideID,QF,QN,RN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,QN,EN,AN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,AF,EF,QF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,RF,RN,AN,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                #          K M       N L
+                #          G I       J H
+                #       E--------Q--------F
+                #   /   |        |        |   \
+                # A-----C--------R--------D-----B
+                
+                Sides = ""
+                
+                Sides += side(SideID,FF,QF,QN,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,QF,RF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,BN,BF,FF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Right Slope
+                SideID++
+                Sides += side(SideID,BN,FN,QN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,RF,QF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,BF,BN,RN,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                Sides = ""
+                
+                Sides += side(SideID,FN2,FF2,EF2,Mat_Ties,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top Face
+                SideID++
+                Sides += side(SideID,FF2,FN2,DN2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Side
+                SideID++
+                Sides += side(SideID,EN2,EF2,CF2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Side
+                SideID++
+                Sides += side(SideID,FN2,EN2,CN2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front side
+                SideID++
+                Sides += side(SideID,EF2,FF2,DF2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back side
+                SideID++
+                Sides += side(SideID,DN2,CN2,CF2,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            
+            break
+        case "ballast_peaked_triangles",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){ #AddBallast is gonna be 2 in order to even get here
+                #Left Half
+                
+                #o
+                #|\
+                #o-o
+                
+                Sides += side(SideID,QN,EF,EN,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,EN,EF,CF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,CF,EF,QN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Slice
+                SideID++
+                Sides += side(SideID,QN,EN,CN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,RN,CN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                
+                #o-o
+                # \|
+                #  o
+                
+                Sides = ""
+                
+                Sides += side(SideID,QN,QF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,EF,CF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Slice
+                SideID++
+                Sides += side(SideID,QF,QN,RN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,CF,EF,QF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,RF,RN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                #          K M       N L
+                #          G I       J H
+                #       E--------Q--------F
+                #   /   |        |        |   \
+                # A-----C--------R--------D-----B
+                
+                #Right Half
+                
+                #  o
+                # /|
+                #o-o
+                
+                Sides = ""
+                
+                Sides += side(SideID,QN,FN,FF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,FF,DF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Slice
+                SideID++
+                Sides += side(SideID,DN,DF,FF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,DN,FN,QN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,DF,DN,RN,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                #o-o
+                #|/
+                #o
+                
+                Sides = ""
+                
+                Sides += side(SideID,FF,QF,QN,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,QF,RF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,FF,QN,RN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Slice
+                SideID++
+                Sides += side(SideID,RF,QF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,DF,RN,RF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            #Tie Plane
+            if(AddPlane){
+                local HeightAdd = vec(0,0,Textures["TieTopHeight",number] - Textures["BallastHeight",number])
+                local HeightSub = vec(0,0,Textures["TieBottomHeight",number] - Textures["BallastHeight",number])
+                local EN2 = EN + HeightAdd
+                local FN2 = FN + HeightAdd
+                local EF2 = EF + HeightAdd
+                local FF2 = FF + HeightAdd
+                
+                local CN2 = CN + HeightSub
+                local DN2 = DN + HeightSub
+                local CF2 = CF + HeightSub
+                local DF2 = DF + HeightSub
+                local Mat_Ties = Textures["Mat_Ties",string]
+                Sides = ""
+                
+                Sides += side(SideID,FN2,FF2,EF2,Mat_Ties,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top Face
+                SideID++
+                Sides += side(SideID,FF2,FN2,DN2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Side
+                SideID++
+                Sides += side(SideID,EN2,EF2,CF2,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Side
+                SideID++
+                Sides += side(SideID,FN2,EN2,CN2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front side
+                SideID++
+                Sides += side(SideID,EF2,FF2,DF2,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back side
+                SideID++
+                Sides += side(SideID,DN2,CN2,CF2,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            
+            break
+         case "ballast_peaked_tri_left",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){ #AddBallast is gonna be 2 in order to even get here
+                #Left Half
+                
+                #o
+                #|\
+                #o-o
+                
+                Sides += side(SideID,QN,EF,EN,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,EN,EF,CF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,CF,EF,QN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Slice
+                SideID++
+                Sides += side(SideID,QN,EN,CN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,RN,CN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                
+                #o-o
+                # \|
+                #  o
+                
+                Sides = ""
+                
+                Sides += side(SideID,QN,QF,EF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,EF,CF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Slice
+                SideID++
+                Sides += side(SideID,QF,QN,RN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,CF,EF,QF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,RF,RN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                #          K M       N L
+                #          G I       J H
+                #       E--------Q--------F
+                #   /   |        |        |   \
+                # A-----C--------R--------D-----B
+                
+            }
+            
+            
+            break
+         case "ballast_peaked_tri_right",
+            #          K M       N L
+            #          G I       J H
+            #       E--------Q--------F
+            #   /   |        |        |   \
+            # A-----C--------R--------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local PeakAdjust = vec(0,0,Textures["PeakHeight",number] - Textures["BallastHeight",number])
+            local QN = round((EN+FN)/2 + PeakAdjust)
+            local QF = round((EF+FF)/2 + PeakAdjust)
+            local RN = round((CN+DN)/2)
+            local RF = round((CF+DF)/2)
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){ #AddBallast is gonna be 2 in order to even get here
+                
+                #          K M       N L
+                #          G I       J H
+                #       E--------Q--------F
+                #   /   |        |        |   \
+                # A-----C--------R--------D-----B
+                
+                #Right Half
+                
+                #  o
+                # /|
+                #o-o
+                
+                Sides = ""
+                
+                Sides += side(SideID,QN,FN,FF,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,FF,DF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Slice
+                SideID++
+                Sides += side(SideID,DN,DF,FF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+                SideID++
+                Sides += side(SideID,DN,FN,QN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,DF,DN,RN,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                
+                #o-o
+                #|/
+                #o
+                
+                Sides = ""
+                
+                Sides += side(SideID,FF,QF,QN,Ties ? Mat_Trackbed_Ties : Mat_Trackbed_NoTies,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Top
+                SideID++
+                Sides += side(SideID,QN,QF,RF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+                SideID++
+                Sides += side(SideID,FF,QN,RN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Slice
+                SideID++
+                Sides += side(SideID,RF,QF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,DF,RN,RF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            break
+        case "ballast_edges_1",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){
+                Sides += side(SideID,AN,EF,AF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Left Slope
+                SideID++
+                Sides += side(SideID,AF,EF,CF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,AN,CF,EF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,AN,AF,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                Sides = ""
+                
+                Sides += side(SideID,AN,EN,EF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Left Slope
+                SideID++
+                Sides += side(SideID,EN,AN,CN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,AN,EF,CF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,CF,EF,EN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Side
+                SideID++
+                Sides += side(SideID,CN,AN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            break
+        case "ballast_edges_2",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local SegmentCenter = (PN/2 + PF/2)
+            local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+            
+            if(AddBallast){
+                Sides += side(SideID,BN,BF,FF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Right Slope
+                SideID++
+                Sides += side(SideID,DF,FF,BF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+                SideID++
+                Sides += side(SideID,BN,FF,DF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,BN,DF,BF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+                Sides = ""
+                
+                Sides += side(SideID,FN,BN,FF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Right Slope
+                SideID++
+                Sides += side(SideID,BN,FN,DN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+                SideID++
+                Sides += side(SideID,DF,FF,BN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Slice
+                SideID++
+                Sides += side(SideID,DN,FN,FF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left Side
+                SideID++
+                Sides += side(SideID,BN,DN,DF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+                SideID++
+                
+                This[BrushID,string] = solid(BrushID,Sides)
+                BrushID++
+            }
+            
+            break
+        
+        case "rail_block_1",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local InnerAngle = -heading(vec(),ang(),MF-MN)
+            local OuterAngle = -heading(vec(),ang(),KF-KN)
+            local InnerCenter = (MN/4 + IN/4 + MF/4 + IF/4)
+            local OuterCenter = (KN/4 + GN/4 + KF/4 + GF/4)
+            local TopCenter = (KN/4 + MN/4 + KF/4 + MF/4)
+            
+            local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+            local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+            local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+            
+            Sides += side(SideID,MN,MF,KF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+            SideID++
+            Sides += side(SideID,IF,MF,MN,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inner
+            SideID++
+            Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
+            SideID++
+            Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,IN,GN,GF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+            SideID++
+            
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "rail_block_2",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local InnerAngle = -heading(vec(),ang(),NF-NN)
+            local OuterAngle = -heading(vec(),ang(),LF-LN)
+            local InnerCenter = (NN/4 + JN/4 + NF/4 + JF/4)
+            local OuterCenter = (LN/4 + HN/4 + LF/4 + HF/4)
+            local TopCenter = (NN/4 + LN/4 + NF/4 + LF/4)
+            
+            local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+            local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+            local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+            
+            Sides += side(SideID,LN,LF,NF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+            SideID++
+            Sides += side(SideID,NN,NF,JF,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inner
+            SideID++
+            Sides += side(SideID,HF,LF,LN,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
+            SideID++
+            Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,HN,JN,JF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "rail_triangles_1",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local InnerAngle = -heading(vec(),ang(),MF-MN)
+            local OuterAngle = -heading(vec(),ang(),KF-KN)
+            local InnerCenter = (MN/4 + IN/4 + MF/4 + IF/4)
+            local OuterCenter = (KN/4 + GN/4 + KF/4 + GF/4)
+            local TopCenter = (KN/4 + MN/4 + KF/4 + MF/4)
+            
+            local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+            local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+            local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+            
+            #o--o
+            # \ |
+            #   o
+            
+            Sides += side(SideID,MN,MF,KF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+            SideID++
+            Sides += side(SideID,IF,MF,MN,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inside of rail
+            SideID++
+            Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,IN,MN,KF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,IN,GF,IF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            Sides = ""
+            
+            #o
+            #| \
+            #o--o
+            
+            Sides += side(SideID,MN,KF,KN,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+            SideID++
+            Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outside of Rail
+            SideID++
+            Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,GF,KF,MN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,IN,GN,GF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "rail_triangles_2",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            local InnerAngle = -heading(vec(),ang(),NF-NN)
+            local OuterAngle = -heading(vec(),ang(),LF-LN)
+            local InnerCenter = (NN/4 + JN/4 + NF/4 + JF/4)
+            local OuterCenter = (LN/4 + HN/4 + LF/4 + HF/4)
+            local TopCenter = (NN/4 + LN/4 + NF/4 + LF/4)
+            
+            local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+            local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+            local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+            
+            #o--o
+            # \ |
+            #   o
+            
+            Sides += side(SideID,LN,LF,NF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+            SideID++
+            Sides += side(SideID,HF,LF,LN,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outside of rail
+            SideID++
+            Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,HN,LN,NF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,HN,JF,HF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            Sides = ""
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #o
+            #| \
+            #o--o
+            
+            Sides += side(SideID,LN,NF,NN,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+            SideID++
+            Sides += side(SideID,JN,NN,NF,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inside of Rail
+            SideID++
+            Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,JF,NF,LN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,HN,JN,JF,AddBallast ? Mat_Nodraw : Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "ballast_trapezoid_phys",
+        
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            Sides += side(SideID,FN,FF,EF,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,EN,EF,AF,Mat_Phys,GX,GY,0,0,0.25,0) #Left Slope
+            SideID++
+            Sides += side(SideID,BN,BF,FF,Mat_Phys,GX,GY,0,0,0.25,0) #Right Slope
+            SideID++
+            Sides += side(SideID,BN,FN,EN,Mat_Phys,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,AF,EF,FF,Mat_Phys,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,BN,AN,AF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            break
+        case "ballast_block_phys",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            
+            Sides += side(SideID,FN,FF,EF,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,EN,EF,CF,Mat_Phys,GX,GZ,0,0,0.25,0) #Left
+            SideID++
+            Sides += side(SideID,FF,FN,DN,Mat_Phys,GX,GZ,0,0,0.25,0) #Right
+            SideID++
+            Sides += side(SideID,DN,FN,EN,Mat_Phys,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,CF,EF,FF,Mat_Phys,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,DN,CN,CF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            break
+        case "rail_block_1_phys",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            Sides += side(SideID,MN,MF,KF,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,IF,MF,MN,Mat_Phys,GX,GZ,0,0,0.25,0) #Inner
+            SideID++
+            Sides += side(SideID,GN,KN,KF,Mat_Phys,GX,GZ,0,0,0.25,0) #Outer
+            SideID++
+            Sides += side(SideID,IN,MN,KN,Mat_Phys,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,GF,KF,MF,Mat_Phys,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,IN,GN,GF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "rail_block_2_phys",
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            Sides += side(SideID,LN,LF,NF,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,NN,NF,JF,Mat_Phys,GX,GZ,0,0,0.25,0) #Inner
+            SideID++
+            Sides += side(SideID,HF,LF,LN,Mat_Phys,GX,GZ,0,0,0.25,0) #Outer
+            SideID++
+            Sides += side(SideID,HN,LN,NN,Mat_Phys,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,JF,NF,LF,Mat_Phys,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,HN,JN,JF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "rail_triangles_1_phys",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            #o--o
+            # \ |
+            #   o
+            
+            #Phys Triangles : move out K,G,L, and H
+            KF = MF + (KF-MF)*8
+            GF = IF + (GF-IF)*8
+            LF = NF + (LF-NF)*8
+            HF = JF + (HF-JF)*8
+            KN = MN + (KN-MN)*8
+            GN = IN + (GN-IN)*8
+            LN = NN + (LN-NN)*8
+            HN = JN + (HN-JN)*8
+            
+            Sides += side(SideID,MN,MF,KF,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,IF,MF,MN,Mat_Phys,GX,GZ,0,0,0.25,0) #Inside of rail
+            SideID++
+            Sides += side(SideID,GF,KF,MF,Mat_Phys,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,IN,MN,KF,Mat_Phys,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,IN,GF,IF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            Sides = ""
+            
+            #o
+            #| \
+            #o--o
+            
+            Sides += side(SideID,MN,KF,KN,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,GN,KN,KF,Mat_Phys,GX,GZ,0,0,0.25,0) #Outside of Rail
+            SideID++
+            Sides += side(SideID,IN,MN,KN,Mat_Phys,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,GF,KF,MN,Mat_Phys,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,IN,GN,GF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+        case "rail_triangles_2_phys",
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #+--U
+            #|
+            #V
+            
+            #o--o
+            # \ |
+            #   o
+            
+            #Phys Triangles : move out K,G,L, and H
+            KF = MF + (KF-MF)*8
+            GF = IF + (GF-IF)*8
+            LF = NF + (LF-NF)*8
+            HF = JF + (HF-JF)*8
+            KN = MN + (KN-MN)*8
+            GN = IN + (GN-IN)*8
+            LN = NN + (LN-NN)*8
+            HN = JN + (HN-JN)*8
+            
+            Sides += side(SideID,LN,LF,NF,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,HF,LF,LN,Mat_Phys,GX,GZ,0,0,0.25,0) #Outside of rail
+            SideID++
+            Sides += side(SideID,JF,NF,LF,Mat_Phys,GY,GZ,0,0,0.25,0) #Back
+            SideID++
+            Sides += side(SideID,HN,LN,NF,Mat_Phys,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,HN,JF,HF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            Sides = ""
+            
+            #          K M      N L
+            #          G I      J H
+            #       E----------------F
+            #   /   |                |   \
+            # A-----C----------------D-----B
+            
+            #o
+            #| \
+            #o--o
+            
+            Sides += side(SideID,LN,NF,NN,Mat_Phys,GX,GY,0,0,0.25,0) #Top
+            SideID++
+            Sides += side(SideID,JN,NN,NF,Mat_Phys,GX,GZ,0,0,0.25,0) #Inside of Rail
+            SideID++
+            Sides += side(SideID,HN,LN,NN,Mat_Phys,GY,GZ,0,0,0.25,0) #Front
+            SideID++
+            Sides += side(SideID,JF,NF,LN,Mat_Phys,GX,GZ,0,0,0.25,0) #Cut
+            SideID++
+            Sides += side(SideID,HN,JN,JF,Mat_Phys,GX,GY,0,0,0.25,0) #Bottom
+            SideID++
+            
+            This[BrushID,string] = solid(BrushID,Sides)
+            BrushID++
+            
+            
+            break
+    }
+    
+    return This
+}
+function array array:buildGenericBallastBlock(Verts:array,Textures:table,SegmentCenter:vector,SegmentAngle:angle,Ties,AddBallast){
+    validate()
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        #Assume Verts is a list of 2D vectors, must be counterclockwise
+        local Lines = array()
+        local Ts = array()
+        local Bs = array()
+        local Cnt = Verts:count()
+        for(N=1,Cnt-1){
+            Lines[N,vector] = vec(Verts[N+1,vector2] - Verts[N,vector2]):normalized()
+        }
+        Lines[Cnt,vector] = vec(Verts[1,vector2] - Verts[Cnt,vector2]):normalized()
+        
+        for(N=1,Cnt){
+            Ts[N,vector] = vec(Verts[N,vector2],-OriginHeight+BallastHeight)
+            Bs[N,vector] = vec(Verts[N,vector2],-OriginHeight)
+        }
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        local Mat_Trackbed_Ties = Textures["Mat_Trackbed_Ties",string]
+        local Mat_Trackbed_NoTies = Textures["Mat_Trackbed_NoTies",string]
+        local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+        
+        local Sides = ""
+        
+        local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+        
+        for(N=1,Cnt-1){
+            Sides += side(SideID,Ts[N,vector],Bs[N,vector],Bs[N+1,vector],Mat_Nodraw,Lines[N,vector],vec(0,0,-1),0,0,0.25,0)
+            SideID++
+        }
+        Sides += side(SideID,Ts[Cnt,vector],Bs[Cnt,vector],Bs[1,vector],Mat_Nodraw,Lines[Cnt,vector],vec(0,0,-1),0,0,0.25,0)
+        SideID++
+        
+        Sides += side(SideID,Bs[3,vector],Bs[2,vector],Bs[1,vector],Mat_Nodraw,vec(1,0,0),vec(0,-1,0),0,0,0.25,0)
+        SideID++
+        
+        Sides += side(SideID,Ts[1,vector],Ts[2,vector],Ts[3,vector],(Ties ? Mat_Trackbed_Ties :Mat_Trackbed_NoTies),Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0)
+        SideID++
+        
+        This[BrushID,string] = solid(BrushID,Sides)
+        BrushID++
+    }
+    
+    return This
+}
+function array array:buildGenericBallastEdges(P1:vector2,P2:vector2,OP1:vector2,OP2:vector2,Textures:table,SegmentCenter:vector,SegmentAngle:angle,AddBallast){ #Assumes coming up on lefthand side
+    validate()
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        
+        local Mat_Ballast = Textures["Mat_Ballast",string]
+        local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+        
+        local Sides = ""
+        
+        local CN = vec(P1,-OriginHeight)
+        local CF = vec(P2,-OriginHeight)
+        
+        local EN = CN + vec(0,0,BallastHeight)
+        local EF = CF + vec(0,0,BallastHeight)
+        
+        local AN = vec(OP1,-OriginHeight)
+        local AF = vec(OP2,-OriginHeight)
+        
+        local GX = ax(EN,EF)
+        local GY = ax(AN,CN)
+        local GZ = vec(0,0,-1)
+        
+        local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+                
+        Sides += side(SideID,AN,EF,AF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Left Slope
+        SideID++
+        Sides += side(SideID,AF,EF,CF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+        SideID++
+        Sides += side(SideID,AN,CF,EF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Slice
+        SideID++
+        Sides += side(SideID,AN,AF,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+        SideID++
+        
+        This[BrushID,string] = solid(BrushID,Sides)
+        BrushID++
+        Sides = ""
+        
+        Sides += side(SideID,AN,EN,EF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Left Slope
+        SideID++
+        Sides += side(SideID,EN,AN,CN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+        SideID++
+        Sides += side(SideID,AN,EF,CF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Slice
+        SideID++
+        Sides += side(SideID,CF,EF,EN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right Side
+        SideID++
+        Sides += side(SideID,CN,AN,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+        SideID++
+        
+        This[BrushID,string] = solid(BrushID,Sides)
+        BrushID++
+    }
+    
+    return This
+}
+
+function array array:buildBallastPatchR(B:vector2,D:vector2,Isect:vector2,Textures:table,SegmentCenter:vector,SegmentAngle:angle,AddBallast){
+    validate()
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        
+        local Mat_Ballast = Textures["Mat_Ballast",string]
+        local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+        
+        local Sides = ""
+        
+        local BF = vec(B,-OriginHeight)
+        local DF = vec(D,-OriginHeight)
+        local FF = vec(D,-OriginHeight+BallastHeight)
+        local DN = vec(Isect,-OriginHeight)
+        local FN = vec(Isect,-OriginHeight+BallastHeight)
+        local BN = BF + (DN-DF)
+        
+        local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+        
+        local GX = ax(FN,FF)
+        local GY = ax(DF,BF)
+        local GZ = vec(0,0,-1)
+        
+        #          K M      N L
+        #          G I      J H
+        #       E----------------F
+        #   /   |                |   \
+        # A-----C----------------D-----B
+        
+        #o
+        #| \
+        #o--o
+        
+        Sides += side(SideID,BF,FF,FN,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Slope
+        SideID++
+        Sides += side(SideID,BF,DF,FF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+        SideID++
+        Sides += side(SideID,DN,FN,FF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Side
+        SideID++
+        Sides += side(SideID,BN,FN,DN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+        SideID++
+        Sides += side(SideID,BF,DN,DF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+        SideID++
+        
+        This[BrushID,string] = solid(BrushID,Sides)
+        BrushID++
+    }
+    return This
+}
+function array array:buildBallastPatchL(A:vector2,C:vector2,Isect:vector2,Textures:table,SegmentCenter:vector,SegmentAngle:angle,AddBallast){
+    validate()
+    if(AddBallast){
+        local OriginHeight = Textures["OriginHeight",number]
+        local BallastHeight = Textures["BallastHeight",number]
+        #local RailTopHeight = Textures["RailTopHeight",number]
+        #local RailBottomHeight = Textures["RailBottomHeight",number]
+        
+        local BallastU = Textures["BallastU",number]
+        local BallastV = Textures["BallastV",number]
+        local BallastScale = Textures["BallastScale",number]
+        
+        local Mat_Ballast = Textures["Mat_Ballast",string]
+        local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+        
+        local Sides = ""
+        
+        local AF = vec(A,-OriginHeight)
+        local CF = vec(C,-OriginHeight)
+        local EF = vec(C,-OriginHeight+BallastHeight)
+        local CN = vec(Isect,-OriginHeight)
+        local EN = vec(Isect,-OriginHeight+BallastHeight)
+        local AN = AF + (CN-CF)
+        
+        local Tex = roadUV(BallastU, BallastV, BallastScale, SegmentCenter, SegmentAngle)
+        
+        local GX = ax(EN,EF)
+        local GY = ax(CF,AF)
+        local GZ = vec(0,0,-1)
+        
+        #          K M      N L
+        #          G I      J H
+        #       E----------------F
+        #   /   |                |   \
+        # A-----C----------------D-----B
+        
+        #o
+        #| \
+        #o--o
+        
+        Sides += side(SideID,EN,EF,AF,Mat_Ballast,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number],BallastScale,0) #Slope
+        SideID++
+        Sides += side(SideID,AF,EF,CF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+        SideID++
+        Sides += side(SideID,CF,EF,EN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Side
+        SideID++
+        Sides += side(SideID,AN,CN,EN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+        SideID++
+        Sides += side(SideID,CN,AF,CF,Mat_Nodraw,GX,GY,0,0,0.25,0) #Bottom
+        SideID++
+        
+        This[BrushID,string] = solid(BrushID,Sides)
+        BrushID++
+    }
+    return This
+}
+
+function array array:fuseRails(N:vector2,L:vector2,K:vector2,M:vector2,Top:vector2,Bottom:vector2,Textures:table,AddBallast){
+    validate()
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    local GX = vec(ax2(Bottom,Top))
+    local GY = vec(ax2(K,L))
+    local GZ = vec(0,0,-1)
+    
+    local KF = vec(K,-OriginHeight+RailTopHeight)
+    local MF = vec(M,-OriginHeight+RailTopHeight)
+    local NF = vec(N,-OriginHeight+RailTopHeight)
+    local LF = vec(L,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    local JF = NF+vec(0,0,-RailHeight)
+    local HF = LF+vec(0,0,-RailHeight)
+    
+    local KN = vec(Top,-OriginHeight+RailTopHeight)
+    local MN = vec(Bottom,-OriginHeight+RailTopHeight)
+    local NN = MN
+    local LN = KN
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    local JN = IN
+    local HN = GN
+    
+    local Sides = ""
+    
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local InnerAngle = -heading(vec(),ang(),MF-MN)
+    local OuterAngle = -heading(vec(),ang(),KF-KN)
+    local InnerCenter = (MN/4 + IN/4 + MF/4 + IF/4)
+    local OuterCenter = (KN/4 + GN/4 + KF/4 + GF/4)
+    local TopCenter = (KN/4 + MN/4 + KF/4 + MF/4)
+    
+    local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+    local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    Sides += side(SideID,MN,MF,KF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    Sides += side(SideID,IF,MF,MN,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inner
+    SideID++
+    Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
+    SideID++
+    Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Front
+    SideID++
+    Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+    SideID++
+    Sides += side(SideID,IN,GN,GF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    Sides = ""
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    InnerAngle = -heading(vec(),ang(),NF-NN)
+    OuterAngle = -heading(vec(),ang(),LF-LN)
+    InnerCenter = (NN/4 + JN/4 + NF/4 + JF/4)
+    OuterCenter = (LN/4 + HN/4 + LF/4 + HF/4)
+    TopCenter = (NN/4 + LN/4 + NF/4 + LF/4)
+    
+    TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+    TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    Sides += side(SideID,LN,LF,NF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    Sides += side(SideID,NN,NF,JF,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inner
+    SideID++
+    Sides += side(SideID,HF,LF,LN,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
+    SideID++
+    Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Front
+    SideID++
+    Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+    SideID++
+    Sides += side(SideID,HN,JN,JF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+    
+}
+function array array:buildPointTip(Verts:array,Textures:table,TextureLeft,TextureRight,LeftRail,AddBallast){
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    #B---A
+    # \ /
+    #  C
+    
+    local AT = round(vec(Verts[1,vector2],-OriginHeight+RailTopHeight))
+    local BT = round(vec(Verts[2,vector2],-OriginHeight+RailTopHeight))
+    local CT = round(vec(Verts[3,vector2],-OriginHeight+RailTopHeight))
+    local AB = AT + vec(0,0,-RailHeight)
+    local BB = BT + vec(0,0,-RailHeight)
+    local CB = CT + vec(0,0,-RailHeight)
+    
+    local GX = ax(CT,BT)
+    local GY = ax(BT,AT)
+    local GZ = vec(0,0,1)
+    
+    local TopCenter = (BT+AT)/2
+    local LeftCenter = (BB+BT+CB+CT)/4
+    local RightCenter = (CB+CT+AB+AT)/4
+    
+    local TopAngle = -heading(vec(),ang(),LeftRail ? (AT-CT) : (BT-CT))
+    local LeftAngle = -heading(vec(),ang(),BT-CT)
+    local RightAngle = -heading(vec(),ang(),AT-CT)
+    
+    local TexTop = roadUV(RailTopU,RailTopV,RailTopScale,TopCenter,TopAngle+ang(0,90,0))
+    local TexLeft = railUV(RailSideU,RailSideV,RailSideScale,LeftCenter,LeftAngle)
+    local TexRight = railUV(RailSideU,RailSideV,RailSideScale,RightCenter,RightAngle)
+    
+    local Sides = ""
+    
+    #B---A
+    # \ /
+    #  C
+    
+    Sides += side(SideID,AT,BT,CT,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    
+    Sides += side(SideID,CB,CT,BT,!TextureLeft ? Mat_Nodraw : Mat_RailSide,TexLeft["U_Axis",vector], TexLeft["V_Axis",vector], TexLeft["UTranslation",number], TexLeft["VTranslation",number], RailSideScale,0) #Left
+    SideID++
+    
+    Sides += side(SideID,AB,AT,CT,!TextureRight ? Mat_Nodraw : Mat_RailSide,TexRight["U_Axis",vector], TexRight["V_Axis",vector], TexRight["UTranslation",number], TexRight["VTranslation",number], RailSideScale,0) #Right
+    SideID++
+    
+    Sides += side(SideID,BB,BT,AT,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+    SideID++
+    
+    Sides += side(SideID,CB,BB,AB,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
+function array array:buildGenericRailBrush(Verts:array,Textures:table,TextureBack,TextureFront,RustyTop,HalfThickness,AddBallast){
+    validate()
+    local M2 = Verts[1,vector2]
+    local K2 = Verts[2,vector2]
+    local K1 = Verts[3,vector2]
+    local M1 = Verts[4,vector2]
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = (RustyTop==0) ? Textures["Mat_RailTop",string] : (RustyTop==1) ? Textures["Mat_RailTop_Rusty",string] : "TOOLS/TOOLSCLIP"
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    if(RustyTop==2){print("Brush "+BrushID)}
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    local GX = vec(ax2(K1,K2))
+    local GY = vec(ax2((M1+M2)/2,(K1+K2)/2))
+    local GZ = vec(0,0,-1)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local KF = vec(K2,-OriginHeight+RailTopHeight)
+    local MF = vec(M2,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    
+    local KN = vec(K1,-OriginHeight+RailTopHeight)
+    local MN = vec(M1,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    
+    local Debug = 0
+    if(Debug){
+        debugHoloBW(MF)
+        debugHoloBW(KF)
+        debugHoloBW(KN)
+        debugHoloBW(MN)
+        
+        debugHoloBW(IF)
+        debugHoloBW(GF)
+        debugHoloBW(GN)
+        debugHoloBW(IN)
+    }
+    
+    local Sides = ""
+    
+    local InnerAngle = -heading(vec(),ang(),MF-MN)
+    local OuterAngle = -heading(vec(),ang(),KF-KN)
+    local InnerCenter = (MN+IN+MF+IF)*0.25
+    local OuterCenter = (KN+GN+KF+GF)*0.25
+    local TopCenter = (KN+MN+KF+MF)*0.25
+    
+    local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, OuterAngle+ang(0,90,0))
+    local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    Sides += side(SideID,MN,MF,KF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    Sides += side(SideID,IF,MF,MN,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inner
+    SideID++
+    Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
+    SideID++
+    if(TextureFront){
+        local FrontCenter = (KN+MN+GN+IN)*0.25
+        local FrontAngle = -heading(vec(),ang(),KN-MN)
+        local TexFront = railUV(RailSideU, RailSideV, RailSideScale, FrontCenter, FrontAngle)
+        Sides += side(SideID,IN,MN,KN,Mat_RailSide,TexFront["U_Axis",vector], TexFront["V_Axis",vector], TexFront["UTranslation",number], TexFront["VTranslation",number], RailSideScale, 0) #Back
+        SideID++
+    }else{
+        Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+        SideID++
+    }
+    if(TextureBack){
+        local BackCenter = (KF+MF+GF+IF)*0.25
+        local BackAngle = -heading(vec(),ang(),KF-MF)
+        local TexBack = railUV(RailSideU, RailSideV, RailSideScale, BackCenter, BackAngle)
+        Sides += side(SideID,GF,KF,MF,Mat_RailSide,TexBack["U_Axis",vector], TexBack["V_Axis",vector], TexBack["UTranslation",number], TexBack["VTranslation",number], RailSideScale, 0) #Back
+        SideID++
+    }else{
+        Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+        SideID++
+    }
+    if(HalfThickness){
+        IN += vec(0,0,RailHeight/2)
+        GN += vec(0,0,RailHeight/2)
+        GF += vec(0,0,RailHeight/2)
+    }
+    Sides += side(SideID,IN,GN,GF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
+function array array:buildOverrideRailBrush(Verts:array,Textures:table,SegmentCenter:vector,SegmentAngle:angle,TextureBack,TextureFront,RustyTop,HalfThickness,AddBallast){
+    validate()
+    local M2 = Verts[1,vector2]
+    local K2 = Verts[2,vector2]
+    local K1 = Verts[3,vector2]
+    local M1 = Verts[4,vector2]
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = !RustyTop ? Textures["Mat_RailTop",string] : Textures["Mat_RailTop_Rusty",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    local GX = vec(ax2(K1,K2))
+    local GY = vec(ax2((M1+M2)/2,(K1+K2)/2))
+    local GZ = vec(0,0,-1)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local KF = vec(K2,-OriginHeight+RailTopHeight)
+    local MF = vec(M2,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    
+    local KN = vec(K1,-OriginHeight+RailTopHeight)
+    local MN = vec(M1,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    
+    local Debug = 0
+    if(Debug){
+        debugHoloBW(MF)
+        debugHoloBW(KF)
+        debugHoloBW(KN)
+        debugHoloBW(MN)
+        
+        debugHoloBW(IF)
+        debugHoloBW(GF)
+        debugHoloBW(GN)
+        debugHoloBW(IN)
+    }
+    
+    local Sides = ""
+    
+    local InnerAngle = -heading(vec(),ang(),MF-MN)
+    local OuterAngle = -heading(vec(),ang(),KF-KN)
+    local InnerCenter = (MN+IN+MF+IF)*0.25
+    local OuterCenter = (KN+GN+KF+GF)*0.25
+    local TopCenter = SegmentCenter#(KN+MN+KF+MF)*0.25
+    
+    local TexTop = roadUV(RailTopU, RailTopV, RailTopScale, TopCenter, SegmentAngle+ang(0,90,0))
+    local TexInner = railUV(RailSideU, RailSideV, RailSideScale, InnerCenter, InnerAngle)
+    local TexOuter = railUV(RailSideU, RailSideV, RailSideScale, OuterCenter, OuterAngle)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    Sides += side(SideID,MN,MF,KF,Mat_RailTop,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    Sides += side(SideID,IF,MF,MN,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inner
+    SideID++
+    Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
+    SideID++
+    if(TextureFront){
+        local FrontCenter = (KN+MN+GN+IN)*0.25
+        local FrontAngle = -heading(vec(),ang(),KN-MN)
+        local TexFront = railUV(RailSideU, RailSideV, RailSideScale, FrontCenter, FrontAngle)
+        Sides += side(SideID,IN,MN,KN,Mat_RailSide,TexFront["U_Axis",vector], TexFront["V_Axis",vector], TexFront["UTranslation",number], TexFront["VTranslation",number], RailSideScale, 0) #Back
+        SideID++
+    }else{
+        Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+        SideID++
+    }
+    if(TextureBack){
+        local BackCenter = (KF+MF+GF+IF)*0.25
+        local BackAngle = -heading(vec(),ang(),KF-MF)
+        local TexBack = railUV(RailSideU, RailSideV, RailSideScale, BackCenter, BackAngle)
+        Sides += side(SideID,GF,KF,MF,Mat_RailSide,TexBack["U_Axis",vector], TexBack["V_Axis",vector], TexBack["UTranslation",number], TexBack["VTranslation",number], RailSideScale, 0) #Back
+        SideID++
+    }else{
+        Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+        SideID++
+    }
+    if(HalfThickness){
+        IN += vec(0,0,RailHeight/2)
+        GN += vec(0,0,RailHeight/2)
+        GF += vec(0,0,RailHeight/2)
+    }
+    Sides += side(SideID,IN,GN,GF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
+function array array:buildFrog(MainLeft,OMN:vector2,IMN:vector2,CMN:vector2,ODV:vector2,IDV:vector2,CDV:vector2,CheckLength,Textures:table,AddBallast){
+    validate()
+    local RailSideU = Textures["RailSideU",number]
+    local RailSideV = Textures["RailSideV",number]
+    local RailSideScale = Textures["RailSideScale",number]
+    local RailTopU = Textures["RailTopU",number]
+    local RailTopV = Textures["RailTopV",number]
+    local RailTopScale = Textures["RailTopScale",number]
+
+    local Mat_RailSide = Textures["Mat_RailSide",string]
+    local Mat_RailTop = Textures["Mat_RailTop",string]
+    local Mat_RailTop_Rusty = Textures["Mat_RailTop_Rusty",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    local RailWidth = Textures["RailWidth",number]
+    
+    local GX = vec(ax2(IMN,OMN))
+    local GY = vec(ax2(CDV,CMN))
+    local GZ = vec(0,0,-1)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #O     O
+    #|\   /|
+    #C-I I-C
+    
+    #DV   MN
+    
+    #TRIANGLES
+    
+    local LF = vec(MainLeft ? OMN : ODV,-OriginHeight+RailTopHeight)
+    local HF = LF+vec(0,0,-RailHeight)
+    local KF = vec(!MainLeft ? OMN : ODV,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    
+    local LN = vec(MainLeft ? CMN : CDV,-OriginHeight+RailTopHeight)
+    local HN = LN+vec(0,0,-RailHeight)
+    local KN = vec(!MainLeft ? CMN : CDV,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    
+    local NN = vec(MainLeft ? IMN : IDV,-OriginHeight+RailTopHeight)
+    local JN = NN+vec(0,0,-RailHeight)
+    local MN = vec(!MainLeft ? IMN : IDV,-OriginHeight+RailTopHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    local Sides = ""
+    
+    local RAngle = -heading(vec(),ang(),LF-LN)
+    local LAngle = -heading(vec(),ang(),KF-KN)
+    local RCenterSide = (LF+HF+NN+JN)*0.25
+    local LCenterSide = (KF+GF+MN+IN)*0.25
+    local RCenterTop = (NN+LN)*0.5
+    local LCenterTop = (KN+MN)*0.5
+    
+    local TexTopR = roadUV(RailTopU, RailTopV, RailTopScale, RCenterTop, RAngle+ang(0,90,0))
+    local TexSideR = railUV(RailSideU, RailSideV, RailSideScale, RCenterSide, RAngle)
+    local TexTopL = roadUV(RailTopU, RailTopV, RailTopScale, LCenterTop, LAngle+ang(0,90,0))
+    local TexSideL = railUV(RailSideU, RailSideV, RailSideScale, LCenterSide, LAngle)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #O     O
+    #|\   /|
+    #C-I I-C
+    
+    #DV   MN
+    
+    #Right (MN normally)
+    
+    Sides += side(SideID,LN,LF,NN,Mat_RailTop,TexTopR["U_Axis",vector], TexTopR["V_Axis",vector], TexTopR["UTranslation",number], TexTopR["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    Sides += side(SideID,JN,NN,LF,Mat_RailSide,TexSideR["U_Axis",vector], TexSideR["V_Axis",vector], TexSideR["UTranslation",number], TexSideR["VTranslation",number], RailSideScale,0) #Left
+    SideID++
+    Sides += side(SideID,HF,LF,LN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right (Nodraw)
+    SideID++
+    Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+    SideID++
+    Sides += side(SideID,HF,HN,JN,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTopR["U_Axis",vector], TexTopR["V_Axis",vector], TexTopR["UTranslation",number], TexTopR["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    Sides = ""
+    
+    #Left (DV normally)
+    
+    Sides += side(SideID,MN,KF,KN,Mat_RailTop,TexTopL["U_Axis",vector], TexTopL["V_Axis",vector], TexTopL["UTranslation",number], TexTopL["VTranslation",number], RailTopScale,0) #Top
+    SideID++
+    Sides += side(SideID,GF,KF,MN,Mat_RailSide,TexSideL["U_Axis",vector], TexSideL["V_Axis",vector], TexSideL["UTranslation",number], TexSideL["VTranslation",number], RailSideScale,0) #Right
+    SideID++
+    Sides += side(SideID,GN,KN,KF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #left (Nodraw)
+    SideID++
+    Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+    SideID++
+    Sides += side(SideID,GN,GF,IN,AddBallast ? Mat_Nodraw : Mat_RailTop,TexTopL["U_Axis",vector], TexTopL["V_Axis",vector], TexTopL["UTranslation",number], TexTopL["VTranslation",number], RailTopScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    Sides = ""
+    
+    #FROG MAIN
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    #O     O
+    #|\   /|
+    #C-I I-C
+    
+    #DV   MN
+    
+    local NFU = LF + round(ax(KN,KF)*CheckLength/4)
+    local LFU = NFU + (MN-KN)
+    
+    local MFU = KF + round(ax(LN,LF)*CheckLength/4)
+    local KFU = MFU + (NN-LN)
+    
+    #local HFU = LFU+vec(0,0,-RailHeight)
+    #local JFU = NFU+vec(0,0,-RailHeight)
+    
+    #local GFU = KFU+vec(0,0,-RailHeight)
+    #local IFU = MFU+vec(0,0,-RailHeight)
+    
+    local VR = array(vec2(LFU),vec2(NFU),vec2(LF),vec2(LN))
+    local VL = array(vec2(MFU),vec2(KFU),vec2(KN),vec2(KF))
+    
+    This:buildGenericRailBrush(VR,Textures,0,0,1,1,AddBallast)
+    This:buildGenericRailBrush(VL,Textures,0,0,1,1,AddBallast)
+    
+    #FROG TIPS
+    
+    local LFT = LFU + round(ax(KN,KF)*CheckLength/8)
+    local NFT = LFT + round((KN-MN)*0.75)
+    local KFT = KFU + round(ax(LN,LF)*CheckLength/8)
+    local MFT = KFT + round((LN-NN)*0.75)
+    
+    VR = array(vec2(LFT),vec2(NFT),vec2(NFU),vec2(LFU))
+    VL = array(vec2(MFT),vec2(KFT),vec2(KFU),vec2(MFU))
+    local CL = (KFU+MFU)/2
+    local CR = (LFU+NFU)/2
+    local AL = -heading(vec(),ang(),KFT-KFU)
+    local AR = -heading(vec(),ang(),LFT-LFU)
+    
+    This:buildOverrideRailBrush(VR,Textures,CR,AR,1,0,1,1,AddBallast)
+    This:buildOverrideRailBrush(VL,Textures,CL,AL,1,0,1,1,AddBallast)
+    
+    #FROG BASE
+    
+    #EGHF
+    #A  B
+    #C  D
+    
+    local AT = KFU+vec(0,0,-RailHeight/2)
+    local AB = AT+vec(0,0,-RailHeight/2)
+    
+    local BT = LFU+vec(0,0,-RailHeight/2)
+    local BB = BT+vec(0,0,-RailHeight/2)
+    
+    local CT = KN+vec(0,0,-RailHeight/2)
+    local CB = CT+vec(0,0,-RailHeight/2)
+    
+    local DT = LN+vec(0,0,-RailHeight/2)
+    local DB = DT+vec(0,0,-RailHeight/2)
+    
+    local ET = KFT+vec(0,0,-RailHeight/2)
+    local EB = ET+vec(0,0,-RailHeight/2)
+    
+    local FT = LFT+vec(0,0,-RailHeight/2)
+    local FB = FT+vec(0,0,-RailHeight/2)
+    
+    local GT = MFT+vec(0,0,-RailHeight/2)
+    local GB = GT+vec(0,0,-RailHeight/2)
+    
+    local HT = NFT+vec(0,0,-RailHeight/2)
+    local HB = HT+vec(0,0,-RailHeight/2)
+
+    
+    local TopCenter = (AT+BT+CT+DT)*0.25
+    local TopAngle = -heading(vec(),ang(),(AT+BT)/2 - (CT+DT)/2)
+    local TexTop = roadUV(RailTopU, RailTopV, RailTopScale*4, TopCenter, TopAngle+ang(0,90,0))
+    
+    local FrontCenter = ((CT+DT+CB+DB)*0.25)+vec(0,0,RailHeight/4)
+    local FrontAngle = -heading(vec(),ang(),DT-CT)
+    local TexFront = railUV(RailSideU, RailSideV, RailSideScale, FrontCenter, FrontAngle)
+    
+    local BackCenter = ((AT+BT+AB+BB)*0.25)+vec(0,0,RailHeight/4)
+    local BackAngle = -heading(vec(),ang(),AT-BT)
+    local TexBack = railUV(RailSideU, RailSideV, RailSideScale, BackCenter, BackAngle)
+    
+    local LeftCenter = ((AT+AB+CT+CB)*0.25)+vec(0,0,RailHeight/4)
+    local LeftAngle = -heading(vec(),ang(),AT-CT)
+    local TexLeft = railUV(RailSideU, RailSideV, RailSideScale, LeftCenter, LeftAngle)
+    
+    local RightCenter = ((BT+BB+DT+DB)*0.25)+vec(0,0,RailHeight/4)
+    local RightAngle = -heading(vec(),ang(),BT-DT)
+    local TexRight = railUV(RailSideU, RailSideV, RailSideScale, RightCenter, RightAngle)
+    
+    Sides = ""
+    
+    Sides += side(SideID,BT,AT,CT,Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Top
+    SideID++
+    
+    Sides += side(SideID,DT,CT,CB,Mat_RailSide,TexFront["U_Axis",vector], TexFront["V_Axis",vector], TexFront["UTranslation",number], TexFront["VTranslation",number], RailSideScale,0) #Front
+    SideID++
+    
+    #Sides += side(SideID,AT,BT,BB,Mat_RailSide,TexBack["U_Axis",vector], TexBack["V_Axis",vector], TexBack["UTranslation",number], TexBack["VTranslation",number], RailSideScale,0) #Back
+    Sides += side(SideID,AT,BT,BB,Mat_Nodraw,GY,GZ,0,0,0.25,0)
+    SideID++
+    
+    Sides += side(SideID,CT,AT,AB,Mat_RailSide,TexLeft["U_Axis",vector], TexLeft["V_Axis",vector], TexLeft["UTranslation",number], TexLeft["VTranslation",number], RailSideScale,0) #Left
+    SideID++
+    
+    Sides += side(SideID,BT,DT,DB,Mat_RailSide,TexRight["U_Axis",vector], TexRight["V_Axis",vector], TexRight["UTranslation",number], TexRight["VTranslation",number], RailSideScale,0) #Right
+    SideID++
+    
+    Sides += side(SideID,CB,AB,BB,AddBallast ? Mat_Nodraw : Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    #EGHF
+    #A  B
+    #C  D
+    
+    Sides = ""
+    
+    Sides += side(SideID,AT,GT,ET,Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Top
+    SideID++
+    Sides += side(SideID,EB,ET,GT,Mat_RailSide,TexBack["U_Axis",vector], TexBack["V_Axis",vector], TexBack["UTranslation",number], TexBack["VTranslation",number], RailSideScale,0) #Back
+    SideID++
+    Sides += side(SideID,AB,AT,ET,Mat_RailSide,TexLeft["U_Axis",vector], TexLeft["V_Axis",vector], TexLeft["UTranslation",number], TexLeft["VTranslation",number], RailSideScale,0) #Left
+    SideID++
+    Sides += side(SideID,GB,GT,AT,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+    SideID++
+    Sides += side(SideID,EB,GB,AB,AddBallast ? Mat_Nodraw : Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Bottom
+    SideID++
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    Sides = ""
+    Sides += side(SideID,HT,GT,AT,Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Top
+    SideID++
+    Sides += side(SideID,GB,GT,HT,Mat_RailSide,TexBack["U_Axis",vector], TexBack["V_Axis",vector], TexBack["UTranslation",number], TexBack["VTranslation",number], RailSideScale,0) #Back
+    SideID++
+    Sides += side(SideID,BB,BT,AT,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+    SideID++
+    Sides += side(SideID,AB,AT,GT,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+    SideID++
+    Sides += side(SideID,HB,HT,BT,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+    SideID++
+    Sides += side(SideID,AB,GB,HB,AddBallast ? Mat_Nodraw : Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Bottom
+    SideID++
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    Sides = ""
+    Sides += side(SideID,BT,FT,HT,Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Top
+    SideID++
+    Sides += side(SideID,HB,HT,FT,Mat_RailSide,TexBack["U_Axis",vector], TexBack["V_Axis",vector], TexBack["UTranslation",number], TexBack["VTranslation",number], RailSideScale,0) #Back
+    SideID++
+    Sides += side(SideID,BB,BT,HT,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+    SideID++
+    Sides += side(SideID,FB,FT,BT,Mat_RailSide,TexRight["U_Axis",vector], TexRight["V_Axis",vector], TexRight["UTranslation",number], TexRight["VTranslation",number], RailSideScale,0) #Right
+    SideID++
+    Sides += side(SideID,BB,HB,FB,AddBallast ? Mat_Nodraw : Textures["Mat_RailTop_Rusty",string],TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale*4,0) #Bottom
+    SideID++
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
+function array array:buildSingleTie(Center:vector,Angle:angle,Textures:table,HeightOffset,Full3D,AddBallast){
+    validate()
+    local TieU = Textures["TieU",number]
+    local TieV = Textures["TieV",number]
+    local TieScale = Textures["TieScale",number]
+    
+    local Mat_Tie_Plates = Textures["Mat_Tie_Plates",string]
+    local Mat_Tie = Textures["Mat_Tie",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    
+    local TieBottomHeight = Textures["TieBottomHeight",number]
+    local TieTopHeight = Textures["TieTopHeight",number]
+    
+    local TieWidth = Textures["TieWidth",number]
+    local TieThickness = Textures["TieThickness",number]
+    local TiePlateWidth = Textures["TiePlateWidth",number]
+    local TiePlateCenter = Textures["TiePlateCenter",number]
+    
+    
+    
+    local GX = Angle:forward()
+    local GY = Angle:right()
+    local GZ = -Angle:up()
+    
+    #local HT = TieTopHeight - BallastHeight
+    local HB = vec(0,0,TieTopHeight - TieBottomHeight)
+    
+    #Center = round(Center + vec(0,0,HT))
+    local CZ = ceil(Center:z())
+    Center = round(Center):setZ(CZ)
+    local TL = GX*TieThickness/2
+    local TW = GY*TieWidth/2
+    
+    #A---B
+    #C---D
+    
+    local AT = round(Center + TL - TW)
+    local BT = round(Center + TL + TW)
+    local CT = round(Center - TL - TW)
+    local DT = round(Center - TL + TW)
+    
+    #print(AT,CT,DT,BT)
+    
+    local AB = AT-HB
+    local BB = BT-HB
+    local CB = CT-HB
+    local DB = DT-HB
+    
+    local TexTop = roadUV(TieU, TieV, TieScale, Center,Angle)
+    
+    local TexFB = railUV(TieU, TieV, TieScale, Center - HB/2,-heading(AT,ang(),BT))
+    
+    local CenterL = (AT+CT)/2 + vec(0,0,TiePlateCenter)
+    local CenterR = (BT+DT)/2 + vec(0,0,TiePlateCenter)
+    local AngLR = Angle:rotateAroundAxis(GX,90)
+    local TexL = railUV(TieU, TieV, TieScale, CenterL, AngLR)
+    local TexR = railUV(TieU, TieV, TieScale, CenterR, AngLR)
+    
+    local Sides = ""
+    
+    Sides += side(SideID,DT,BT,AT,Mat_Tie_Plates,TexTop["U_Axis",vector],TexTop["V_Axis",vector],TexTop["UTranslation",number],TexTop["VTranslation",number],TieScale,0) #Top
+    SideID++
+    
+    Sides += side(SideID,DB,DT,CT,Full3D ? Mat_Tie : Mat_Nodraw,TexFB["U_Axis",vector],TexFB["V_Axis",vector],TexFB["UTranslation",number],TexFB["VTranslation",number],TieScale,0) #Front
+    SideID++
+    
+    Sides += side(SideID,AB,AT,BT,Full3D ? Mat_Tie : Mat_Nodraw,TexFB["U_Axis",vector],TexFB["V_Axis",vector],TexFB["UTranslation",number],TexFB["VTranslation",number],TieScale,0) #Back
+    SideID++
+    
+    Sides += side(SideID,CB,CT,AT,Full3D ? Mat_Tie : Mat_Nodraw,TexL["U_Axis",vector],TexL["V_Axis",vector],TexL["UTranslation",number],TexL["VTranslation",number],TieScale,0) #Left
+    SideID++
+    
+    Sides += side(SideID,BB,BT,DT,Full3D ? Mat_Tie : Mat_Nodraw,TexR["U_Axis",vector],TexR["V_Axis",vector],TexR["UTranslation",number],TexR["VTranslation",number],TieScale,0) #Right
+    SideID++
+    
+    Sides += side(SideID,CB,AB,BB,AddBallast ? Mat_Nodraw : Mat_Tie,TexTop["U_Axis",vector],TexTop["V_Axis",vector],TexTop["UTranslation",number],TexTop["VTranslation",number],TieScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
+function array array:buildTieBrushOverride(Verts:array,Center:vector2,Angle:angle,Textures:table,Plates,SideState,Full3D,AddBallast){
+    validate()
+    local TieU = Textures["TieU",number]
+    local TieV = Textures["TieV",number]
+    local TieScale = Textures["TieScale",number]
+    
+    local Mat_Tie_Plates = Textures["Mat_Tie_Plates",string]
+    local Mat_Tie = Textures["Mat_Tie",string]
+    local Mat_Nodraw = "TOOLS/TOOLSNODRAW"
+    
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    
+    local TieBottomHeight = Textures["TieBottomHeight",number]
+    local TieTopHeight = Textures["TieTopHeight",number]
+    
+    local TieWidth = Textures["TieWidth",number]
+    local TieThickness = Textures["TieThickness",number]
+    local TiePlateWidth = Textures["TiePlateWidth",number]
+    local TiePlateCenter = Textures["TiePlateCenter",number]
+    
+    local GX = Angle:forward()
+    local GY = Angle:right()
+    local GZ = vec(0,0,-1)
+    
+    local HT = -OriginHeight+TieTopHeight
+    local HB = vec(0,0,TieTopHeight-TieBottomHeight)
+    
+    #A---B
+    #C---D
+    
+    local AT = vec(Verts[2,vector2],HT)
+    local BT = vec(Verts[1,vector2],HT)
+    local CT = vec(Verts[3,vector2],HT)
+    local DT = vec(Verts[4,vector2],HT)
+    
+    local AB = AT-HB
+    local BB = BT-HB
+    local CB = CT-HB
+    local DB = DT-HB
+    
+    local TexTop = roadUV(TieU, TieV, TieScale, vec(Center,HT),Angle)
+    
+    local TexFB = railUV(TieU, TieV, TieScale, vec(Center,HT) - HB/2,Angle:rotateAroundAxis(GZ,-90))
+    
+    local CenterLR = (AB+CB)/2 + vec(0,0,TiePlateCenter)
+    local AngLR = Angle:rotateAroundAxis(GX,90)
+    local TexLR = railUV(TieU, TieV, TieScale, CenterLR, AngLR)
+    
+    local Sides = ""
+    
+    Sides += side(SideID,DT,BT,AT,(Plates ? Mat_Tie_Plates : Mat_Tie),TexTop["U_Axis",vector],TexTop["V_Axis",vector],TexTop["UTranslation",number],TexTop["VTranslation",number],TieScale,0) #Top
+    SideID++
+    
+    Sides += side(SideID,DB,DT,CT,Full3D ? Mat_Tie : Mat_Nodraw,TexFB["U_Axis",vector],TexFB["V_Axis",vector],TexFB["UTranslation",number],TexFB["VTranslation",number],TieScale,0) #Front
+    SideID++
+    
+    Sides += side(SideID,AB,AT,BT,Full3D ? Mat_Tie : Mat_Nodraw,TexFB["U_Axis",vector],TexFB["V_Axis",vector],TexFB["UTranslation",number],TexFB["VTranslation",number],TieScale,0) #Back
+    SideID++
+    
+    if(SideState==-1){
+        Sides += side(SideID,CB,CT,AT,Full3D ? Mat_Tie : Mat_Nodraw,TexLR["U_Axis",vector],TexLR["V_Axis",vector],TexLR["UTranslation",number],TexLR["VTranslation",number],TieScale,0) #Left
+        SideID++
+    }else{
+        Sides += side(SideID,CB,CT,AT,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Left
+        SideID++
+    }
+    if(SideState==1){
+        Sides += side(SideID,BB,BT,DT,Full3D ? Mat_Tie : Mat_Nodraw,TexLR["U_Axis",vector],TexLR["V_Axis",vector],TexLR["UTranslation",number],TexLR["VTranslation",number],TieScale,0) #Right
+        SideID++
+    }else{
+        Sides += side(SideID,BB,BT,DT,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Right
+        SideID++
+    }
+        
+    
+    Sides += side(SideID,CB,AB,BB,AddBallast ? Mat_Nodraw : Mat_Tie,TexTop["U_Axis",vector],TexTop["V_Axis",vector],TexTop["UTranslation",number],TexTop["VTranslation",number],TieScale,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}

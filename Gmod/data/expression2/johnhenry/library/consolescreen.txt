@@ -1,0 +1,2829 @@
+@name johnhenry/library/consolescreen
+@inputs CS:wirelink Pod:entity
+@outputs CS_PieceID CS_Pieces
+@persist TrackGauge BallastBlockWidth
+@persist Page Line MaxLine MinLine Lines:table LastLine:array CS_PieceID CS_Pieces CS_Data:table CompileReady
+@persist [CS_Header CS_Button CS_Button_Important CS_Property CS_Value_Edit CS_Value_Calc CS_Locked]:vector CS_Snap CS_HeightSnap
+@persist Address Address2 InitVector:vector2 InitVector2:vector2 AdjustVector:vector2 AdjustVector2:vector2 InitNumber AdjustNumber
+@persist Manifest:array AutoSaving
+@persist VonMode
+@trigger 
+#include "johnhenry/library/egp"
+CS_PieceID = 0
+CS_Pieces = 0
+CS_Data = table()
+
+CS_Header = vec(255,191,0)
+CS_Button = vec(255)
+CS_Button_Important = vec(255,255,0)
+CS_Property = vec(191)
+CS_Value_Edit = vec(127,255,127)
+CS_Value_Calc = vec(127,255,255)
+CS_Locked = vec(127,0,0)
+
+CS_Snap = 128
+CS_HeightSnap = 8
+CompileReady = 0
+
+VonMode = 0
+
+LastLine = array()
+
+fileLoad("johnhenry_saves/manifest.txt")
+
+function void wirelink:csClear(){
+    This["Reset",number] = 1
+    This["Reset",number] = 0
+    return void
+}
+function string blank(){
+    return " ":repeat(30)
+}
+function void wirelink:csClearLine(Ln){
+    local L = clamp(Ln-1,0,19)
+    This:writeString(blank(),0,L)
+    return void
+}
+function void wirelink:csWriteLeft(Ln,Text:string,Color:vector,Flash){
+    if(Text!=""){
+        local L = clamp(Ln-1,0,19)
+        This:writeString(Text,0,L,Color,vec(),Flash)
+    }
+    return void
+}
+function void wirelink:csWriteCenter(Ln,Text:string,Color:vector,Flash){
+    if(Text!=""){
+        local L = clamp(Ln-1,0,19)
+        
+        local Len = Text:length()
+        This:writeString(Text,15-floor(Len/2),L,Color,vec(),Flash)
+    }
+    return void
+}
+function void wirelink:csWriteRight(Ln,Text:string,Color:vector,Flash){
+    if(Text!=""){
+        local L = clamp(Ln-1,0,19)
+        
+        local Len = Text:length()
+        This:writeString(Text,30-Len,L,Color,vec(),Flash)
+    }
+    return void
+}
+function void getUniqueID(){ #Not super necessary because remove() works like arrays when used with tables and moves entries down correctly
+    if(CS_Pieces==0){
+        CS_Pieces = 1
+        CS_PieceID = 1
+    }else{
+        for(N=1,CS_Pieces+1){
+            if(!CS_Data:exists(N:toString())){
+                CS_PieceID = N
+                if(N>CS_Pieces){
+                    CS_Pieces++
+                }
+            }
+        }
+    }
+    return void
+}
+function vector2 tp3dir(Direction){
+    local Dir = vec2()
+    switch(abs(Direction)){
+        case 0,
+            Dir = vec2(0,4)
+            break
+            
+        case 1,
+            Dir = vec2(-1,4)
+            break
+        case 2,
+            Dir = vec2(-2,4)
+            break
+        case 4,
+            Dir = vec2(-4,4)
+            break
+        
+        case 6,
+            Dir = vec2(-4,2)
+            break
+        case 7,
+            Dir = vec2(-4,1)
+            break
+        case 8,
+            Dir = vec2(-4,0)
+            break
+            
+        case 9,
+            Dir = vec2(-4,-1)
+            break
+        case 10,
+            Dir = vec2(-4,-2)
+            break
+        case 12,
+            Dir = vec2(-4,-4)
+            break
+            
+        case 14,
+            Dir = vec2(-2,-4)
+            break
+        case 15,
+            Dir = vec2(-1,-4)
+            break
+        case 16,
+            Dir = vec2(0,-4)
+            break
+        
+        default,
+            Dir = vec2(0,4)
+            break
+    }
+    Dir = vec2(Dir:x()*sign(Direction), Dir:y())
+    return Dir/4
+}
+function number parallel(A1, B1, A2, B2){
+    local Para = 0
+    if((A1==0) & (A2==0)){
+        Para = 1
+    }elseif((B1/A1)==(B2/A2)){
+        Para = 1
+    }
+    return Para
+}
+
+function array intersection(Line1:array, Line2:array){
+    
+    local A1 = Line1[1,number]
+    local B1 = Line1[2,number]
+    local C1 = Line1[3,number]
+    
+    local A2 = Line2[1,number]
+    local B2 = Line2[2,number]
+    local C2 = Line2[3,number]
+    
+    local Error = parallel(A1, B1, A2, B2)
+    local Intersection = vec2()
+    
+    if(!Error){
+        #A1X + B1Y + C1 = 0
+        #A2X + B2Y + C2 = 0
+        
+        if((A1==0)&(B2==0)){
+            Intersection = vec2(-C2/A2,-C1/B1)
+        }elseif((A2==0)&(B1==0)){
+            Intersection = vec2(-C1/A1,-C2/B2)
+        }elseif(A1!=0){ #Solve Eq 1 for X
+            #X = -(C1 + B1Y)/A1
+            #Sub into Eq 2
+            #(A2/A1)(C1) + (A2/A1)(B1Y) = (B2Y + C2)
+            #(A2B1/A1 - B2)Y = C2 - (A2C1/A1)
+            #Y = (C2 - (A2C1/A1))/(A2B1/A1 - B2)
+            local Y = (C2 - (A2*C1/A1))/(A2*B1/A1 - B2)
+            local X = -(C1 + B1*Y)/A1
+            Intersection = vec2(X,Y)
+        }elseif(A2!=0){ #Solve Eq2 for X
+            local Y = (C1 - (A1*C2/A2))/(A1*B2/A2 - B1)
+            local X = -(C2 + B2*Y)/A2
+            Intersection = vec2(X,Y)
+        }
+    }
+    
+    return array(Error,Intersection)
+    
+}
+function vector2 mid2(Start:vector2, End:vector2, T){
+    return Start + T*(End-Start)
+}
+function array line(Point:vector2, Dir:vector2){
+    local PX = Point:x()
+    local PY = Point:y()
+    local DX = Dir:x()
+    local DY = Dir:y()
+    #Y - PY = (DY/DX)(X-PX)
+    #DX*Y - PY*DX = DY*X - DY*PX
+    #DX*Y - DY*X = PY*DX - DY*PX
+    
+    local A = DY
+    local B = -DX
+    local C = (PY*DX - DY*PX)
+    #print(A:toString()+"X + "+B:toString()+"Y + "+C:toString()+" = 0")
+    return array(A,B,C)
+}
+
+function void wrapOnPathInit(Points:array){
+    WrapPathLength = 0
+    WrapSegLengths = array()
+    WrapPathPoints = Points:clone()
+    for(N=1,Points:count()-1){
+        local Len = (Points[N+1,vector] - Points[N,vector]):length()
+        WrapSegLengths[N,number] = Len
+        WrapPathLength += Len
+    }
+}
+
+function vector wrapOnPathDist(Dist){
+    Dist = clamp(Dist,0,WrapPathLength)
+    local Out = WrapPathPoints[WrapPathPoints:count(),vector]
+    for(N=1,WrapSegLengths:count()){
+        local SL = WrapSegLengths[N,number]
+        if(Dist > SL){ #It's in the next segment - subtract the distance
+            Dist -= SL
+        }else{ #It's in this segment
+            local Start = WrapPathPoints[N,vector]
+            local End = WrapPathPoints[N+1,vector]
+            Out = Start + (End-Start)*Dist/SL
+            break
+        }
+    }
+    return Out
+}
+function vector wrapOnPathFrac(Frac){
+    return wrapOnPathDist(Frac*WrapPathLength)
+}
+
+function void processManifest(){
+    if(Manifest:count()==0){
+        Manifest = vonDecode(fileRead())
+    }
+    if(Manifest:count()==0){ #No manifest - create new
+        Manifest[1,string] = "autosave (empty)"
+        for(N=2,8){
+            Manifest[N,string] = "save "+(N-1)+" (empty)"
+        }
+    }
+}
+
+function void autosave(){
+    if(!AutoSaving){
+        AutoSaving = 1
+        processManifest()
+        local FileString = vonEncode(CS_Data)
+        local FileName = "johnhenry_saves/autosave.txt"
+        fileWrite(FileName,FileString)
+        Manifest[1,string] = FileName
+        soundPlay(1,1,"hl1/fvox/fuzz.wav")
+        timer("updatemanifest",1000)
+    }
+}
+
+function table plotStraight(In:array){#Startpos, Dir, Length, Height, Segments
+    local Out = table()
+    
+    local StartPos = In[2,vector2]
+    local Dir = In[3,number]
+    local Length = In[4,number]
+    local Height = In[5,number]
+    local Segments = In[6,number]
+    
+    local Points = array()
+    Points[1,vector2] = StartPos
+    local EndPos = StartPos + tp3dir(Dir)*Length
+    for(N=1,Segments){
+        Points[N+1,vector2] = StartPos + (EndPos-StartPos)*(N/Segments)
+    }
+    local Grade = Height/((EndPos-StartPos):length())
+    
+    local DirN = tp3dir(Dir):normalized()
+    local Right = DirN:rotate(-90)
+    local Left = DirN:rotate(90)
+    local BallastPoints = array()
+    local RailPointsL = array()
+    local RailPointsR = array()
+    for(N=1,Points:count()){
+        local P = Points[N,vector2]
+        BallastPoints[N,vector2] = P + Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = P + Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = P + Right*TrackGauge/2
+        RailPointsL[N,vector2] = P + Left*TrackGauge/2
+    }
+    
+    Out["startpos",vector2] = StartPos
+    Out["startdir",number] = Dir
+    Out["length",number] = Length
+    Out["height",number] = Height
+    Out["segments",number] = Segments
+    
+    Out["type",string] = "straight"
+    Out["plot",array] = Points
+    Out["endpos",vector2] = EndPos
+    Out["enddir",number] = Dir
+    Out["grade",number] = Grade
+    
+    Out["ballast",array] = BallastPoints
+    Out["leftrail",array] = RailPointsL
+    Out["rightrail",array] = RailPointsR
+    
+    Out["highlight",number] = ((Page==10)&(Address==2)) ? 1 : 0
+    return Out
+}
+function table plotArc(In:array){ #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
+    local Out = table()
+    local StartPos = In[2,vector2]
+    local StartDir = In[3,number]
+    local EndDir = In[4,number]
+    local EndPos = In[5,vector2]
+    local Radius = In[6,number]
+    local Height = In[7,number]
+    local Segments = In[8,number]
+    
+    local StartV = tp3dir(StartDir):normalized()
+    local EndV = tp3dir(EndDir):normalized()
+    
+    local TotalLength = 0
+    local Points = array()
+    local Isect = vec2()
+    local GoesLeft = StartV:cross(EndV) > 0
+    if(GoesLeft){
+        local L1 = line(StartPos + Radius*StartV:rotate(90),StartV)
+        local L2 = line(EndPos + Radius*EndV:rotate(90),EndV)
+        
+        Isect = intersection(L1,L2)[2,vector2]
+    }else{
+        local L1 = line(StartPos + Radius*StartV:rotate(-90),StartV)
+        local L2 = line(EndPos + Radius*EndV:rotate(-90),EndV)
+        
+        Isect = intersection(L1,L2)[2,vector2]
+    }
+    local StartAngle = atan(StartV:y(),StartV:x()) + (GoesLeft ? -90 : 90)
+    local EndAngle = atan(EndV:y(),EndV:x()) + (GoesLeft ? -90 : 90)
+    
+    local AngDiff = angnorm(EndAngle-StartAngle)
+    
+    Points[1,vector2] = StartPos
+    
+    for(N=0,Segments){
+        local Theta = StartAngle + N*AngDiff/Segments
+        Points[N+2,vector2] = Isect + Radius*vec2(cos(Theta),sin(Theta))
+    }
+    Points[Segments+3,vector2] = EndPos
+    
+    local Invalid = 0
+    local StartValid = (Points[2,vector2]-StartPos):dot(StartV) >= 0
+    local EndValid = (Points[Segments+2,vector2]-EndPos):dot(-EndV) >= 0
+    local StartSwing = 2
+    local EndSwing = Segments+2
+    
+    if(EndValid){
+        if(EndPos:distance(Points[Segments+2,vector2])<1){
+            Points:remove(Segments+2)
+        }
+    }else{
+        Invalid = 1
+    }
+    if(StartValid){
+        if(StartPos:distance(Points[2,vector2])<1){
+            Points:remove(2)
+            StartSwing -= 1
+            EndSwing -= 1
+        }
+    }else{
+        Invalid = 1
+    }
+    
+    for(N=2,Points:count()){
+        TotalLength += (Points[N,vector2]-Points[N-1,vector2]):length()
+    }
+    
+    local Grade = Height/TotalLength
+    
+    local BallastPoints = array()
+    local RailPointsR = array()
+    local RailPointsL = array()
+    
+    local DirN = tp3dir(StartDir):normalized()
+    local Left = DirN:rotate(90)
+    local Right = DirN:rotate(-90)
+    
+    BallastPoints[1,vector2] = StartPos + Right*BallastBlockWidth/2
+    BallastPoints[2*Points:count(),vector2] = StartPos + Left*BallastBlockWidth/2 
+    RailPointsR[1,vector2] = StartPos + Right*TrackGauge/2
+    RailPointsL[1,vector2] = StartPos + Left*TrackGauge/2
+    
+    for(N=2,Points:count()-1){
+        
+        local Far = Points[N+1,vector2]
+        local Mid = Points[N,vector2]
+        local Near = Points[N-1,vector2]
+        
+        local Dir = (((Far-Mid):normalized() + (Mid-Near):normalized())/2):normalized()
+        Left = Dir:rotate(90)
+        Right = Dir:rotate(-90)
+        
+        BallastPoints[N,vector2] = Mid + Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = Mid + Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = Mid + Right*TrackGauge/2
+        RailPointsL[N,vector2] = Mid + Left*TrackGauge/2
+    }
+    
+    DirN = tp3dir(EndDir):normalized()
+    Left = DirN:rotate(90)
+    Right = DirN:rotate(-90)
+    
+    BallastPoints[Points:count(),vector2] = EndPos + Right*BallastBlockWidth/2
+    BallastPoints[Points:count()+1,vector2] = EndPos + Left*BallastBlockWidth/2 
+    RailPointsR[Points:count(),vector2] = EndPos + Right*TrackGauge/2
+    RailPointsL[Points:count(),vector2] = EndPos + Left*TrackGauge/2
+    
+    
+    Out["startpos",vector2] = StartPos
+    Out["endpos",vector2] = EndPos
+    Out["startdir",number] = StartDir
+    Out["enddir",number] = EndDir
+    Out["radius",number] = Radius
+    Out["height",number] = Height
+    Out["segments",number] = Segments
+    
+    Out["type",string] = "arc"
+    Out["plot",array] = Points
+    Out["grade",number] = Grade
+    Out["center",vector2] = Isect
+    Out["startswing",number] = StartSwing
+    Out["endswing",number] = EndSwing
+    Out["invalid",number] = Invalid
+    
+    Out["ballast",array] = BallastPoints
+    Out["leftrail",array] = RailPointsL
+    Out["rightrail",array] = RailPointsR
+    
+    Out["highlight",number] = (Page==10) ? ((Address==2) ? 1 : (Address==5) ? Points:count() : 0) : 0
+    
+    return Out
+}
+function table plotBankedArc(In:array){ #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments, BlendIn, BlendOut
+    local Out = table()
+    local StartPos = In[2,vector2]
+    local StartDir = In[3,number]
+    local EndDir = In[4,number]
+    local EndPos = In[5,vector2]
+    local Radius = In[6,number]
+    local Height = In[7,number]
+    local Segments = In[8,number]
+    local BlendIn = In[9,vector2]
+    local BlendOut = In[10,vector2]
+    
+    local StartV = tp3dir(StartDir):normalized()
+    local EndV = tp3dir(EndDir):normalized()
+    
+    local TotalLength = 0
+    local Points = array()
+    local Isect = vec2()
+    local GoesLeft = StartV:cross(EndV) > 0
+    if(GoesLeft){
+        local L1 = line(StartPos + Radius*StartV:rotate(90),StartV)
+        local L2 = line(EndPos + Radius*EndV:rotate(90),EndV)
+        
+        Isect = intersection(L1,L2)[2,vector2]
+    }else{
+        local L1 = line(StartPos + Radius*StartV:rotate(-90),StartV)
+        local L2 = line(EndPos + Radius*EndV:rotate(-90),EndV)
+        
+        Isect = intersection(L1,L2)[2,vector2]
+    }
+    local StartAngle = atan(StartV:y(),StartV:x()) + (GoesLeft ? -90 : 90)
+    local EndAngle = atan(EndV:y(),EndV:x()) + (GoesLeft ? -90 : 90)
+    
+    local AngDiff = angnorm(EndAngle-StartAngle)
+    
+    Points[1,vector2] = StartPos
+    
+    for(N=0,Segments){
+        local Theta = StartAngle + N*AngDiff/Segments
+        Points[N+2,vector2] = Isect + Radius*vec2(cos(Theta),sin(Theta))
+    }
+    Points[Segments+3,vector2] = EndPos
+    
+    local Invalid = 0
+    local StartValid = (Points[2,vector2]-StartPos):dot(StartV) >= 0
+    local EndValid = (Points[Segments+2,vector2]-EndPos):dot(-EndV) >= 0
+    local StartSwing = 2
+    local EndSwing = Segments+2
+    
+    if(EndValid){
+        if(EndPos:distance(Points[Segments+2,vector2])<1){
+            Points:remove(Segments+2)
+        }
+    }else{
+        Invalid = 1
+    }
+    if(StartValid){
+        if(StartPos:distance(Points[2,vector2])<1){
+            Points:remove(2)
+            StartSwing -= 1
+            EndSwing -= 1
+        }
+    }else{
+        Invalid = 1
+    }
+    
+    for(N=2,Points:count()){
+        TotalLength += (Points[N,vector2]-Points[N-1,vector2]):length()
+    }
+    
+    local Grade = Height/TotalLength
+    
+    local BallastPoints = array()
+    local RailPointsR = array()
+    local RailPointsL = array()
+    
+    local DirN = tp3dir(StartDir):normalized()
+    local Left = DirN:rotate(90)
+    local Right = DirN:rotate(-90)
+    
+    BallastPoints[1,vector2] = StartPos + Right*BallastBlockWidth/2
+    BallastPoints[2*Points:count(),vector2] = StartPos + Left*BallastBlockWidth/2 
+    RailPointsR[1,vector2] = StartPos + Right*TrackGauge/2
+    RailPointsL[1,vector2] = StartPos + Left*TrackGauge/2
+    
+    for(N=2,Points:count()-1){
+        
+        local Far = Points[N+1,vector2]
+        local Mid = Points[N,vector2]
+        local Near = Points[N-1,vector2]
+        
+        local Dir = (((Far-Mid):normalized() + (Mid-Near):normalized())/2):normalized()
+        Left = Dir:rotate(90)
+        Right = Dir:rotate(-90)
+        
+        BallastPoints[N,vector2] = Mid + Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = Mid + Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = Mid + Right*TrackGauge/2
+        RailPointsL[N,vector2] = Mid + Left*TrackGauge/2
+    }
+    
+    DirN = tp3dir(EndDir):normalized()
+    Left = DirN:rotate(90)
+    Right = DirN:rotate(-90)
+    
+    BallastPoints[Points:count(),vector2] = EndPos + Right*BallastBlockWidth/2
+    BallastPoints[Points:count()+1,vector2] = EndPos + Left*BallastBlockWidth/2 
+    RailPointsR[Points:count(),vector2] = EndPos + Right*TrackGauge/2
+    RailPointsL[Points:count(),vector2] = EndPos + Left*TrackGauge/2
+    
+    local BHs = array()
+    local PC = Points:count()-1
+    
+    #Find Banked Heights
+        
+    local StartIn = BlendIn:x()
+    local EndIn = BlendIn:y()
+    local StartOut = PC - BlendOut:y()
+    local EndOut = PC - BlendOut:x()
+    
+    #Start with real flats just in case
+    if(StartIn>0){
+        for(N=0,StartIn){
+            BHs[N+1,number] = 0
+        }
+    }
+    #Transition In (if any)
+    if(EndIn>StartIn){
+        for(N=StartIn,EndIn){
+            BHs[N+1,number] = 1*((N-StartIn)/(EndIn-StartIn))
+        }
+    }
+    #Full Banked
+    if(StartOut>EndIn){
+        for(N=EndIn,StartOut){
+            BHs[N+1,number] = 1
+        }
+    }
+    #Transition Out (if any)
+    if(EndOut>StartOut){
+        for(N=StartOut,EndOut){
+            BHs[N+1,number] = 1*((PC-N-BlendOut:x())/(EndOut-StartOut))
+        }
+    }
+    #end just in case
+    if(EndOut<PC){
+        for(N=EndOut,PC){
+            BHs[N+1,number] = 0
+        }
+    }
+    
+    Out["startpos",vector2] = StartPos
+    Out["endpos",vector2] = EndPos
+    Out["startdir",number] = StartDir
+    Out["enddir",number] = EndDir
+    Out["radius",number] = Radius
+    Out["height",number] = Height
+    Out["segments",number] = Segments
+    Out["blendin",vector2] = BlendIn
+    Out["blendout",vector2] = BlendOut
+    
+    Out["type",string] = "banked_arc"
+    Out["plot",array] = Points
+    Out["grade",number] = Grade
+    Out["center",vector2] = Isect
+    Out["startswing",number] = StartSwing
+    Out["endswing",number] = EndSwing
+    Out["invalid",number] = Invalid
+    
+    Out["bankheights",array] = BHs
+    
+    Out["ballast",array] = BallastPoints
+    Out["leftrail",array] = RailPointsL
+    Out["rightrail",array] = RailPointsR
+    
+    Out["highlight",number] = (Page==10) ? ((Address==2) ? 1 : (Address==5) ? Points:count() : 0) : 0
+    
+    return Out
+}
+function table plotBezier(In:array){ #Startpos, StartDir, StartCP, EndPos, EndDir, EndCP, Height, Segments
+    local Out = table()
+    
+    local StartPos = In[2,vector2]
+    local StartDir = In[3,number]
+    local StartCP = In[4,number]
+    local EndPos = In[5,vector2]
+    local EndDir = In[6,number]
+    local EndCP = In[7,number]
+    local Height = In[8,number]
+    local Segments = In[9,number]
+    local Crossover = In[10,number]
+    
+    local Points = array()
+    
+    local CP1 = StartPos + StartCP*tp3dir(StartDir)
+    local CP2 = EndPos - EndCP*tp3dir(EndDir)
+    
+    for(N=0,Segments){
+        local AB = mid2(StartPos,CP1,N/Segments)
+        local BC = mid2(CP1,CP2,N/Segments)
+        local CD = mid2(CP2,EndPos,N/Segments)
+        local ABC = mid2(AB,BC,N/Segments)
+        local BCD = mid2(BC,CD,N/Segments)
+        Points[N+1,vector2] = mid2(ABC,BCD,N/Segments)
+    }
+    local TotalLength = 0
+    for(N=2,Points:count()){
+        TotalLength += (Points[N,vector2]-Points[N-1,vector2]):length()
+    }
+    local Grade = Height/TotalLength
+    
+    local BallastPoints = array()
+    local RailPointsR = array()
+    local RailPointsL = array()
+    
+    local Dirs = array()
+    
+    local DirN = tp3dir(StartDir):normalized()
+    Dirs[1,vector2] = DirN
+    local Left = DirN:rotate(90)
+    local Right = DirN:rotate(-90)
+    
+    BallastPoints[1,vector2] = StartPos + Right*BallastBlockWidth/2
+    BallastPoints[2*Points:count(),vector2] = StartPos + Left*BallastBlockWidth/2 
+    RailPointsR[1,vector2] = StartPos + Right*TrackGauge/2
+    RailPointsL[1,vector2] = StartPos + Left*TrackGauge/2
+    
+    for(N=2,Points:count()-1){
+        
+        local Far = Points[N+1,vector2]
+        local Mid = Points[N,vector2]
+        local Near = Points[N-1,vector2]
+        
+        local Dir = ((Far-Mid):normalized() + (Mid-Near):normalized()):normalized()
+        Dirs[N,vector2] = Dir
+        Left = Dir:rotate(90)
+        Right = Dir:rotate(-90)
+        
+        BallastPoints[N,vector2] = Mid + Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = Mid + Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = Mid + Right*TrackGauge/2
+        RailPointsL[N,vector2] = Mid + Left*TrackGauge/2
+    }
+    
+    DirN = tp3dir(EndDir):normalized()
+    Dirs[Points:count(),vector2] = DirN
+    Left = DirN:rotate(90)
+    Right = DirN:rotate(-90)
+    
+    BallastPoints[Points:count(),vector2] = EndPos + Right*BallastBlockWidth/2
+    BallastPoints[Points:count()+1,vector2] = EndPos + Left*BallastBlockWidth/2 
+    RailPointsR[Points:count(),vector2] = EndPos + Right*TrackGauge/2
+    RailPointsL[Points:count(),vector2] = EndPos + Left*TrackGauge/2
+    
+    local MinRadius = inf()
+    local TightestSeg = 0
+    local Center = vec2()
+    for(N=2,Points:count()){
+        local DF = Dirs[N,vector2]:rotate(90)
+        local DN = Dirs[N-1,vector2]:rotate(90)
+        local L1 = line(Points[N,vector2],DF)
+        local L2 = line(Points[N-1,vector2],DN)
+        local ISM = intersection(L1,L2)
+        if(!ISM[1,number]){ #Segments Not Parallel
+            local R = Points[N,vector2]:distance(ISM[2,vector2])
+            
+            if(R<MinRadius){
+                MinRadius = R
+                TightestSeg = N-1
+                Center = ISM[2,vector2]
+            }
+        }
+    }
+    
+    Out["startpos",vector2] = StartPos
+    Out["endpos",vector2] = EndPos
+    Out["startdir",number] = StartDir
+    Out["enddir",number] = EndDir
+    Out["startcp",number] = StartCP
+    Out["endcp",number] = EndCP
+    Out["height",number] = Height
+    Out["segments",number] = Segments
+    Out["xover",number] = Crossover
+    
+    Out["type",string] = "bezier"
+    Out["plot",array] = Points
+    Out["grade",number] = Grade
+    Out["cp1",vector2] = CP1
+    Out["cp2",vector2] = CP2
+    Out["tseg",number] = TightestSeg
+    Out["minr",number] = round(MinRadius)
+    Out["center",vector2] = Center
+
+    Out["ballast",array] = BallastPoints
+    Out["leftrail",array] = RailPointsL
+    Out["rightrail",array] = RailPointsR
+    
+    Out["highlight",number] = (Page==10) ? ((Address==2) ? 1 : (Address==5) ? Points:count() : 0) : 0
+    
+    return Out
+}
+
+function table plotSwitch(In:array){ #Main, Div, Splitmode
+    local Out = table()
+    local MN = In[2,number]
+    local DV = In[3,number]
+    local Split = In[4,string]
+    
+    local StartMN = EGP_Datas[MN,table]["startpos",vector2]
+    local StartDV = EGP_Datas[DV,table]["startpos",vector2]
+    local GoodPos = StartMN==StartDV
+    
+    local DirMN = EGP_Datas[MN,table]["startdir",number]
+    local DirDV = EGP_Datas[DV,table]["startdir",number]
+    local GoodDir = DirMN==DirDV
+    
+    local HgtMN = EGP_Datas[MN,table]["height",number]
+    local HgtDV = EGP_Datas[DV,table]["height",number]
+    local GoodHgt = HgtMN==HgtDV
+    
+    local EndMN = EGP_Datas[MN,table]["endpos",vector2]
+    local EndDV = EGP_Datas[DV,table]["endpos",vector2]
+    local XProduct = (EndMN-StartMN):cross(EndDV-StartDV)
+    
+    local Go = (XProduct>0) ? "Right" : (XProduct<0) ? "Left" : "Error"
+    
+    Out["type",string] = "switch"
+    Out["mn",number] = MN
+    Out["dv",number] = DV
+    Out["splitmode",string] = Split
+    Out["validswitch",number] = GoodPos & GoodDir & GoodHgt & (XProduct!=0)
+    Out["goes",string] = Go
+    
+    return Out
+}
+
+function void wirelink:updatePage(){
+    local Blonk = blank()
+    for(N=1,18){ 
+        local NS = N:toString()
+        This:csWriteLeft(N,Blonk,vec(0),0)
+        if(Lines:exists(NS)){
+            local Selected = Line==N
+            local V = Lines[NS,array]
+            
+            This:csWriteLeft(N,V[1,string],V[4,vector],Selected)
+            This:csWriteCenter(N,V[2,string],V[5,vector],Selected)
+            This:csWriteRight(N,V[3,string],V[6,vector],Selected)
+        }
+    }
+    return void
+}
+function void wirelink:initPage(PageID){ #Make default values for things
+    LastLine[Page,number] = Line
+    Page = PageID
+    Lines = table()
+    switch(int(Page)){
+        case 0, #Main Menu
+            MinLine = 5
+            MaxLine = 13
+            Line = max(MinLine,LastLine[Page,number])
+        
+            Lines["1",array] = array("","John Henry V1.0","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Trakpak3 Track Generator","",vec(),CS_Header,vec())
+            Lines["3",array] = array("","By Magnum MacKivler","",vec(),CS_Header,vec())
+            
+            Lines["5",array] = array("New Piece","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["6",array] = array("Edit Pieces","","",(CS_Data:count()==0) ? CS_Locked : CS_Button,vec(),vec())
+            Lines["7",array] = array("Delete Piece","","",(CompileReady|(CS_Data:count()==0)) ? CS_Locked : CS_Button,vec(),vec())
+            Lines["8",array] = array("Settings","","",CS_Button,vec(),vec())
+            Lines["9",array] = array("Camera Controls","","",CS_Button,vec(),vec())
+            Lines["10",array] = array("Create Save","","",CS_Button,vec(),vec())
+            Lines["11",array] = array("Load Save","","",CS_Button,vec(),vec())
+            Lines["12",array] = array("Delete Save","","",CS_Button,vec(),vec())
+            Lines["13",array] = array("Reset John Henry","","",CS_Button_Important,vec(),vec())
+            break
+        case 1, #Select New Piece Type
+            MinLine = 4
+            MaxLine = 8
+            Line = max(MinLine,LastLine[Page,number])
+        
+            Lines["1",array] = array("","New Piece","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Select Type","",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("Straight","","",CS_Button,vec(),vec())
+            Lines["5",array] = array("Curve (Arc)","","",CS_Button,vec(),vec())
+            Lines["6",array] = array("Banked Curve (Arc)","","",CS_Button,vec(),vec())
+            Lines["7",array] = array("Curve (Bezier)","","",CS_Button,vec(),vec())
+            Lines["8",array] = array("Switch","","",CS_Button,vec(),vec())
+            break
+        case 2, #Straight Data
+            MinLine = 4
+            MaxLine = 10
+            Line = max(MinLine,LastLine[Page,number])
+            
+            local Data = CS_Data[CS_PieceID,array]
+            
+            Lines["1",array] = array("","Straight","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["6",array] = array("Length:","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["7",array] = array("Height:","",Data[5,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["8",array] = array("Number of Segments:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["9",array] = array("Mirror","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["10",array] = array(VonMode ? "Export This VON" : "Write and Compile","","",CompileReady ? CS_Locked : CS_Button_Important,vec(),vec())
+            
+            Lines["13",array] = array("End Pos:","",EGP_Datas[CS_PieceID,table]["endpos",vector2]:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["14",array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            
+            SelectedPlot = CS_PieceID
+            EGP:egpInitPage(1)
+            autosave()
+            break
+        case 3, #Arc Data
+            MinLine = 4
+            MaxLine = 13
+            Line = max(MinLine,LastLine[Page,number])
+            
+            local Data = CS_Data[CS_PieceID,array]
+            
+            Lines["1",array] = array("","Curve (Arc)","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Start Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["6",array] = array("End Direction:","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["7",array] = array("End Pos:","",Data[5,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["8",array] = array("Radius:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["9",array] = array("Height:","",Data[7,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["10",array] = array("Number of Segments:","",Data[8,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["11",array] = array("Mirror","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["12",array] = array("Invert","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["13",array] = array(VonMode ? "Export This VON" : "Write and Compile","","",CompileReady ? CS_Locked : CS_Button_Important,vec(),vec())
+            
+            Lines["15",array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            
+            SelectedPlot = CS_PieceID
+            EGP:egpInitPage(1)
+            autosave()
+            break
+        case 4, #Banked Arc
+            MinLine = 4
+            MaxLine = 16
+            Line = max(MinLine,LastLine[Page,number])
+            
+            local Data = CS_Data[CS_PieceID,array]
+            
+            Lines["1",array] = array("","Curve (Banked Arc)","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Start Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["6",array] = array("End Direction:","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["7",array] = array("End Pos:","",Data[5,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["8",array] = array("Radius:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["9",array] = array("Height:","",Data[7,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["10",array] = array("Number of Segments:","",Data[8,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["11",array] = array("Blend In From:","",Data[9,vector2]:x():toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["12",array] = array("Blend In To:","",Data[9,vector2]:y():toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["13",array] = array("Blend Out From:","",Data[10,vector2]:x():toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["14",array] = array("Blend Out To:","",Data[10,vector2]:y():toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["15",array] = array("Mirror","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["16",array] = array(VonMode ? "Export This VON" : "Write and Compile","","",CompileReady ? CS_Locked : CS_Button_Important,vec(),vec())
+            
+            Lines["18",array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            
+            SelectedPlot = CS_PieceID
+            EGP:egpInitPage(1)
+            autosave()
+            break
+        case 5, #Bez Data
+            MinLine = 4
+            MaxLine = 15
+            Line = max(MinLine,LastLine[Page,number])
+            
+            local Data = CS_Data[CS_PieceID,array]
+            
+            Lines["1",array] = array("","Curve (Bezier)","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Start Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["6",array] = array("Start CP Length","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["7",array] = array("End Pos:","",Data[5,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["8",array] = array("End Direction:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["9",array] = array("End CP Length:","",Data[7,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["10",array] = array("Height:","",Data[8,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["11",array] = array("Number of Segments:","",Data[9,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["12",array] = array("Crossover Cut:","",Data[10,number] ? "X-Over" : "Normal",CompileReady ? CS_Locked :CS_Property, vec(),CS_Value_Edit)
+            Lines["13",array] = array("Mirror","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["14",array] = array("Axial Mirror","","",CompileReady ? CS_Locked : CS_Button,vec(),vec())
+            Lines["15",array] = array(VonMode ? "Export This VON" : "Write and Compile","","",CompileReady ? CS_Locked : CS_Button_Important,vec(),vec())
+            
+            
+            Lines["17",array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Lines["18",array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            
+            SelectedPlot = CS_PieceID
+            EGP:egpInitPage(1)
+            autosave()
+            break
+        case 6, #Switch Data
+            MinLine = 4
+            MaxLine = 8
+            Line = max(MinLine,LastLine[Page,number])
+            
+            local Data = CS_Data[CS_PieceID,array]
+            local Valid = EGP_Datas[CS_PieceID,table]["validswitch",number]
+            Lines["1",array] = array("","Switch","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
+            local TypeMN = CS_Data[Data[2,number],array][1,string]
+            local BadTypeMN = (TypeMN=="switch")|(TypeMN=="banked_arc")
+            local TypeDV = CS_Data[Data[3,number],array][1,string]
+            local BadTypeDV = (TypeDV=="switch")|(TypeDV=="banked_arc")
+            Valid = Valid & !BadTypeMN & !BadTypeDV
+            Lines["4",array] = array("Main Piece:","",Data[2,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),BadTypeMN ? CS_Button_Important : CS_Value_Edit)
+            Lines["5",array] = array("Diverging Piece:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),BadTypeDV ? CS_Button_Important : CS_Value_Edit)
+            Lines["6",array] = array("Split Mode","",Data[4,string],CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["7",array] = array("Swap MN/DV","(MN)","(DV)",CompileReady ? CS_Locked : CS_Button,EGP_MN,EGP_DV)
+            Lines["8",array] = array(VonMode ? "Export All VONs" : "Write and Compile","","",CompileReady ? CS_Locked : CS_Button_Important,vec(),vec())
+            
+            Lines["10",array] = array("Valid Switch?","",Valid ? "Yes" : "No",CS_Property,vec(),CS_Value_Calc)
+            Lines["11",array] = array("Main piece goes:","",EGP_Datas[CS_PieceID,table]["goes",string],CS_Property,vec(),CS_Value_Calc)
+            SelectedPlot = CS_PieceID
+            EGP:egpInitPage(1)
+            autosave()
+            break
+        case 7, #Edit Pieces Menu
+            MinLine = 3
+            MaxLine = CS_Pieces+2
+            Line = max(MinLine,LastLine[Page,number])
+            
+            Lines["1",array] = array("","Edit Piece:","",vec(),CS_Header,vec())
+            
+            for(N=1,CS_Data:count()){
+                local Data = CS_Data[N:toString(),array]
+                Lines[(N+2):toString(),array] = array(N:toString(),CS_Data[N,array][1,string],"",CS_Button,CS_Button,vec())
+            }
+            break
+        case 8, #Delete Pieces Menu
+            MinLine = 3
+            MaxLine = CS_Pieces+2
+            Line = max(MinLine,LastLine[Page,number])
+            
+            Lines["1",array] = array("","Delete Piece:","",vec(),CS_Header,vec())
+            
+            for(N=1,CS_Data:count()){
+                local Data = CS_Data[N:toString(),array]
+                Lines[(N+2):toString(),array] = array(N:toString(),CS_Data[N,array][1,string],"",CS_Button_Important,CS_Button_Important,vec())
+            }
+            break
+        case 9, #Reset Prompt
+            MinLine = 4
+            MaxLine = 5
+            Line = max(MinLine,LastLine[Page,number])
+            
+            Lines["1",array] = array("","Reset John Henry?","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Are you sure?","",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("No, don't reset!","","",CS_Button,vec(),vec())
+            Lines["5",array] = array("Yes, reset!","","",CS_Button_Important,vec(),vec())
+            break
+        case 10, #Position Adjust
+            
+            InitVector = CS_Data[CS_PieceID,array][Address,vector2]
+            AdjustVector = InitVector
+            InitVector2 = CS_Data[CS_PieceID,array][Address2,vector2]
+            AdjustVector2 = InitVector2
+            
+            Line = 12
+            
+            Lines["1",array] = array("","Adjust Position","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("","W","",vec(),CS_Button,vec())
+            Lines["4",array] = array("","|","",vec(),CS_Button,vec())
+            Lines["5",array] = array("","A-*-D","",vec(),CS_Button,vec())
+            Lines["6",array] = array("","|","",vec(),CS_Button,vec())
+            Lines["7",array] = array("","S","",vec(),CS_Button,vec())
+            
+            Lines["9",array] = array("Snap Size:","",CS_Snap:toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            Lines["11",array] = array("Initial:","",InitVector:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["12",array] = array("New:","",InitVector:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            Lines["14",array] = array("New (# of Steps):","",round(InitVector/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            local Ln = 16
+            if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+                Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+                Ln++
+            }
+            Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            break
+        case 11, #Direction Adjust
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 4
+            
+            Lines["1",array] = array("","Adjust Direction","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            SelectedDirection = AdjustNumber
+            EGP:egpInitPage(2)
+            
+            break
+        case 12, #CP Distance Adjust
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 6
+            
+            Lines["1",array] = array("","Adjust CP Distance","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Snap Size:","",CS_Snap:toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            Lines["5",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            local Ln = 10
+            if(1){
+                Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+                Ln++
+            }
+            Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            break
+        case 13, #Height Adjust
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 6
+            
+            Lines["1",array] = array("","Adjust Height","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Snap Size:","",CS_HeightSnap:toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            Lines["5",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_HeightSnap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            local Ln = 10
+            Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+            break
+        case 14, #Radius Adjust
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 6
+            Lines["1",array] = array("","Adjust Radius","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Snap Size:","",CS_Snap:toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            Lines["5",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+            break
+        case 15, #Segments Adjust
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 4
+            
+            Lines["1",array] = array("","Adjust Segs","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            break
+        case 16, #Length Adjust
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 6
+            Lines["1",array] = array("","Adjust Length","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Snap Size:","",CS_Snap:toString(),CS_Property,vec(),CS_Value_Calc)
+            
+            Lines["5",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            
+            Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+            break
+        case 17, #Switch Piece ID
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            
+            Line = 4
+            Lines["1",array] = array("","Adjust Piece ID","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            break
+        case 18, #Switch Split Mode
+            
+            InitNumber = CS_Data[CS_PieceID,array][Address,number]
+            AdjustNumber = InitNumber
+            MinLine = 3
+            MaxLine = 5
+            Line = max(MinLine,LastLine[Page,number])
+            Lines["1",array] = array("","Adjust Split Mode","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Split Main","",InitNumber:toString(),CS_Button,vec(),vec())
+            Lines["4",array] = array("Split Diverging","",AdjustNumber:toString(),CS_Button,vec(),vec())
+            Lines["5",array] = array("No Split","",AdjustNumber:toString(),CS_Button,vec(),vec())
+            break
+        case 19, #General Settings
+            
+            MinLine = 3
+            MaxLine = 6
+            Line = max(MinLine,LastLine[Page,number])
+            Lines["1",array] = array("","Settings","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("General Snap","",CS_Snap:toString(),CS_Property,vec(),CS_Value_Edit)
+            Lines["4",array] = array("Height Snap","",CS_HeightSnap:toString(),CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Export Mode","",VonMode ? "VON Export" : "JH Compile",CS_Property,vec(),CS_Button)
+            Lines["6",array] = array("Clear VON Docket","","",CS_Button_Important,vec(),vec())
+            break
+        case 20, #General Snap Setting
+            
+            InitNumber = CS_Snap
+            AdjustNumber = InitNumber
+            
+            Line = 4
+            Lines["1",array] = array("","General Snap","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            break
+        case 21, #Height Snap Setting
+            
+            InitNumber = CS_HeightSnap
+            AdjustNumber = InitNumber
+            
+            Line = 4
+            Lines["1",array] = array("","Height Snap","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            break
+        case 22, #Camera Control
+            
+            Line = 0
+        
+            Lines["1",array] = array("","Camera Controls","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("","W","(Zoom In)",vec(),CS_Button,CS_Button)
+            Lines["4",array] = array("","|","Up",vec(),CS_Button,CS_Button)
+            Lines["5",array] = array("","A-*-D","",vec(),CS_Button,vec())
+            Lines["6",array] = array("","|","Dn",vec(),CS_Button,CS_Button)
+            Lines["7",array] = array("","S","(Zoom Out)",vec(),CS_Button,CS_Button)
+            
+            Lines["9",array] = array("","Space (Auto)","",vec(),CS_Button,vec())
+            break
+        case 23, #Banking Transition Points
+            InitVector = CS_Data[CS_PieceID,array][Address,vector2]
+            local Frac = frac(PageID)
+            InitNumber = ((Frac==0.1)|(Frac==0.3)) ? InitVector:x() : InitVector:y()
+            AdjustNumber = InitNumber
+            
+            Line = 4
+            Lines["1",array] = array("","Adjust Piece ID","",vec(),CS_Header,vec())
+            
+            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            break
+        case 24, #File Menu
+            
+            local Frac = frac(PageID)
+            local Header = (Frac==0.1) ? "Create Save" : (Frac==0.2) ? "Load Save" : "Delete Save"
+            
+            local ColorExists = (Frac==0.1) ? CS_Button_Important : (Frac==0.2) ? CS_Button : CS_Button_Important
+            local ColorEmpty = (Frac==0.1) ? CS_Button : CS_Property
+            processManifest()
+            #printTable(Manifest)
+            local Exists = array()
+            for(N=1,8){
+                Exists[N,number] = !Manifest[N,string]:find("empty")
+            }
+            #printTable(Exists)
+            MinLine = 3
+            MaxLine = 10
+            Line = max(MinLine,LastLine[Page,number])
+        
+            Lines["1",array] = array("",Header,"",vec(),CS_Header,vec())
+            
+            for(N=1,8){
+                Lines[(N+2):toString(),array] = array(Manifest[N,string],"","",Exists[N,number] ? ColorExists : ColorEmpty,vec(),vec())
+            }
+            
+            break
+        case 25, #Please Wait
+            Line = 1
+            Lines["9",array] = array("","Please Wait...","",vec(),CS_Header,vec())
+            break
+        case 26, #Reset VON Prompt
+            MinLine = 4
+            MaxLine = 5
+            Line = max(MinLine,LastLine[Page,number])
+            
+            Lines["1",array] = array("","Clear VON Docket?","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","Rename the file to keep it!","",vec(),CS_Header,vec())
+            
+            Lines["4",array] = array("No, don't clear VON data!","","",CS_Button,vec(),vec())
+            Lines["5",array] = array("Yes, clear VON data!","","",CS_Button_Important,vec(),vec())
+            break
+    }
+    
+    This:updatePage()
+    return void
+}
+function string writeAllVons(){
+    local Out = ""
+    
+    for(N=1,EGP_Datas:count()){
+        local Data = EGP_Datas[N,table]
+        #printTable(Data)
+        local DTable = table()
+        local Descriptor = ""
+        DTable["Index",number] = N
+        DTable["Type",string] = Data["type",string]
+        
+        switch(Data["type",string]){
+            case "straight",
+                DTable["StartPos",vector2] = Data["startpos",vector2]
+                DTable["Dir",number] = Data["startdir",number]
+                DTable["Length",number] = Data["length",number]
+                DTable["Height",number] = Data["height",number]
+                DTable["Segments",number] = Data["segments",number]
+                Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+            break
+            case "arc",
+                DTable["StartPos",vector2] = Data["startpos",vector2]
+                DTable["EndPos",vector2] = Data["endpos",vector2]
+                DTable["StartDir",number] = Data["startdir",number]
+                DTable["EndDir",number] = Data["enddir",number]
+                DTable["Radius",number] = Data["radius",number]
+                DTable["Height",number] = Data["height",number]
+                DTable["Segments",number] = Data["segments",number]
+                Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+            break
+            case "banked_arc",
+                DTable["StartPos",vector2] = Data["startpos",vector2]
+                DTable["EndPos",vector2] = Data["endpos",vector2]
+                DTable["StartDir",number] = Data["startdir",number]
+                DTable["EndDir",number] = Data["enddir",number]
+                DTable["Radius",number] = Data["radius",number]
+                DTable["Height",number] = Data["height",number]
+                DTable["Segments",number] = Data["segments",number]
+                DTable["BlendIn",number] = Data["blendin",number]
+                DTable["BlendOut",number] = Data["blendout",number]
+                Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND "+DTable["BlendIn",number]+" in, "+DTable["BlendOut",number]+" out"
+            break
+            case "bezier",
+                DTable["StartPos",vector2] = Data["startpos",vector2]
+                DTable["EndPos",vector2] = Data["endpos",vector2]
+                DTable["StartDir",number] = Data["startdir",number]
+                DTable["EndDir",number] = Data["enddir",number]
+                DTable["StartCPLength",number] = Data["startcp",number]
+                DTable["EndCPLength",number] = Data["endcp",number]
+                DTable["Height",number] = Data["height",number]
+                DTable["Segments",number] = Data["segments",number]
+                DTable["Xover",number] = Data["xover",number]
+                Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+Data["minr",number]+", HEIGHT "+DTable["Height",number]+(DTable["Xover",number] ? " XOVER" : "")
+            break
+            case "switch",
+                DTable["MainPiece",number] = Data["mn",number]
+                DTable["DivPiece",number] = Data["dv",number]
+                DTable["Split",string] = Data["splitmode",string]
+                Descriptor = "//SWITCH"
+            break
+        }
+        Out += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+    }
+    
+    return Out
+}
+
+function string writeSingleVon(){
+    local Data = EGP_Datas[CS_PieceID,table]
+    #printTable(Data)
+    local DTable = table()
+    local Descriptor = ""
+    DTable["Index",number] = 1
+    DTable["Type",string] = Data["type",string]
+    
+    switch(Data["type",string]){
+        case "straight",
+            DTable["StartPos",vector2] = Data["startpos",vector2]
+            DTable["Dir",number] = Data["startdir",number]
+            DTable["Length",number] = Data["length",number]
+            DTable["Height",number] = Data["height",number]
+            DTable["Segments",number] = Data["segments",number]
+            Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        break
+        case "arc",
+            DTable["StartPos",vector2] = Data["startpos",vector2]
+            DTable["EndPos",vector2] = Data["endpos",vector2]
+            DTable["StartDir",number] = Data["startdir",number]
+            DTable["EndDir",number] = Data["enddir",number]
+            DTable["Radius",number] = Data["radius",number]
+            DTable["Height",number] = Data["height",number]
+            DTable["Segments",number] = Data["segments",number]
+            Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+        break
+        case "banked_arc",
+            DTable["StartPos",vector2] = Data["startpos",vector2]
+            DTable["EndPos",vector2] = Data["endpos",vector2]
+            DTable["StartDir",number] = Data["startdir",number]
+            DTable["EndDir",number] = Data["enddir",number]
+            DTable["Radius",number] = Data["radius",number]
+            DTable["Height",number] = Data["height",number]
+            DTable["Segments",number] = Data["segments",number]
+            DTable["BlendIn",number] = Data["blendin",number]
+            DTable["BlendOut",number] = Data["blendout",number]
+            Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND "+DTable["BlendIn",number]+" in, "+DTable["BlendOut",number]+" out"
+        break
+        case "bezier",
+            DTable["StartPos",vector2] = Data["startpos",vector2]
+            DTable["EndPos",vector2] = Data["endpos",vector2]
+            DTable["StartDir",number] = Data["startdir",number]
+            DTable["EndDir",number] = Data["enddir",number]
+            DTable["StartCPLength",number] = Data["startcp",number]
+            DTable["EndCPLength",number] = Data["endcp",number]
+            DTable["Height",number] = Data["height",number]
+            DTable["Segments",number] = Data["segments",number]
+            DTable["Xover",number] = Data["xover",number]
+            Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+Data["minr",number]+", HEIGHT "+DTable["Height",number]
+        break
+        case "switch", #Can't do switches single
+        break
+    }
+    return Descriptor+"\n"+vonEncode(DTable)+"\n"
+}
+
+function array wirelink:writePieces(){
+    local Script = array()
+    
+    CompileReady = 1
+    
+    
+    for(N=1,EGP_Datas:count()){
+        local Data = EGP_Datas[N,table]
+        switch(Data["type",string]){
+            case "straight",
+                Script:pushString(".newpiece straight name")
+                Script:pushString(".define startpos "+Data["startpos",vector2]:x()+" "+Data["startpos",vector2]:y())
+                Script:pushString(".define dir "+Data["startdir",number])
+                Script:pushString(".define length "+Data["length",number])
+                Script:pushString(".define height "+Data["height",number])
+                Script:pushString(".define segments "+Data["segments",number])
+                Script:pushString(".plot")
+                #Script:pushString(".draw")
+                break
+            case "arc",
+                Script:pushString(".newpiece arc name")
+                Script:pushString(".define startpos "+Data["startpos",vector2]:x()+" "+Data["startpos",vector2]:y())
+                Script:pushString(".define endpos "+Data["endpos",vector2]:x()+" "+Data["endpos",vector2]:y())
+                Script:pushString(".define startdir "+Data["startdir",number])
+                Script:pushString(".define enddir "+Data["enddir",number])
+                Script:pushString(".define radius "+Data["radius",number])
+                Script:pushString(".define height "+Data["height",number])
+                Script:pushString(".define segments "+Data["segments",number])
+                Script:pushString(".plot")
+                #Script:pushString(".draw")
+                break
+            case "banked_arc",
+                Script:pushString(".newpiece banked_arc name")
+                Script:pushString(".define startpos "+Data["startpos",vector2]:x()+" "+Data["startpos",vector2]:y())
+                Script:pushString(".define endpos "+Data["endpos",vector2]:x()+" "+Data["endpos",vector2]:y())
+                Script:pushString(".define startdir "+Data["startdir",number])
+                Script:pushString(".define enddir "+Data["enddir",number])
+                Script:pushString(".define radius "+Data["radius",number])
+                Script:pushString(".define height "+Data["height",number])
+                Script:pushString(".define segments "+Data["segments",number])
+                Script:pushString(".define blendin "+Data["blendin",vector2]:x()+" "+Data["blendin",vector2]:y())
+                Script:pushString(".define blendout "+Data["blendout",vector2]:x()+" "+Data["blendout",vector2]:y())
+                Script:pushString(".plot")
+                #Script:pushString(".draw")
+                break
+            case "bezier",
+                Script:pushString(".newpiece bezier name")
+                Script:pushString(".define startpos "+Data["startpos",vector2]:x()+" "+Data["startpos",vector2]:y())
+                Script:pushString(".define endpos "+Data["endpos",vector2]:x()+" "+Data["endpos",vector2]:y())
+                Script:pushString(".define startdir "+Data["startdir",number])
+                Script:pushString(".define enddir "+Data["enddir",number])
+                Script:pushString(".define startcp "+Data["startcp",number])
+                Script:pushString(".define endcp "+Data["endcp",number])
+                Script:pushString(".define height "+Data["height",number])
+                Script:pushString(".define segments "+Data["segments",number])
+                Script:pushString(".define xover "+Data["xover",number])
+                Script:pushString(".plot")
+                #Script:pushString(".draw")
+                break
+            case "switch",
+                Script:pushString(".newpiece switch name")
+                Script:pushString(".define mainpiece "+Data["mn",number])
+                Script:pushString(".define divpiece "+Data["dv",number])
+                Script:pushString(".define split "+Data["splitmode",string])
+                Script:pushString(".plot")
+                break
+        }
+    }
+    switch(EGP_Datas[CS_PieceID,table]["type",string]){
+        case "straight",
+            This:initPage(2)
+            break
+        case "arc",
+            This:initPage(3)
+            break
+        case "banked_arc",
+            This:initPage(4)
+            break
+        case "bezier",
+            This:initPage(5)
+            break
+        case "switch",
+            This:initPage(6)
+            break
+    }
+    return Script
+}
+
+function table wirelink:applyStraight(){
+    local Data = CS_Data[CS_PieceID,array]
+    local Results = plotStraight(Data)
+    EGP_Datas[CS_PieceID,table] = Results
+    EGP:egpInitPage(1)
+    #autosave()
+    return Results
+}
+function table wirelink:applyArc(){
+    local Data = CS_Data[CS_PieceID,array]
+    local Results = plotArc(Data)
+    EGP_Datas[CS_PieceID,table] = Results
+    EGP:egpInitPage(1)
+    #autosave()
+    return Results
+}
+function table wirelink:applyBankedArc(){
+    local Data = CS_Data[CS_PieceID,array]
+    local Results = plotBankedArc(Data)
+    EGP_Datas[CS_PieceID,table] = Results
+    EGP:egpInitPage(1)
+    #autosave()
+    return Results
+}
+function table wirelink:applyBezier(){
+    local Data = CS_Data[CS_PieceID,array]
+    local Results = plotBezier(Data)
+    EGP_Datas[CS_PieceID,table] = Results
+    #printTable(Results)
+    EGP:egpInitPage(1)
+    #autosave()
+    return Results
+}
+function table wirelink:applySwitch(){
+    local Data =CS_Data[CS_PieceID,array]
+    local Results = plotSwitch(Data)
+    EGP_Datas[CS_PieceID,table] = Results
+    EGP:egpInitPage(1)
+    #autosave()
+    return Results
+}
+function void wirelink:genAll(){
+    for(N=1,CS_Data:count()){
+        local Data = CS_Data[N,array]
+        switch(Data[1,string]){
+            case "straight",
+                EGP_Datas[N,table] = plotStraight(Data)
+                break
+            case "arc",
+                EGP_Datas[N,table] = plotArc(Data)
+                break
+            case "banked_arc",
+                EGP_Datas[N,table] = plotBankedArc(Data)
+                break
+            case "bezier",
+                EGP_Datas[N,table] = plotBezier(Data)
+                break
+            default,
+                break
+        }
+    }
+    EGP:egpInitPage(1)
+}
+function void wirelink:pressApply(KillMarker){
+    if((Page==10)|(int(Page)==23)){
+        CS_Data[CS_PieceID,array][Address,vector2] = AdjustVector
+        if(Address2){
+            CS_Data[CS_PieceID,array][Address2,vector2] = AdjustVector2
+        }
+        local Type = CS_Data[CS_PieceID,array][1,string]
+        if(AdjustVector!=InitVector){
+            EGP_Datas[CS_PieceID,table]["plotted",number] = 0
+        }
+        switch(CS_Data[CS_PieceID,array][1,string]){
+            case "straight",
+                if(KillMarker){Page = 2}
+                This:applyStraight()
+                break
+            case "arc",
+                if(KillMarker){Page = 3}
+                This:applyArc()
+                break
+            case "banked_arc",
+                if(KillMarker){Page = 4}
+                This:applyBankedArc()
+                break
+            case "bezier",
+                if(KillMarker){Page = 5}
+                This:applyBezier()
+                break
+            case "switch",
+                if(KillMarker){Page = 6}
+                This:applySwitch()
+                break
+        }
+        if(KillMarker){Page = 10}
+        #Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+    }elseif((Page>10) & (Page<18)){
+        CS_Data[CS_PieceID,array][Address,number] = AdjustNumber
+        local Type = CS_Data[CS_PieceID,array][1,string]
+        if(AdjustVector!=InitVector){
+            EGP_Datas[CS_PieceID,table]["plotted",number] = 0
+        }
+        switch(CS_Data[CS_PieceID,array][1,string]){
+            case "straight",
+                This:applyStraight()
+                break
+            case "arc",
+                This:applyArc()
+                break
+            case "banked_arc",
+                This:applyBankedArc()
+                break
+            case "bezier",
+                This:applyBezier()
+                break
+            case "switch",
+                This:applySwitch()
+                break
+        }
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+    }
+    
+    return void
+}
+
+function void wirelink:pressContinue(){
+    switch(int(Page)){
+        case 0, #Main Menu
+            switch(Line){
+                case 5, #Go to New Piece
+                    if(CompileReady){
+                        Pod:soundPlay(0,0.5,"buttons/button19.wav")
+                    }else{
+                        This:initPage(1)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    }
+                    break
+                case 6, #Go to Edit Pieces
+                    if(CS_Pieces>0){
+                        This:initPage(7)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    }else{
+                        Pod:soundPlay(0,0.5,"buttons/button19.wav")
+                    }
+                    break
+                case 7, #Go to Delete Pieces
+                    if(CompileReady){
+                        Pod:soundPlay(0,0.5,"buttons/button19.wav")
+                    }else{
+                        if(CS_Pieces>0){
+                            This:initPage(8)
+                            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        }else{
+                            Pod:soundPlay(0,0.5,"buttons/button19.wav")
+                        }
+                    }
+                    break
+                case 8, #Settings
+                    This:initPage(19)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 9, #Camera Controls
+                    This:initPage(22)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 10, #Save Config
+                    This:initPage(24.1)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 11, #Load Config
+                    This:initPage(24.2)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 12, #Delete Config
+                    This:initPage(24.3)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 13, #Go to Reset Prompt
+                    This:initPage(9)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+            }
+            break
+        case 1, #New Piece Type Selection
+            switch(Line){
+                case 4, #Straight
+                    getUniqueID()
+                    CS_Data[CS_PieceID,array] = array("straight",vec2(),0,1024,0,1) #Startpos, Dir, Length, Height, Segments
+                    This:applyStraight()
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 5, #Arc
+                    getUniqueID()
+                    CS_Data[CS_PieceID,array] = array("arc",vec2(),0,-2,vec2(256,1024),1536,0,6) #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
+                    This:applyArc()
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 6, #Banked Arc - does nothing yet
+                    getUniqueID()
+                    CS_Data[CS_PieceID,array] = array("banked_arc",vec2(),0,-8,vec2(2048,2048),2048,0,16,vec2(0,2),vec2(0,2)) #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
+                    This:applyBankedArc()
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 7, #Bez
+                    getUniqueID()
+                    CS_Data[CS_PieceID,array] = array("bezier",vec2(),0,1024,vec2(256,2048),0,1024,0,8) #Startpos, StartDir, StartCP, EndPos, EndDir, EndCP, Height, Segments
+                    This:applyBezier()
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 8, #Switch
+                    getUniqueID()
+                    CS_Data[CS_PieceID,array] = array("switch",1,2,"main") #Main, Div, Split
+                    This:applySwitch()
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                    
+            }
+            break
+        case 2, #Straight Data
+            if(CompileReady){
+                Pod:soundPlay(0,0.5,"buttons/button19.wav")
+            }else{
+                switch(Line){
+                    case 4, #Start Pos
+                        Address = 2
+                        This:initPage(10)
+                        This:applyStraight()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 5, #Direction
+                        Address = 3
+                        ForbiddenDirection1 = -17
+                        ForbiddenDirection2 = -17
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 6, #Length
+                        Address = 4
+                        This:initPage(16)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 7, #Height
+                        Address = 5
+                        This:initPage(13)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 8, #Segments
+                        Address = 6
+                        This:initPage(15)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 9, #Mirror
+                        CS_Data[CS_PieceID,array][2,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][2,vector2]
+                        CS_Data[CS_PieceID,array][3,number] = -1*CS_Data[CS_PieceID,array][3,number]
+                        This:applyStraight()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 10, #Write and Compile
+                        if(VonMode){
+                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                        }else{
+                            Script = This:writePieces()
+                            AutoCompile = 1
+                            AutoCompileID = CS_PieceID
+                            FinalCompileID = EGP_Datas:count()
+                            timer(".runscript",500)
+                        }
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                }
+            }
+            break
+        case 3, #Arc Data
+            if(CompileReady){
+                Pod:soundPlay(0,0.5,"buttons/button19.wav")
+            }else{
+                switch(Line){
+                    case 4, #Start Pos
+                        Address = 2
+                        Address2 = 5
+                        This:initPage(10)
+                        This:applyArc()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 5, #Start Direction
+                        Address = 3
+                        local Data = CS_Data[CS_PieceID,array]
+                        ForbiddenDirection1 = Data[4,number]
+                        ForbiddenDirection2 = ForbiddenDirection1 - sign(ForbiddenDirection1+0.5)*16
+                        if(ForbiddenDirection2==-16){ForbiddenDirection2=16}
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 6, #End Direction
+                        Address = 4
+                        local Data = CS_Data[CS_PieceID,array]
+                        ForbiddenDirection1 = Data[3,number]
+                        ForbiddenDirection2 = ForbiddenDirection1 - sign(ForbiddenDirection1+0.5)*16
+                        if(ForbiddenDirection2==-16){ForbiddenDirection2=16}
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 7, #End Pos
+                        Address = 5
+                        This:initPage(10)
+                        This:applyArc()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 8, #Radius
+                        Address = 6
+                        This:initPage(14)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 9, #Height
+                        Address = 7
+                        This:initPage(13)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 10, #Segments
+                        Address = 8
+                        This:initPage(15)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 11, #Mirror
+                        CS_Data[CS_PieceID,array][2,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][2,vector2]
+                        CS_Data[CS_PieceID,array][3,number] = -1*CS_Data[CS_PieceID,array][3,number]
+                        CS_Data[CS_PieceID,array][4,number] = -1*CS_Data[CS_PieceID,array][4,number]
+                        CS_Data[CS_PieceID,array][5,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][5,vector2]
+                        This:applyArc()
+                        This:initPage(3)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 12, #Invert (Swap Start/End Dirs)
+                        local SDir = CS_Data[CS_PieceID,array][3,number]
+                        local EDir = CS_Data[CS_PieceID,array][4,number]
+                        CS_Data[CS_PieceID,array][3,number] = EDir
+                        CS_Data[CS_PieceID,array][4,number] = SDir
+                        This:applyArc()
+                        This:initPage(3)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 13, #Write and Compile
+                        if(VonMode){
+                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                        }else{
+                            Script = This:writePieces()
+                            AutoCompile = 1
+                            AutoCompileID = CS_PieceID
+                            FinalCompileID = EGP_Datas:count()
+                            timer(".runscript",500)
+                        }
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                }
+            }
+            break
+        case 4, #Banked Arc Data
+            if(CompileReady){
+                Pod:soundPlay(0,0.5,"buttons/button19.wav")
+            }else{
+                switch(Line){
+                    case 4, #Start Pos
+                        Address = 2
+                        Address2 = 5
+                        This:initPage(10)
+                        This:applyBankedArc()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 5, #Start Direction
+                        Address = 3
+                        local Data = CS_Data[CS_PieceID,array]
+                        ForbiddenDirection1 = Data[4,number]
+                        ForbiddenDirection2 = ForbiddenDirection1 - sign(ForbiddenDirection1+0.5)*16
+                        if(ForbiddenDirection2==-16){ForbiddenDirection2=16}
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 6, #End Direction
+                        Address = 4
+                        local Data = CS_Data[CS_PieceID,array]
+                        ForbiddenDirection1 = Data[3,number]
+                        ForbiddenDirection2 = ForbiddenDirection1 - sign(ForbiddenDirection1+0.5)*16
+                        if(ForbiddenDirection2==-16){ForbiddenDirection2=16}
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 7, #End Pos
+                        Address = 5
+                        This:initPage(10)
+                        This:applyBankedArc()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 8, #Radius
+                        Address = 6
+                        This:initPage(14)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 9, #Height
+                        Address = 7
+                        This:initPage(13)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 10, #Segments
+                        Address = 8
+                        This:initPage(15)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 11, #Start In
+                        Address = 9
+                        This:initPage(23.1)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 12, #End In
+                        Address = 9
+                        This:initPage(23.2)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 13, #Start Out
+                        Address = 10
+                        This:initPage(23.3)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 14, #End Out
+                        Address = 10
+                        This:initPage(23.4)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 15, #Mirror
+                        CS_Data[CS_PieceID,array][2,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][2,vector2]
+                        CS_Data[CS_PieceID,array][3,number] = -1*CS_Data[CS_PieceID,array][3,number]
+                        CS_Data[CS_PieceID,array][4,number] = -1*CS_Data[CS_PieceID,array][4,number]
+                        CS_Data[CS_PieceID,array][5,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][5,vector2]
+                        This:applyBankedArc()
+                        This:initPage(4)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 16, #Write and Compile
+                        if(VonMode){
+                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                        }else{
+                            Script = This:writePieces()
+                            AutoCompile = 1
+                            AutoCompileID = CS_PieceID
+                            FinalCompileID = EGP_Datas:count()
+                            timer(".runscript",500)
+                        }
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                }
+            }
+            break
+        case 5, #Bez Data
+            if(CompileReady){
+                Pod:soundPlay(0,0.5,"buttons/button19.wav")
+            }else{
+                switch(Line){
+                    case 4, #Start Pos
+                        Address = 2
+                        Address2 = 5
+                        This:initPage(10)
+                        This:applyBezier()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 5, #Start Direction
+                        Address = 3
+                        ForbiddenDirection1 = -17
+                        ForbiddenDirection2 = -17
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 6, #Start CP
+                        Address = 4
+                        This:initPage(12)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 7, #End Pos
+                        Address = 5
+                        This:initPage(10)
+                        This:applyBezier()
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 8, #End Direction
+                        Address = 6
+                        ForbiddenDirection1 = -17
+                        ForbiddenDirection2 = -17
+                        This:initPage(11)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 9, #End CP
+                        Address = 7
+                        This:initPage(12)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 10, #Height
+                        Address = 8
+                        This:initPage(13)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 11, #Segments
+                        Address = 9
+                        This:initPage(15)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 12, #X-over toggle
+                        CS_Data[CS_PieceID,array][10,number] = !CS_Data[CS_PieceID,array][10,number]
+                        This:applyBezier()
+                        This:initPage(5)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 13, #Mirror
+                        CS_Data[CS_PieceID,array][2,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][2,vector2]
+                        CS_Data[CS_PieceID,array][3,number] = -1*CS_Data[CS_PieceID,array][3,number]
+                        CS_Data[CS_PieceID,array][5,vector2] = vec2(-1,1)*CS_Data[CS_PieceID,array][5,vector2]
+                        CS_Data[CS_PieceID,array][6,number] = -1*CS_Data[CS_PieceID,array][6,number]
+                        This:applyBezier()
+                        This:initPage(5)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 14, #Axial Mirror (Mirror end point over Start Axis)
+                        local EP = CS_Data[CS_PieceID,array][5,vector2]
+                        local Axis = tp3dir(CS_Data[CS_PieceID,array][3,number])
+                        local AxisR = Axis:rotate(90):normalized()
+                        local Dist = EP:dot(AxisR)
+                        CS_Data[CS_PieceID,array][5,vector2] = round(EP - 2*Dist*AxisR)
+                        
+                        This:applyBezier()
+                        This:initPage(5)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 15, #Write and Compile
+                        if(VonMode){
+                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                        }else{
+                            Script = This:writePieces()
+                            AutoCompile = 1
+                            AutoCompileID = CS_PieceID
+                            FinalCompileID = EGP_Datas:count()
+                            timer(".runscript",500)
+                        }
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                }
+            }
+            break
+        case 6, #Switch Data
+            if(CompileReady){
+                Pod:soundPlay(0,0.5,"buttons/button19.wav")
+            }else{
+                switch(Line){
+                    case 4, #Main ID
+                        Address = 2
+                        This:initPage(17)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 5, #Div ID
+                        Address = 3
+                        This:initPage(17)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 6, #Split Mode
+                        Address = 4
+                        This:initPage(18)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 7,
+                        local MN = CS_Data[CS_PieceID,array][2,number]
+                        local DV = CS_Data[CS_PieceID,array][3,number]
+                        CS_Data[CS_PieceID,array][2,number] = DV
+                        CS_Data[CS_PieceID,array][3,number] = MN
+                        
+                        This:applySwitch()
+                        This:initPage(6)
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                    case 8, #Write and Compile
+                        if(VonMode){
+                            fileAppend("johnhenry_saves/von_docket.txt",writeAllVons()+"%END%\n")
+                            print("VON strings for all pieces have been added to e2files/johnhenry_saves/von_docket.txt!")
+                        }else{
+                            Script = This:writePieces()
+                            AutoCompile = 1
+                            AutoCompileID = CS_PieceID
+                            FinalCompileID = EGP_Datas:count()
+                            timer(".runscript",500)
+                        }
+                        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                        break
+                }
+            }
+            break
+        case 7, #Edit Pieces List
+            CS_PieceID = (Line-2)
+            local Type = CS_Data[CS_PieceID,array][1,string]
+            switch(Type){
+                case "straight",
+                    This:applyStraight()
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "arc",
+                    This:applyArc()
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "banked_arc",
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "bezier",
+                    This:applyBezier()
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "switch",
+                    This:applySwitch()
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                default,
+                    break
+            }
+            
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+        case 8, #Delete Piece
+            CS_PieceID = 0
+            local ID = (Line-2)
+            CS_Data:remove(ID)
+            EGP_Datas:remove(ID)
+            EGP:egpInitPage(1)
+            CS_Pieces--
+            if(0){
+                This:updatePage()
+            }else{
+                This:initPage(0)
+            }
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+        case 9, #Reset Prompt
+            if(Line==4){
+                This:initPage(0)
+                Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            }elseif(Line==5){
+                reset()
+            }
+            break
+        case 10, #Edit Position - Confirm
+            CS_Data[CS_PieceID,array][Address,vector2] = AdjustVector
+            if(Address2>0){
+                CS_Data[CS_PieceID,array][Address2,vector2] = AdjustVector2
+                Address2 = 0
+            }
+            local Type = CS_Data[CS_PieceID,array][1,string]
+            if(AdjustVector!=InitVector){
+                EGP_Datas[CS_PieceID,table]["plotted",number] = 0
+            }
+            switch(Type){
+                case "straight",
+                    This:pressApply(1)
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "arc",
+                    This:pressApply(1)
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "banked_arc",
+                    This:pressApply(1)
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "bezier",
+                    This:pressApply(1)
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "switch",
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                default,
+                    break
+            }
+            break
+        case 19, #Settings
+            switch(Line){
+                case 3, #General Snap
+                    This:initPage(20)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 4, #Height Snap
+                    This:initPage(21)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 5, #Cycle Export Mode
+                    VonMode = !VonMode
+                    This:initPage(19)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case 6, #Clear VON Prompt
+                    This:initPage(26)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+            }
+            break
+        case 20, #General Snap
+            CS_Snap = AdjustNumber
+            This:initPage(19)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+        case 21, #Height Snap
+            CS_HeightSnap = AdjustNumber
+            This:initPage(19)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+        case 11, #Edit Direction - Confirm
+        case 12, #Edit CP
+        case 13, #Edit Height
+        case 14, #Edit Radius
+        case 15, #Edit Segs
+        case 16, #Edit Length
+        case 17, #Edit Switch Piece IDs
+            CS_Data[CS_PieceID,array][Address,number] = AdjustNumber
+            if(AdjustNumber!=InitNumber){
+                EGP_Datas[CS_PieceID,table]["plotted",number] = 0
+            }
+            local Type = CS_Data[CS_PieceID,array][1,string]
+            switch(Type){
+                case "straight",
+                    This:pressApply(1)
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "arc",
+                    This:pressApply(1)
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "banked_arc",
+                    This:pressApply(1)
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "bezier",
+                    This:pressApply(1)
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                case "switch",
+                    This:pressApply(1)
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    break
+                default,
+                    break
+            }
+            break
+        case 18, #Switch Split Mode
+            if(Line==3){
+                CS_Data[CS_PieceID,array][Address,string] = "main"
+            }elseif(Line==4){
+                CS_Data[CS_PieceID,array][Address,string] = "diverging"
+            }elseif(Line==5){
+                CS_Data[CS_PieceID,array][Address,string] = "none"
+            }
+            This:pressApply(1)
+            This:initPage(6)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+        case 23,
+            local Frac = frac(Page)
+            if((Frac==0.1)|(Frac==0.3)){
+                AdjustVector = InitVector:setX(AdjustNumber)
+            }else{
+                AdjustVector = InitVector:setY(AdjustNumber)
+            }
+            This:pressApply(1)
+            This:initPage(4)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+        case 24, #Save/Load Screen
+            local Frac = frac(Page)
+            local FileID = Line-2
+            if(Frac==0.1){ #Save
+                local FileString = vonEncode(CS_Data)
+                local FileName = "johnhenry_saves/save_"+FileID+".txt"
+                fileWrite(FileName,FileString)
+                Manifest[FileID,string] = FileName
+                This:initPage(25)
+                Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                timer("updatemanifest",1000)
+            }elseif(Frac==0.2){ #Load
+                if(Manifest:exists(FileID)){
+                    fileLoad(Manifest[FileID,string])
+                    Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                    This:initPage(25)
+                    timer("loadcfg",1000)
+                }else{
+                    Pod:soundPlay(0,0.5,"buttons/button19.wav")
+                }
+            }else{ #Delete
+                Manifest[FileID,string] = "empty"
+                Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+                This:initPage(25)
+                timer("updatemanifest",1000)
+            }
+            
+            break
+        case 26, #Reset VON Prompt
+            if(Line==5){
+                fileWrite("johnhenry_saves/von_docket.txt","")
+            }
+            This:initPage(19)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
+            break
+    }
+    return void
+}
+
+function void wirelink:pressBack(){
+    switch(int(Page)){
+        case 0, #Main Menu - Do Nothing
+            break
+        case 1, #New Piece Select Track Menu
+        case 7, #Edit List
+        case 8, #Reset Prompt
+        case 19, #Settings
+        case 22, #Camera Control
+        case 24, #Save/Load/Delete Configs
+            This:initPage(0)
+            Pod:soundPlay(0,0.5,"buttons/button16.wav")
+            break
+        case 2, #Straight Data
+        case 3, #Arc
+        case 4, #Banked Arc
+        case 5, #Bez
+        case 6, #Switch
+            This:initPage(7)
+            Pod:soundPlay(0,0.5,"buttons/button16.wav")
+            break
+        case 20, #General snap
+        case 21, #Height Snap
+        case 26, #Clear VON Prompt
+            This:initPage(19)
+            Pod:soundPlay(0,0.5,"buttons/button16.wav")
+        case 10, #Edit Position
+        case 23, #Banked Arc Transition
+            CS_Data[CS_PieceID,array][Address,vector2] = InitVector
+            if(Address2>0){
+                CS_Data[CS_PieceID,array][Address2,vector2] = InitVector2
+                Address2 = 0
+            }
+            local Type = CS_Data[CS_PieceID,array][1,string]
+            switch(Type){
+                case "straight",
+                    This:applyStraight()
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "arc",
+                    This:applyArc()
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "banked_arc",
+                    This:applyBankedArc()
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "bezier",
+                    This:applyBezier()
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "switch",
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                default,
+                    break
+            }
+            break
+        case 11, #Edit Direction
+        case 12, #Edit CP
+        case 13, #Edit Height
+        case 14, #Edit Radius
+        case 15, #Edit Segs
+        case 16, #Edit Length
+        case 17, #Edit SW Piece ID
+            CS_Data[CS_PieceID,array][Address,number] = InitNumber
+            local Type = CS_Data[CS_PieceID,array][1,string]
+            switch(Type){
+                case "straight",
+                    This:applyStraight()
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "arc",
+                    This:applyArc()
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "banked_arc",
+                    This:applyBankedArc()
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "bezier",
+                    This:applyBezier()
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "switch",
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                default,
+                    break
+            }
+            break
+        case 18, #Edit Split Mode
+            local Type = CS_Data[CS_PieceID,array][1,string]
+            switch(Type){
+                case "straight",
+                    This:initPage(2)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "arc",
+                    This:initPage(3)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "banked_arc",
+                    This:initPage(4)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "bezier",
+                    This:initPage(5)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                case "switch",
+                    This:initPage(6)
+                    Pod:soundPlay(0,0.5,"buttons/button16.wav")
+                    break
+                default,
+                    break
+            }
+            break
+        }
+    return void
+}
+function void wirelink:pressW(){
+    if(Page==10){ #Position
+        local X = AdjustVector:x()
+        local Y = AdjustVector:y()
+        Y += CS_Snap
+        AdjustVector = vec2(X,Y)
+        
+        if(Address2>0){
+            local X = AdjustVector2:x()
+            local Y = AdjustVector2:y()
+            Y += CS_Snap
+            AdjustVector2 = vec2(X,Y)
+        }
+        
+        Lines["12",array] = array("New:","",AdjustVector:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["14",array] = array("New (# of Steps):","",round(AdjustVector/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 16
+        if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+            Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Ln++
+        }
+        Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==11){ #Direction
+        AdjustNumber++
+        if((AdjustNumber==ForbiddenDirection1)|(AdjustNumber==ForbiddenDirection2)){
+            AdjustNumber++
+        }
+        local AAV = abs(AdjustNumber)
+        if((AAV==3)|(AAV==5)|(AAV==11)|(AAV==13)){
+            AdjustNumber++
+        }elseif(AdjustNumber>16){
+            AdjustNumber = -15
+        }
+        if((AdjustNumber==ForbiddenDirection1)|(AdjustNumber==ForbiddenDirection2)){
+            AdjustNumber++
+        }
+        Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        This:updatePage()
+        SelectedDirection = AdjustNumber
+        EGP:egpInitPage(2)
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==12)|(Page==14)){ #CP / Radius
+        AdjustNumber += CS_Snap
+        
+        Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 10
+        if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+            Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Ln++
+            Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        }
+        
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==13){ #Height
+        AdjustNumber += CS_HeightSnap
+        
+        Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_HeightSnap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 10
+        Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==15)|(Page==17)){ #Segments / Switch IDs
+        AdjustNumber++
+        
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        if(Page==15){This:pressApply(0)}
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==16){ #Length
+        AdjustNumber += CS_Snap
+        
+        Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==20)|(Page==21)){ #Snaps
+        if(AdjustNumber<1024){
+            AdjustNumber *= 2
+        }
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==22){ #Camera Control
+        EGPAutoScale = 0
+        local CX = EGPViewCenter:x()
+        local CY = EGPViewCenter:y()
+        CY += EGPGridSize
+        EGPViewCenter = vec2(CX,CY)
+        EGP:egpInitPage(1)
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(int(Page)==23){ #Banked Curve Transition
+        if(AdjustNumber<CS_Data[CS_PieceID,array][8,number]){
+            AdjustNumber++
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            local Frac = frac(Page)
+            if((Frac==0.1)|(Frac==0.3)){
+                AdjustVector = InitVector:setX(AdjustNumber)
+            }else{
+                AdjustVector = InitVector:setY(AdjustNumber)
+            }
+            This:pressApply(0)
+            This:updatePage()
+            EGP:egpInitPage(1)
+        }
+    }else{
+        Line--
+        if(Line<MinLine){
+            Line = MaxLine
+        }
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }
+    return void
+}
+function void wirelink:pressS(){
+    if(Page==10){ #Position
+        local X = AdjustVector:x()
+        local Y = AdjustVector:y()
+        Y += -CS_Snap
+        AdjustVector = vec2(X,Y)
+        
+        if(Address2>0){
+            local X = AdjustVector2:x()
+            local Y = AdjustVector2:y()
+            Y += -CS_Snap
+            AdjustVector2 = vec2(X,Y)
+        }
+        
+        Lines["12",array] = array("New:","",AdjustVector:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["14",array] = array("New (# of Steps):","",round(AdjustVector/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 16
+        if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+            Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Ln++
+        }
+        Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==11){ #Direction
+        AdjustNumber--
+        if((AdjustNumber==ForbiddenDirection1)|(AdjustNumber==ForbiddenDirection2)){
+            AdjustNumber--
+        }
+        local AAV = abs(AdjustNumber)
+        if((AAV==3)|(AAV==5)|(AAV==11)|(AAV==13)){
+            AdjustNumber--
+        }elseif(AdjustNumber<-15){
+            AdjustNumber = 16
+        }
+        if((AdjustNumber==ForbiddenDirection1)|(AdjustNumber==ForbiddenDirection2)){
+            AdjustNumber--
+        }
+        Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        This:updatePage()
+        SelectedDirection = AdjustNumber
+        EGP:egpInitPage(2)
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==12)|(Page==14)){ #CP / Radius
+        if(AdjustNumber-CS_Snap>0){AdjustNumber += -CS_Snap}
+        
+        Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 10
+        if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+            Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Ln++
+            Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        }
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==13){ #Height
+        AdjustNumber += -CS_HeightSnap
+        
+        Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_HeightSnap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 10
+        Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==15)|(Page==17)){ #Segments / Switch IDs
+        if(AdjustNumber>1){AdjustNumber--}
+        
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        if(Page==15){This:pressApply(0)}
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==16){ #Length
+        if(AdjustNumber-CS_Snap>0){AdjustNumber += -CS_Snap}
+        
+        Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==20)|(Page==21)){
+        if(AdjustNumber>1){
+            AdjustNumber /= 2
+        }
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==22){ #Camera Control
+        EGPAutoScale = 0
+        local CX = EGPViewCenter:x()
+        local CY = EGPViewCenter:y()
+        CY += -EGPGridSize
+        EGPViewCenter = vec2(CX,CY)
+        EGP:egpInitPage(1)
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(int(Page)==23){ #Banked Curve Transition
+        if(AdjustNumber>0){
+            AdjustNumber--
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            local Frac = frac(Page)
+            if((Frac==0.1)|(Frac==0.3)){
+                AdjustVector = InitVector:setX(AdjustNumber)
+            }else{
+                AdjustVector = InitVector:setY(AdjustNumber)
+            }
+            This:pressApply(0)
+            This:updatePage()
+            EGP:egpInitPage(1)
+        }
+    }else{
+        Line++
+        if(Line>MaxLine){
+            Line = MinLine#max(MinLine,LastLine[Page,number])
+        }
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }
+    return void
+}
+
+function void wirelink:pressA(){
+    if(Page==10){
+        local X = AdjustVector:x()
+        local Y = AdjustVector:y()
+        X += -CS_Snap
+        AdjustVector = vec2(X,Y)
+        
+        if(Address2>0){
+            local X = AdjustVector2:x()
+            local Y = AdjustVector2:y()
+            X += -CS_Snap
+            AdjustVector2 = vec2(X,Y)
+        }
+        
+        Lines["12",array] = array("New:","",AdjustVector:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["14",array] = array("New (# of Steps):","",round(AdjustVector/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 16
+        if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+            Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Ln++
+        }
+        Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==22){ #Camera Control
+        EGPAutoScale = 0
+        local CX = EGPViewCenter:x()
+        local CY = EGPViewCenter:y()
+        CX += -EGPGridSize
+        EGPViewCenter = vec2(CX,CY)
+        EGP:egpInitPage(1)
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }else{
+        
+    }
+    return void
+}
+function void wirelink:pressD(){
+    if(Page==10){
+        local X = AdjustVector:x()
+        local Y = AdjustVector:y()
+        X += CS_Snap
+        AdjustVector = vec2(X,Y)
+        
+        if(Address2>0){
+            local X = AdjustVector2:x()
+            local Y = AdjustVector2:y()
+            X += CS_Snap
+            AdjustVector2 = vec2(X,Y)
+        }
+        
+        Lines["12",array] = array("New:","",AdjustVector:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["14",array] = array("New (# of Steps):","",round(AdjustVector/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
+        This:pressApply(0)
+        local Ln = 16
+        if(CS_Data[CS_PieceID,array][1,string]=="bezier"){
+            Lines[Ln:toString(),array] = array("Minimum Radius:","",EGP_Datas[CS_PieceID,table]["tseg",number] ? EGP_Datas[CS_PieceID,table]["minr",number]:toString() : "???",CS_Property,vec(),CS_Value_Calc)
+            Ln++
+        }
+        Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==22){ #Camera Control
+        EGPAutoScale = 0
+        local CX = EGPViewCenter:x()
+        local CY = EGPViewCenter:y()
+        CX += EGPGridSize
+        EGPViewCenter = vec2(CX,CY)
+        EGP:egpInitPage(1)
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }else{
+        
+    }
+    return void
+}
+function void wirelink:pressUp(){
+    if((Page==10)|(Page==12)|(Page==14)|(Page==16)){ #General snap Adjust
+        if(CS_Snap<1024){
+            CS_Snap *= 2
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+            This:initPage(Page)
+        }
+    }elseif(Page==13){
+        if(CS_HeightSnap<1024){
+            CS_HeightSnap *= 2
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+            This:initPage(Page)
+        }
+    }elseif(Page==22){ #Camera Control
+        EGPAutoScale = 0
+        if(EGPScale>0.03125){
+            EGPScale /= 2
+            EGPGridSize = 32*EGPScale
+            EGP:egpInitPage(1)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+        }
+    }
+    return void
+}
+function void wirelink:pressDn(){
+    if((Page==10)|(Page==12)|(Page==14)|(Page==16)){ #General snap Adjust
+        if(CS_Snap>1){
+            CS_Snap /= 2
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+            This:initPage(Page)
+        }
+    }elseif(Page==13){
+        if(CS_HeightSnap>1){
+            CS_HeightSnap /= 2
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+            This:initPage(Page)
+        }
+    }elseif(Page==22){ #Camera Control
+        EGPAutoScale = 0
+        if(EGPScale<128){
+            EGPScale *= 2
+            EGPGridSize = 32*EGPScale
+            EGP:egpInitPage(1)
+            Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+        }
+    }
+    return void
+}
+function void wirelink:pressSpace(){
+    if((Page==22)|((Page>=2)&(Page<=6))){
+        EGPAutoScale = 1
+        EGP:egpInitPage(1)
+    }
+    return void
+}

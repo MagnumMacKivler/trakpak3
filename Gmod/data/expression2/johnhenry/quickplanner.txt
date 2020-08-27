@@ -1,0 +1,1706 @@
+@name johnhenry/quickplanner
+@inputs 
+@outputs SlopeIndex DirIndex PieceCount
+@persist [StraightLengths ArcRadii ArcStartDirs ArcEndDirs TurnoutStartDirs TurnoutEndDirs WyeDirs BendLengths Slopes]:array #Piece Specs
+@persist DTS BallastTopWidth NumParallelTracks [DTS0 DTS1 DTS2 DTS4]:vector2 #Double Track Specs
+@persist Grid HeightGrid SegmentLimit MakeStraights MakeArcs MakeBends MakeTurnouts MakeWyes MakeSidings MakeCrossovers StraightPathMode TrackGauge RailThickness #Settings
+@persist [ ]:table [SDirs]:array #Reference
+@persist SlopeIndex DirIndex RadiusIndex LengthIndex AEPs:table AHs:table LastPR #Shared Data
+@persist StraightGradeMatrix:table #Straight Data
+@persist AllRadii:array #Arc Data
+@persist [Compiles VonTables]:table PieceCount VonNames:array SequenceIndex CompileIndex FileText:string
+@trigger 
+
+if(first()){
+    
+    #Piece Specs
+    StraightLengths = array(32,48,64,96,128,192,256,384,512,768,1024,1536,2048,3072,4096,6144,8192) #The straights that will be made; also switches will borrow from this list for their straight portions.
+    #ArcRadii = array(2048,3072)
+    ArcRadii = array(2048,3072,4096,6144,8192) #The principal (non-double tracked) curve radii.
+    ArcStartDirs =  array(0,0,0,0) #Starting direction for arc curves. Lines up with ArcEndDirs. All curves will be mirrored (negative numbers).
+    ArcEndDirs =    array(1,2,4,8) #Ending direction for arc curves. Lines up with ArcStartDirs. All curves will be mirrored (negative numbers).
+    BendLengths = array(1536,2048) #Lengths of bends, sidings and crossovers.
+    TurnoutStartDirs =  array(0,0,0,1,2,4) #Starting direction for turnouts. Lines up with TurnoutEndDirs. All switches will be mirrored (negative numbers).
+    TurnoutEndDirs =    array(1,2,4,0,0,0) #Ending direction for turnouts. Lines up with TurnoutStartDirs. All switches will be mirrored (negative numbers).
+    WyeDirs = array(1,2,4) #Ending Direction for Wyes.
+    Slopes = array(0,2/128,3/128,4/128) #List of Slopes (Rise/Run) for straights and curves. Negatives will also be made (except for 0 of course).
+    
+    #Multi Track/Track Geometry
+    BallastTopWidth = 128 #Used to make sure track pieces don't intersect in the wrong places
+    DTS = 192 #Double Track Separation
+    NumParallelTracks = 2 #2 to generate double track, 3 for triple track, 4 for quad track, etc. Numbers >2 may take a VERY long time!
+    
+    #Settings
+    Grid = 32 #For auto-calculated lengths and curves of principal radii/parallel switches
+    HeightGrid = 4 #For graded pieces
+    SegmentLimit = 24 #Don't change this
+    StraightPathMode = 2 #How long to make the straight paths of a siding/crossover switch? 0 for full length, 1 for half length, 2 for both.
+    TrackGauge = 56 #Used for checking some switches
+    RailThickness = 4
+    
+    #Piece Type Enable/Disable
+    MakeStraights = 0 
+    MakeArcs = 0
+    MakeBends = 0
+    MakeTurnouts = 0
+    MakeWyes = 1
+    MakeSidings = 0
+    MakeCrossovers = 0
+    
+    #End of config
+    
+    #include "johnhenry/library/linalg"
+    
+    function number roundToGrid(In, GridSize){
+        return round(In/GridSize)*GridSize
+    }
+    
+    function number ceilToGrid(In, GridSize){
+        return ceil(In/GridSize)*GridSize
+    }
+    
+    function vector2 roundToGrid(In:vector2, GridSize){
+        local X = round(In:x()/GridSize)*GridSize
+        local Y = round(In:y()/GridSize)*GridSize
+        return vec2(X,Y)
+    }
+    
+    function vector2 dirToGrid(Dir:vector2, GridSize){
+        local X = abs(Dir:x())
+        local Y = abs(Dir:y())
+        
+        if((X%4)==0){
+            Dir /= Y
+        }else{
+            Dir /= X
+        }
+        return Dir*GridSize
+    }
+    
+    function vector2 tp3dir(Direction){
+        local Dir = vec2()
+        switch(abs(Direction)){
+            case 0,
+                Dir = vec2(0,4)
+                break
+                
+            case 1,
+                Dir = vec2(-1,4)
+                break
+            case 2,
+                Dir = vec2(-2,4)
+                break
+            case 4,
+                Dir = vec2(-4,4)
+                break
+            
+            case 6,
+                Dir = vec2(-4,2)
+                break
+            case 7,
+                Dir = vec2(-4,1)
+                break
+            case 8,
+                Dir = vec2(-4,0)
+                break
+                
+            case 9,
+                Dir = vec2(-4,-1)
+                break
+            case 10,
+                Dir = vec2(-4,-2)
+                break
+            case 12,
+                Dir = vec2(-4,-4)
+                break
+                
+            case 14,
+                Dir = vec2(-2,-4)
+                break
+            case 15,
+                Dir = vec2(-1,-4)
+                break
+            case 16,
+                Dir = vec2(0,-4)
+                break
+            
+            default,
+                Dir = vec2(0,4)
+                break
+        }
+        Dir = vec2(Dir:x()*sign(Direction), Dir:y())
+        return Dir/4
+    }
+    
+    function number tp3ang(Dir){
+        local D = vec(tp3dir(Dir),0)
+        local Angle = -bearing(vec(),ang(),D)
+        return Angle
+    }
+    function number dir2ang(Dir:vector2){
+        local D = vec(Dir,0)
+        local Angle = -bearing(vec(),ang(),D)
+        return Angle
+    }
+    
+    SequenceIndex = 1
+    
+    DTS0 = vec2(DTS,0)
+    DTS1 = vec2(DTS,DTS/4)
+    DTS2 = vec2(DTS,DTS/2)
+    DTS4 = vec2(ceilToGrid(DTS*2/3, 16))
+    
+    SDirs = array(0,1,-1,2,-2,4) #Directions to make straights at
+    
+    #Combine principal radii with N track radii
+    AllRadii = array()
+    for(RI=1,ArcRadii:count()){
+        local R0 = ArcRadii[RI,number]
+        AllRadii:pushNumber(R0)
+        for(N=1,NumParallelTracks-1){
+            AllRadii:pushNumber(R0 + DTS*N)
+        }
+        AEPs[R0,table] = table() #Initialize this for later
+        AHs[R0,table] = table()
+    }
+    
+    print("Starting Specification!")
+    
+    if(MakeStraights){
+        timer("StraightsInit",100)
+    }elseif(MakeArcs){
+        timer("ArcsInit",100)
+    }elseif(MakeBends){
+        timer("BendsInit",100)
+    }elseif(MakeTurnouts){
+        timer("TurnoutsInit",100)
+    }elseif(MakeWyes){
+        timer("WyesInit",100)
+    }elseif(MakeSidings){
+        timer("SidingsInit",100)
+    }elseif(MakeCrossovers){
+        timer("CrossoversInit",100)
+    }
+}elseif(clk("StraightsInit")){
+    
+    #Init Making Straights
+    
+    local Count = 0
+    
+    #Find the first straight length to make for each grade
+    local LC = StraightLengths:count()
+    foreach(SI,Slope:number=Slopes){
+        local MakeLength = array()
+        for(LI=1,LC){
+            local H = StraightLengths[LI,number]*Slope
+            if((H%HeightGrid)==0){
+                MakeLength[LI,number] = 1
+                Count++
+            }else{
+                MakeLength[LI,number] = 0
+            }
+        }
+        #printTable(MakeLength)
+        StraightGradeMatrix[SI,array] = MakeLength
+    }
+    
+    SlopeIndex = 1
+    LengthIndex = 1
+    DirIndex = 1
+    
+    Count = Count*SDirs:count()
+    
+    print("Making Straights ("+Count+")...")
+    timer("MakeStraight",100)
+}elseif(clk("MakeStraight")){
+    #SDirs
+        #Lengths
+            #Slopes
+    for(SlopeIndex=1,Slopes:count()){
+        if(StraightGradeMatrix[SlopeIndex,array][LengthIndex,number]){
+            
+            local DTable = table()
+            DTable["Index",number] = 1
+            DTable["Type",string] = "straight"
+            
+            local Len = StraightLengths[LengthIndex,number]
+            DTable["StartPos",vector2] = vec2(0,0)
+            DTable["Dir",number] = SDirs[DirIndex,number]
+            DTable["Length",number] = Len
+            DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+            DTable["Segments",number] = ceil(Len/1024)
+            
+            local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+            PieceCount++
+            Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+            
+        }
+    }
+    local Done = 0
+
+    SlopeIndex = 1
+    LengthIndex++
+    if(LengthIndex>StraightLengths:count()){ #Last Length for this Dir
+        LengthIndex = 1
+        DirIndex++
+        if(DirIndex>SDirs:count()){ #Last Dir - done with straights!
+            DirIndex = 1
+            Done = 1
+            VonTables[SequenceIndex,table] = Compiles
+            VonNames[SequenceIndex,string] = "straights"
+            SequenceIndex++
+            Compiles = table()
+        }
+    }       
+    
+    if(Done){
+        if(MakeArcs){
+            timer("ArcsInit",100)
+        }elseif(MakeBends){
+            timer("BendsInit",100)
+        }elseif(MakeTurnouts){
+            timer("TurnoutsInit",100)
+        }elseif(MakeWyes){
+            timer("WyesInit",100)
+        }elseif(MakeSidings){
+            timer("SidingsInit",100)
+        }elseif(MakeCrossovers){
+            timer("CrossoversInit",100)
+        }else{
+            timer("Finish",100)
+        }
+    }else{
+        timer("MakeStraight",50)
+    }
+}elseif(clk("ArcsInit")){
+    
+    SlopeIndex = 1
+    RadiusIndex = 1
+    DirIndex = 1
+    
+    local Count = AllRadii:count()*ArcStartDirs:count()*2*(Slopes:count()*2 - 1)
+    
+    print("Making Arcs ("+Count+")...")
+    timer("MakeArc",100)
+}elseif(clk("MakeArc")){
+    
+    local IsPrincipal = ((RadiusIndex-1)%NumParallelTracks)==0
+    
+    local Radius = AllRadii[RadiusIndex,number]
+    
+    local StartDir = ArcStartDirs[DirIndex,number]
+    local EndDir = ArcEndDirs[DirIndex,number]
+    
+    local StartStep = dirToGrid(tp3dir(StartDir),Grid)
+    local EndStep = dirToGrid(tp3dir(EndDir),Grid)
+    local GoesLeft = StartStep:cross(EndStep) > 0
+    
+    local StartNorm = StartStep:normalized()
+    local EndNorm = EndStep:normalized()
+    
+    #Find Average Segment Length
+    local StartAng = tp3ang(StartDir)
+    local EndAng = tp3ang(EndDir)
+    local AngSweep = angnorm(EndAng-StartAng)
+    
+    local Segments = ceil(SegmentLimit*abs(AngSweep)/90)
+    local SegLength = Radius*abs(AngSweep)*(_PI/180)/Segments
+    
+    #Find Arc Chord (local coordinates)
+    local AddTheta = (GoesLeft ? -90 : 90)
+    local ArcStart = Radius*vec2(cos(StartAng+AddTheta),sin(StartAng+AddTheta))
+    local ArcEnd = Radius*vec2(cos(EndAng+AddTheta),sin(EndAng+AddTheta))
+    local Chord = ArcEnd - ArcStart
+    
+    local EndPos = vec2()
+    local Height = 0
+    
+    if(IsPrincipal){
+        LastPR = Radius
+        
+        EndPos = roundToGrid(Chord,Grid)
+        
+        #print(EndPos)
+        
+        local Isect = vec2()
+        
+        if(GoesLeft){
+            local L1 = line(Radius*StartNorm:rotate(90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }else{
+            local L1 = line(Radius*StartNorm:rotate(-90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(-90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }
+        
+        local ArcStartW = Isect + ArcStart
+        local ArcEndW = Isect + ArcEnd
+        
+        local StartValid = (ArcStartW):dot(StartStep) >= 0
+        local EndValid = (ArcEndW-EndPos):dot(-EndStep) >= 0
+        
+        for(N=1,3){ #Adjust to make valid
+            if(!StartValid){
+                EndPos += StartStep
+                ArcStartW += StartStep
+                ArcEndW += StartStep
+            }
+            if(!EndValid){
+                EndPos += EndStep
+            }
+            
+            StartValid = (ArcStartW):dot(StartStep) >= 0
+            EndValid = (ArcEndW-EndPos):dot(-EndStep) >= 0
+            if(StartValid & EndValid){break}
+        }
+        
+        #Adjust for segment length
+        local NumAdjustments = 0
+        while((ArcStartW:length()>1) & (ArcStartW:length()<SegLength/2)){
+            EndPos += StartStep
+            #Cheese Calculations
+            ArcStartW += StartStep
+            ArcEndW += StartStep
+            NumAdjustments++
+        }
+        while((ArcEndW:distance(EndPos)>1) & (ArcEndW:distance(EndPos)<SegLength/2)){
+            EndPos += EndStep
+            NumAdjustments++
+        }
+        
+        #Calculate Height
+        local TotalLength = Radius*AngSweep*_PI/180 + ArcStartW:length() + ArcEndW:distance(EndPos)
+        Height = roundToGrid(TotalLength*Slopes[SlopeIndex,number],HeightGrid)
+        
+        #Store EndPos and Height for future use
+        AEPs[LastPR,table][SlopeIndex+" "+DirIndex,vector2] = EndPos
+        AHs[LastPR,table][SlopeIndex+" "+DirIndex,number] = Height
+        
+    }else{
+        #DTS normally up and right
+        local Start_Offset = vec2()
+        local End_Offset = vec2()
+        
+        local CurveLeft = EndDir>StartDir
+        
+        switch(abs(StartDir)){
+            case 0,
+                Start_Offset = DTS0
+                break
+            case -1,
+                Start_Offset = DTS1*vec2(1,-1)
+                break
+            case 1,
+                Start_Offset = DTS1
+                break
+            case -2,
+                Start_Offset = DTS2*vec2(1,-1)
+                break
+            case 2,
+                Start_Offset = DTS2
+                break
+            case -4,
+                Start_Offset = DTS4*vec2(1,-1)
+                break
+            case 4,
+                Start_Offset = DTS4
+                break
+            case -8,
+                Start_Offset = round(DTS0:rotate(-90))
+                break
+            case 8,
+                Start_Offset = round(DTS0:rotate(90))
+                break
+        }
+        
+        switch(abs(EndDir)){
+            case 0,
+                End_Offset = DTS0
+                break
+            case -1,
+                End_Offset = DTS1*vec2(1,-1)
+                break
+            case 1,
+                End_Offset = DTS1
+                break
+            case -2,
+                End_Offset = DTS2*vec2(1,-1)
+                break
+            case 2,
+                End_Offset = DTS2
+                break
+            case -4,
+                End_Offset = DTS4*vec2(1,-1)
+                break
+            case 4,
+                End_Offset = DTS4
+                break
+            case -8,
+                End_Offset = round(DTS0:rotate(-90))
+                break
+            case 8,
+                End_Offset = round(DTS0:rotate(90))
+                break
+        }
+        
+        if(!CurveLeft){
+            Start_Offset *= -1
+            End_Offset *= -1
+        }
+        
+        EndPos = AEPs[LastPR,table][SlopeIndex+" "+DirIndex,vector2] + End_Offset - Start_Offset
+        Height = AHs[LastPR,table][SlopeIndex+" "+DirIndex,number]
+    }
+    #print(Height)
+    
+    #Write to Von
+    local DTable = table()
+    DTable["Index",number] = 1
+    DTable["Type",string] = "arc"
+    
+    DTable["StartPos",vector2] = vec2()
+    DTable["EndPos",vector2] = EndPos
+    DTable["StartDir",number] = StartDir
+    DTable["EndDir",number] = EndDir
+    DTable["Radius",number] = Radius
+    DTable["Height",number] = Height
+    DTable["Segments",number] = Segments
+    local Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+    PieceCount++
+    Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+    
+    if(Height!=0){
+        #Write Inverted (vertical)
+        DTable["Height",number] = -Height
+        Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+        PieceCount++
+        Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+    }
+    	
+    #Write Mirrored
+    DTable["EndPos",vector2] = EndPos*vec2(-1,1)
+    DTable["StartDir",number] = -StartDir
+    DTable["EndDir",number] = -EndDir
+    DTable["Height",number] = Height
+    Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+    PieceCount++
+    Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+        
+    if(Height!=0){
+        #Write Mirrored Inverted (vertical)
+        DTable["Height",number] = -Height
+        Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+        PieceCount++
+        Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+    }
+    
+    local Done = 0
+    
+    SlopeIndex++
+    if(SlopeIndex>Slopes:count()){ #Last slope for this Dir
+        SlopeIndex = 1
+        DirIndex++
+        if(DirIndex>ArcStartDirs:count()){ #Last Dir in this radius
+            DirIndex = 1
+            RadiusIndex++
+            VonTables[SequenceIndex,table] = Compiles
+            VonNames[SequenceIndex,string] = "arcs_r"+Radius
+            SequenceIndex++
+            Compiles = table()
+            if(RadiusIndex>AllRadii:count()){ #Last Radius - done with arcs!
+                DirIndex = 1
+                Done = 1
+            }
+        }
+    }
+    
+    if(Done){
+        if(MakeBends){
+            timer("BendsInit",100)
+        }elseif(MakeTurnouts){
+            timer("TurnoutsInit",100)
+        }elseif(MakeWyes){
+            timer("WyesInit",100)
+        }elseif(MakeSidings){
+            timer("SidingsInit",100)
+        }elseif(MakeCrossovers){
+            timer("CrossoversInit",100)
+        }else{
+            timer("Finish",100)
+        }
+    }else{
+        timer("MakeArc",50)
+    }
+    
+}elseif(clk("BendsInit")){
+    
+    local Count = SDirs:count()*BendLengths:count()*Slopes:count()*2
+    
+    SlopeIndex = 1
+    LengthIndex = 1
+    DirIndex = 1
+    
+    print("Making Bends ("+Count+")...")
+    timer("MakeBend",100)
+}elseif(clk("MakeBend")){
+    
+    for(SlopeIndex = 1,Slopes:count()){
+        
+        local Len = BendLengths[LengthIndex,number]
+        local Dir = SDirs[DirIndex,number]
+        #DTS starts off on the right, then gets negated for the left.
+        
+        local DTS_Offset = vec2()
+        switch(Dir){
+            case 0,
+                DTS_Offset = DTS0
+                break
+            case 1,
+                DTS_Offset = DTS1
+                break
+            case -1,
+                DTS_Offset = DTS1*vec2(1,-1)
+                break
+            case 2,
+                DTS_Offset = DTS2
+                break
+            case -2,
+                DTS_Offset = DTS2*vec2(1,-1)
+                break
+            case 4,
+                DTS_Offset = DTS4
+                break
+        }
+        
+        #Write to Von
+        local DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) + DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        
+        PieceCount++
+        Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+        
+        #Write Axial Mirrored
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) - DTS_Offset
+        PieceCount++
+        Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+    }
+    
+    
+    local Done = 0
+
+    SlopeIndex = 1
+    LengthIndex++
+    if(LengthIndex>BendLengths:count()){ #Last Length for this Dir
+        LengthIndex = 1
+        DirIndex++
+        if(DirIndex>SDirs:count()){ #Last Dir - done with straights!
+            DirIndex = 1
+            Done = 1
+            VonTables[SequenceIndex,table] = Compiles
+            VonNames[SequenceIndex,string] = "bends"
+            SequenceIndex++
+            Compiles = table()
+        }
+    }       
+    
+    if(Done){
+        if(MakeTurnouts){
+            timer("TurnoutsInit",100)
+        }elseif(MakeWyes){
+            timer("WyesInit",100)
+        }elseif(MakeSidings){
+            timer("SidingsInit",100)
+        }elseif(MakeCrossovers){
+            timer("CrossoversInit",100)
+        }else{
+            timer("Finish",100)
+        }
+    }else{
+        timer("MakeBend",50)
+    }
+}elseif(clk("TurnoutsInit")){
+    DirIndex = 1
+    RadiusIndex = 1
+    
+    local Count = AllRadii:count()*TurnoutStartDirs:count()*2
+    print("Making Turnouts ("+Count+")...")
+    timer("MakeTurnout",100)
+}elseif(clk("MakeTurnout")){
+    
+    #Pre-Calculate Arc Path
+    local IsPrincipal = ((RadiusIndex-1)%NumParallelTracks)==0
+    local Radius = AllRadii[RadiusIndex,number]
+    
+    local StartDir = TurnoutStartDirs[DirIndex,number]
+    local EndDir = TurnoutEndDirs[DirIndex,number]
+    
+    local MainLeft = EndDir<StartDir
+    
+    local StartStep = dirToGrid(tp3dir(StartDir),Grid)
+    local EndStep = dirToGrid(tp3dir(EndDir),Grid)
+    local GoesLeft = StartStep:cross(EndStep) > 0
+    
+    local StartNorm = StartStep:normalized()
+    local EndNorm = EndStep:normalized()
+    
+    #Find Average Segment Length
+    local StartAng = tp3ang(StartDir)
+    local EndAng = tp3ang(EndDir)
+    local AngSweep = angnorm(EndAng-StartAng)
+    
+    local Segments = ceil(SegmentLimit*abs(AngSweep)/90)
+    local SegLength = Radius*abs(AngSweep)*(_PI/180)/Segments
+    
+    #Find Arc Chord (local coordinates)
+    local AddTheta = (GoesLeft ? -90 : 90)
+    local ArcStart = Radius*vec2(cos(StartAng+AddTheta),sin(StartAng+AddTheta))
+    local ArcEnd = Radius*vec2(cos(EndAng+AddTheta),sin(EndAng+AddTheta))
+    local Chord = ArcEnd - ArcStart
+    
+    local EndPos = vec2()
+    local StartDirU = tp3dir(StartDir)
+    local MinLen = 0
+    local Isect = vec2()
+    
+    if(IsPrincipal){
+        LastPR = Radius
+        EndPos = roundToGrid(Chord,Grid)
+        
+        Isect = vec2()
+        
+        if(GoesLeft){
+            local L1 = line(Radius*StartNorm:rotate(90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }else{
+            local L1 = line(Radius*StartNorm:rotate(-90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(-90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }
+        
+        local ArcStartW = Isect + ArcStart
+        local ArcEndW = Isect + ArcEnd
+    
+        local StartValid = (ArcStartW):dot(StartStep) >= 0
+        local EndValid = (ArcEndW-EndPos):dot(-EndStep) >= 0
+        
+        for(N=1,3){ #Adjust to make valid
+            if(!StartValid){
+                EndPos += StartStep
+                ArcStartW += StartStep
+                ArcEndW += StartStep
+            }
+            if(!EndValid){
+                EndPos += EndStep
+            }
+            
+            StartValid = (ArcStartW):dot(StartStep) >= 0
+            EndValid = (ArcEndW-EndPos):dot(-EndStep) >= 0
+            if(StartValid & EndValid){break}
+        }
+        
+        #Adjust for segment length
+        local NumAdjustments = 0
+        while((ArcStartW:length()>1) & (ArcStartW:length()<SegLength/2)){
+            EndPos += StartStep
+            #Cheese Calculations
+            ArcStartW += StartStep
+            ArcEndW += StartStep
+            NumAdjustments++
+        }
+        while((ArcEndW:distance(EndPos)>1) & (ArcEndW:distance(EndPos)<SegLength/2)){
+            EndPos += EndStep
+            NumAdjustments++
+        }
+    
+        #Adjust to make sure the rails aren't too close
+        #local SP1 = (TrackGauge/2 + RailThickness)*StartNorm:rotate(MainLeft ? -90 : 90)
+        #local SP2 = SP1 + StartNorm
+        #local AP = EndPos + (TrackGauge/2 + RailThickness)*StartNorm:rotate(MainLeft ? 90 : -90)
+        #local Dist = AP:projectOntoLine(SP1,SP2):distance(AP)
+        #if(Dist<8){
+        #    EndPos += EndStep
+        #}
+        
+        #Find Minimum Straight Length (to start of arc) snapped to grid
+        MinLen = 4*ArcStartW:length()/(StartDirU:length())
+    
+        LengthIndex = 1
+        for(N=1,StraightLengths:count()){
+            if(MinLen < StraightLengths[N,number]){
+                MinLen = StraightLengths[N,number]
+                LengthIndex = N
+                break
+            }
+        }
+        
+        AEPs[LastPR,table][DirIndex,vector2] = EndPos
+    
+    }else{
+        
+        #DTS normally up and right
+        local Start_Offset = vec2()
+        local End_Offset = vec2()
+        
+        local CurveLeft = EndDir>StartDir
+        
+        switch(abs(StartDir)){
+            case 0,
+                Start_Offset = DTS0
+                break
+            case -1,
+                Start_Offset = DTS1*vec2(1,-1)
+                break
+            case 1,
+                Start_Offset = DTS1
+                break
+            case -2,
+                Start_Offset = DTS2*vec2(1,-1)
+                break
+            case 2,
+                Start_Offset = DTS2
+                break
+            case -4,
+                Start_Offset = DTS4*vec2(1,-1)
+                break
+            case 4,
+                Start_Offset = DTS4
+                break
+            case -8,
+                Start_Offset = round(DTS0:rotate(-90))
+                break
+            case 8,
+                Start_Offset = round(DTS0:rotate(90))
+                break
+        }
+        
+        switch(abs(EndDir)){
+            case 0,
+                End_Offset = DTS0
+                break
+            case -1,
+                End_Offset = DTS1*vec2(1,-1)
+                break
+            case 1,
+                End_Offset = DTS1
+                break
+            case -2,
+                End_Offset = DTS2*vec2(1,-1)
+                break
+            case 2,
+                End_Offset = DTS2
+                break
+            case -4,
+                End_Offset = DTS4*vec2(1,-1)
+                break
+            case 4,
+                End_Offset = DTS4
+                break
+            case -8,
+                End_Offset = round(DTS0:rotate(-90))
+                break
+            case 8,
+                End_Offset = round(DTS0:rotate(90))
+                break
+        }
+        
+        if(!CurveLeft){
+            Start_Offset *= -1
+            End_Offset *= -1
+        }
+        
+        EndPos = AEPs[LastPR,table][DirIndex,vector2] + End_Offset - Start_Offset
+        
+        #if(Radius==2240){print(StartDir,EndDir,Start_Offset,End_Offset,AEPs[LastPR,table][DirIndex,vector2],EndPos)}
+        
+        if(GoesLeft){
+            local L1 = line(Radius*StartNorm:rotate(90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }else{
+            local L1 = line(Radius*StartNorm:rotate(-90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(-90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }
+        
+        local ArcStartW = Isect + ArcStart
+        local ArcEndW = Isect + ArcEnd
+        
+        #Find Minimum Straight Length (to start of arc) snapped to grid
+        MinLen = 4*ArcStartW:length()/(StartDirU:length())
+    
+        LengthIndex = 1
+        for(N=1,StraightLengths:count()){
+            if(MinLen < StraightLengths[N,number]){
+                MinLen = StraightLengths[N,number]
+                LengthIndex = N
+                break
+            }
+        }
+    }
+    
+    
+    
+    #Increase until you find one that's outside the ballast outer circle
+    for(N=LengthIndex,StraightLengths:count()){
+        local EP = StraightLengths[N,number]*StartDirU
+        if(EP:distance(Isect) > Radius+BallastTopWidth){
+            MinLen = StraightLengths[N,number]
+            break
+        }
+    }
+    
+    #Write to Von
+    
+    local DTable = table()
+    DTable["Index",number] = 1
+    DTable["Type",string] = "straight"
+    
+    DTable["StartPos",vector2] = vec2(0,0)
+    DTable["Dir",number] = StartDir
+    DTable["Length",number] = MinLen
+    DTable["Height",number] = 0
+    DTable["Segments",number] = 1
+    
+    local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+    local CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+    
+    DTable = table()
+    DTable["Index",number] = 2
+    DTable["Type",string] = "arc"
+    
+    DTable["StartPos",vector2] = vec2()
+    DTable["EndPos",vector2] = EndPos
+    DTable["StartDir",number] = StartDir
+    DTable["EndDir",number] = EndDir
+    DTable["Radius",number] = Radius
+    DTable["Height",number] = 0
+    DTable["Segments",number] = Segments
+    Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+    CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+    
+    DTable = table()
+    DTable["Index",number] = 3
+    DTable["Type",string] = "switch"
+    
+    DTable["MainPiece",number] = 1
+    DTable["DivPiece",number] = 2
+    DTable["Split",string] = "main"
+    Descriptor = "//SWITCH"
+    CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+    PieceCount++
+    Compiles:pushString(CString)
+    
+    #Write Mirrored
+    
+    DTable = table()
+    DTable["Index",number] = 1
+    DTable["Type",string] = "straight"
+    
+    DTable["StartPos",vector2] = vec2(0,0)
+    DTable["Dir",number] = -StartDir
+    DTable["Length",number] = MinLen
+    DTable["Height",number] = 0
+    DTable["Segments",number] = 1
+    
+    Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+    CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+    
+    DTable = table()
+    DTable["Index",number] = 2
+    DTable["Type",string] = "arc"
+    
+    DTable["StartPos",vector2] = vec2()
+    DTable["EndPos",vector2] = EndPos*vec2(-1,1)
+    DTable["StartDir",number] = -StartDir
+    DTable["EndDir",number] = -EndDir
+    DTable["Radius",number] = Radius
+    DTable["Height",number] = 0
+    DTable["Segments",number] = Segments
+    Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+    CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+    
+    DTable = table()
+    DTable["Index",number] = 3
+    DTable["Type",string] = "switch"
+    
+    DTable["MainPiece",number] = 1
+    DTable["DivPiece",number] = 2
+    DTable["Split",string] = "main"
+    Descriptor = "//SWITCH"
+    CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+    PieceCount++
+    Compiles:pushString(CString)
+    
+    local Done = 0
+    
+    DirIndex++
+    if(DirIndex>TurnoutStartDirs:count()){ #Last Dir Combo in this radius
+        DirIndex = 1
+        RadiusIndex++
+        VonTables[SequenceIndex,table] = Compiles
+        VonNames[SequenceIndex,string] = "turnouts_r"+Radius
+        SequenceIndex++
+        Compiles = table()
+        if(RadiusIndex>AllRadii:count()){ #Last Radius - done with arcs!
+            DirIndex = 1
+            Done = 1
+        }
+    }
+    
+    if(Done){
+        if(MakeWyes){
+            timer("WyesInit",100)
+        }elseif(MakeSidings){
+            timer("SidingsInit",100)
+        }elseif(MakeCrossovers){
+            timer("CrossoversInit",100)
+        }else{
+            timer("Finish",100)
+        }
+    }else{
+        timer("MakeTurnout",50)
+    }
+}elseif(clk("WyesInit")){
+    RadiusIndex = 1
+    DirIndex = 1
+    
+    local Count = WyeDirs:count()*AllRadii:count()
+    print("Making Wyes ("+Count+")...")
+    timer("MakeWye",100)
+}elseif(clk("MakeWye")){
+    
+    #Pre-Calculate Arc Path
+    local IsPrincipal = ((RadiusIndex-1)%NumParallelTracks)==0
+    local Radius = AllRadii[RadiusIndex,number]
+    
+    local StartDir = 0
+    local EndDir = WyeDirs[DirIndex,number]
+    
+    local StartStep = dirToGrid(tp3dir(StartDir),Grid)
+    local EndStep = dirToGrid(tp3dir(EndDir),Grid)
+    local GoesLeft = StartStep:cross(EndStep) > 0
+    
+    local StartNorm = StartStep:normalized()
+    local EndNorm = EndStep:normalized()
+    
+    #Find Average Segment Length
+    local StartAng = tp3ang(StartDir)
+    local EndAng = tp3ang(EndDir)
+    local AngSweep = angnorm(EndAng-StartAng)
+    
+    local Segments = ceil(SegmentLimit*abs(AngSweep)/90)
+    local SegLength = Radius*abs(AngSweep)*(_PI/180)/Segments
+    
+    #Find Arc Chord (local coordinates)
+    local AddTheta = (GoesLeft ? -90 : 90)
+    local ArcStart = Radius*vec2(cos(StartAng+AddTheta),sin(StartAng+AddTheta))
+    local ArcEnd = Radius*vec2(cos(EndAng+AddTheta),sin(EndAng+AddTheta))
+    local Chord = ArcEnd - ArcStart
+    
+    local EndPos = vec2()
+    if(IsPrincipal){
+        LastPR = Radius
+        EndPos = roundToGrid(Chord,Grid)
+        
+        local Isect = vec2()
+        
+        if(GoesLeft){
+            local L1 = line(Radius*StartNorm:rotate(90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }else{
+            local L1 = line(Radius*StartNorm:rotate(-90),StartNorm)
+            local L2 = line(EndPos + Radius*EndNorm:rotate(-90),EndNorm)
+            
+            Isect = intersection(L1,L2)[2,vector2]
+        }
+        
+        local ArcStartW = Isect + ArcStart
+        local ArcEndW = Isect + ArcEnd
+    
+        local StartValid = (ArcStartW):dot(StartStep) >= 0
+        local EndValid = (ArcEndW-EndPos):dot(-EndStep) >= 0
+        
+        for(N=1,3){ #Adjust to make valid
+            if(!StartValid){
+                EndPos += StartStep
+                ArcStartW += StartStep
+                ArcEndW += StartStep
+            }
+            if(!EndValid){
+                EndPos += EndStep
+            }
+            
+            StartValid = (ArcStartW):dot(StartStep) >= 0
+            EndValid = (ArcEndW-EndPos):dot(-EndStep) >= 0
+            if(StartValid & EndValid){break}
+        }
+        
+        
+        #Adjust for segment length
+        local NumAdjustments = 0
+        while((ArcStartW:length()>1) & (ArcStartW:length()<SegLength/2)){
+            EndPos += StartStep
+            #Cheese Calculations
+            ArcStartW += StartStep
+            ArcEndW += StartStep
+            NumAdjustments++
+        }
+        while((ArcEndW:distance(EndPos)>1) & (ArcEndW:distance(EndPos)<SegLength/2)){
+            EndPos += EndStep
+            NumAdjustments++
+        }
+        
+        AEPs[LastPR,table][DirIndex,vector2] = EndPos
+        
+    }else{
+        #DTS normally up and right
+        local Start_Offset = vec2()
+        local End_Offset = vec2()
+        
+        local CurveLeft = EndDir>StartDir
+        
+        switch(abs(StartDir)){
+            case 0,
+                Start_Offset = DTS0
+                break
+            case -1,
+                Start_Offset = DTS1*vec2(1,-1)
+                break
+            case 1,
+                Start_Offset = DTS1
+                break
+            case -2,
+                Start_Offset = DTS2*vec2(1,-1)
+                break
+            case 2,
+                Start_Offset = DTS2
+                break
+            case -4,
+                Start_Offset = DTS4*vec2(1,-1)
+                break
+            case 4,
+                Start_Offset = DTS4
+                break
+            case -8,
+                Start_Offset = round(DTS0:rotate(-90))
+                break
+            case 8,
+                Start_Offset = round(DTS0:rotate(90))
+                break
+        }
+        
+        switch(abs(EndDir)){
+            case 0,
+                End_Offset = DTS0
+                break
+            case -1,
+                End_Offset = DTS1*vec2(1,-1)
+                break
+            case 1,
+                End_Offset = DTS1
+                break
+            case -2,
+                End_Offset = DTS2*vec2(1,-1)
+                break
+            case 2,
+                End_Offset = DTS2
+                break
+            case -4,
+                End_Offset = DTS4*vec2(1,-1)
+                break
+            case 4,
+                End_Offset = DTS4
+                break
+            case -8,
+                End_Offset = round(DTS0:rotate(-90))
+                break
+            case 8,
+                End_Offset = round(DTS0:rotate(90))
+                break
+        }
+        
+        if(!CurveLeft){
+            Start_Offset *= -1
+            End_Offset *= -1
+        }
+        
+        EndPos = AEPs[LastPR,table][DirIndex,vector2] + End_Offset - Start_Offset
+    }
+    #Write To Von
+    local DTable = table()
+    DTable["Index",number] = 1
+    DTable["Type",string] = "arc"
+    
+    DTable["StartPos",vector2] = vec2()
+    DTable["EndPos",vector2] = EndPos
+    DTable["StartDir",number] = 0
+    DTable["EndDir",number] = EndDir
+    DTable["Radius",number] = Radius
+    DTable["Height",number] = 0
+    DTable["Segments",number] = Segments
+    local Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+    local CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+    
+    DTable = table()
+    DTable["Index",number] = 2
+    DTable["Type",string] = "arc"
+    
+    DTable["StartPos",vector2] = vec2()
+    DTable["EndPos",vector2] = EndPos*vec2(-1,1)
+    DTable["StartDir",number] = 0
+    DTable["EndDir",number] = -EndDir
+    DTable["Radius",number] = Radius
+    DTable["Height",number] = 0
+    DTable["Segments",number] = Segments
+    Descriptor = "//ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]
+    CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+    
+    DTable = table()
+    DTable["Index",number] = 3
+    DTable["Type",string] = "switch"
+    
+    DTable["MainPiece",number] = 1
+    DTable["DivPiece",number] = 2
+    DTable["Split",string] = "none"
+    Descriptor = "//SWITCH"
+    CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+    PieceCount++
+    Compiles:pushString(CString)
+    
+    local Done = 0
+    
+    RadiusIndex++
+    if(RadiusIndex>AllRadii:count()){ #Last Radius for this Dir
+        RadiusIndex = 1
+        DirIndex++
+        if(DirIndex>WyeDirs:count()){ #Last Dir - done with Wyes!
+            DirIndex = 1
+            Done = 1
+            VonTables[SequenceIndex,table] = Compiles
+            VonNames[SequenceIndex,string] = "wyes"
+            SequenceIndex++
+            Compiles = table()
+        }
+    } 
+    
+    if(Done){
+        if(MakeSidings){
+            timer("SidingsInit",100)
+        }elseif(MakeCrossovers){
+            timer("CrossoversInit",100)
+        }else{
+            timer("Finish",100)
+        }
+    }else{
+        timer("MakeWye",50)
+    }
+    
+}elseif(clk("SidingsInit")){
+    DirIndex = 1
+    LengthIndex = 1
+    
+    local Count = SDirs:count()*BendLengths:count()*2*(StraightPathMode==2 ? 2 : 1)
+    print("Making Sidings ("+Count+")...")
+    timer("MakeSiding",100)
+}elseif(clk("MakeSiding")){
+    
+    local Len = BendLengths[LengthIndex,number]
+    local Dir = SDirs[DirIndex,number]
+    #DTS starts off on the right, then gets negated for the left.
+        
+    local DTS_Offset = vec2()
+    switch(Dir){
+        case 0,
+            DTS_Offset = DTS0
+            break
+        case 1,
+            DTS_Offset = DTS1
+            break
+        case -1,
+            DTS_Offset = DTS1*vec2(1,-1)
+            break
+        case 2,
+            DTS_Offset = DTS2
+            break
+        case -2,
+            DTS_Offset = DTS2*vec2(1,-1)
+            break
+        case 4,
+            DTS_Offset = DTS4
+            break
+    }
+    
+    #Write to Von
+    if((StraightPathMode==0) | (StraightPathMode==2)){ #Full Length Straights
+        local DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        local CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) + DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+        
+        
+        #Write Axial Mirrored
+        DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) - DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+    }
+    
+    if((StraightPathMode==1) | (StraightPathMode==2)){ #Half Length Straights
+        local DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len/2
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        local CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) + DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+        
+        
+        #Write Axial Mirrored
+        DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len/2
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) - DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+    }
+    local Done = 0
+    
+    LengthIndex++
+    if(LengthIndex>BendLengths:count()){ #Last Length for this Dir
+        LengthIndex = 1
+        DirIndex++
+        if(DirIndex>SDirs:count()){ #Last Dir - done with Sidings!
+            DirIndex = 1
+            Done = 1
+            VonTables[SequenceIndex,table] = Compiles
+            VonNames[SequenceIndex,string] = "sidings"
+            SequenceIndex++
+            Compiles = table()
+        }
+    }
+    
+    if(Done){
+        if(MakeCrossovers){
+            timer("CrossoversInit",100)
+        }else{
+            timer("Finish",100)
+        }
+    }else{
+        timer("MakeSiding",50)
+    }
+}elseif(clk("CrossoversInit")){
+    DirIndex = 1
+    LengthIndex = 1
+    
+    local Count = SDirs:count()*BendLengths:count()*2*(StraightPathMode==2 ? 2 : 1)
+    print("Making Crossovers ("+Count+")...")
+    timer("MakeCrossover",100)
+}elseif(clk("MakeCrossover")){
+    local Len = BendLengths[LengthIndex,number]
+    local Dir = SDirs[DirIndex,number]
+    #DTS starts off on the right, then gets negated for the left.
+        
+    local DTS_Offset = vec2()
+    switch(Dir){
+        case 0,
+            DTS_Offset = DTS0
+            break
+        case 1,
+            DTS_Offset = DTS1
+            break
+        case -1,
+            DTS_Offset = DTS1*vec2(1,-1)
+            break
+        case 2,
+            DTS_Offset = DTS2
+            break
+        case -2,
+            DTS_Offset = DTS2*vec2(1,-1)
+            break
+        case 4,
+            DTS_Offset = DTS4
+            break
+    }
+    
+    #Write to Von
+    if((StraightPathMode==0) | (StraightPathMode==2)){ #Full Length Straights
+        local DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        local CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) + DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        DTable["Xover",number] = 1
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+        
+        
+        #Write Axial Mirrored
+        DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) - DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        DTable["Xover",number] = 1
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+    }
+    
+    if((StraightPathMode==1) | (StraightPathMode==2)){ #Half-Length Straights
+        local DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len/2
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        local CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) + DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        DTable["Xover",number] = 1
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+        
+        
+        #Write Axial Mirrored
+        DTable = table()
+        DTable["Index",number] = 1
+        DTable["Type",string] = "straight"
+        
+        DTable["StartPos",vector2] = vec2(0,0)
+        DTable["Dir",number] = SDirs[DirIndex,number]
+        DTable["Length",number] = Len/2
+        DTable["Height",number] = 0
+        DTable["Segments",number] = 1
+        
+        local Descriptor = "//STRAIGHT, DIR "+DTable["Dir",number]+", LENGTH "+DTable["Length",number]+", HEIGHT "+DTable["Height",number]
+        CString = Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 2
+        DTable["Type",string] = "bezier"
+        
+        DTable["StartPos",vector2] = vec2()
+        DTable["EndPos",vector2] = Len*tp3dir(Dir) - DTS_Offset
+        DTable["StartDir",number] = Dir
+        DTable["EndDir",number] = Dir
+        DTable["StartCPLength",number] = Len*0.4375
+        DTable["EndCPLength",number] = Len*0.4375
+        DTable["Height",number] = Len*Slopes[SlopeIndex,number]
+        DTable["Segments",number] = 16
+        DTable["Xover",number] = 1
+        local Descriptor = "//BEZIER, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", MIN RADIUS "+"NOT CALCULATED"+", HEIGHT "+DTable["Height",number]
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n"
+        
+        DTable = table()
+        DTable["Index",number] = 3
+        DTable["Type",string] = "switch"
+        
+        DTable["MainPiece",number] = 1
+        DTable["DivPiece",number] = 2
+        DTable["Split",string] = "main"
+        Descriptor = "//SWITCH"
+        CString += Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n"
+        PieceCount++
+        Compiles:pushString(CString)
+    }
+    
+    
+    local Done = 0
+    
+    LengthIndex++
+    if(LengthIndex>BendLengths:count()){ #Last Length for this Dir
+        LengthIndex = 1
+        DirIndex++
+        if(DirIndex>SDirs:count()){ #Last Dir - done with Crossovers!
+            DirIndex = 1
+            Done = 1
+            VonTables[SequenceIndex,table] = Compiles
+            VonNames[SequenceIndex,string] = "crossovers"
+            SequenceIndex++
+            Compiles = table()
+        }
+    }
+    
+    if(Done){
+        timer("Finish",100)
+    }else{
+        timer("MakeCrossover",50)
+    }
+}elseif(clk("Finish")){
+    print("Specs Finished: "+PieceCount+" Unique Pieces Specified. Compiling VON Docket files...")
+    SequenceIndex = 1
+    CompileIndex = 1
+    FileText = ""
+    timer("CompileVon",100)
+}elseif(clk("CompileVon")){
+    FileText += VonTables[SequenceIndex,table][CompileIndex,string]
+    
+    local Done = 0
+    
+    CompileIndex++
+    if(CompileIndex>VonTables[SequenceIndex,table]:count()){ #Last von in compile list
+        
+        fileWrite("johnhenry_saves/dockets/"+VonNames[SequenceIndex,string]+".txt",FileText)
+        print("Wrote file johnhenry_saves/dockets/"+VonNames[SequenceIndex,string]+".txt with "+(CompileIndex-1)+" pieces!")
+        FileText = ""
+        
+        CompileIndex = 1
+        SequenceIndex++
+        if(SequenceIndex>VonTables:count()){
+            SequenceIndex = 1
+            Done = 1
+            print("Finished!")
+        }
+    }
+    
+    if(!Done){
+        timer("CompileVon",50)
+    }
+}

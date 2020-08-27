@@ -1,0 +1,189 @@
+@name johnhenry/library/linalg
+@persist WrapSegLengths:array WrapPathLength WrapPathPoints:array
+
+function number parallel(A1, B1, A2, B2){
+    local Para = 0
+    if((A1==0) & (A2==0)){
+        Para = 1
+    }elseif((B1/A1)==(B2/A2)){
+        Para = 1
+    }
+    return Para
+}
+
+function array intersection(Line1:array, Line2:array){
+    
+    local A1 = Line1[1,number]
+    local B1 = Line1[2,number]
+    local C1 = Line1[3,number]
+    
+    local A2 = Line2[1,number]
+    local B2 = Line2[2,number]
+    local C2 = Line2[3,number]
+    
+    local Error = parallel(A1, B1, A2, B2)
+    local Intersection = vec2()
+    
+    if(!Error){
+        #A1X + B1Y + C1 = 0
+        #A2X + B2Y + C2 = 0
+        
+        if((A1==0)&(B2==0)){
+            Intersection = vec2(-C2/A2,-C1/B1)
+        }elseif((A2==0)&(B1==0)){
+            Intersection = vec2(-C1/A1,-C2/B2)
+        }elseif(A1!=0){ #Solve Eq 1 for X
+            #X = -(C1 + B1Y)/A1
+            #Sub into Eq 2
+            #(A2/A1)(C1) + (A2/A1)(B1Y) = (B2Y + C2)
+            #(A2B1/A1 - B2)Y = C2 - (A2C1/A1)
+            #Y = (C2 - (A2C1/A1))/(A2B1/A1 - B2)
+            local Y = (C2 - (A2*C1/A1))/(A2*B1/A1 - B2)
+            local X = -(C1 + B1*Y)/A1
+            Intersection = vec2(X,Y)
+        }elseif(A2!=0){ #Solve Eq2 for X
+            local Y = (C1 - (A1*C2/A2))/(A1*B2/A2 - B1)
+            local X = -(C2 + B2*Y)/A2
+            Intersection = vec2(X,Y)
+        }
+    }
+    
+    return array(Error,Intersection)
+    
+}
+function array line(Point:vector2, Dir:vector2){
+    local PX = Point:x()
+    local PY = Point:y()
+    local DX = Dir:x()
+    local DY = Dir:y()
+    #Y - PY = (DY/DX)(X-PX)
+    #DX*Y - PY*DX = DY*X - DY*PX
+    #DX*Y - DY*X = PY*DX - DY*PX
+    
+    local A = DY
+    local B = -DX
+    local C = (PY*DX - DY*PX)
+    #print(A:toString()+"X + "+B:toString()+"Y + "+C:toString()+" = 0")
+    return array(A,B,C)
+}
+function number vector2:isOnLine(Line:array){
+    local A = Line[1,number]
+    local B = Line[2,number]
+    local C = Line[3,number]
+    local X = This:x()
+    local Y = This:y()
+    #Ax+By+C=0
+    return (A*X + B*Y + C)==0
+}
+function array lineSegIsect(A1:vector2, A2:vector2, B1:vector2, B2:vector2){
+    local LA = line(A1,(A2-A1):normalized())
+    local LB = line(B1,(B2-B1):normalized())
+    
+    local I = intersection(LA,LB)
+    if(!I[1,number]){ #No Error
+        local IP = I[2,vector2]
+        local IRA1 = ((IP-A1):dot(A2-A1)) >= 0
+        local IRA2 = ((IP-A2):dot(A1-A2)) >= 0
+        local IRB1 = ((IP-B1):dot(B2-B1)) >= 0
+        local IRB2 = ((IP-B2):dot(B1-B2)) >= 0
+        
+        if(IRA1 & IRA2 & IRB1 & IRB2){
+            return array(0,IP)
+        }else{
+            return array(1,IP)
+        }
+        
+    }else{ #Lines parallel
+        return I
+    }
+    
+    
+}
+function vector2 mid2(Start:vector2, End:vector2, T){
+    return Start + T*(End-Start)
+}
+function number findZ(Base:vector2, Dir:vector2, Sample:vector2){
+    
+    local DirN = Dir:normalized()
+    return (Sample-Base):dot(DirN)
+    
+}
+
+function number vector2:isInShadow(Point1:vector2, Point2:vector2, Point3:vector2, Point4:vector2){ #Tests whether this point is inside the box drawn by these four points
+    
+    local InBound12 = (Point2-Point1):cross(This-Point1) >= 0
+    local InBound23 = (Point3-Point2):cross(This-Point2) >= 0
+    local InBound34 = (Point4-Point3):cross(This-Point3) >= 0
+    local InBound41 = (Point1-Point4):cross(This-Point4) >= 0
+    
+    return InBound12 & InBound23 & InBound34 & InBound41
+}
+
+function number vector2:isInShadow3(Point1:vector2, Point2:vector2, Point3:vector2, Point4:vector2){ #Same as previous but with just a little bit of direction-specific extra margin - this one is actually used.
+    #2<-1
+    #|  |
+    #3<-4
+    local Point2B = Point2 + (Point2-Point1)*0.125
+    local Point3B = Point3 + (Point3-Point4)*0.125
+    
+    local InBound12 = (Point2B-Point1):cross(This-Point1) >= 0
+    local InBound23 = (Point3B-Point2B):cross(This-Point2B) >= 0
+    local InBound34 = (Point4-Point3B):cross(This-Point3B) >= 0
+    local InBound41 = (Point1-Point4):cross(This-Point4) >= 0
+    
+    return InBound12 & InBound23 & InBound34 & InBound41
+}
+
+function vector2 vector2:projectOntoLine(Point1:vector2,Point2:vector2){
+    
+    local Dnorm = (Point2-Point1):normalized()
+    local Dot = (This-Point1):dot(Dnorm)
+    
+    return Point1 + Dot*Dnorm
+}
+function vector2 vector2:projectOntoLineUnit(Point:vector2,Unit:vector2){
+    
+    local Unorm = Unit:normalized()
+    local Dot = round((This-Point):dot(Unorm)/Unit:length())
+    
+    return Point + Dot*Unit
+}
+function number vector2:collinear(Point1:vector2,Point2:vector2){
+    local Projected = This:projectOntoLine(Point1,Point2)
+    return (This:distance(Projected) < 1)
+}
+
+function number rdwidth(Rail_Width, Angle){
+    return Rail_Width/cos(Angle)
+}
+
+function void wrapOnPathInit(Points:array){
+    WrapPathLength = 0
+    WrapSegLengths = array()
+    WrapPathPoints = Points:clone()
+    for(N=1,Points:count()-1){
+        local Len = (Points[N+1,vector] - Points[N,vector]):length()
+        WrapSegLengths[N,number] = Len
+        WrapPathLength += Len
+    }
+}
+
+function vector wrapOnPathDist(Dist){
+    Dist = clamp(Dist,0,WrapPathLength)
+    local Out = WrapPathPoints[WrapPathPoints:count(),vector]
+    for(N=1,WrapSegLengths:count()){
+        local SL = WrapSegLengths[N,number]
+        if(Dist > SL){ #It's in the next segment - subtract the distance
+            Dist -= SL
+        }else{ #It's in this segment
+            local Start = WrapPathPoints[N,vector]
+            local End = WrapPathPoints[N+1,vector]
+            Out = Start + (End-Start)*Dist/SL
+            break
+        }
+    }
+    return Out
+}
+function vector wrapOnPathFrac(Frac){
+    return wrapOnPathDist(Frac*WrapPathLength)
+}

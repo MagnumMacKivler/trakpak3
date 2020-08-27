@@ -6,6 +6,8 @@ Trakpak 3.0 "Beta", Copyright 2019-2020 by Magnum MacKivler
 
 Trakpak3 is currently in development. This will be the master list for materials, models, brushwork, and other things needed to develop for trakpak. I'm changing my plan for Trakpak3's release schedule. Instead of releasing everything at once (which will take a great deal of time), I plan to release an initial set of resources, enough to get people (including myself) started on mapping, and the rest will be filled in as time goes by.
 
+**The files uploaded here are incomplete and unfinished. Furthermore, they are not organized in a way that is conducive to testing yet. Downloading trakpak3 at the current stage of development is NOT recommended!**
+
 ### The Day 1 To-Do List:
 
 This is a list of everything I want to include in Trakpak3 for the Day 1 release to let people start mapping as soon as possible.

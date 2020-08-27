@@ -1,0 +1,726 @@
+@name johnhenry/library/egp
+@inputs EGP:wirelink
+@outputs 
+@persist EGP_Page EGPAutoScale EGPScale EGPGridSize EGPViewCenter:vector2 EGPID LastGridID SelectedPlot SelectedDirection ForbiddenDirection1 ForbiddenDirection2
+@persist EGP_Datas:table
+@persist [EGP_MainGrid EGP_SubGrid EGP_GoodPlot EGP_BadPlot EGP_Direction EGP_SelectedDirection EGP_ForbiddenDirection EGP_Adjust EGP_MN EGP_DV]:vector
+@trigger 
+
+#EGP Coordinate range is 0-511
+
+EGPScale = 4 #Inches per pixel
+EGPViewCenter = vec2(0,0) #World Coordinates on which the EGP view will be centered
+EGPGridSize = 32
+EGPID = 1
+EGP_Page = 0
+SelectedPlot = 0
+EGPAutoScale = 1
+
+EGP_MainGrid = vec(255)
+EGP_SubGrid = vec(0,63,127)
+EGP_GoodPlot = vec(0,127,0)
+EGP_BadPlot = vec(127,0,0)
+EGP_Direction = vec(255)
+EGP_SelectedDirection = vec(0,255,0)
+EGP_ForbiddenDirection = vec(255,0,0)
+EGP_Adjust = vec(255,255,0)
+EGP_MN = vec(255,0,255)
+EGP_DV = vec(255,255,0)
+
+EGP_Datas = table()
+
+function vector2 vec2EGP(Point:vector2){
+    local Disp = Point-EGPViewCenter
+    local DispPixels = Disp/EGPScale
+    local X = 256 + DispPixels:x()
+    local Y = 256 - DispPixels:y()
+    return vec2(X,Y)
+}
+function vector2 vec2EGP(VX,VY){
+    local Point = vec2(VX,VY)
+    local Disp = Point-EGPViewCenter
+    local DispPixels = Disp/EGPScale
+    local X = 256 + DispPixels:x()
+    local Y = 256 - DispPixels:y()
+    return vec2(X,Y)
+}
+function vector2 vec2simple(V:vector2){
+    local X = V:x()
+    local Y = V:y()
+    return vec2(256+X,256-Y)
+}
+function vector2 vec2simple(X,Y){
+    return vec2(256+X,256-Y)
+}
+function vector2 egp2real(EGPCoord:vector2){
+    local DispPixX = EGPCoord:x() - 256
+    local DispPixY = -EGPCoord:y() + 256
+    local DispPixels = vec2(DispPixX, DispPixY)
+    local Disp = DispPixels*EGPScale
+    local Point = Disp+EGPViewCenter
+    return Point
+}
+function vector2 egp2real(EX,EY){
+    local DispPixX = EX - 256
+    local DispPixY = -EY + 256
+    local DispPixels = vec2(DispPixX, DispPixY)
+    local Disp = DispPixels*EGPScale
+    local Point = Disp+EGPViewCenter
+    return Point
+}
+function void wirelink:drawGrid(){
+    local ScreenCenter = vec2EGP(0,0)
+    This:egpLine(EGPID,vec2(0,ScreenCenter:y()),vec2(511,ScreenCenter:y())) #Horizontal
+    This:egpColor(EGPID,EGP_MainGrid)
+    EGPID++
+    This:egpLine(EGPID,vec2(ScreenCenter:x(),0),vec2(ScreenCenter:x(),511)) #Vertical
+    This:egpColor(EGPID,EGP_MainGrid)
+    EGPID++
+    
+    local X = ScreenCenter:x() - EGPGridSize/EGPScale #Left
+    while((X>0) & (egp2real(X,0):x()>=-16384)){
+        This:egpLine(EGPID,vec2(X,0),vec2(X,511)) #Vertical
+        This:egpColor(EGPID,EGP_SubGrid)
+        EGPID++
+        X += -EGPGridSize/EGPScale
+    }
+    X = ScreenCenter:x() + EGPGridSize/EGPScale #Right
+    while((X<511) & (egp2real(X,0):x()<=16384)){
+        This:egpLine(EGPID,vec2(X,0),vec2(X,511)) #Vertical
+        This:egpColor(EGPID,EGP_SubGrid)
+        EGPID++
+        X += EGPGridSize/EGPScale
+    }
+    local Y = ScreenCenter:y() - EGPGridSize/EGPScale #Up
+    while((Y>0) & (egp2real(0,Y):y()<=16384)){
+        This:egpLine(EGPID,vec2(0,Y),vec2(511,Y)) #Vertical
+        This:egpColor(EGPID,EGP_SubGrid)
+        EGPID++
+        Y += -EGPGridSize/EGPScale
+    }
+    Y = ScreenCenter:y() + EGPGridSize/EGPScale #Down
+    while((Y<511) & (egp2real(0,Y):y()>=-16384)){
+        This:egpLine(EGPID,vec2(0,Y),vec2(511,Y)) #Vertical
+        This:egpColor(EGPID,EGP_SubGrid)
+        EGPID++
+        Y += EGPGridSize/EGPScale
+    }
+    This:egpText(EGPID,"Grid Size: "+EGPGridSize+"\"",vec2(507,507))
+    This:egpColor(EGPID,EGP_MainGrid)
+    This:egpAlign(EGPID,2,2)
+    EGPID++
+    LastGridID = EGPID-1
+    return void
+}
+function void wirelink:drawPlot(Data:table,PN){
+    local Points = Data["plot",array]
+    local RailsL = Data["leftrail",array]
+    local RailsR = Data["rightrail",array]
+    local Ballast = Data["ballast",array]
+    local Good = !Data["invalid",number]
+    local BHs = Data["bankheights",array]
+    local Xover = Data["xover",number]
+    local Color = vec()
+    if(EGP_Datas[SelectedPlot,table]["type",string]=="switch"){
+        local IsMN = PN==EGP_Datas[SelectedPlot,table]["mn",number]
+        local IsDV = PN==EGP_Datas[SelectedPlot,table]["dv",number]
+        if(IsMN){
+            Color = EGP_MN
+        }elseif(IsDV){
+            Color = EGP_DV
+        }else{
+            Color = clamp((Good ? EGP_GoodPlot : EGP_BadPlot)+((SelectedPlot==PN) ? vec(128) : vec(0)),vec(0),vec(255))
+        }
+    }else{
+        Color = clamp((Good ? EGP_GoodPlot : EGP_BadPlot)+((SelectedPlot==PN) ? vec(128) : vec(0)),vec(0),vec(255))
+    }
+    
+    local SPoints = array()
+    local SRailsL = array()
+    local SRailsR = array()
+    local SBallast = array()
+    for(N=1,Points:count()){
+        local P = vec2EGP(Points[N,vector2])
+        SPoints[N,vector2] = P
+        if((N==1)|(N==Points:count())){
+            This:egpCircleOutline(EGPID,P,vec2(4))
+        }
+        This:egpColor(EGPID,Color)
+        EGPID++
+        SRailsR[N,vector2] = vec2EGP(RailsR[N,vector2])
+        SRailsL[N,vector2] = vec2EGP(RailsL[N,vector2])
+    }
+    for(N=1,Ballast:count()){
+        SBallast[N,vector2] = vec2EGP(Ballast[N,vector2])
+    }
+    if(Points:count()>2){
+        This:egpPolyOutline(EGPID,SBallast)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        This:egpLineStrip(EGPID,SRailsL)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        This:egpLineStrip(EGPID,SRailsR)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        local BPC = SBallast:count()
+        for(N=1,Points:count()){
+            This:egpLine(EGPID,SBallast[N,vector2],SBallast[BPC-N+1,vector2])
+            if(Data["type",string]=="banked_arc"){
+                local BH = BHs[N,number]
+                This:egpColor(EGPID,Color + BH*(vec(255,0,0)-Color))
+            }else{
+                This:egpColor(EGPID,Color)
+            }
+            EGPID++
+        }
+    }else{
+        This:egpPolyOutline(EGPID,SBallast)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        This:egpLine(EGPID,SRailsL[1,vector2],SRailsL[2,vector2])
+        This:egpColor(EGPID,Color)
+        EGPID++
+        This:egpLine(EGPID,SRailsR[1,vector2],SRailsR[2,vector2])
+        This:egpColor(EGPID,Color)
+        EGPID++
+    }
+    
+    
+    if((Data["type",string]=="arc")|(Data["type",string]=="banked_arc")){
+        local Center = vec2EGP(Data["center",vector2])
+        This:egpBox(EGPID,Center,vec2(8))
+        This:egpColor(EGPID,Color)
+        This:egpAngle(EGPID,45)
+        EGPID++
+        
+        This:egpLine(EGPID,SPoints[Data["startswing",number],vector2],Center)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        
+        This:egpLine(EGPID,SPoints[Data["endswing",number],vector2],Center)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        
+    }elseif(Data["type",string]=="bezier"){
+        local CP1 = vec2EGP(Data["cp1",vector2])
+        local CP2 = vec2EGP(Data["cp2",vector2])
+        
+        This:egpBox(EGPID,CP1,vec2(8))
+        This:egpColor(EGPID,Color)
+        This:egpAngle(EGPID,45)
+        EGPID++
+        
+        This:egpBox(EGPID,CP2,vec2(8))
+        This:egpColor(EGPID,Color)
+        This:egpAngle(EGPID,45)
+        EGPID++
+        
+        This:egpLine(EGPID,SPoints[1,vector2],CP1)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        
+        This:egpLine(EGPID,SPoints[SPoints:count(),vector2],CP2)
+        This:egpColor(EGPID,Color)
+        EGPID++
+        if(Data["tseg",number]){
+            local TCenter = vec2EGP(Data["center",vector2])
+            This:egpBox(EGPID,TCenter,vec2(8))
+            This:egpAngle(EGPID,45)
+            local TColor = clamp(vec(127,0,127)+((SelectedPlot==PN) ? vec(128) : vec(0)),vec(0),vec(255))
+            This:egpColor(EGPID,TColor)
+            EGPID++
+            This:egpLine(EGPID,SPoints[Data["tseg",number],vector2],TCenter)
+            This:egpColor(EGPID,TColor)
+            EGPID++
+            This:egpLine(EGPID,SPoints[Data["tseg",number]+1,vector2],TCenter)
+            This:egpColor(EGPID,TColor)
+            EGPID++
+        }
+    }
+    local Highlight = Data["highlight",number]
+    if(Highlight!=0){
+        local BasePoint = SPoints[Highlight,vector2]
+        This:egpBox(EGPID,BasePoint,vec2(48,2))
+        This:egpColor(EGPID,EGP_Adjust)
+        EGPID++
+        
+        This:egpBox(EGPID,BasePoint,vec2(2,48))
+        This:egpColor(EGPID,EGP_Adjust)
+        EGPID++
+        
+        This:egpCircleOutline(EGPID,BasePoint,vec2(16))
+        This:egpColor(EGPID,EGP_Adjust)
+        EGPID++
+    }
+    return void
+}
+function number pow2Snap(Number,Factor){
+    return 2^ceil(log2(Number)+Factor)
+}
+function void wirelink:autoScale(Points:array){
+    local Xs = array()
+    local Ys = array()
+    for(N=1,Points:count()){
+        local P = Points[N,vector2]
+        Xs[N,number] = P:x()
+        Ys[N,number] = P:y()
+    }
+    local MinX = Xs:min()
+    local MaxX = Xs:max()
+    local MinY = Ys:min()
+    local MaxY = Ys:max()
+    EGPViewCenter = round(vec2((MaxX+MinX)/2,(MaxY+MinY)/2))
+    local XScale = max(0.25,pow2Snap(MaxX-MinX,0.25)/512)
+    local YScale = max(0.25,pow2Snap(MaxY-MinY,0.25)/512)
+    EGPScale = max(XScale,YScale)
+    EGPGridSize = EGPScale*32
+    return void
+}
+function void wirelink:egpInitPage(PageID){
+    
+    EGP_Page = PageID
+    EGPID = 1
+    This:egpClear()
+    switch(EGP_Page){
+        case 0, #Intro Page
+            local ColorBG = vec(95,31,31)
+            local ColorHammer = vec(255,191,0)
+            local ColorRail = vec(191)
+            local ColorTie = vec(127,63,0)
+            
+            #Ties
+            local Theta = 0
+            while(Theta<180){
+                This:egpBox(EGPID,vec2(256),vec2(472,6))
+                This:egpColor(EGPID,ColorTie)
+                This:egpAngle(EGPID,Theta)
+                EGPID++
+                Theta += 5
+            }
+            
+            #Outer Rail
+            This:egpCircleOutline(EGPID,vec2simple(0,0),vec2(224))
+            This:egpColor(EGPID,ColorRail)
+            EGPID++
+            
+            #Inner Rail
+            This:egpCircleOutline(EGPID,vec2simple(0,0),vec2(204))
+            This:egpColor(EGPID,ColorRail)
+            EGPID++
+            
+            #BG Black
+            This:egpCircle(EGPID,vec2simple(0,0),vec2(192))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            
+            #BG Purple - 40
+            This:egpCircle(EGPID,vec2simple(0,0),vec2(180))
+            This:egpColor(EGPID,ColorBG)
+            EGPID++
+            
+            #Horizontal Lines
+            This:egpBox(EGPID,vec2simple(0,128),vec2(260,6))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(0,44),vec2(360,6))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(0,-44),vec2(360,6))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(0,-128),vec2(260,6))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            
+            #Vertical Lines
+            This:egpBox(EGPID,vec2(256),vec2(6,372))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(-96,86),vec2(6,86))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(96,86),vec2(6,86))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(-12,-44),vec2(6,172))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            This:egpBox(EGPID,vec2simple(12,-44),vec2(6,172))
+            This:egpColor(EGPID,vec())
+            EGPID++
+            
+            #Hammer
+            This:egpBox(EGPID,vec2simple(0,102),vec2(186,48))
+            This:egpColor(EGPID,ColorHammer)
+            EGPID++
+            This:egpBox(EGPID,vec2simple(0,62),vec2(186,32))
+            This:egpColor(EGPID,ColorHammer*0.75)
+            EGPID++
+            This:egpBox(EGPID,vec2simple(-4,-42),vec2(9,166))
+            This:egpColor(EGPID,ColorHammer*0.75)
+            EGPID++
+            This:egpBox(EGPID,vec2simple(5,-42),vec2(9,166))
+            This:egpColor(EGPID,ColorHammer)
+            EGPID++
+            
+            This:egpText(EGPID,"J    H",vec2simple(6+4,-82-2))
+            This:egpAlign(EGPID,1,1)
+            This:egpFont(EGPID,"Times New Roman",64)
+            This:egpColor(EGPID,vec())
+            EGPID++
+            
+            This:egpText(EGPID,"J    H",vec2simple(6,-82))
+            This:egpAlign(EGPID,1,1)
+            This:egpFont(EGPID,"Times New Roman",64)
+            This:egpColor(EGPID,ColorHammer)
+            EGPID++
+            
+            This:egpText(EGPID,"John Henry v1.0",vec2simple(252,244))
+            This:egpAlign(EGPID,2,1)
+            This:egpSize(EGPID,24)
+            EGPID++
+            
+            This:egpText(EGPID,"Track Generator",vec2simple(252,244-20))
+            This:egpAlign(EGPID,2,1)
+            This:egpSize(EGPID,20)
+            EGPID++
+            
+            This:egpText(EGPID,"Made by",vec2simple(252,-244+40))
+            This:egpAlign(EGPID,2,1)
+            This:egpSize(EGPID,20)
+            EGPID++
+            
+            This:egpText(EGPID,"Magnum",vec2simple(252,-244+20))
+            This:egpAlign(EGPID,2,1)
+            This:egpSize(EGPID,24)
+            EGPID++
+            
+            This:egpText(EGPID,"for Trakpak3",vec2simple(252,-244))
+            This:egpAlign(EGPID,2,1)
+            This:egpSize(EGPID,20)
+            EGPID++
+            
+            
+            break
+        case 1, #Plot
+            local AllPoints = array()
+            for(N=1,EGP_Datas:count()){
+                local Data = EGP_Datas[N,table]
+                AllPoints = AllPoints:add(Data["plot",array])
+                if((Data["type",string]=="arc")|(Data["type",string]=="banked_arc")){
+                    AllPoints:pushVector2(Data["center",vector2])
+                }elseif(Data["type",string]=="bezier"){
+                    AllPoints:pushVector2(Data["cp1",vector2])
+                    AllPoints:pushVector2(Data["cp2",vector2])
+                }
+            }
+            if(EGPAutoScale){This:autoScale(AllPoints)}
+            This:drawGrid()
+            for(N=1,EGP_Datas:count()){
+                This:drawPlot(EGP_Datas[N,table],N)
+            }
+            break
+        case 2, #Direction Gizmo
+            local N = 0
+            local Dir = vec2(0,4)
+            local TextDist = 236
+            local TextSize = 32
+            local LineDist = 220
+            
+            local ACenter = vec2(-192,192)
+            This:egpBox(EGPID,vec2simple(ACenter),vec2(64,8))
+            This:egpAngle(EGPID,45)
+            This:egpColor(EGPID,EGP_MainGrid)
+            EGPID++
+            This:egpTriangle(EGPID,vec2simple(ACenter+vec2(-32,16):rotate(45)),vec2simple(ACenter+vec2(-64,0):rotate(45)),vec2simple(ACenter+vec2(-32,-16):rotate(45)))
+            EGPID++
+            This:egpText(EGPID,"W",vec2simple(ACenter+vec2(-32,32)))
+            This:egpSize(EGPID,48)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            local ACenter = vec2(192,192)
+            This:egpBox(EGPID,vec2simple(ACenter),vec2(64,8))
+            This:egpAngle(EGPID,-45)
+            This:egpColor(EGPID,EGP_MainGrid)
+            EGPID++
+            This:egpTriangle(EGPID,vec2simple(ACenter+vec2(32,16):rotate(-45)),vec2simple(ACenter+vec2(64,0):rotate(-45)),vec2simple(ACenter+vec2(32,-16):rotate(-45)))
+            EGPID++
+            This:egpText(EGPID,"S",vec2simple(ACenter+vec2(32,32)))
+            This:egpSize(EGPID,48)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 0
+            Dir = vec2(0,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 1
+            Dir = vec2(-1,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 2
+            Dir = vec2(-2,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 4
+            Dir = vec2(-4,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 6
+            Dir = vec2(-4,2)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 7
+            Dir = vec2(-4,1)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 8
+            Dir = vec2(-4,0)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 9
+            Dir = vec2(-4,-1)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 10
+            Dir = vec2(-4,-2)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 12
+            Dir = vec2(-4,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 14
+            Dir = vec2(-2,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 15
+            Dir = vec2(-1,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = 16
+            Dir = vec2(0,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -15
+            Dir = vec2(1,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -14
+            Dir = vec2(2,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -12
+            Dir = vec2(4,-4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -10
+            Dir = vec2(4,-2)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -9
+            Dir = vec2(4,-1)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -8
+            Dir = vec2(4,0)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -7
+            Dir = vec2(4,1)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -6
+            Dir = vec2(4,2)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -4
+            Dir = vec2(4,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -2
+            Dir = vec2(2,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            N = -1
+            Dir = vec2(1,4)
+            This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            EGPID++
+            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpSize(EGPID,TextSize)
+            This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
+            This:egpAlign(EGPID,1,1)
+            EGPID++
+            
+            
+            break
+    }
+    
+    
+    return void
+}
+EGP:egpInitPage(0)

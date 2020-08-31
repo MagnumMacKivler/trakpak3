@@ -8,9 +8,11 @@ Trakpak3 is currently in development. This will be the master list for materials
 
 **The files uploaded here are incomplete and unfinished. Furthermore, they are not organized in a way that is conducive to testing yet. Downloading trakpak3 at the current stage of development is NOT recommended!**
 
-The Master To-Do list has been relocated [here.](https://github.com/MagnumMacKivler/trakpak3/projects/1)
+[Master To-Do List](https://github.com/MagnumMacKivler/trakpak3/projects/1)
 
-The Wiki To-Do list has been relocated [here.](https://github.com/MagnumMacKivler/trakpak3/projects/2)
+[Wiki To-Do List](https://github.com/MagnumMacKivler/trakpak3/projects/2)
+
+[Bug Tracker](https://github.com/MagnumMacKivler/trakpak3/projects/3)
 
 ### Community Contribution
 

@@ -61,7 +61,7 @@
 	
 	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
 ]
-
+//Switch Lever (Bodygroups)
 @PointClass base(Angles) studioprop() = tp3_switch_lever_bg : "A bodygrouped/skinned lever to control switches."
 [
 	model(studio) : "Model" : "" : "The model path for the switch lever."
@@ -292,6 +292,30 @@
 	]
 	stand_4(target_destination) : "Switch Stand 4" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_4(choices) : "Switch Stand 4 State" : 0 : "Switch Stand 4's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_5(target_destination) : "Switch Stand 5" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_5(choices) : "Switch Stand 5 State" : 0 : "Switch Stand 5's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_6(target_destination) : "Switch Stand 6" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_6(choices) : "Switch Stand 6 State" : 0 : "Switch Stand 6's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_7(target_destination) : "Switch Stand 7" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_7(choices) : "Switch Stand 7 State" : 0 : "Switch Stand 7's Required State." =
+	[
+		0 : "Main (Closed)"
+		1 : "Diverging (Open)"
+	]
+	stand_8(target_destination) : "Switch Stand 8" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_8(choices) : "Switch Stand 8 State" : 0 : "Switch Stand 8's Required State." =
 	[
 		0 : "Main (Closed)"
 		1 : "Diverging (Open)"

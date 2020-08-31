@@ -29,8 +29,12 @@ hook.Add("InitPostEntity","TP3_NodeLoad",function()
 	end
 end)
 
+util.AddNetworkString("tp3_request_blockpack")
+
 --Send all the block entity info to the client so they can actually bind the blocks - should only be useful in singleplayer. Also does signal Cabsignal Points.
-hook.Add("PlayerInitialSpawn","TP3_BlockEntityCollect",function(ply)
+net.Receive("tp3_request_blockpack", function(length, ply)
+	
+	--print("\nReceived Blockpack Request from player\n")
 	
 	local blockpack = {BlockData = {}, NodeList = Trakpak3.NodeList}
 	

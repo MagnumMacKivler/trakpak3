@@ -186,8 +186,15 @@ function Trakpak3.ClearNodes()
 	end
 end
 
+--Tell the server it's okay to send the blockpack
+hook.Add("InitPostEntity","Trakpak3_RequestBlockPack",function()
+	net.Start("tp3_request_blockpack")
+	net.SendToServer()
+end)
+
 --Receive blocks
 net.Receive("tp3_blockpack", function(mlen)
+	--print("\nBLOCK PACK RECEIVED\n")
 	local JSON = net.ReadData(mlen)
 	JSON = util.Decompress(JSON)
 	local alldata = util.JSONToTable(JSON)

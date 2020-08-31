@@ -112,7 +112,7 @@ function Trakpak3.OpenSigEdit(page)
 		
 		local page1 = vgui.Create("DPanel",sheet)
 		page1:SetBackgroundColor(Color(63,63,63))
-		sheet:AddSheet("Define Aspects",page1,"icon16/book_edit.png",false,false,"Edit the list of aspects (rules) your signaling system uses.")
+		sheet:AddSheet("Define Rules",page1,"icon16/book_edit.png",false,false,"Edit the list of rules your signaling system uses.")
 		
 		local rules_list = vgui.Create("DListView",page1)
 		rules_list:SetSize(1024,336)
@@ -122,7 +122,7 @@ function Trakpak3.OpenSigEdit(page)
 		
 		Trakpak3.SigEdit.panels.rules[1] = rules_list
 		
-		local c1 = rules_list:AddColumn("Aspect Name")
+		local c1 = rules_list:AddColumn("Rule Name")
 		local c2 = rules_list:AddColumn("Speed")
 		rules_list:AddColumn("Description")
 		local c4 = rules_list:AddColumn("Color")
@@ -147,7 +147,7 @@ function Trakpak3.OpenSigEdit(page)
 		local label = vgui.Create("DLabel",panel)
 		label:SetSize(256,24)
 		label:Dock(LEFT)
-		label:SetText("Aspect Name")
+		label:SetText("Rule Name")
 		label:SetContentAlignment(5)
 		
 		--rule speed label
@@ -184,6 +184,7 @@ function Trakpak3.OpenSigEdit(page)
 		speedbox:AddChoice("RESTRICTED")
 		speedbox:AddChoice("STOP/DANGER")
 		speedbox:SetValue("FULL")
+		speedbox:SetSortItems(false)
 		
 		local colortable = {
 			["Red"] = Color(255,0,0),
@@ -238,7 +239,7 @@ function Trakpak3.OpenSigEdit(page)
 		local label = vgui.Create("DLabel",rpanel)
 		label:SetSize(384,24)
 		label:Dock(TOP)
-		label:SetText("Signal Description")
+		label:SetText("Rule Description")
 		label:SetContentAlignment(5)
 		
 		
@@ -352,7 +353,7 @@ function Trakpak3.OpenSigEdit(page)
 		end
 		
 		local label = vgui.Create("DLabel",page1)
-		label:SetText("This is where you define the list of signal aspects that the system is capable of showing. Each aspect has a name, a maximum speed at which a train is allowed to pass it, and a description.\n\nThe name can be one or more words but CANNOT contain underscores.\n\nThe description is optional, but it's a good idea to add one in order to give explicit instructions. The description is shown in Signal Vision.\n\nColor doesn't affect what the signal actually shows, but is used to quickly organize aspects in Signal Vision.")
+		label:SetText("This is where you define the list of signal Rules (aspects) that the system is capable of showing. Each Rule has a name, a maximum speed at which a train is allowed to pass it, and a description.\n\nThe name can be one or more words but CANNOT contain underscores.\n\nThe description is optional, but it's a good idea to add one in order to give explicit instructions. The description is shown in Signal Vision.\n\nColor doesn't affect what the signal actually shows, but is used to quickly organize aspects in Signal Vision.")
 		label:SetSize(192,4)
 		label:SetWrap(true)
 		label:Dock(FILL)
@@ -421,7 +422,7 @@ function Trakpak3.OpenSigEdit(page)
 		end
 		
 		local label = vgui.Create("DLabel",panel)
-		label:SetText("This is where you list the available signal types your system can support. Signal types must be one word (no spaces, but underscores are okay).\n\nThe signal type determines how to set bodygroups, skins, etc. for a given aspect.")
+		label:SetText("This is where you list the available signal types your system can support. Signal types must be one word (no spaces, but underscores are okay).\n\nThe signal type determines how to set bodygroups, skins, etc. for a given Rule.")
 		label:SetWrap(true)
 		label:SetSize(192,256)
 		label:Dock(TOP)
@@ -485,7 +486,7 @@ function Trakpak3.OpenSigEdit(page)
 		end
 		
 		local label = vgui.Create("DLabel",panel)
-		label:SetText("This is where you list the available signal tags your system can understand. Tags must be one word (no spaces, but underscores are okay).\n\nTags are set by the mapper in Hammer to provide extra directions when choosing an aspect to display. Tags can be used in the Logic Function.")
+		label:SetText("This is where you list the available signal tags your system can understand. Tags must be one word (no spaces, but underscores are okay).\n\nTags are set by the mapper in Hammer to provide extra directions when choosing a Rule to display. Tags can be used in the Logic Function.")
 		label:SetWrap(true)
 		label:SetSize(192,256)
 		label:Dock(TOP)
@@ -618,7 +619,7 @@ function Trakpak3.OpenSigEdit(page)
 		int_aspectsheet:SetSize(192,1)
 		int_aspectsheet:Dock(LEFT)
 		int_aspectsheet:SetMultiSelect(false)
-		int_aspectsheet:AddColumn("Aspect Name")
+		int_aspectsheet:AddColumn("Rule Name")
 		Trakpak3.SigEdit.panels.rules[2] = int_aspectsheet
 		function int_aspectsheet:OnRowSelected(index, row)
 			--print("Selected Aspect:",row:GetColumnText(1))
@@ -835,7 +836,7 @@ function Trakpak3.OpenSigEdit(page)
 		end
 		
 		local label = vgui.Create("DLabel",page3)
-		label:SetText("This is where you configure how each Signal Type adjusts its skins, bodygroups, or animation cycle for each Aspect. Not every Signal Type needs to be able to display every Aspect; you can use the Logic Function, Tags, and decisions from the mapper to make sure signals only show what they can.\n\nMultiple Signal Types can be selected at once.\n\nSkin is an integer starting from 0 (max of 31).\n\nBodygroups is a list of integers starting from 0. A single number affects only the first bodygroup. Mutiple numbers affect multiple bodygroups in order; for example, '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1.\n\nAnimation Cycle is the normalized fraction (decimal from 0 to 1) along the model's animation. For example, '0' is at the start, '0.5' is halfway through, and '1' is at the end. The animation sequence used must be named 'range'.\n\nLeaving any parameter box blank will tell the signal system not to change the associated skin/bodygroups/cycle.")
+		label:SetText("This is where you configure how each Signal Type adjusts its skins, bodygroups, or animation cycle for each Rule. Not every Signal Type needs to be able to display every Rule; you can use the Logic Function, Tags, and decisions from the mapper to make sure signals only show what they can.\n\nMultiple Signal Types can be selected at once.\n\nSkin is an integer starting from 0 (max of 31).\n\nBodygroups is a list of integers starting from 0. A single number affects only the first bodygroup. Mutiple numbers affect multiple bodygroups in order; for example, '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1.\n\nAnimation Cycle is the normalized fraction (decimal from 0 to 1) along the model's animation. For example, '0' is at the start, '0.5' is halfway through, and '1' is at the end. The animation sequence used must be named 'range'.\n\nLeaving any parameter box blank will tell the signal system not to change the associated skin/bodygroups/cycle.")
 		label:SetWrap(true)
 		label:SetSize(192,256)
 		label:Dock(FILL)
@@ -848,7 +849,7 @@ function Trakpak3.OpenSigEdit(page)
 		page4:SetBackgroundColor(Color(63,63,63))
 		sheet:AddSheet("Logic Editor",page4,"icon16/monitor_lightning.png",false,false,"Configure the Logic Function.")
 		
-		--Aspect Return Sheet
+		--Rule Return Sheet
 		
 		local panel = vgui.Create("DPanel",page4)
 		panel:SetSize(128,1)
@@ -857,7 +858,7 @@ function Trakpak3.OpenSigEdit(page)
 		local button = vgui.Create("DButton",panel)
 		button:SetSize(1,48)
 		button:Dock(BOTTOM)
-		button:SetText("Add Aspect Return")
+		button:SetText("Add Rule Return")
 		button.DoClick = function()
 			local id = Trakpak3.SigEdit.selectednode
 			if id and (id>1) then
@@ -876,7 +877,7 @@ function Trakpak3.OpenSigEdit(page)
 		
 		local aspect_returns = vgui.Create("DListView",panel)
 		aspect_returns:Dock(FILL)
-		aspect_returns:AddColumn("Aspect Name")
+		aspect_returns:AddColumn("Rule Name")
 		aspect_returns:SetMultiSelect(false)
 		Trakpak3.SigEdit.panels.rules[3] = aspect_returns
 		function aspect_returns:DoDoubleClick()
@@ -1113,7 +1114,10 @@ function Trakpak3.OpenSigEdit(page)
 		tag_conditions:AddColumn("Signal Tags")
 		tag_conditions:SetMultiSelect(false)
 		Trakpak3.SigEdit.panels.tags[2] = tag_conditions
-		
+		function tag_conditions:DoDoubleClick(id, row)
+			local tagname = row:GetColumnText(1)
+			if tagname!="" then Trakpak3.SigEdit.AddCText("( TAGS."..tagname.." )") end
+		end
 		--Signal Parameter Sheet
 		
 		local panel = vgui.Create("DPanel",conpanel)
@@ -1180,7 +1184,7 @@ function Trakpak3.OpenSigEdit(page)
 		parm_conditions:AddLine("Track Occupancy")
 		parm_conditions:AddLine("Route Diverging")
 		parm_conditions:AddLine("Route Speed")
-		parm_conditions:AddLine("Next Signal Aspect")
+		parm_conditions:AddLine("Next Signal Rule")
 		parm_conditions:AddLine("Next Signal Speed")
 		parm_conditions:AddLine("CTC State")
 		
@@ -1220,7 +1224,7 @@ function Trakpak3.OpenSigEdit(page)
 				compbox:AddChoice("RESTRICTED")
 				compbox:AddChoice("STOP/DANGER")
 				compbox:SetValue("FULL")
-			elseif text=="Next Signal Aspect" then
+			elseif text=="Next Signal Rule" then
 				opbox:AddChoice("Is")
 				opbox:AddChoice("Is Not")
 				opbox:SetValue("Is")
@@ -1385,14 +1389,14 @@ function Trakpak3.OpenSigEdit(page)
 		local label = vgui.Create("DLabel",panel)
 		label:SetSize(1,32)
 		label:Dock(TOP)
-		label:SetText("NEXT Signal Aspect")
+		label:SetText("NEXT Signal Rule")
 		label:SetContentAlignment(5)
 		label:SetTextColor(Color(63,63,63))
 		
 		local list = vgui.Create("DListView",panel)
 		list:SetSize(1,128)
 		list:Dock(FILL)
-		list:AddColumn("Aspect Name")
+		list:AddColumn("Rule Name")
 		list:SetMultiSelect(false)
 		list:SetSortable(false)
 		Trakpak3.SigEdit.panels.rules[4] = list
@@ -1634,7 +1638,7 @@ function Trakpak3.OpenSigEdit(page)
 		local label = vgui.Create("DLabel",panel)
 		label:SetSize(1,32)
 		label:Dock(BOTTOM)
-		label:SetText("Calculated Aspect")
+		label:SetText("Calculated Rule")
 		label:SetContentAlignment(5)
 		label:SetTextColor(Color(63,63,63))
 		
@@ -1658,7 +1662,7 @@ function Trakpak3.OpenSigEdit(page)
 		label:Dock(TOP)
 		label:SetWrap(true)
 		label:SetContentAlignment(8)
-		label:SetText("This is where you can test all the Aspects, Signal Types, and Logic you've made. Note that you must write the Logic Function (in the Logic Editor) before this will work.")
+		label:SetText("This is where you can test all the Rules, Signal Types, and Logic you've made. Note that you must write the Logic Function (in the Logic Editor) before this will work.")
 		label:DockMargin(8,8,8,8)
 		
 		--Save File Page 6
@@ -1901,9 +1905,13 @@ function Trakpak3.SigEdit.UpdateModel(ent, index)
 	--skin
 	if skin then ent:SetSkin(tonumber(skin) or 0) end
 	--bodygroups
-	if bodygroups then
+	if bodygroups and not table.IsEmpty(bodygroups) then
 		for k, v in pairs(bodygroups) do
 			ent:SetBodygroup(k, tonumber(v) or 0)
+		end
+	else
+		for n = 1, ent:GetNumBodyGroups() do
+			ent:SetBodygroup(n, 0)
 		end
 	end
 	--anim cycle
@@ -2309,7 +2317,7 @@ function Trakpak3.SigEdit.SimNextSignal()
 	
 	if rule then aspect = rule.name else return end
 	
-	print("Simulating Next Signal: ", sigtype, aspect)
+	--print("Simulating Next Signal: ", sigtype, aspect)
 	
 	if sigtype and aspect and (sigtype!="") and(aspect!="") then
 		local data = Trakpak3.SigEdit.sigtypes[sigtype][aspect]
@@ -2359,9 +2367,20 @@ function Trakpak3.SigEdit.SimLocalSignal()
 					Trakpak3.SigEdit.intskins[6] = data.skin3
 					Trakpak3.SigEdit.intbodygroups[6] = string.Explode(" ",data.bg3) or {}
 					Trakpak3.SigEdit.intcycles[6] = data.cycle3
+				else
+					Trakpak3.SigEdit.intskins[4] = 0
+					Trakpak3.SigEdit.intbodygroups[4] = {}
+					Trakpak3.SigEdit.intcycles[4] = 0
 					
-					Trakpak3.SigEdit.panels.sim_abox:SetValue(aspect)
+					Trakpak3.SigEdit.intskins[5] = 0
+					Trakpak3.SigEdit.intbodygroups[5] = {}
+					Trakpak3.SigEdit.intcycles[5] = 0
+					
+					Trakpak3.SigEdit.intskins[6] = 0
+					Trakpak3.SigEdit.intbodygroups[6] = {}
+					Trakpak3.SigEdit.intcycles[6] = 0
 				end
+				Trakpak3.SigEdit.panels.sim_abox:SetValue(aspect)
 			end
 		end
 	end

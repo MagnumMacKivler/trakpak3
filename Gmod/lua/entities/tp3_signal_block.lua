@@ -29,6 +29,9 @@ if SERVER then
 	util.AddNetworkString("tp3_showhulls")
 	
 	function ENT:Initialize()
+		
+		self:ValidateNumerics()
+		
 		self.occupied = (self.blockmode==1)
 		self.scanid = 1
 		self.run = false --will wait until a node chain is provided
@@ -92,8 +95,9 @@ if SERVER then
 	end
 	
 	function ENT:Think()
-
+		--print("AAA")
 		if self.run and Trakpak3.NodeList and self.nodes and self.skips and self.scanid then
+			--print(Entity(35).run)
 			--Perform a hull trace between two nodes
 			if not self.skips[self.scanid] then  --OK to scan
 				--Get node IDs

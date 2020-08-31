@@ -19,6 +19,8 @@ if SERVER then
 	}
 	
 	function ENT:Initialize()
+		self:ValidateNumerics()
+	
 		--Prop Init Stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)

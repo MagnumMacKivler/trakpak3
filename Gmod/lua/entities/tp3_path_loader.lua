@@ -34,6 +34,7 @@ if SERVER then
 		--Keyvalue Validation
 		self:RegisterEntity("target",self.target)
 		self:RegisterEntity("target2",self.target2)
+		self:ValidateNumerics()
 		
 		self:ProcessLogic()
 		local condition = self:EvaluateLogic()

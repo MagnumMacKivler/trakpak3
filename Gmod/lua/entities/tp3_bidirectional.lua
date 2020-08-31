@@ -19,6 +19,7 @@ if SERVER then
 	}
 	
 	function ENT:Initialize()
+		self:ValidateNumerics()
 		
 		self.blockstates = {}
 		self.numblocks = 0

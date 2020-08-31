@@ -71,6 +71,7 @@ if SERVER then
 		self:RegisterEntity("homesignal",self.homesignal)
 		self.trigger_axis = self.angles:Forward()
 		self.angtolerance = math.Clamp(self.angtolerance or 45, 5, 175)
+		self:ValidateNumerics()
 		
 		--Reset since the angles KV actually rotates the entity
 		self:SetAngles(Angle())

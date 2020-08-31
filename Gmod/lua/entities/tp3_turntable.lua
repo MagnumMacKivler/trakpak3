@@ -37,6 +37,8 @@ if SERVER then
 	util.AddNetworkString("TP3_TurnTable_ControlInfo")
 	
 	function ENT:Initialize()
+		self:ValidateNumerics()
+		
 		self:SetModel(self.model)
 		self:SetSkin(self.skin or 0)
 		

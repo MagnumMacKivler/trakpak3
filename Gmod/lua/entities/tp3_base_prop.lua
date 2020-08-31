@@ -47,11 +47,24 @@ if SERVER then
 		end		
 	end
 	
+	--Validate Entity KVs
 	function ENT:RegisterEntity(varname, targetname)
 		local ent, valid = Trakpak3.FindByTargetname(targetname)
 		self[varname.."_valid"] = valid
 		if valid then
 			self[varname.."_ent"] = ent
+		end
+	end
+	
+	--Validate Numeric KVs (in case hammer neglects to set 0's to anything)
+	function ENT:ValidateNumerics()
+		local KVM = self.KeyValueMap
+		if KVM and not table.IsEmpty(KVM) then
+			for key, dtype in pairs(KVM) do
+				if dtype=="number" then
+					self[key] = self[key] or 0
+				end
+			end
 		end
 	end
 end

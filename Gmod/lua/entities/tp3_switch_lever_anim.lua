@@ -23,6 +23,7 @@ if SERVER then
 	}
 	
 	function ENT:Initialize()
+		self:ValidateNumerics()
 		
 		--Model/Physics Init
 		self:SetModel(self.model)

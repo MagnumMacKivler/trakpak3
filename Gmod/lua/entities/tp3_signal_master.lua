@@ -46,6 +46,7 @@ if SERVER then
 		if self.bodygroups then for n, p in pairs(string.Explode(" ",self.bodygroups)) do self:SetBodygroup(n,tonumber(p)) end end
 		
 		--Keyvalue Validation
+		self:ValidateNumerics()
 		self:RegisterEntity("slave_1",self.slave_1)
 		self:RegisterEntity("slave_2",self.slave_2)
 		self:RegisterEntity("block",self.block)
@@ -175,8 +176,6 @@ if SERVER then
 				local colordata = self.system.sigtypes[self.signaltype][aspect]
 				if colordata then
 					self.aspect = aspect
-					self:TriggerOutput("OnChangedAspect",self,aspect)
-					hook.Run("TP3_SignalUpdate",self:GetName(),aspect)
 					
 					local data = {}
 					if colordata.skin1!="" then data.skin1 = tonumber(colordata.skin1) end
@@ -253,6 +252,10 @@ if SERVER then
 						WireLib.TriggerOutput(self,"ColorCode",self.effectivecolor)
 					end
 					
+					--Broadcast Update & Fire Hammer Output
+					self:TriggerOutput("OnChangedAspect",self,aspect)
+					hook.Run("TP3_SignalUpdate",self:GetName(),aspect)
+					
 					--Network Vars for Signal Vision
 					self:SetNWString("Aspect",aspect)
 					self:SetNWInt("Speed",self.system.rules[aspect].speed)
@@ -305,7 +308,10 @@ if SERVER then
 				
 				if signal.automatic then
 					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state) --occupied, diverging, speed, nextrule, nextspeed, tags
-					if newaspect then signal:HandleNewAspect(newaspect) end
+					if newaspect then
+						--print(signal, newaspect)
+						signal:HandleNewAspect(newaspect)
+					end
 				end
 			end
 		end

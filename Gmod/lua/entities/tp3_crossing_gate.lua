@@ -31,7 +31,7 @@ if SERVER then
 	ENT.AutomaticFrameAdvance = true
 	
 	function ENT:Initialize()
-		
+		self:ValidateNumerics()
 		self:RegisterEntity("xing",self.xing)
 		
 		--Prop Init Stuff

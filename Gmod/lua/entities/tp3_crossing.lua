@@ -37,7 +37,7 @@ if SERVER then
 	function ENT:Initialize()
 		--Entity validation
 		self:RegisterEntity("block_island",self.block_island)
-		
+		self:ValidateNumerics()
 		
 		if self.pkvs then
 			self.tracks = {}

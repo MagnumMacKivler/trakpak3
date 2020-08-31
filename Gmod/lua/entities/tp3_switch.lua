@@ -25,6 +25,7 @@ if SERVER then
 	}
 	
 	function ENT:Initialize()
+		self:ValidateNumerics()
 		
 		--Auto-calculate DV if needed
 		local invalid = false

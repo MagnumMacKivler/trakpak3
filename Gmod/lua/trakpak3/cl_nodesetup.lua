@@ -194,7 +194,7 @@ end)
 
 --Receive blocks
 net.Receive("tp3_blockpack", function(mlen)
-	--print("\nBLOCK PACK RECEIVED\n")
+	print("\nBLOCK PACK RECEIVED\n")
 	local JSON = net.ReadData(mlen)
 	JSON = util.Decompress(JSON)
 	local alldata = util.JSONToTable(JSON)
@@ -206,6 +206,7 @@ net.Receive("tp3_blockpack", function(mlen)
 		for name, data in pairs(Trakpak3.Blocks) do
 			Trakpak3.NewNodeChain(name, data.pos, data.nodes, data.skips)
 			Trakpak3.BlockDims[name] = {lw = data.lw, h = data.h, offset = data.offset, occupied = data.occupied}
+			--PrintTable(Trakpak3.BlockDims[name])
 		end
 	end
 end)
@@ -474,7 +475,7 @@ function Trakpak3.SaveNodeFile()
 	file.CreateDir("trakpak3/nodes")
 	file.Write("trakpak3/nodes/"..game.GetMap()..".txt", json)
 	local gray = Color(127,255,255)
-	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/"..game.GetMap()..".txt! To include it with your map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/nodes/!")
+	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/nodes/"..game.GetMap()..".txt! To include it with your map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/nodes/!")
 end
 
 function Trakpak3.LoadNodeFile()
@@ -483,9 +484,9 @@ function Trakpak3.LoadNodeFile()
 		local ftable = util.JSONToTable(json)
 		Trakpak3.NodeList = ftable.NodeList
 		Trakpak3.NodeChainList = ftable.NodeChainList
-		chat.AddText(Color(127,255,255), "Loaded node file data/trakpak3/"..game.GetMap()..".txt successfully.")
+		chat.AddText(Color(127,255,255), "Loaded node file data/trakpak3/nodes/"..game.GetMap()..".txt successfully.")
 	else
-		chat.AddText(Color(127,255,255),"Could not find node file data/trakpak3/"..game.GetMap()..".txt!")
+		chat.AddText(Color(127,255,255),"Could not find node file data/trakpak3/nodes/"..game.GetMap()..".txt!")
 	end
 end
 
@@ -555,7 +556,7 @@ function Trakpak3.NodeEditMenu(panel)
 		AYS:DockPadding(32,32,32,16)
 		
 		local warning = vgui.Create("DLabel",AYS)
-		warning:SetText("This will override the file in data/trakpak3/.")
+		warning:SetText("This will override the file in data/trakpak3/nodes/.")
 		warning:Dock(TOP)
 		
 		local yesbutton = vgui.Create("DButton", AYS)

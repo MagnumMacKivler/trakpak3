@@ -10,22 +10,22 @@ hook.Add("InitPostEntity","TP3_NodeLoad",function()
 			Trakpak3.NodeChainList = ftable.NodeChainList
 		end
 		if Trakpak3.NodeList and Trakpak3.NodeChainList then
-			print("Trakpak3 node file trakpak3/nodes/"..game.GetMap()..".lua loaded successfully!")
+			print("[Trakpak3] Node file trakpak3/nodes/"..game.GetMap()..".lua loaded successfully! Block Report:\n")
 			
 			for block_name, chain in pairs(Trakpak3.NodeChainList) do
 				local block_ent, valid = Trakpak3.FindByTargetname(block_name)
 				if valid then
 					block_ent:SetupNodes(chain)
 				else
-					print("Block '"..block_name.."' in node file does not exist in map!")
+					print("[Trakpak3] Signal Block '"..block_name.."' in node file does not exist in map!")
 				end
 			end
 			
 		else
-			print("Error loading node file trakpak3/nodes/"..game.GetMap()..".lua!")
+			print("[Trakpak3] Error loading node file trakpak3/nodes/"..game.GetMap()..".lua!")
 		end
 	else
-		print("Could not locate a suitable node file (trakpak3/nodes/"..game.GetMap()..".lua), the signals are probably not going to work!")
+		print("[Trakpak3] Could not locate a suitable node file (trakpak3/nodes/"..game.GetMap()..".lua), the signals are probably not going to work!")
 	end
 end)
 
@@ -34,7 +34,7 @@ util.AddNetworkString("tp3_request_blockpack")
 --Send all the block entity info to the client so they can actually bind the blocks - should only be useful in singleplayer. Also does signal Cabsignal Points.
 net.Receive("tp3_request_blockpack", function(length, ply)
 	
-	--print("\nReceived Blockpack Request from player\n")
+	print("[Trakpak3] Received Blockpack Request from player.")
 	
 	local blockpack = {BlockData = {}, NodeList = Trakpak3.NodeList}
 	
@@ -65,7 +65,7 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 	end
 	
 	if table.IsEmpty(blockpack) then
-		print("There are no Trakpak3 signal blocks on this map to send to client!")
+		print("[Trakpak3] There are no Trakpak3 signal blocks on this map to send to client.")
 	else
 		--print("The table is NOT empty.")
 		local JSON = util.TableToJSON(blockpack)

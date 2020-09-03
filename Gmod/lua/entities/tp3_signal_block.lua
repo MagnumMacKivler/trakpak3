@@ -54,8 +54,16 @@ if SERVER then
 		
 		self.nodecount = table.Count(self.nodes)
 		
-		if self.blockmode==0 then self.run = true end
-		print("Block '"..self:GetName().."' set up successfully.")
+		if self.nodecount==1 then
+			self.run = false
+			ErrorNoHalt("[Trakpak3] Error! Signal Block "..self:GetName().." has only one in the chain! Double check this block's node chain and retry.\n")
+		elseif self.nodecount==0 then
+			self.run = false
+			print("[Trakpak3] Signal Block "..self:GetName().." Has no nodes in the chain.")
+		else
+			if self.blockmode==0 then self.run = true end
+			print("[Trakpak3] Signal Block '"..self:GetName().."' set up successfully with "..self.nodecount.." nodes.")
+		end
 	end
 	
 	--Update occupancy state of all nodes in my block
@@ -108,19 +116,27 @@ if SERVER then
 				local pos1 = Trakpak3.NodeList[node1]
 				local pos2 = Trakpak3.NodeList[node2]
 				
-				local ht = {
-					start = pos1 + Vector(0,0,self.hull_h/2 + self.hull_offset),
-					endpos = pos2 + Vector(0,0,self.hull_h/2 + self.hull_offset),
-					mins = Vector(-self.hull_lw/2, -self.hull_lw/2, -self.hull_h/2),
-					maxs = Vector(self.hull_lw/2, self.hull_lw/2, self.hull_h/2),
-					filter = Trakpak3.GetBlacklist(),
-					ignoreworld = true
-				}
-				local tr = util.TraceHull(ht)
-				if tr.Hit then --Trace hit something, block is occupied
-					self.scanid = 1
-					self.hitsomething = true
-					self:HandleNewState(true, true, Trakpak3.GetRoot(tr.Entity))
+				if pos1 and pos2 then
+				
+					local ht = {
+						start = pos1 + Vector(0,0,self.hull_h/2 + self.hull_offset),
+						endpos = pos2 + Vector(0,0,self.hull_h/2 + self.hull_offset),
+						mins = Vector(-self.hull_lw/2, -self.hull_lw/2, -self.hull_h/2),
+						maxs = Vector(self.hull_lw/2, self.hull_lw/2, self.hull_h/2),
+						filter = Trakpak3.GetBlacklist(),
+						ignoreworld = true
+					}
+					local tr = util.TraceHull(ht)
+					if tr.Hit then --Trace hit something, block is occupied
+						self.scanid = 1
+						self.hitsomething = true
+						self:HandleNewState(true, true, Trakpak3.GetRoot(tr.Entity))
+					end
+				else
+					self.run = false
+					print("[Trakpak3] Signal Block "..self:GetName()..", Invalid positions:")
+					print("Node 1: ",node1, pos1)
+					print("Node 2: ",node2, pos2)
 				end
 			end
 			

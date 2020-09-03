@@ -194,7 +194,7 @@ end)
 
 --Receive blocks
 net.Receive("tp3_blockpack", function(mlen)
-	print("\nBLOCK PACK RECEIVED\n")
+	print("[Trakpak3] Block Pack Received.")
 	local JSON = net.ReadData(mlen)
 	JSON = util.Decompress(JSON)
 	local alldata = util.JSONToTable(JSON)
@@ -655,10 +655,10 @@ function Trakpak3.NodeEditMenu(panel)
 		LocalPlayer():EmitSound("buttons/button9.wav")
 		if not Trakpak3.ShowHulls then
 			Trakpak3.ShowHulls = true
-			print("Showing Trakpak3 Block Hulls.")
+			print("[Trakpak3] Showing Trakpak3 Block Hulls.")
 		else
 			Trakpak3.ShowHulls = false
-			print("Hiding Trakpak3 Block Hulls.")
+			print("[Trakpak3] Hiding Trakpak3 Block Hulls.")
 		end
 	end
 	panel:AddPanel(button)
@@ -670,10 +670,10 @@ concommand.Add("tp3_showhulls", function()
 	
 	if not Trakpak3.ShowHulls then
 		Trakpak3.ShowHulls = true
-		print("Showing Trakpak3 Block Hulls.")
+		print("[Trakpak3] Showing Trakpak3 Block Hulls.")
 	else
 		Trakpak3.ShowHulls = false
-		print("Hiding Trakpak3 Block Hulls.")
+		print("[Trakpak3] Hiding Trakpak3 Block Hulls.")
 	end
 	
 end)

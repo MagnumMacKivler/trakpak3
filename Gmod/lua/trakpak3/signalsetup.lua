@@ -34,7 +34,7 @@ for k, filename in pairs(file.Find("trakpak3/signalsystems/*.lua","LUA")) do
 				local rtable = ftable.rules[n]
 				local name = rtable.name
 				currentsys.rules[name] = {speed = speed_dict[rtable.speed], desc = rtable.description, color = rtable.color}
-				print(name, rtable.speed, rtable.description)
+				--print(name, rtable.speed, rtable.description)
 			end
 			currentsys.sigtypes = ftable.sigtypes
 			if ftable.func_text then

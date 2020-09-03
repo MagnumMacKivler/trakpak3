@@ -91,11 +91,13 @@ if SERVER then
 			if string.Left(key,5)=="stand" then
 				local k = string.Right(key,1)
 				self.switches[k] = self.pkvs["stand_"..k]
-				self.states[k] = self.pkvs["state_"..k]
+				self.states[k] = self.pkvs["state_"..k] or false
+				--[[
 				if (self.states[k]!=true) and (self.states[k]!=false) then
-					print("Switch Path "..self:GetName().." Switch without matching condition: "..key.."!")
+					print("[Trakpak3] Switch Path "..self:GetName().." Switch without matching condition: "..key.."!")
 					self.switches[k] = nil
 				end
+				]]--
 			end
 		end
 	end

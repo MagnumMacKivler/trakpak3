@@ -46,6 +46,26 @@ function Trakpak3.HammerStringToAngle(str)
 	
 end
 
+--String Processing for Colors
+function Trakpak3.HammerStringToColor(str)
+	local coords = string.Explode(" ",str)
+	if coords[1] and coords[2] and coords[3] then
+		local alpha = coords[4]
+		if alpha then alpha = tonumber(alpha) end
+		return Color(tonumber(coords[1]), tonumber(coords[2]), tonumber(coords[3]), alpha or 255)
+	end
+	return nil
+	
+end
+
+--RotateAroundAxis that actually returns a new angle
+function Trakpak3.RotateAroundAxis(angle, axis, rotation)
+	local newang = Angle()
+	newang:Set(angle)
+	newang:RotateAroundAxis(axis,rotation)
+	return newang
+end
+
 --Finds the "root" entity in a chain (I.E. the one that the input entity is directly or indirectly parented to)
 function Trakpak3.GetRoot(ent)
 	if not ent:IsValid() then return end

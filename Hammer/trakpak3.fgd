@@ -2,8 +2,6 @@
 
 @include "base.fgd"
 
-
-
 //Switch
 @PointClass base(Angles) studioprop() = tp3_switch : "A simple switch. Swaps between two models to change tracks. All Input/Output and Control functions are handled by the Switch Stand."
 [
@@ -23,7 +21,7 @@
 ]
 
 //Switch Lever
-@PointClass base(Targetname, Angles) studioprop() = tp3_switch_lever_anim : "An animated lever to control switches."
+@PointClass base(Targetname, Angles) studioprop() = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
 [
 	model(studio) : "Model" : "" : "The model path for the switch lever."
 	//switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
@@ -49,8 +47,12 @@
 		1 : "Yes"
 	]
 	
+	bodygroups_closed(string) : "Bodygroups (Closed)" : "" : "Bodygroups to set when the switch stand is thrown main (closed). See the regular 'Bodygroups' keyvalue for formatting help."
+	bodygroups_motion(string) : "Bodygroups (Motion)" : "" : "Bodygroups to set when the switch stand is in motion. See the regular 'Bodygroups' keyvalue for formatting help."
+	bodygroups_open(string) : "Bodygroups (Open)" : "" : "Bodygroups to set when the switch stand is thrown diverging (open). See the regular 'Bodygroups' keyvalue for formatting help."
+	
 	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
-	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv" : "Disables the toolgun on this entity except for the tools listed here."
+	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
 	input ThrowMain(void) : "Throws the switch to main (closed)."
@@ -58,22 +60,6 @@
 	
 	output OnThrownMain(void) : "Fires when the switch is thrown main (closed)."
 	output OnThrownDiverging(void) : "Fires when the switch is thrown diverging (open)."
-	
-	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
-]
-//Switch Lever (Bodygroups)
-@PointClass base(Angles) studioprop() = tp3_switch_lever_bg : "A bodygrouped/skinned lever to control switches."
-[
-	model(studio) : "Model" : "" : "The model path for the switch lever."
-	switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
-	bg_target_close(integer) : "Target Bgrp Closed" : 0 : "The bodygroup value for the switch target/position indicator (BGRP ID 1) when the switch is main (closed)."
-	bg_target_open(integer) : "Target Bgrp Open" : 1 : "The bodygroup value for the switch target/position indicator (BGRP ID 1) when the switch is diverging (open)."
-	
-	bg_lever_close(integer) : "Lever Bgrp Closed" : 0 : "The bodygroup value for the lever handle (BGRP ID 2) when the switch is main (closed)."
-	bg_lever_open(integer) : "Lever Bgrp Open" : 1 : "The bodygroup value for the lever handle (BGRP ID 2) when the switch is diverging (open)."
-	
-	skin(integer) : "Skin Closed" : 0 : "The model's skin when the switch is main (closed)."
-	skin_open(integer) : "Skin Open" : 0 : "The model's skin when the switch is diverging (open)."
 	
 	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
 ]
@@ -204,6 +190,8 @@
 	cs_pos(vector) : "Cab Signal Pos" : : "When a tp3_cabsignal_box passes over this point (moving in the correct direction), it will register as having passed this signal. Place it roughly level with the railheads, in the center of the two rails, and at least one locomotive length before the signal."
 	nickname(string) : "Nickname" : "" : "(Optional) The signal's nickname, used in-game to describe what it does. Unlike the targetname, this doesn't have to be unique."
 	
+	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
+	
 	input SetManual(string) : "Forces a signal to display the given aspect name (if given) and stops all automatic behavior."
 	input SetAutomatic(void) : "Forces the signal to resume responding to the signaling system normally."
 	
@@ -241,7 +229,7 @@
 		2 : "Damped Jerk"
 		3 : "Bouncy Jerk"
 	]
-	
+	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input SetColor(integer) : "Force the signal head to show this color (integer code for a signal bodygroup or skin)."
 	output OnChangedColor(integer) : "Fires whenever this specific signal head changes color, and passes that color code as a parameter."
@@ -292,30 +280,6 @@
 	]
 	stand_4(target_destination) : "Switch Stand 4" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_4(choices) : "Switch Stand 4 State" : 0 : "Switch Stand 4's Required State." =
-	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
-	]
-	stand_5(target_destination) : "Switch Stand 5" : : "A tp3_switch_lever_anim/bg to monitor."
-	state_5(choices) : "Switch Stand 5 State" : 0 : "Switch Stand 5's Required State." =
-	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
-	]
-	stand_6(target_destination) : "Switch Stand 6" : : "A tp3_switch_lever_anim/bg to monitor."
-	state_6(choices) : "Switch Stand 6 State" : 0 : "Switch Stand 6's Required State." =
-	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
-	]
-	stand_7(target_destination) : "Switch Stand 7" : : "A tp3_switch_lever_anim/bg to monitor."
-	state_7(choices) : "Switch Stand 7 State" : 0 : "Switch Stand 7's Required State." =
-	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
-	]
-	stand_8(target_destination) : "Switch Stand 8" : : "A tp3_switch_lever_anim/bg to monitor."
-	state_8(choices) : "Switch Stand 8 State" : 0 : "Switch Stand 8's Required State." =
 	[
 		0 : "Main (Closed)"
 		1 : "Diverging (Open)"
@@ -393,8 +357,8 @@
 	
 	skin(integer) : "Skin (Open)" : 0 : "The gate model's skin when the lights are off."
 	skin2(integer) : "Skin (Closed)" : 1 : "The gate model's skin when the lights are on."
-	bodygroups(string) : "Bodygroups (Open)" : "0 0 0 0 0" : "The gate model's bodygroups when the gate is open. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
-	bodygroups2(string) : "Bodygroups (Closed)" : "0 0 0 0 0" : "The gate model's bodygroups when the gate is closed. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1. If blank, bodygroups will not be changed."
+	bodygroups(string) : "Bodygroups (Open)" : "" : "The gate model's bodygroups when the gate is open. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	bodygroups2(string) : "Bodygroups (Closed)" : "" : "The gate model's bodygroups when the gate is closed. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1. If blank, bodygroups will not be changed."
 	anim_trans(string) : "Transition Anim (Open)" : "up" : "The gate's transition-to-open animation (sequence). If blank, model will not be animated."
 	anim_trans2(string) : "Transition Anim (Closed)" : "down" : "The gate's transition-to-closed animation (sequence). If blank, model will not be animated."
 	anim_idle(string) : "Idle Anim (Open)" : "idle_up" : "The gate's default animation (sequence) when open. If blank, model will not be animated."
@@ -415,14 +379,104 @@
 	output OnLightsOff(void) : "Fired when the lights turn off."
 	output OnGateOpen(void) : "Fired when the gate starts opening."
 ]
-
-//Cab Signal Trigger
-@SolidClass base(Targetname) line(255 255 255, targetname, targetname, targetname, homesignal) = tp3_trigger_cabsignal : "An entity for use with Cab Signaling and ATS (Automatic Train Stop). Interacts with tp3_cabsignal_box entities that pass through its volume and is moving along the specified direction."
-
+//Custom Sign Stuff
+@BaseClass = TP3_SIGNTEXT_SINGLE
 [
-	homesignal(target_destination) : "Home Signal" : : "The signal that the train 'passes' when it passes through this trigger. Next Signal is retrieved automatically."
-	angles(angle) : "Trigger Direction (P Y R)" : "0 0 0" : "This is the direction the cab signal box must be traveling in to receive an update. Prevents trains from getting the wrong signal updates if traveling in the wrong direction."
-	angtolerance(float) : "Angle Tolerance" : "45.0" : "Interact with the cab signal box if the box's velocity vector matches the Trigger Direction plus or minus this many degrees. Clamped to [5, 175] in game."
+	text(string) : "Sign Text" : "" : "The text to display on the sign. You can make multi-line text using [n] as a newline character."
+	text_size(float) : "Text Size" : 8 : "The size (height) of the font in inches."
+	input SetText(string) : "Set the text of the sign."
+]
+@BaseClass = TP3_SIGNTEXT_MULTI
+[
+	text_1(string) : "Sign Text 1" : "" : "The text to display on the sign (Attachment Point 'text1'). You can make multi-line text using [n] as a newline character."
+	text_2(string) : "Sign Text 2" : "" : "The text to display on the sign (Attachment Point 'text2'). You can make multi-line text using [n] as a newline character."
+	text_3(string) : "Sign Text 3" : "" : "The text to display on the sign (Attachment Point 'text3'). You can make multi-line text using [n] as a newline character."
+	text_4(string) : "Sign Text 4" : "" : "The text to display on the sign (Attachment Point 'text4'). You can make multi-line text using [n] as a newline character."
+	text_size_1(float) : "Text Size 1" : 8 : "The size (height) of the font in inches."
+	text_size_2(float) : "Text Size 2" : 8 : "The size (height) of the font in inches."
+	text_size_3(float) : "Text Size 3" : 8 : "The size (height) of the font in inches."
+	text_size_4(float) : "Text Size 4" : 8 : "The size (height) of the font in inches."
+	input SetText1(string) : "Set the text of the sign."
+	input SetText2(string) : "Set the text of the sign."
+	input SetText3(string) : "Set the text of the sign."
+	input SetText4(string) : "Set the text of the sign."
+]
+@BaseClass base(Targetname) = TP3_SIGNTEXT_COMMON
+[
+	
+	
+	text_align_h(choices) : "Text Alignment (Horizontal)" : 0 : "Horizontal Alignment" =
+	[
+		-1 : "Left"
+		0 : "Center"
+		1 : "Right"
+	]
+	text_align_v(choices) : "Text Alignment (Vertical)" : 0 : "Vertical Alignment" =
+	[
+		-1 : "Bottom"
+		0 : "Center"
+		1 : "Top"
+	]
+	text_offset(float) : "Text Offset" : "0.25" : "The distance (in inches) from the surface that the text will be displayed. Larger numbers (0.5, 1.0, etc.) may be used to combat Z-fighting."
+	text_font(string) : "Font" : "Roboto" : "The font in which the text will be displayed. Note that this is NOT the font's .ttf filename. See the Trakpak3 Github Wiki for more information. https://github.com/MagnumMacKivler/trakpak3/wiki/Custom-Fonts-for-Signage"
+	text_res(integer) : "Text Resolution" : 128 : "The resolution (height) of the text, in pixels. Text will be scaled to fit the Text Size."
+	text_weight(integer) : "Weight (Boldness)" : 500 : "The line weight of the font. Larger numbers are bolder."
+	text_color(color255) : "Text Color" : "0 0 0" : "The color of the text. Accepts Alpha as a fourth parameter."
+	text_color2(color255) : "Text Outline Color" : "0 0 0" : "The color of the text outline (if used). Accepts Alpha as a fourth parameter."
+	text_outw(integer) : "Text Outline Width" : 4 : "The width, in pixels, of the text outline (if used)."
+	
+	spawnflags(flags) =
+	[
+		1 : "Italic" : 0
+		2 : "Underline" : 0
+		4 : "Outline" : 0
+		8 : "Glow-In-The-Dark" : 0
+		16 : "Ignore Max Draw Radius (Good for Skyboxes)" : 0
+	]
+	
+	
+	input SetColor(string) : "Set the color of the text (R G B)."
+	input SetColor2(string) : "Set the color of the outline text (if used) (R G B)."
+	input SetGlow(integer) : "Make the text glow in the dark or be shaded by static map lighting."
+]
+//Custom Sign, Prop (Single)
+@PointClass base(TP3_SIGNTEXT_COMMON, TP3_SIGNTEXT_SINGLE) vecline(text_pos) studioprop() = tp3_sign_prop : 
+"A prop that renders user-defined text in 2D relative to a prop. Useful for speed signs, interlocking signs, signal number plates, etc."
+[
+	model(studio) : "Model" : "" : "The model path for the sign."
+	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The sign model's orientation in the world. The text will be oriented such that the angle's forward axis is the normal of the text plane."
+	skin(integer) : "Skin" : 0 : "The sign model's skin."
+	
+	bodygroups(string) : "Bodygroups" : "" : "The sign model's bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	text_pos(vector) : "Text Origin" : : "The position in the world where the text will be placed. Works with Text Alignment."
+	gmod_allowtools(string) readonly : "Allow Tools" : "none" : "Disables the toolgun on this entity except for the tools listed here."
+]
+
+//Custom Sign, Prop (Multi/Auto)
+@PointClass base(TP3_SIGNTEXT_COMMON, TP3_SIGNTEXT_MULTI) studioprop() = tp3_sign_auto : 
+"A prop that renders user-defined text in 2D relative to a prop. Instead of specifying the text position manually (like with tp3_sign_prop), this model uses pre-encoded attachment points (named 'text1' thru 'text4'). Useful for speed signs, interlocking signs, signal number plates, etc."
+[
+	model(studio) : "Model" : "" : "The model path for the sign."
+	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The sign model's orientation in the world."
+	skin(integer) : "Skin" : 0 : "The sign model's skin."
+	
+	bodygroups(string) : "Bodygroups" : "" : "The sign model's bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	gmod_allowtools(string) readonly : "Allow Tools" : "none" : "Disables the toolgun on this entity except for the tools listed here."
+]
+
+//Custom Sign, World
+@PointClass base(TP3_SIGNTEXT_COMMON, TP3_SIGNTEXT_SINGLE) studioprop("models/editor/axis_helper_thick.mdl") = tp3_sign_world : 
+"An entity that renders text in a 2D plane defined by this entity's positions and angles. Unlike tp3_sign_prop, this does not require a model. Great for writing text onto brushes!"
+[
+	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The text plane's orientation in the world. The text will be oriented such that the angle's forward axis is the normal of the text plane."
+]
+
+//Dispatch/CTC Board
+@PointClass vecline(endpos) studioprop("models/editor/axis_helper_thick.mdl") = tp3_dispatch_board : 
+"Creates a 2D Dispatch board in the world for players to operate. Dispatch boards can display block occupancy information on a simplified map of the route, as well as control signals and switches."
+[
+	board(string) : "Dispatch Board Name" : "" : "The name of the dispatch board page to use."
+	endpos(vector) : "Bottom Corner" : : "The bottom right corner of the dispatch board. This entity's position is the top left corner."
 ]
 
 // Track Node - Deprecated

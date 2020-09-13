@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8506"
-	"mapversion" "137"
+	"mapversion" "174"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -38,7 +38,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "137"
+	"mapversion" "174"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -2805,6 +2805,82 @@ world
 			"visgroupautoshown" "1"
 		}
 	}
+	solid
+	{
+		"id" "15250"
+		side
+		{
+			"id" "2144"
+			"plane" "(-3104 512 384) (-3088 512 384) (-3088 256 384)"
+			"material" "DEV/DEV_MEASUREGENERIC01B"
+			"uaxis" "[1 0 0 0] 0.25"
+			"vaxis" "[0 -1 0 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "48"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "2145"
+			"plane" "(-3104 256 256) (-3088 256 256) (-3088 512 256)"
+			"material" "TOOLS/TOOLSNODRAW"
+			"uaxis" "[1 0 0 0] 0.25"
+			"vaxis" "[0 -1 0 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "16"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "2146"
+			"plane" "(-3104 512 384) (-3104 256 384) (-3104 256 256)"
+			"material" "DEV/DEV_MEASUREGENERIC01B"
+			"uaxis" "[0 1 0 0] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "48"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "2147"
+			"plane" "(-3088 512 256) (-3088 256 256) (-3088 256 384)"
+			"material" "DEV/DEV_MEASUREGENERIC01B"
+			"uaxis" "[0 1 0 0] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "48"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "2148"
+			"plane" "(-3088 512 384) (-3104 512 384) (-3104 512 256)"
+			"material" "DEV/DEV_MEASUREGENERIC01B"
+			"uaxis" "[1 0 0 0] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "48"
+			"smoothing_groups" "0"
+		}
+		side
+		{
+			"id" "2149"
+			"plane" "(-3088 256 256) (-3104 256 256) (-3104 256 384)"
+			"material" "DEV/DEV_MEASUREGENERIC01B"
+			"uaxis" "[1 0 0 0] 0.25"
+			"vaxis" "[0 0 -1 0] 0.25"
+			"rotation" "0"
+			"lightmapscale" "48"
+			"smoothing_groups" "0"
+		}
+		editor
+		{
+			"color" "0 232 217"
+			"visgroupshown" "1"
+			"visgroupautoshown" "1"
+		}
+	}
 	group
 	{
 		"id" "4796"
@@ -3455,6 +3531,658 @@ hidden
 			"visgroupautoshown" "1"
 			"logicalpos" "[0 1500]"
 		}
+	}
+}
+entity
+{
+	"id" "9842"
+	"classname" "prop_static"
+	"angles" "0 0 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s2048_4lt_0pg_+2048x-2048x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "-32 -5136 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9811"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/arcs/r2048/a0fw_4rt_right_0pg_+1600x+0672x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "640 -3536 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "14245"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s3072_0fw_0pg_+3072x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "864 -4592 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9541"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s3072_0fw_0pg_+3072x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "1056 -4592 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "11546"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/arcs/r3264/a0fw_1lt_left_0pg_+1040x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "1056 -4592 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "11550"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/arcs/r3072/a0fw_1lt_left_0pg_+0992x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "864 -4592 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9141"
+	"classname" "tp3_switch"
+	"angles" "0 90 0"
+	"animated" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "ss_j_2"
+	"model" "models/trakpak3_rsg/switches/turnouts/r2048/t1lt_0fw_right_+0768x-0192_+0704x-0096_mn.mdl"
+	"skin" "4"
+	"origin" "544 -2832 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9423"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s768_1lt_0pg_+0768x-0192x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "736 -2784 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9386"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s512_1lt_0pg_+0512x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "608 -2272 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "14177"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s512_1lt_0pg_+0512x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "416 -2320 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9761"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/arcs/r3072/a0fw_2lt_left_0pg_+1600x-0384x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "2400 -4992 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9788"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s2048_0fw_0pg_+2048x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "2400 -4992 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9727"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s3072_2lt_0pg_+3072x-1536x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "480 -320 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9264"
+	"classname" "tp3_switch"
+	"angles" "0 90 0"
+	"animated" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "ss_x_3"
+	"model" "models/trakpak3_rsg/switches/xovers/x1lt_right_minr2048_+1536x-0384_+1584x-0192_mn.mdl"
+	"skin" "4"
+	"origin" "224 -736 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9275"
+	"classname" "tp3_switch"
+	"angles" "0 270 0"
+	"animated" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "ss_x_4"
+	"model" "models/trakpak3_rsg/switches/xovers/x1lt_right_minr2048_+1536x-0384_+1584x-0192_mn.mdl"
+	"skin" "4"
+	"origin" "416 -2320 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9177"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/arcs/r3264/a0fw_1lt_left_0pg_+1040x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "-96 256 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9143"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/arcs/r3072/a0fw_1lt_left_0pg_+0992x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "96 256 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9076"
+	"classname" "tp3_switch"
+	"angles" "0 90 0"
+	"animated" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "ss_j_1"
+	"model" "models/trakpak3_rsg/switches/turnouts/r3072/t0fw_2lt_left_+1024x00000_+1600x-0384_mn.mdl"
+	"skin" "4"
+	"origin" "96 1280 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9116"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "-96 1280 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "8914"
+	"classname" "tp3_switch"
+	"angles" "0 90 0"
+	"animated" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "ss_x_1"
+	"model" "models/trakpak3_rsg/switches/xovers/x0fw_left_minr2048_+1536x00000_+1536x-0192_mn.mdl"
+	"skin" "4"
+	"origin" "-96 3072 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "8942"
+	"classname" "tp3_switch"
+	"angles" "0 270 0"
+	"animated" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "ss_x_2"
+	"model" "models/trakpak3_rsg/switches/xovers/x0fw_left_minr2048_+1536x00000_+1536x-0192_mn.mdl"
+	"skin" "4"
+	"origin" "96 1536 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9112"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s256_0fw_0pg_+0256x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "-96 1536 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "9045"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s256_0fw_0pg_+0256x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "96 1536 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "8977"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s4096_0fw_0pg_+4096x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "96 7168 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "8856"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/trakpak3_rsg/straights/s4096_0fw_0pg_+4096x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "-96 7168 24"
+	editor
+	{
+		"color" "174 115 0"
+		"groupid" "14392"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
 	}
 }
 entity
@@ -8273,7 +9001,7 @@ entity
 	"autoreset" "0"
 	"behavior" "1"
 	"bodygroups" "5"
-	"gmod_allowtools" "wire_adv"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/switchstands/racor_112e_left.mdl"
 	"seq_idle_close" "idle_close"
 	"seq_idle_open" "idle_open"
@@ -8298,7 +9026,7 @@ entity
 	"autoreset" "0"
 	"behavior" "1"
 	"bodygroups" "5"
-	"gmod_allowtools" "wire_adv"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/switchstands/racor_112e_left.mdl"
 	"seq_idle_close" "idle_close"
 	"seq_idle_open" "idle_open"
@@ -8323,7 +9051,7 @@ entity
 	"autoreset" "0"
 	"behavior" "1"
 	"bodygroups" "3"
-	"gmod_allowtools" "wire_adv"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/switchstands/bethlehem_51a_right.mdl"
 	"seq_idle_close" "idle_close"
 	"seq_idle_open" "idle_open"
@@ -8331,7 +9059,7 @@ entity
 	"seq_throw_open" "throw_open"
 	"skin" "0"
 	"targetname" "ss_j_1"
-	"origin" "230 1260 8"
+	"origin" "230 1160 8"
 	editor
 	{
 		"color" "220 30 220"
@@ -8348,7 +9076,7 @@ entity
 	"autoreset" "0"
 	"behavior" "1"
 	"bodygroups" "4"
-	"gmod_allowtools" "wire_adv"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/switchstands/bethlehem_51a_right.mdl"
 	"seq_idle_close" "idle_close"
 	"seq_idle_open" "idle_open"
@@ -8356,7 +9084,7 @@ entity
 	"seq_throw_open" "throw_open"
 	"skin" "0"
 	"targetname" "ss_j_2"
-	"origin" "414 -2864 8"
+	"origin" "453 -3020 8"
 	editor
 	{
 		"color" "220 30 220"
@@ -8373,7 +9101,7 @@ entity
 	"autoreset" "0"
 	"behavior" "1"
 	"bodygroups" "5"
-	"gmod_allowtools" "wire_adv"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/switchstands/racor_112e_left.mdl"
 	"seq_idle_close" "idle_close"
 	"seq_idle_open" "idle_open"
@@ -8398,7 +9126,7 @@ entity
 	"autoreset" "0"
 	"behavior" "1"
 	"bodygroups" "5"
-	"gmod_allowtools" "wire_adv"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/switchstands/racor_112e_left.mdl"
 	"seq_idle_close" "idle_close"
 	"seq_idle_open" "idle_open"
@@ -8539,6 +9267,7 @@ entity
 	"cs_pos" "-96 3488 27"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/tri-light/ryg.mdl"
 	"sigtype" "cl_high_l3"
 	"skin" "0"
@@ -8589,6 +9318,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 90 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/tri-light/ryg.mdl"
 	"skin" "0"
 	"targetname" "signal_north_1_2"
@@ -8608,6 +9338,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 90 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/tri-light/rlyg.mdl"
 	"skin" "0"
 	"targetname" "signal_north_1_3"
@@ -8658,6 +9389,7 @@ entity
 	"cs_pos" "96 3488 27"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/tri-light/ryg.mdl"
 	"sigtype" "cl_high_l3"
 	"skin" "0"
@@ -8681,6 +9413,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 90 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/tri-light/ryg.mdl"
 	"skin" "0"
 	"targetname" "signal_north_2_2"
@@ -8700,6 +9433,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 90 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/tri-light/rlyg.mdl"
 	"skin" "0"
 	"targetname" "signal_north_2_3"
@@ -8750,6 +9484,7 @@ entity
 	"cs_pos" "864 -4360 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/searchlight/searchlight.mdl"
 	"sigtype" "cl_high"
 	"skin" "0"
@@ -8772,6 +9507,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 270 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/searchlight/searchlight.mdl"
 	"skin" "0"
 	"targetname" "signal_south_1_2"
@@ -8795,6 +9531,7 @@ entity
 	"cs_pos" "1056 -4352 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/searchlight/searchlight.mdl"
 	"sigtype" "cl_high"
 	"skin" "0"
@@ -8817,6 +9554,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 270 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/searchlight/searchlight.mdl"
 	"skin" "0"
 	"targetname" "signal_south_2_2"
@@ -9130,6 +9868,7 @@ entity
 	"cs_pos" "584 -528 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/x.mdl"
 	"sigtype" "cl_high"
 	"skin" "0"
@@ -9153,6 +9892,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 300 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/x.mdl"
 	"skin" "0"
 	"targetname" "signal_east_1_2"
@@ -9172,6 +9912,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 300 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/ryg.mdl"
 	"skin" "0"
 	"targetname" "signal_east_1_3"
@@ -9194,6 +9935,7 @@ entity
 	"cs_pos" "32 -5072 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/dwarf_rx.mdl"
 	"sigtype" "cl_dwarf_l"
 	"skin" "0"
@@ -9246,6 +9988,7 @@ entity
 	"cs_pos" "2400 -4672 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/ryg.mdl"
 	"nextsignal" "signal_east_1_1"
 	"sigtype" "cl_high"
@@ -9271,6 +10014,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 270 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/ryg.mdl"
 	"skin" "0"
 	"targetname" "signal_east_2_3"
@@ -9290,6 +10034,7 @@ entity
 	"classname" "tp3_signal_slave"
 	"angles" "0 270 0"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/x.mdl"
 	"skin" "0"
 	"targetname" "signal_east_2_2"
@@ -9340,6 +10085,7 @@ entity
 	"cs_pos" "2304 -4144 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
 	"model" "models/trakpak3_us/signals/colorlight/ryg.mdl"
 	"sigtype" "cl_high"
 	"skin" "0"
@@ -9580,654 +10326,135 @@ entity
 }
 entity
 {
-	"id" "9842"
-	"classname" "prop_static"
+	"id" "14543"
+	"classname" "tp3_sign_world"
 	"angles" "0 0 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s2048_4lt_0pg_+2048x-2048x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "-32 -5136 24"
+	"spawnflags" "8"
+	"text" "This Text Glows.[n]Yeet."
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "255 255 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "8"
+	"text_weight" "300"
+	"origin" "-3072 256 128"
 	editor
 	{
-		"color" "174 115 0"
-		"groupid" "14392"
+		"color" "220 30 220"
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
+		"logicalpos" "[0 0]"
 	}
 }
 entity
 {
-	"id" "9811"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/arcs/r2048/a0fw_4rt_right_0pg_+1600x+0672x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "640 -3536 24"
+	"id" "14628"
+	"classname" "tp3_sign_world"
+	"angles" "0 0 0"
+	"spawnflags" "8"
+	"text" "This text is in a custom font."
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "255 255 0"
+	"text_color2" "0 0 0"
+	"text_font" "Magneto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "8"
+	"text_weight" "300"
+	"origin" "-3072 256 96"
 	editor
 	{
-		"color" "174 115 0"
-		"groupid" "14392"
+		"color" "220 30 220"
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
+		"logicalpos" "[0 0]"
 	}
 }
 entity
 {
-	"id" "14245"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s3072_0fw_0pg_+3072x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "864 -4592 24"
+	"id" "14781"
+	"classname" "tp3_sign_prop"
+	"angles" "0 180 0"
+	"gmod_allowtools" "none"
+	"model" "models/props_wasteland/cargo_container01.mdl"
+	"skin" "0"
+	"spawnflags" "0"
+	"text" "TOTALLY NOT[n]NORTHERN PETROL"
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "255 255 255"
+	"text_color2" "0 0 0"
+	"text_font" "Impact"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_pos" "-705 768 64"
+	"text_res" "256"
+	"text_size" "32"
+	"text_weight" "500"
+	"origin" "-640 768 64"
 	editor
 	{
-		"color" "174 115 0"
-		"groupid" "14392"
+		"color" "220 30 220"
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
+		"logicalpos" "[0 0]"
 	}
 }
 entity
 {
-	"id" "9541"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s3072_0fw_0pg_+3072x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "1056 -4592 24"
+	"id" "14936"
+	"classname" "tp3_sign_auto"
+	"angles" "0 0 0"
+	"gmod_allowtools" "none"
+	"model" "models/trakpak3_common/roads/signs/streetsign_quad.mdl"
+	"skin" "2"
+	"spawnflags" "0"
+	"text_1" "POOTIS ST"
+	"text_2" "POOTIS ST"
+	"text_3" "GOTTAM AVE"
+	"text_4" "GOTTAM AVE"
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "255 255 255"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size_1" "6"
+	"text_size_2" "6"
+	"text_size_3" "5.5"
+	"text_size_4" "5.5"
+	"text_weight" "500"
+	"origin" "-3080 -504 304"
 	editor
 	{
-		"color" "174 115 0"
-		"groupid" "14392"
+		"color" "220 30 220"
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
+		"logicalpos" "[0 0]"
 	}
 }
 entity
 {
-	"id" "11546"
-	"classname" "prop_static"
-	"angles" "0 270 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/arcs/r3264/a0fw_1lt_left_0pg_+1040x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "1056 -4592 24"
+	"id" "15092"
+	"classname" "tp3_dispatch_board"
+	"angles" "0 0 0"
+	"board" "Test Interlocking"
+	"endpos" "-3104 256 256"
+	"origin" "-3104 512 384"
 	editor
 	{
-		"color" "174 115 0"
-		"groupid" "14392"
+		"color" "220 30 220"
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "11550"
-	"classname" "prop_static"
-	"angles" "0 270 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/arcs/r3072/a0fw_1lt_left_0pg_+0992x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "864 -4592 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9141"
-	"classname" "tp3_switch"
-	"angles" "0 90 0"
-	"animated" "1"
-	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
-	"lever" "ss_j_2"
-	"model" "models/trakpak3_rsg/switches/turnouts/r2048/t1lt_0fw_right_+0768x-0192_+0704x-0096_mn.mdl"
-	"skin" "4"
-	"origin" "544 -2832 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9423"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s768_1lt_0pg_+0768x-0192x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "736 -2784 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9386"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s512_1lt_0pg_+0512x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "608 -2272 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "14177"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s512_1lt_0pg_+0512x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "416 -2320 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9761"
-	"classname" "prop_static"
-	"angles" "0 270 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/arcs/r3072/a0fw_2lt_left_0pg_+1600x-0384x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "2400 -4992 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9788"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s2048_0fw_0pg_+2048x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "2400 -4992 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9727"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s3072_2lt_0pg_+3072x-1536x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "480 -320 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9264"
-	"classname" "tp3_switch"
-	"angles" "0 90 0"
-	"animated" "1"
-	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
-	"lever" "ss_x_3"
-	"model" "models/trakpak3_rsg/switches/xovers/x1lt_right_minr2048_+1536x-0384_+1584x-0192_mn.mdl"
-	"skin" "4"
-	"origin" "224 -736 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9275"
-	"classname" "tp3_switch"
-	"angles" "0 270 0"
-	"animated" "1"
-	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
-	"lever" "ss_x_4"
-	"model" "models/trakpak3_rsg/switches/xovers/x1lt_right_minr2048_+1536x-0384_+1584x-0192_mn.mdl"
-	"skin" "4"
-	"origin" "416 -2320 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9177"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/arcs/r3264/a0fw_1lt_left_0pg_+1040x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "-96 256 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9143"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/arcs/r3072/a0fw_1lt_left_0pg_+0992x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "96 256 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9076"
-	"classname" "tp3_switch"
-	"angles" "0 90 0"
-	"animated" "1"
-	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
-	"lever" "ss_j_1"
-	"model" "models/trakpak3_rsg/switches/turnouts/r3072/t0fw_2lt_left_+1024x00000_+1600x-0384_mn.mdl"
-	"skin" "4"
-	"origin" "96 1280 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9116"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "-96 1280 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "8914"
-	"classname" "tp3_switch"
-	"angles" "0 90 0"
-	"animated" "1"
-	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
-	"lever" "ss_x_1"
-	"model" "models/trakpak3_rsg/switches/xovers/x0fw_left_minr2048_+1536x00000_+1536x-0192_mn.mdl"
-	"skin" "4"
-	"origin" "-96 3072 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "8942"
-	"classname" "tp3_switch"
-	"angles" "0 270 0"
-	"animated" "1"
-	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
-	"lever" "ss_x_2"
-	"model" "models/trakpak3_rsg/switches/xovers/x0fw_left_minr2048_+1536x00000_+1536x-0192_mn.mdl"
-	"skin" "4"
-	"origin" "96 1536 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9112"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s256_0fw_0pg_+0256x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "-96 1536 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9045"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s256_0fw_0pg_+0256x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "96 1536 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "8977"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s4096_0fw_0pg_+4096x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "96 7168 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "8856"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s4096_0fw_0pg_+4096x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "-96 7168 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
+		"logicalpos" "[0 0]"
 	}
 }
 cameras

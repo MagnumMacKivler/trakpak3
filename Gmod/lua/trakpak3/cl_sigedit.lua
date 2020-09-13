@@ -38,8 +38,9 @@ function Trakpak3.OpenSigEdit(page)
 	--Populate with chosen page
 	Trakpak3.SigEdit.page = page or Trakpak3.SigEdit.page or 0
 	if Trakpak3.SigEdit.page==0 then --New/Load menu
-		SSC(frame, 384,192)
-		frame:SetTitle("Trakpak3 Signal System Editor: New/Load System")
+		SSC(frame, 440,192)
+		frame:SetTitle("SigEdit (Trakpak3 Signal System Editor): New/Load System")
+		frame:SetIcon("trakpak3_common/icons/signal_lun_n.png")
 		
 		local epanel = vgui.Create("DPanel",frame)
 		epanel:Dock(FILL)
@@ -103,7 +104,8 @@ function Trakpak3.OpenSigEdit(page)
 		
 	elseif Trakpak3.SigEdit.page==1 then --Everything Else
 		SSC(frame, 1280,640)
-		frame:SetTitle("Trakpak3 Signal System Editor: Configure")
+		frame:SetTitle("SigEdit (Trakpak3 Signal System Editor): Configure")
+		frame:SetIcon("trakpak3_common/icons/signal_grn_n.png")
 		
 		local sheet = vgui.Create("DPropertySheet",frame)
 		sheet:Dock(FILL)

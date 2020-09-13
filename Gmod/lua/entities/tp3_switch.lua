@@ -58,7 +58,7 @@ if SERVER then
 	--Set local parameters
 	function ENT:SwitchSetup(behavior)
 		self.behavior = behavior
-		print("Behavior setup: "..behavior)
+		--print("Behavior setup: "..behavior)
 	end
 	
 	--Instruct the switch to throw
@@ -335,7 +335,7 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		--timer.Simple(1,function() self:SetModel(oldmodel) end)
 		self:SetModel(oldmodel)
-		print("Quickphys!")
+		--print("Quickphys!")
 	end
 	
 	--Change Switch Full (Model and Physics, Reset all state data)
@@ -353,7 +353,7 @@ if SERVER then
 		self:SetAutomaticFrameAdvance(false)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		if self.skin then self:SetSkin(self.skin) end
-		print("Switch ",state)
+		--print("Switch ",state)
 		self:FindAttachments()
 	end
 	

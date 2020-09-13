@@ -32,6 +32,7 @@ end)
 util.AddNetworkString("tp3_request_blockpack")
 
 --Send all the block entity info to the client so they can actually bind the blocks - should only be useful in singleplayer. Also does signal Cabsignal Points.
+--Also does Signals and Switches for DS boards
 net.Receive("tp3_request_blockpack", function(length, ply)
 	
 	print("[Trakpak3] Received Blockpack Request from player.")
@@ -76,21 +77,76 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		net.Send(ply)
 	end
 	
-	--Cab Signal Positions
+	--Signals and Cab Signal Positions
 	local allsigs = ents.FindByClass("tp3_signal_master")
 	local positions = {}
+	local signals = {}
 	if allsigs then
+	
 		for _, signal in pairs(allsigs) do
 			table.insert(positions, signal.cs_pos)
+			
+			local name = signal:GetName()
+			if name and (name!="") then
+				signals[name] = signal:GetPos()
+			end
 		end
 		
+		--CS Pos
 		local JSON = util.TableToJSON(positions)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_cabsignal_pospack")
 		net.Start("tp3_cabsignal_pospack")
 		net.WriteData(JSON,#JSON)
 		net.Send(ply)
+		
+		--Signal Pos
+		local JSON = util.TableToJSON(signals)
+		JSON = util.Compress(JSON)
+		util.AddNetworkString("tp3_signalpack")
+		net.Start("tp3_signalpack")
+		net.WriteData(JSON,#JSON)
+		net.Send(ply)
+	end
+	
+	--Switches
+	local allswitches = ents.FindByClass("tp3_switch_lever_anim")
+	local switches = {}
+	if allswitches then
+		for _, switch in pairs(allswitches) do
+			local name = switch:GetName()
+			if name and (name!="") then
+				switches[name] = switch:GetPos()
+			end
+		end
+		
+		--Switch Pos
+		local JSON = util.TableToJSON(switches)
+		JSON = util.Compress(JSON)
+		util.AddNetworkString("tp3_switchpack")
+		net.Start("tp3_switchpack")
+		net.WriteData(JSON,#JSON)
+		net.Send(ply)
+		
 	end
 	
 end)
 
+--Clipboard
+--[[
+util.AddNetworkString("tp3_clipboard")
+net.Receive("tp3_clipboard",function(len, ply)
+	local text = net.ReadString() or ""
+	ply:SetNWString("tp3_clipboard",text)
+end)
+hook.Add("KeyPress","Trakpak3_Clipboard",function(ply, key)
+	if key==IN_USE then
+		local cbt = ply:GetNWString("tp3_clipboard")
+		print(ply, cbt)
+		if cbt and (cbt!="") then
+			net.Start("tp3_clipboard")
+			net.Send(ply)
+		end
+	end
+end)
+]]--

@@ -1,3 +1,5 @@
+--Clientside Node Setup as well as debug and "pack" receiving functions
+
 --Functions for editing individual nodes
 function Trakpak3.GetUniqueNodeID()
 	if not Trakpak3.NodeList then
@@ -218,6 +220,20 @@ net.Receive("tp3_cabsignal_pospack", function(mlen)
 	Trakpak3.CS_Positions = util.JSONToTable(JSON)
 end)
 
+--Receive Signal Positions themselves
+net.Receive("tp3_signalpack",function(mlen)
+	local JSON = net.ReadData(mlen)
+	JSON = util.Decompress(JSON)
+	Trakpak3.Signals = util.JSONToTable(JSON)
+end)
+
+--Receive Switches
+net.Receive("tp3_switchpack",function(mlen)
+	local JSON = net.ReadData(mlen)
+	JSON = util.Decompress(JSON)
+	Trakpak3.Switches = util.JSONToTable(JSON)
+end)
+
 --Occupancy Update
 net.Receive("tp3_block_hull_update", function()
 	local block_name = net.ReadString()
@@ -308,7 +324,7 @@ Trakpak3.CLEAR = Color(0,255,0)
 Trakpak3.OCCUPIED = Color(255,0,0)
 
 --Draw all the nodes on screen as well as the cursor
-hook.Add("PostDrawOpaqueRenderables","TP3_NE_DRAW", function()
+hook.Add("PostDrawTranslucentRenderables","TP3_NE_DRAW", function()
 	local tewl = LocalPlayer():GetTool()
 	local applicable_tools = {"tp3_node_editor","tp3_node_chainer"}
 	local goodtool = false
@@ -430,6 +446,9 @@ hook.Add("PostDrawOpaqueRenderables","TP3_NE_DRAW", function()
 		local rdist = (GetConVar("tp3_node_editor_drawdistance"):GetFloat() or 1024)^2
 		local mypos = LocalPlayer():GetPos()
 		
+		local incopyzone = false
+		
+		--Blocks and their Nodes
 		for block_name, chain in pairs(Trakpak3.NodeChainList) do
 			--Determine Color
 			local ChainColor
@@ -439,7 +458,7 @@ hook.Add("PostDrawOpaqueRenderables","TP3_NE_DRAW", function()
 				ChainColor = Trakpak3.CLEAR
 			end
 			
-			--Draw!
+			--Draw Node Hulls
 			local nodes = chain.Nodes
 			local skips = chain.Skips
 			local dims = Trakpak3.BlockDims[block_name]
@@ -462,7 +481,140 @@ hook.Add("PostDrawOpaqueRenderables","TP3_NE_DRAW", function()
 					end
 				end
 			end 
+			
+			--Draw Block Block
+			if Trakpak3.Blocks and (Trakpak3.ShowHulls==2) then
+				local bpos = Trakpak3.Blocks[block_name].pos
+				if mypos:DistToSqr(bpos) < rdist then
+				
+					local mins = Vector(-64,-64,-8)
+					local maxs = Vector(64,64,128)
+					
+					render.DrawWireframeBox(bpos,Angle(),mins,maxs,ChainColor)
+					
+					local text
+					local tpos
+					
+					if mypos:WithinAABox(bpos+mins, bpos+maxs) then --Inside the box
+						text = "Signal Block '"..block_name.."' (Press E to Copy to Clipboard)"
+						tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+						
+						incopyzone = true
+						if not Trakpak3.Clipboard then
+							Trakpak3.Clipboard = block_name
+							--net.Start("tp3_clipboard")
+								--net.WriteString(block_name)
+							--net.SendToServer()
+						end
+					else --Outside the box
+						text = "Signal Block '"..block_name.."'"
+						tpos = (bpos + Vector(0,0,64)):ToScreen()
+					end
+					
+					cam.Start2D()
+						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, ChainColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
+					cam.End2D()
+				end
+			end
 		end
+		
+		--Signals
+		if Trakpak3.Signals and (Trakpak3.ShowHulls==2) then
+			local sigcolor = Color(255,255,255)
+			for name, pos in pairs(Trakpak3.Signals) do
+				if mypos:DistToSqr(pos) < rdist then
+					local mins = Vector(-64,-64,-64)
+					local maxs = Vector(64,64,64)
+					
+					render.DrawWireframeBox(pos,Angle(),mins,maxs,sigcolor)
+					
+					local text
+					local tpos
+					
+					if mypos:WithinAABox(pos+mins, pos+maxs) then --Inside the box
+						text = "Signal '"..name.."' (Press E to Copy to Clipboard)"
+						tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+						
+						incopyzone = true
+						if not Trakpak3.Clipboard then
+							Trakpak3.Clipboard = name
+							--net.Start("tp3_clipboard")
+								--net.WriteString(name)
+							--net.SendToServer()
+						end
+					else --Outside the box
+						text = "Signal '"..name.."'"
+						tpos = (pos + Vector(0,0,64)):ToScreen()
+					end
+					
+					cam.Start2D()
+						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, sigcolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
+					cam.End2D()
+				end
+			end
+		end
+		
+		--Signals
+		if Trakpak3.Switches and (Trakpak3.ShowHulls==2) then
+			local swicolor = Color(255,0,255)
+			for name, pos in pairs(Trakpak3.Switches) do
+				if mypos:DistToSqr(pos) < rdist then
+					local mins = Vector(-64,-64,-8)
+					local maxs = Vector(64,64,128)
+					
+					render.DrawWireframeBox(pos,Angle(),mins,maxs,swicolor)
+					
+					local text
+					local tpos
+					
+					if mypos:WithinAABox(pos+mins, pos+maxs) then --Inside the box
+						text = "Switch '"..name.."' (Press E to Copy to Clipboard)"
+						tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+						
+						incopyzone = true
+						if not Trakpak3.Clipboard then
+							Trakpak3.Clipboard = name
+							--net.Start("tp3_clipboard")
+								--net.WriteString(name)
+							--net.SendToServer()
+						end
+					else --Outside the box
+						text = "Switch '"..name.."'"
+						tpos = (pos + Vector(0,0,64)):ToScreen()
+					end
+					
+					cam.Start2D()
+						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, swicolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
+					cam.End2D()
+				end
+			end
+		end
+		
+		if not incopyzone and Trakpak3.Clipboard then
+			Trakpak3.Clipboard = false
+			--net.Start("tp3_clipboard")
+			--net.SendToServer()
+		end
+	end
+end)
+
+--Copy to Clipboard
+--[[
+net.Receive("tp3_clipboard", function(len)
+	local text = LocalPlayer():GetNWString("tp3_clipboard")
+	if text and (text!="") then
+		SetClipboardText(text)
+		LocalPlayer():EmitSound("buttons/button18.wav")
+		chat.AddText("Copied '"..text.."' to clipboard.")
+	end
+end)
+]]--
+
+hook.Add("KeyPress","Trakpak3_Clipboard",function(ply, key)
+	if key==IN_USE and Trakpak3.Clipboard then
+		SetClipboardText(Trakpak3.Clipboard)
+		LocalPlayer():EmitSound("buttons/button18.wav")
+		chat.AddText("Copied '"..Trakpak3.Clipboard.."' to clipboard.")
 	end
 end)
 
@@ -479,7 +631,7 @@ function Trakpak3.SaveNodeFile()
 end
 
 function Trakpak3.LoadNodeFile()
-	local json = file.Read("trakpak3/"..game.GetMap()..".txt", "DATA")
+	local json = file.Read("trakpak3/nodes/"..game.GetMap()..".txt", "DATA")
 	if json then
 		local ftable = util.JSONToTable(json)
 		Trakpak3.NodeList = ftable.NodeList
@@ -666,14 +818,25 @@ function Trakpak3.NodeEditMenu(panel)
 end
 
 --Showhulls Console Command
-concommand.Add("tp3_showhulls", function()
-	
-	if not Trakpak3.ShowHulls then
-		Trakpak3.ShowHulls = true
+concommand.Add("tp3_showhulls", function(ply, cmd, args)
+	local to = args[1]
+	if to=="2" then
+		Trakpak3.ShowHulls = 2
+		print("[Trakpak3] Showing Trakpak3 Full Debug.")
+	elseif to=="1" then
+		Trakpak3.ShowHulls = 1
 		print("[Trakpak3] Showing Trakpak3 Block Hulls.")
-	else
+	elseif to=="0" then
 		Trakpak3.ShowHulls = false
 		print("[Trakpak3] Hiding Trakpak3 Block Hulls.")
+	else
+		if not Trakpak3.ShowHulls then
+			Trakpak3.ShowHulls = 1
+			print("[Trakpak3] Showing Trakpak3 Block Hulls.")
+		else
+			Trakpak3.ShowHulls = false
+			print("[Trakpak3] Hiding Trakpak3 Block Hulls.")
+		end
 	end
 	
 end)

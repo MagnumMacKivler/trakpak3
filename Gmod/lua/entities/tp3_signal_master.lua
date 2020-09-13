@@ -88,8 +88,10 @@ if SERVER then
 			local names = {"Aspect","Diverging","Speed","ColorCode"}
 			local types = {"STRING","NORMAL","NORMAL","NORMAL"}
 			WireLib.CreateSpecialOutputs(self, names, types, descs)
+			--print("YAAAAAAAA")
 		end
 		
+		--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",self.ctc_state)
 	end
 	
 	function ENT:SetScript(sysname, sigtype)
@@ -105,10 +107,10 @@ if SERVER then
 				--end
 				self.signaltype = sigtype
 			else
-				print("Cannot find signal system '"..sysname.."'!")
+				print("[Trakpak3] Cannot find signal system '"..sysname.."'!")
 			end
 		else
-			print("Signal Table does not exist!")
+			print("[Trakpak3] Signal Table does not exist!")
 		end
 	end
 	
@@ -262,7 +264,7 @@ if SERVER then
 					self:SetNWString("Description",self.system.rules[aspect].desc)
 					self:SetNWString("Color",self.system.rules[aspect].color)
 				else
-					error("Error! Aspect "..aspect.." is not defined for signal type "..self.signaltype.."!")
+					error("[Trakpak3] Error! Aspect "..aspect.." is not defined for signal type "..self.signaltype.."!")
 				end
 			end
 		end
@@ -283,7 +285,10 @@ if SERVER then
 		for k, signal in pairs(ents.FindByClass("tp3_signal_master")) do
 			if signal.block_valid and signal.block==blockname then
 				--CTC Trip
-				if (signal.ctc_state==1) and occupied and (not signal.my_occupied) then signal.ctc_state = 0 end
+				if (signal.ctc_state==1) and occupied and (not signal.my_occupied) then
+					signal.ctc_state = 0
+					Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",0)
+				end
 				
 				--Update Block Occupancy
 				signal.my_occupied = occupied
@@ -412,20 +417,24 @@ if SERVER then
 			if newaspect then self:HandleNewAspect(newaspect) end
 		elseif iname=="SetCTC_Hold" then
 			self.ctc_state = 0
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",0)
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
 			if newaspect then self:HandleNewAspect(newaspect) end
 		elseif iname=="SetCTC_Once" then
 			self.ctc_state = 1
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
 			if newaspect then self:HandleNewAspect(newaspect) end
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",1)
 		elseif iname=="SetCTC_Allow" then
 			self.ctc_state = 2
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
 			if newaspect then self:HandleNewAspect(newaspect) end
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",2)
 		elseif iname=="SetCTC_Force" then
 			self.ctc_state = 3
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
 			if newaspect then self:HandleNewAspect(newaspect) end
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",3)
 		end
 	end
 	
@@ -527,4 +536,18 @@ if SERVER then
 			end
 		end
 	end
+	
+	--Receive DS commands
+	hook.Add("TP3_Dispatch_Command","Trakpak3_DS_Signals", function(name, cmd, val)
+		for _, signal in pairs(ents.FindByClass("tp3_signal_master")) do --For Each Signal,
+			if (name==signal:GetName()) and (cmd=="set_ctc") then
+				if val<=3 then
+					signal.ctc_state = val
+					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state)
+					if newaspect then signal:HandleNewAspect(newaspect) end
+					Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",val)
+				end
+			end
+		end
+	end)
 end

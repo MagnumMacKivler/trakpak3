@@ -84,6 +84,7 @@ if SERVER then
 			self:TriggerOutput("OnOccupied",self)
 			--Block Update to Signal System
 			hook.Run("TP3_BlockUpdate",self:GetName(),true, false, ent)
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"occupied",1)
 			--Update Wireframe
 			self:UpdateNodeList(true)
 		elseif not state and self.occupied then --Block is no longer occupied
@@ -93,6 +94,7 @@ if SERVER then
 			self:TriggerOutput("OnClear",self)
 			--Block Update to Signal System
 			hook.Run("TP3_BlockUpdate",self:GetName(),false)
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"occupied",0)
 			--Update Wireframe
 			self:UpdateNodeList(false)
 		end

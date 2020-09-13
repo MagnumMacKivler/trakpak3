@@ -42,6 +42,17 @@ if SERVER then
 			if patterned then self.pkvs[key] = Trakpak3.HammerStringToVector(value) else self[key] = Trakpak3.HammerStringToVector(value) end
 		elseif datatype=="angle" then
 			if patterned then self.pkvs[key] = Trakpak3.HammerStringToAngle(value) else self[key] = Trakpak3.HammerStringToAngle(value) end
+		elseif datatype=="color" then
+			if patterned then self.pkvs[key] = Trakpak3.HammerStringToColor(value) else self[key] = Trakpak3.HammerStringToColor(value) end
+		elseif datatype=="flags" then
+			--Cannot be patterned
+			local flags = {}
+			local flagint = tonumber(value)
+			for n = 1, (self.NumFlags or 0) do
+				local power = math.pow(2,n-1)
+				flags[n] = bit.band(flagint,power)==power
+			end
+			self[key] = flags
 		elseif datatype=="output" then
 			self:StoreOutput(key, value)
 		end		
@@ -63,6 +74,8 @@ if SERVER then
 			for key, dtype in pairs(KVM) do
 				if dtype=="number" then
 					self[key] = self[key] or 0
+				elseif dtype=="flags" then
+					self[key] = self[key] or {}
 				end
 			end
 		end

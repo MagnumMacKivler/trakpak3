@@ -504,6 +504,7 @@ function Dispatch.OpenEditor()
 				self:DoRightClick()
 			elseif (Dispatch.placetype=="signal") or (Dispatch.placetype=="switch") or (Dispatch.placetype=="block") then
 				local x, y = self:GetGridCoords(self:LocalCursorPos())
+				--print(Dispatch.page, Dispatch.selected)
 				Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:Update(true, x, y)
 				self:DoRightClick()
 			end
@@ -824,9 +825,10 @@ end
 --Select & Deselect
 function Dispatch.Select(id, newprop)
 	if Dispatch.selected then
-		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect()
+		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
 	end
 	Dispatch.selected = id
+	--print("Selected: ",Dispatch.selected)
 	local element = Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]
 	element:OnSelect(Dispatch.Panels.editor)
 	if newprop and Dispatch.Panels.editor then Dispatch.DisplayProperties(element) end
@@ -834,11 +836,14 @@ end
 
 function Dispatch.Deselect()
 	if Dispatch.selected then
-		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect()
+		--print("Deselected: ",Dispatch.selected)
+		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
 	end
 	Dispatch.selected = nil
 	Dispatch.editing = nil
 	Dispatch.placing = nil
+	
+	
 	
 	--Clear properties table
 	local ptable = Dispatch.Panels.ptable
@@ -877,7 +882,7 @@ function Dispatch.AddElement(ent)
 		end
 	end
 	function element:OnSelect(editor) end --Select/Deselect functions
-	function element:OnDeselect() end
+	function element:OnDeselect(editor) end
 	function element:OnUse() end --Function to fire when the user clicks this element's button/whatever
 	function element:UpdateValue() end --Called when an element in the world changes state
 	element.type = "null"
@@ -993,7 +998,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			end
 		end
 	end
-	function element:OnDeselect(canvas)
+	function element:OnDeselect(editor)
 		local button = self.button
 		local e = self
 		if editor then
@@ -1038,15 +1043,24 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 				button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
 			end
 		else
-			local state = Dispatch.RealData[self.signal].ctc_state
-			if state==0 then --Hold
-				button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
-			elseif state==1 then --Once
-				button:SetImage("trakpak3_common/icons/signal_yel_"..dir..".png")
-			elseif state==2 then --Allow
-				button:SetImage("trakpak3_common/icons/signal_grn_"..dir..".png")
-			elseif state==3 then --Force
-				button:SetImage("trakpak3_common/icons/signal_lun_"..dir..".png")
+			if self.signal and (self.signal!="") then
+				local sig = Dispatch.RealData[self.signal]
+				if sig then
+					local state = sig.ctc_state
+					if state==0 then --Hold
+						button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
+					elseif state==1 then --Once
+						button:SetImage("trakpak3_common/icons/signal_yel_"..dir..".png")
+					elseif state==2 then --Allow
+						button:SetImage("trakpak3_common/icons/signal_grn_"..dir..".png")
+					elseif state==3 then --Force
+						button:SetImage("trakpak3_common/icons/signal_lun_"..dir..".png")
+					end
+				else
+					ErrorNoHalt("[Trakpak3] Dispatch Board Signal name '"..self.signal.."' does not match an existing entity.")
+				end
+			else
+				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Signal with no signal name.")
 			end
 		end
 		
@@ -1171,36 +1185,52 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 				button:SetImage("trakpak3_common/icons/switch_n_lit.png")
 			end
 		else
-			local state = Dispatch.RealData[self.switch]["state"]
-			local blocked = Dispatch.RealData[self.switch]["blocked"]
-			local broken = Dispatch.RealData[self.switch]["broken"]
-			
-			if (broken==1) and (blocked==1) then --Broken Blocked
-				button:SetImage("trakpak3_common/icons/switch_x_unlit.png")
-			elseif (broken==1) then --Broken Clear
-				button:SetImage("trakpak3_common/icons/switch_x_lit.png")
-			elseif (state==0) and (blocked==1) then --MN Blocked
-				button:SetImage("trakpak3_common/icons/switch_n_unlit.png")
-			elseif (state==0) then --MN Clear
-				button:SetImage("trakpak3_common/icons/switch_n_lit.png")
-			elseif (state==1) and (blocked==1) then --DV Blocked
-				button:SetImage("trakpak3_common/icons/switch_r_unlit.png")
-			elseif (state==1) then --DV Clear
-				button:SetImage("trakpak3_common/icons/switch_r_lit.png")
-			elseif (state==2) then --Moving
-				button:SetImage("trakpak3_common/icons/switch_hourglass_lit.png")
+			local state = 0
+			local blocked = 0
+			local broken = 0
+			if self.switch and (self.switch!="") then
+				local sig = Dispatch.RealData[self.switch]
+				if sig then
+					state = sig["state"]
+					blocked = sig["blocked"]
+					broken = sig["broken"]
+					
+					if (broken==1) and (blocked==1) then --Broken Blocked
+						button:SetImage("trakpak3_common/icons/switch_x_unlit.png")
+					elseif (broken==1) then --Broken Clear
+						button:SetImage("trakpak3_common/icons/switch_x_lit.png")
+					elseif (state==0) and (blocked==1) then --MN Blocked
+						button:SetImage("trakpak3_common/icons/switch_n_unlit.png")
+					elseif (state==0) then --MN Clear
+						button:SetImage("trakpak3_common/icons/switch_n_lit.png")
+					elseif (state==1) and (blocked==1) then --DV Blocked
+						button:SetImage("trakpak3_common/icons/switch_r_unlit.png")
+					elseif (state==1) then --DV Clear
+						button:SetImage("trakpak3_common/icons/switch_r_lit.png")
+					elseif (state==2) then --Moving
+						button:SetImage("trakpak3_common/icons/switch_hourglass_lit.png")
+					end
+				else
+					ErrorNoHalt("[Trakpak3] Dispatch Board Switch name '"..self.switch.."' does not match an existing entity.")
+				end
+			else
+				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Switch with no switch name.")
 			end
+			
 		end
 		local e = element
 		function button:DoClick()
-			local state = Dispatch.RealData[e.switch]["state"]
-			local blocked = Dispatch.RealData[e.switch]["blocked"]
-			local broken = Dispatch.RealData[e.switch]["broken"]
-			if (blocked==0) and (broken==0) then
-				if state==0 then
-					Dispatch.SendCommand(e.switch, "throw", 1)
-				elseif state==1 then
-					Dispatch.SendCommand(e.switch, "throw", 0)
+			if e.switch and (e.switch!="") then
+				local state = Dispatch.RealData[e.switch]["state"]
+				local blocked = Dispatch.RealData[e.switch]["blocked"]
+				local broken = Dispatch.RealData[e.switch]["broken"]
+				
+				if (blocked==0) and (broken==0) then
+					if state==0 then
+						Dispatch.SendCommand(e.switch, "throw", 1)
+					elseif state==1 then
+						Dispatch.SendCommand(e.switch, "throw", 0)
+					end
 				end
 			end
 		end
@@ -1343,15 +1373,21 @@ function Dispatch.AddBlock(ent, x, y, block)
 				button:SetImage("trakpak3_common/icons/block_clear.png")
 			end
 		else
-			if Dispatch.RealData[self.block].occupied==1 then 
-				button:SetImage("trakpak3_common/icons/block_occupied.png")
+			if self.block and (self.block!="") then
+				local block = Dispatch.RealData[self.block]
+				if block then
+					if (block.occupied==1) then 
+						button:SetImage("trakpak3_common/icons/block_occupied.png")
+					else
+						button:SetImage("trakpak3_common/icons/block_clear.png")
+					end
+				else
+					ErrorNoHalt("[Trakpak3] Dispatch Board Block name '"..self.block.."' does not match an existing entity.")
+				end
 			else
-				button:SetImage("trakpak3_common/icons/block_clear.png")
+				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Block Detector with no block name.")
 			end
-		end
-		
-		function button:DoClick() 
-			--Dispatchy Stuff
+			
 		end
 	end
 	
@@ -1654,6 +1690,19 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 		end
 		--if self.eh1 and self.eh1:IsValid() then self.eh1:Remove() end
 		if self.eh2 and self.eh2:IsValid() then self.eh2:Remove() end
+	end
+	
+	function element:Generate(pnl,nohelpers,selected,editor)
+		if not editor then
+			if self.block and (self.block!="") then
+				local block = Dispatch.RealData[self.block]
+				if not block then
+					ErrorNoHalt("[Trakpak3] Dispatch Board BlockLine name '"..self.block.."' does not match an existing entity.")
+				end
+			else
+				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Block Line with no block name.")
+			end
+		end
 	end
 	
 	function element:GenerateEditor(pnl,nohelpers,selected)

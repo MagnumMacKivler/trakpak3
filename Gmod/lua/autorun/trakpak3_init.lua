@@ -1,9 +1,15 @@
 if SERVER then
+	--print("\nINCLUDING TP3LIB\n")
 	include("trakpak3/tp3lib.lua")
+	--print("\nINCLUDING NODESETUP\n")
 	include("trakpak3/nodesetup.lua")
+	--print("\nINCLUDING SIGNALSETUP\n")
 	include("trakpak3/signalsetup.lua")
+	--print("\nINCLUDING SWITCHSTANDS\n")
 	include("trakpak3/switchstands.lua")
+	--print("\nINCLUDING SIGNTEXT\n")
 	include("trakpak3/signtext.lua")
+	--print("\nINCLUDING DISPATCH\n")
 	include("trakpak3/dispatch.lua")
 	
 	AddCSLuaFile("trakpak3/cl_nodesetup.lua")

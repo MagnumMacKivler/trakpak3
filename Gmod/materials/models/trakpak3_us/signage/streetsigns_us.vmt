@@ -2,4 +2,5 @@
 {
 	"$basetexture" "trakpak3_us/signage/streetsigns_us"
 	"$surfaceprop" "MetalVent"
+	"$halflambert" "1"
 }

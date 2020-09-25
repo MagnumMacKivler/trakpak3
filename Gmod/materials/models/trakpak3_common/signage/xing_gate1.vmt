@@ -3,6 +3,8 @@
 	"$basetexture" "trakpak3_common/signage/xing_gate1"
 	"$surfaceprop" "MetalVent"
 	
+	"$halflambert" "1"
+	
 	"$detail" "detail\metal_detail_01"
 	"$detailscale" "0.25"
 	"$detailblendfactor" ".25"

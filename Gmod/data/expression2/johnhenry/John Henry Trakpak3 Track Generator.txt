@@ -2757,7 +2757,7 @@ if(clk("makebrush")){
         #print(SingleTieZ)
         
         local ZRange = StMaxZ - SingleTieZ - TieSeparation/2
-        local NumTies = round(ZRange/TieSeparation)
+        local NumTies = floor(ZRange/TieSeparation)
         #print(ZRange, TieSeparation, NumTies)
         if(NumTies<=0){ #Skip Single Tie Gen
             timer("plotsingleties_finish",100)
@@ -7241,7 +7241,7 @@ if(clk("makebrush")){
             #-3 for both rails (stock rails before frog)
             #-4 for skip (make split-up rail brushes!)
             #-4.5 for Split-up rails, Full PB
-            #-5 for true skip (used immediate before and after the StockToChop in certain cases)
+            #-5 for true skip (used immediately before and after the StockToChop in certain cases)
             #-5.5 for Skip Rails, Full PB
             
             local SegAssignmentsMN = array()
@@ -7262,19 +7262,19 @@ if(clk("makebrush")){
                     #Stock Index MN = the MN segment that converges with the DV Closure Index
                     
                     local ST = 0
-                    if(N==StockToChopMN){
+                    if(N==StockToChopMN){ #The chopped-up rail segment
                         ST = -4.5
-                    }elseif(HasR1MN & (N==(StockToChopMN-1))){
+                    }elseif(HasR1MN & (N==(StockToChopMN-1))){ #The one before the chopped-up segment if a patch is needed
                         ST = -5
-                    }elseif(N==max(ClosureIndexMN,StockIndexMN)){
+                    }elseif(N==max(ClosureIndexMN,StockIndexMN)){ #No patch but the rail merges with something
                         ST = -5.5
-                    }elseif(N<=RIMN){
-                        if(N<StockToChopMN){
+                    }elseif(N<=RIMN){ #Before Frog
+                        if(N<StockToChopMN){ #Before Chop
                             ST = MainLeft ? -1.5 : -2.5
-                        }else{
+                        }else{ #Between Chop and Frog
                             ST = MainLeft ? -1.75 : -2.75
                         }
-                    }else{
+                    }else{ #After Frog
                         ST = 1.5
                     }
                     SegAssignmentsMN[N,number] = ST
@@ -7282,6 +7282,15 @@ if(clk("makebrush")){
                 for(N=1,NumSegsDV){
                     local ST = 0
                     if(N==StockToChopDV){
+                        if(SegAssignmentsDV[N-1,number] <= -5){ #Segment in danger of Z-fighting. Drop the near and near-1 E and F by a scale unit. Only do this on the DV side.
+                            local JL = JointsLists[DV,table]
+                            local Es = JL["E",array]
+                            local Fs = JL["F",array]
+                            Es[N,vector] = Es[N,vector] + vec(0,0,-2*Scale)
+                            Fs[N,vector] = Fs[N,vector] + vec(0,0,-2*Scale)
+                            Es[N-1,vector] = Es[N-1,vector] + vec(0,0,-2*Scale)
+                            Fs[N-1,vector] = Fs[N-1,vector] + vec(0,0,-2*Scale)
+                        }
                         ST = -4.5
                     }elseif(HasR1DV & (N==(StockToChopDV-1))){
                         ST = -5

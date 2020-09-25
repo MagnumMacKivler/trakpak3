@@ -1,6 +1,0 @@
-"VertexLitGeneric"
-{
-	"$basetexture" "trakpak3_common/signals/crossing/xlight_3_off"
-	"$surfaceprop" "Glass"
-	//"$selfillum" "1"
-}

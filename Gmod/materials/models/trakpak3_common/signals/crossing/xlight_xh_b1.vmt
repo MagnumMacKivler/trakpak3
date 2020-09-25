@@ -1,0 +1,15 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/signals/crossing/xlight_xh_b"
+	"$surfaceprop" "Glass"
+	"$selfillum" "1"
+	"Proxies"
+	{
+		"AnimatedTexture"
+		{
+			"animatedTextureVar" "$basetexture"
+			"animatedTextureFrameNumVar" "$frame"
+			"animatedTextureFrameRate" "8"
+		}
+	} 
+}

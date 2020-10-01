@@ -2409,19 +2409,23 @@ if(clk("makebrush")){
     }
 }elseif(clk("buildsingleties")){
     local Done = 0
-    for(N=1,4){
-        if(SMDQC){
-            buildSingleTie(SingleTieCenters[TieID,vector],SingleTieAngles[TieID,angle],Textures,SingleTieHeights[TieID,number],RidiculousTies==3,MakeBallast)
-        }else{
-            BrushStrings:buildSingleTie(SingleTieCenters[TieID,vector],SingleTieAngles[TieID,angle],Textures,SingleTieHeights[TieID,number],RidiculousTies==3,MakeBallast)
-        }
-        
-        if(TieID==STC){
-            Done = 1
-            TieID++
-            break
-        }else{
-            TieID++
+    if(STC<=0){
+        Done = 1
+    }else{
+        for(N=1,4){
+            if(SMDQC){
+                buildSingleTie(SingleTieCenters[TieID,vector],SingleTieAngles[TieID,angle],Textures,SingleTieHeights[TieID,number],RidiculousTies==3,MakeBallast)
+            }else{
+                BrushStrings:buildSingleTie(SingleTieCenters[TieID,vector],SingleTieAngles[TieID,angle],Textures,SingleTieHeights[TieID,number],RidiculousTies==3,MakeBallast)
+            }
+            
+            if(TieID==STC){
+                Done = 1
+                TieID++
+                break
+            }else{
+                TieID++
+            }
         }
     }
     if(!Done){
@@ -2760,7 +2764,13 @@ if(clk("makebrush")){
         local NumTies = floor(ZRange/TieSeparation)
         #print(ZRange, TieSeparation, NumTies)
         if(NumTies<=0){ #Skip Single Tie Gen
-            timer("plotsingleties_finish",100)
+            if(StMaxZ > TieSeparation){ #There should be at only one tie
+                timer("plotsingleties_one",100)
+            }else{
+                timer("plotsingleties_finish",100)
+            }
+        }elseif(NumTies==1){
+            timer("plotsingleties_one",100)
         }else{
             StStep = ZRange/NumTies
             #print(NumTies + " Ties, avg separation "+StStep)
@@ -2836,6 +2846,25 @@ if(clk("makebrush")){
         timer("plotsingleties_loop",100)
     }
     
+}elseif(clk("plotsingleties_one")){ #For short straight pieces that just need one single tie
+    local HeightAdjust = TieTopHeight-BallastHeight
+    
+    local OnSeg = StStartSeg
+    local Far = StP[OnSeg,vector]
+    local Near = StP[OnSeg-1,vector]
+    
+    local LeftAnchor = 0.5*StEs[OnSeg-1,vector] + 0.5*StEs[OnSeg,vector]
+    local RightAnchor = 0.5*StFs[OnSeg-1,vector] + 0.5*StFs[OnSeg,vector]
+    
+    local Point = (0.5*Near + 0.5*Far):setZ((LeftAnchor:z()+RightAnchor:z())/2 + HeightAdjust)
+    
+    STC++
+    SingleTieCenters[STC,vector] = Point
+    SingleTieAngles[STC,angle] = StA[OnSeg-1,angle]
+    
+    SingleTieHeights[STC,number] = (0.5*Near + 0.5*Far):z()
+    #print("Plotted Single Tie, ",STC)
+    timer("plotsingleties_finish",100)
 }elseif(clk("plotsingleties_finish")){
     if(SwitchCompileStep==0){
         TieID = 1

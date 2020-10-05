@@ -1,0 +1,9 @@
+LightmappedGeneric
+{
+	$basetexture "trakpak3_common/metal/bridgemetal1_blue"
+	$surfaceprop "metal"
+	$detail "detail/metal_detail_01"
+	$detailscale "0.5"
+	$detailblendfactor "0.25"
+	$detailblendmode 0
+}

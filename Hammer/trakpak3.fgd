@@ -21,7 +21,7 @@
 ]
 
 //Switch Lever
-@PointClass base(Targetname, Angles) studioprop() = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
+@PointClass base(Targetname, Angles) studioprop() line(0 255 0, targetname, targetname, targetname, linked_stand) = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
 [
 	model(studio) : "Model" : "" : "The model path for the switch lever."
 	//switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
@@ -51,12 +51,23 @@
 	bodygroups_motion(string) : "Bodygroups (Motion)" : "" : "Bodygroups to set when the switch stand is in motion. See the regular 'Bodygroups' keyvalue for formatting help."
 	bodygroups_open(string) : "Bodygroups (Open)" : "" : "Bodygroups to set when the switch stand is thrown diverging (open). See the regular 'Bodygroups' keyvalue for formatting help."
 	
+	linked_stand(target_destination) : "Linked Switch Stand" : : "Another tp3_switch_lever_anim that this stand will attempt to match states with. You do not need to point the linked stand back to this one; the switch stand will do that automatically."
+	
+	locked(choices) : "Automatic Only" : 0 : "If set, the switch will not be operable by pressing +Use on it, but can still be controlled from dispatch boards, Wiremod, or Hammer I/O." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	
 	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
 	input ThrowMain(void) : "Throws the switch to main (closed)."
 	input ThrowDiverging(void) : "Throws the switch to diverging (open)."
+	
+	input SetAutoOnly(void) : "Set this switch stand to disallow manual operation (by pressing +Use). The switch stand can still be controlled from dispatch boards, Wiremod, or Hammer I/O."
+	input SetAllowManual(void) : "Set this switch stand to allow manual operation."
 	
 	output OnThrownMain(void) : "Fires when the switch is thrown main (closed)."
 	output OnThrownDiverging(void) : "Fires when the switch is thrown diverging (open)."

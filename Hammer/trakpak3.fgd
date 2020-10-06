@@ -181,7 +181,7 @@
 	]
 	
 		//Signal Info
-	sysname(string) : "Signal System Name" : "" : "The name of the Signal System that this signal will comply with."
+	sysname(string) : "Signal System Name" : "" : "The name of the Signal System that this signal will comply with. Signal System files are stored in 'lua/trakpak3/signalsystems/<mapname>'."
 	sigtype(string) : "Signal Type" : "" : "The signal type for this signal. Signal Types are defined by the Signal System."
 	tags(string) : "Tags" : "" : "Special Signal Tags, used to give the signal code more information. Tags are separated by spaces."
 	slave_1(target_destination) : "Slave Signal 1" : : "(Optional) A tp3_signal_slave that this signal will control."

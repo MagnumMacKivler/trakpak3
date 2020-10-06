@@ -283,8 +283,10 @@ function Dispatch.OpenEditor()
 	xbox:SetMinMax(16,96)
 	function xbox:OnValueChanged(value)
 		local page = Dispatch.page
-		Dispatch.Boards[page].x_res = value
-		Dispatch.PopulatePage(Dispatch.Panels.canvas)
+		if page>0 then
+			Dispatch.Boards[page].x_res = value
+			Dispatch.PopulatePage(Dispatch.Panels.canvas)
+		end
 	end
 	Dispatch.Panels.xbox = xbox
 	
@@ -302,8 +304,10 @@ function Dispatch.OpenEditor()
 	ybox:SetMinMax(16,96)
 	function ybox:OnValueChanged(value)
 		local page = Dispatch.page
-		Dispatch.Boards[page].y_res = value
-		Dispatch.PopulatePage(Dispatch.Panels.canvas)
+		if page > 0 then
+			Dispatch.Boards[page].y_res = value
+			Dispatch.PopulatePage(Dispatch.Panels.canvas)
+		end
 	end
 	Dispatch.Panels.ybox = ybox
 	
@@ -1522,8 +1526,10 @@ function Dispatch.AddLine(ent, x1, y1, x2, y2)
 	
 	function element:OnDeselect()
 		local e = self
-		function self.handle:DoClick()
-			if e.entity then e.entity:Select(e:GetIndex()) else Dispatch.Select(e:GetIndex(),true) end
+		if self.handle then
+			function self.handle:DoClick()
+				if e.entity then e.entity:Select(e:GetIndex()) else Dispatch.Select(e:GetIndex(),true) end
+			end
 		end
 		--if self.eh1 and self.eh1:IsValid() then self.eh1:Remove() end
 		if self.eh2 and self.eh2:IsValid() then self.eh2:Remove() end

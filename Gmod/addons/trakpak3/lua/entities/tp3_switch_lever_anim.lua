@@ -280,7 +280,7 @@ if SERVER then
 	function ENT:Think()
 		--Begin actuation if current state does not match target state
 		if not self.animating and not self.occupied and (self.state != self.targetstate) then
-			self.switch:SwitchThrow(self.targetstate)
+			if self.switch then self.switch:SwitchThrow(self.targetstate) end
 			self:Actuate(self.targetstate)
 		end
 		self:NextThink(CurTime())

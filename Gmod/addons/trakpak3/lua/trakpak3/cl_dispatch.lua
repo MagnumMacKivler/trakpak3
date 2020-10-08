@@ -1526,7 +1526,7 @@ function Dispatch.AddLine(ent, x1, y1, x2, y2)
 	
 	function element:OnDeselect()
 		local e = self
-		if self.handle then
+		if self.handle and self.handle:IsValid() then
 			function self.handle:DoClick()
 				if e.entity then e.entity:Select(e:GetIndex()) else Dispatch.Select(e:GetIndex(),true) end
 			end

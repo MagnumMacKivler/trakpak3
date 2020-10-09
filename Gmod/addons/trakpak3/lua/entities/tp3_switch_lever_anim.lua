@@ -129,7 +129,7 @@ if SERVER then
 		hook.Run("TP3_SwitchUpdate",self:GetName(),2,true)
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"broken",1)
 		
-		WireLib.TriggerOutput(self,"Broken",1)
+		if WireLib then WireLib.TriggerOutput(self,"Broken",1) end
 		
 		timer.Simple(60,function()
 			if self.broken then self:StandFix() end
@@ -147,7 +147,7 @@ if SERVER then
 		local s_table = {"physics/wood/wood_box_impact_hard1.wav","physics/wood/wood_box_impact_hard2.wav","physics/wood/wood_box_impact_hard3.wav"}
 		self:EmitSound(s_table[p1])
 		
-		WireLib.TriggerOutput(self,"Broken",0)
+		if WireLib then WireLib.TriggerOutput(self,"Broken",0) end
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"broken",0)
 		
 		if self.state then self:CompleteThrowDV() else self:CompleteThrowMN() end
@@ -163,7 +163,7 @@ if SERVER then
 		self.occupied = occ
 		local occn = 0
 		if occ then occn = 1 end
-		WireLib.TriggerOutput(self,"Blocked",occn)
+		if WireLib then WireLib.TriggerOutput(self,"Blocked",occn) end
 		if self.autoreset and self.targetstate then
 			self:SetTargetState(false)
 		end
@@ -218,8 +218,10 @@ if SERVER then
 			if self.animate then
 				self.animating = true
 				self:ResetSequence(self.seq_throw_open)
-				WireLib.TriggerOutput(self,"Main",0)
-				WireLib.TriggerOutput(self,"Diverging",0)
+				if WireLib then
+					WireLib.TriggerOutput(self,"Main",0)
+					WireLib.TriggerOutput(self,"Diverging",0)
+				end
 				
 				--Broadcast
 				hook.Run("TP3_SwitchUpdate",self:GetName(),2)
@@ -238,8 +240,10 @@ if SERVER then
 			if self.animate then
 				self.animating = true
 				self:ResetSequence(self.seq_throw_close)
-				WireLib.TriggerOutput(self,"Main",0)
-				WireLib.TriggerOutput(self,"Diverging",0)
+				if WireLib then
+					WireLib.TriggerOutput(self,"Main",0)
+					WireLib.TriggerOutput(self,"Diverging",0)
+				end
 				
 				--Broadcast
 				hook.Run("TP3_SwitchUpdate",self:GetName(),2)
@@ -297,10 +301,10 @@ if SERVER then
 			self:SetTargetState(false)
 		elseif inputname=="SetAutoOnly" then
 			self.locked = true
-			WireLib.TriggerOutput(self,"AutomaticOnly",1)
+			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",1) end
 		elseif inputname=="SetAllowManual" then
 			self.locked = false
-			WireLib.TriggerOutput(self,"AutomaticOnly",0)
+			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",0) end
 		end
 	end
 	

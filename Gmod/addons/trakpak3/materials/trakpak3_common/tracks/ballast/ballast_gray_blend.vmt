@@ -1,0 +1,5 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_common/tracks/ballast/ballast_gray_blend"
+	"$surfaceprop" "Gravel"
+}

@@ -1,4 +1,4 @@
-@name johnhenry/quickplanner
+@name johnhenry/quickplanner rsg basic
 @inputs 
 @outputs SlopeIndex DirIndex PieceCount
 @persist [StraightLengths ArcRadii SegLimits ArcStartDirs ArcEndDirs TurnoutStartDirs TurnoutEndDirs WyeDirs BendLengths Slopes]:array #Piece Specs
@@ -13,21 +13,21 @@
 @trigger 
 
 if(first()){
-    #<Description line (optional)>
+    #RSG Basic is the docket list used to make bridge tracks and guard rails - it doesn't need to encompass the full spectrum of pieces.
     
-    Subfolder = "rsg" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
+    Subfolder = "rsg_basic" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
     #If you simply want to compile straight to the johnhenry_saves/dockets/ folder, leave this empty.
     
     #Piece Specs
-    StraightLengths = array(32,48,64,96,128,192,256,384,512,768,1024,1536,2048,3072,4096,6144,8192) #The straights that will be made; also switches will borrow from this list for their straight portions.
+    StraightLengths = array(32,48,64,96,128,192,256,384,512,768,1024,1536,2048,3072,4096) #The straights that will be made; also switches will borrow from this list for their straight portions.
     ArcRadii = array(2048,3072,4096,6144,8192) #The principal (non-double tracked) curve radii.
     SegLimits = array(32,40,48,56,64) #The Max number of segments for a 90 degree curve for each principal radius.
     ArcStartDirs =  array(0,0,0,0) #Starting direction for arc curves. Lines up with ArcEndDirs. All curves will be mirrored (negative numbers).
     ArcEndDirs =    array(1,2,4,8) #Ending direction for arc curves. Lines up with ArcStartDirs. All curves will be mirrored (negative numbers).
     BendLengths = array(1536,2048) #Lengths of bends, sidings and crossovers.
-    TurnoutStartDirs =  array(0,0,0,1,2,4) #Starting direction for turnouts. Lines up with TurnoutEndDirs. All switches will be mirrored (negative numbers).
-    TurnoutEndDirs =    array(1,2,4,0,0,0) #Ending direction for turnouts. Lines up with TurnoutStartDirs. All switches will be mirrored (negative numbers).
-    WyeDirs = array(1,2,4) #Ending Direction for Wyes.
+    TurnoutStartDirs =  array() #Starting direction for turnouts. Lines up with TurnoutEndDirs. All switches will be mirrored (negative numbers).
+    TurnoutEndDirs =    array() #Ending direction for turnouts. Lines up with TurnoutStartDirs. All switches will be mirrored (negative numbers).
+    WyeDirs = array() #Ending Direction for Wyes.
     Slopes = array(0,2/128,3/128,4/128) #List of Slopes (Rise/Run) for straights and curves. Negatives will also be made (except for 0 of course).
     
     #Multi Track/Track Geometry
@@ -45,7 +45,7 @@ if(first()){
     
     #Piece Type Enable/Disable
     MakeStraights = 1 
-    MakeArcs = 0
+    MakeArcs = 1
     MakeBends = 0
     MakeTurnouts = 0
     MakeWyes = 0

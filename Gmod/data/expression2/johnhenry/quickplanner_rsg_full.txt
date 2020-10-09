@@ -1,4 +1,4 @@
-@name johnhenry/quickplanner
+@name johnhenry/quickplanner rsg full
 @inputs 
 @outputs SlopeIndex DirIndex PieceCount
 @persist [StraightLengths ArcRadii SegLimits ArcStartDirs ArcEndDirs TurnoutStartDirs TurnoutEndDirs WyeDirs BendLengths Slopes]:array #Piece Specs
@@ -13,9 +13,9 @@
 @trigger 
 
 if(first()){
-    #<Description line (optional)>
+    #RSG Full is the docket list used to make the regular, ballasted track - it has the most combinations for maximum flexibility.
     
-    Subfolder = "rsg" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
+    Subfolder = "rsg_full" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
     #If you simply want to compile straight to the johnhenry_saves/dockets/ folder, leave this empty.
     
     #Piece Specs
@@ -45,12 +45,12 @@ if(first()){
     
     #Piece Type Enable/Disable
     MakeStraights = 1 
-    MakeArcs = 0
-    MakeBends = 0
-    MakeTurnouts = 0
-    MakeWyes = 0
-    MakeSidings = 0
-    MakeCrossovers = 0
+    MakeArcs = 1
+    MakeBends = 1
+    MakeTurnouts = 1
+    MakeWyes = 1
+    MakeSidings = 1
+    MakeCrossovers = 1
     
     #End of config
     

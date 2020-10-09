@@ -6,7 +6,7 @@
 @model models/props_lab/reciever01d.mdl
 
 if(first()){
-    Docketname = "turnouts_r8384"
+    Docketname = "rsg_basic/straights"
     fileLoad("johnhenry_saves/dockets/"+Docketname+".txt") #Pick the VON Docket file you want to use.
     Index = 1 #Begin by loading this piece from the docket.
     EndIndex = 0 #Stop after running this piece. If 0, don't stop (continue to end of docket)

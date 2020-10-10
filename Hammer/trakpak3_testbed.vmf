@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8506"
-	"mapversion" "178"
+	"mapversion" "179"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -32,13 +32,13 @@ viewsettings
 	"bSnapToGrid" "1"
 	"bShowGrid" "1"
 	"bShowLogicalGrid" "0"
-	"nGridSpacing" "2"
+	"nGridSpacing" "16"
 	"bShow3DGrid" "0"
 }
 world
 {
 	"id" "1"
-	"mapversion" "178"
+	"mapversion" "179"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -3707,39 +3707,11 @@ entity
 	"ignorenormals" "0"
 	"maxdxlevel" "0"
 	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s768_1lt_0pg_+0768x-0192x0000.mdl"
+	"model" "models/models/trakpak3_rsg/straights/s0768_1lt_0pg_+0768x-0192x0000.mdl"
 	"screenspacefade" "0"
 	"skin" "4"
 	"solid" "6"
 	"origin" "736 -2752 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
-	"id" "9386"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s512_1lt_0pg_+0512x-0128x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "608 -2240 24"
 	editor
 	{
 		"color" "174 115 0"
@@ -3763,7 +3735,7 @@ entity
 	"ignorenormals" "0"
 	"maxdxlevel" "0"
 	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s512_1lt_0pg_+0512x-0128x0000.mdl"
+	"model" "models/models/trakpak3_rsg/straights/s0512_1lt_0pg_+0512x-0128x0000.mdl"
 	"screenspacefade" "0"
 	"skin" "4"
 	"solid" "6"
@@ -3991,34 +3963,6 @@ entity
 }
 entity
 {
-	"id" "9112"
-	"classname" "prop_static"
-	"angles" "0 90 0"
-	"disableselfshadowing" "0"
-	"disableshadows" "0"
-	"disablevertexlighting" "0"
-	"fademaxdist" "0"
-	"fademindist" "-1"
-	"fadescale" "1"
-	"ignorenormals" "0"
-	"maxdxlevel" "0"
-	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s256_0fw_0pg_+0256x00000x0000.mdl"
-	"screenspacefade" "0"
-	"skin" "4"
-	"solid" "6"
-	"origin" "-96 1536 24"
-	editor
-	{
-		"color" "174 115 0"
-		"groupid" "14392"
-		"visgroupshown" "1"
-		"visgroupautoshown" "1"
-		"logicalpos" "[0 1000]"
-	}
-}
-entity
-{
 	"id" "9045"
 	"classname" "prop_static"
 	"angles" "0 90 0"
@@ -4031,7 +3975,7 @@ entity
 	"ignorenormals" "0"
 	"maxdxlevel" "0"
 	"mindxlevel" "0"
-	"model" "models/trakpak3_rsg/straights/s256_0fw_0pg_+0256x00000x0000.mdl"
+	"model" "models/models/trakpak3_rsg/straights/s0256_0fw_0pg_+0256x00000x0000.mdl"
 	"screenspacefade" "0"
 	"skin" "4"
 	"solid" "6"
@@ -10465,6 +10409,60 @@ entity
 	editor
 	{
 		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "16319"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/models/trakpak3_rsg/straights/s0256_0fw_0pg_+0256x00000x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "-96 1536 24"
+	editor
+	{
+		"color" "174 115 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "16362"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"disableselfshadowing" "0"
+	"disableshadows" "0"
+	"disablevertexlighting" "0"
+	"fademaxdist" "0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"ignorenormals" "0"
+	"maxdxlevel" "0"
+	"mindxlevel" "0"
+	"model" "models/models/trakpak3_rsg/straights/s0512_1lt_0pg_+0512x-0128x0000.mdl"
+	"screenspacefade" "0"
+	"skin" "4"
+	"solid" "6"
+	"origin" "608 -2240 24"
+	editor
+	{
+		"color" "174 115 0"
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
 		"logicalpos" "[0 1000]"

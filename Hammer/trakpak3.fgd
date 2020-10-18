@@ -18,10 +18,15 @@
 	//closesound(sound) : "Close Sound" : "" : "The sound the lever makes when the switch is thrown main (closed). If blank, uses whatever the Open Sound is set to."
 	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
 	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer" : "Disables the toolgun on this entity except for the tools listed here."
+	disableshadows(choices) : "Disable Shadows" : 1 : "Most if not all track should have shadows disabled because they are part of the ground." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 ]
 
 //Switch Lever
-@PointClass base(Targetname, Angles) studioprop() line(0 255 0, targetname, targetname, targetname, linked_stand) = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
+@PointClass base(Targetname, Parentname, Angles) studioprop() line(0 255 0, targetname, targetname, targetname, linked_stand) = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
 [
 	model(studio) : "Model" : "" : "The model path for the switch lever."
 	//switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
@@ -58,6 +63,11 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	nowire(choices) : "Disable Wiremod Input" : 0 : "If set, the switch will ignore wiremod inputs (but can still output)." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 	
 	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
@@ -90,6 +100,24 @@
 	acceleration(float) : "Acceleration Factor" : "2.5" : "Acceleration/Deceleration rate in degrees per second per second. You probably don't need to change this."
 	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the turntable makes when it starts to move."
 	sound_stop(sound) : "Start Move Sound" : "doors/garage_stop1.wav" : "The sound the turntable makes when it comes to a complete stop."
+	
+	powered(choices) : "Mode of Operation" : 1 : "How should this turntable be operated? Powered turntables require a seat (prop_vehicle_prisoner_pod) for the operator to sit in. Armstrong (Manual) turntables require one or more trigger_multiples around a solid part of the turntable (a pushbar) that players are supposed to walk into." =
+	[
+		0 : "Armstrong (Manual)"
+		1 : "Powered (Seat)"
+	]
+	
+	locked(choices) : "Start Locked" : 1 : "Should the turntable start locked?" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	
+	input Lock(void) : "Lock the turntable, preventing it from moving this should be required before moving a train on or off!"
+	input Unlock(void) : "Unlock the turntable, allowing it to move again."
+	
+	input AddPusher(void) : "Add the !activator to the table's pusher list."
+	input RemovePusher(void) : "Remove the !activator from the table's pusher list."
 	
 ]
 
@@ -156,7 +184,7 @@
 
 
 //Master Signal
-@PointClass base(Targetname) vecline(cs_pos) studioprop() = tp3_signal_master :
+@PointClass base(Targetname, Parentname) vecline(cs_pos) studioprop() = tp3_signal_master :
 	"A scripted signal prop. Can control two other props (extra 'heads' or other parts needed to make a signal work, such as the B&O CPL Marker Lamps) and can interface with the Hammer and Wiremod I/O systems."
 [
 		//Model Info
@@ -217,7 +245,7 @@
 ]
 
 //Slave Signal
-@PointClass base(Targetname) studioprop() = tp3_signal_slave :
+@PointClass base(Targetname, Parentname) studioprop() = tp3_signal_slave :
 	"A dummy/supervised signal prop. Has very limited I/O capability and usually only responds to controls from a tp3_signal_master."
 [
 	model(studio) : "Model" : "" : "The model path for the signal prop."
@@ -242,7 +270,9 @@
 	]
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
 	
-	input SetColor(integer) : "Force the signal head to show this color (integer code for a signal bodygroup or skin)."
+	input SetBodygroups(string) : "Force the signal to display these bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	input SetSkin(integer) : "Force the signal to display this skin."
+	input SetCycle(float) : "Force the signal to go to this point in its animation cycle."
 	output OnChangedColor(integer) : "Fires whenever this specific signal head changes color, and passes that color code as a parameter."
 ]
 
@@ -461,6 +491,11 @@
 	bodygroups(string) : "Bodygroups" : "" : "The sign model's bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	text_pos(vector) : "Text Origin" : : "The position in the world where the text will be placed. Works with Text Alignment."
 	gmod_allowtools(string) readonly : "Allow Tools" : "none" : "Disables the toolgun on this entity except for the tools listed here."
+	disableshadows(choices) : "Disable Shadows" : 0 : "Prevent this entity from casting shadows." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 ]
 
 //Custom Sign, Prop (Multi/Auto)
@@ -473,6 +508,11 @@
 	
 	bodygroups(string) : "Bodygroups" : "" : "The sign model's bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	gmod_allowtools(string) readonly : "Allow Tools" : "none" : "Disables the toolgun on this entity except for the tools listed here."
+	disableshadows(choices) : "Disable Shadows" : 0 : "Prevent this entity from casting shadows." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 ]
 
 //Custom Sign, World

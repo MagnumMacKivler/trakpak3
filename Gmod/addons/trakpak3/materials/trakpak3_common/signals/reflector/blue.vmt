@@ -1,0 +1,5 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_common/signals/reflector/blue"
+	"$surfaceprop" "Glass"
+}

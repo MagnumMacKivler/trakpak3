@@ -109,7 +109,6 @@ if SERVER then
 	--Handle new color
 	function ENT:HandleNewColor(skin, bg, cycle)
 		local oldcolor = self.effectivecolor
-			
 		
 		--Set Self
 		if bg then
@@ -152,9 +151,17 @@ if SERVER then
 	end
 	
 	function ENT:AcceptInput(iname, activator, caller, data)
-		if iname=="SetColor" then
+		if iname=="SetSkin" then
 			if data and data!="" then
 				self:HandleNewColor(tonumber(data))
+			end
+		elseif iname=="SetBodygroups" then
+			if data and data!="" then
+				self:HandleNewColor(nil, data)
+			end
+		elseif iname=="SetCycle" then
+			if data and data!="" then
+				self:HandleNewColor(nil, nil, tonumber(data))
 			end
 		end
 	end

@@ -1,3 +1,5 @@
+--MsgC(Trakpak3.Magenta,"Running Sign Library\n")
+
 util.AddNetworkString("tp3_register_sign")
 
 --will be triggered when each player intializes clientside

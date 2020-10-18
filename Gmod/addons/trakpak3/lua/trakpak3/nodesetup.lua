@@ -1,6 +1,10 @@
 --Set up all the signal blocks
+--MsgC(Trakpak3.Magenta,"Running Node Setup\n")
 
 hook.Add("InitPostEntity","TP3_NodeLoad",function()
+	
+	print("\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA")
+
 	local json = file.Read("trakpak3/nodes/"..game.GetMap()..".lua","LUA")
 
 	if json then --Found a file!

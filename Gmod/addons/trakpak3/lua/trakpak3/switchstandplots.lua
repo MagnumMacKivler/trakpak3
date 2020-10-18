@@ -1,3 +1,5 @@
+--MsgC(Trakpak3.Magenta,"Running Switch Stand Plots\n")
+
 --[[
 
 ==================

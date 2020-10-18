@@ -1,3 +1,5 @@
+--MsgC(Trakpak3.Magenta,"Running Signal Setup\n")
+
 TP3Signals = { systems = {} }
 
 --Speed Enums

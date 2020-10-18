@@ -1,4 +1,5 @@
 --General Entity Functions for Trakpak3
+--MsgC(Trakpak3.Magenta,"Running TP3Lib\n")
 
 --Helper function for finding by targetname
 Trakpak3.FindByTargetname = function(name)
@@ -159,6 +160,11 @@ Trakpak3.SpeedDictionary = {
 	[0] = "STOP/DANGER"
 }
 
+
+--Global Init Variable
+hook.Add("InitPostEntity","Trakpak3_GlobalInit",function()
+	timer.Simple(5,function() Trakpak3.InitPostEntity = true end)
+end)
 
 --Mover Library, used for Turntables, Transfer tables, etc.
 --[[

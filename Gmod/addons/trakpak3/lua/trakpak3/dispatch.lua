@@ -1,3 +1,5 @@
+--MsgC(Trakpak3.Magenta,"Running Dispatch Library\n")
+
 Trakpak3.Dispatch = {}
 Trakpak3.Dispatch.InitData = {}
 Trakpak3.Dispatch.MapBoards = {}
@@ -5,9 +7,11 @@ Trakpak3.Dispatch.Loaded = false
 Trakpak3.Dispatch.Attempted = false
 
 hook.Add("InitPostEntity","TP3_DispLoad",function()
+	--MsgC(Trakpak3.Magenta,"InitPostEntity! Looking for file trakpak3/dispatch/"..game.GetMap()..".lua")
 	local json = file.Read("trakpak3/dispatch/"..game.GetMap()..".lua","LUA")
 
 	if json then --Found a file!
+		--MsgC(Trakpak3.Magenta,"Found a file! Converting contents to a table.")
 		local ftable = util.JSONToTable(json)
 		if ftable then
 			print("[Trakpak3] Dispatch Board file trakpak3/dispatch/"..game.GetMap()..".lua loaded successfully!")
@@ -33,6 +37,9 @@ hook.Add("InitPostEntity","TP3_DispLoad",function()
 			end
 			
 			Trakpak3.Dispatch.Loaded = true
+		else
+			--MsgC(Trakpak3.Magenta,"Could not convert JSON to Table correctly!")
+			print("[Trakpak3] Could not convert JSON to Table correctly!")
 		end
 	else
 		print("[Trakpak3] Could not locate a suitable Dispatch Board file (trakpak3/dispatch/"..game.GetMap()..".lua).")

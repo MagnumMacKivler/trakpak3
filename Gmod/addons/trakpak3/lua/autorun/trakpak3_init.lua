@@ -3,13 +3,21 @@ if SERVER then
 	Trakpak3 = {}
 	Trakpak3.SwitchStandPlots = {}
 	Trakpak3.SignalPlots = {}
+	Trakpak3.Magenta = Color(255,0,255)
 	
+	--MsgC(Trakpak3.Magenta, "[1/7] Loading TP3lib\n")
 	include("trakpak3/tp3lib.lua")
+	--MsgC(Trakpak3.Magenta, "[2/7] Loading Node Setup\n")
 	include("trakpak3/nodesetup.lua")
+	--MsgC(Trakpak3.Magenta, "[3/7] Loading Signal Setup\n")
 	include("trakpak3/signalsetup.lua")
+	--MsgC(Trakpak3.Magenta, "[4/7] Loading Switch Stand Plots\n")
 	include("trakpak3/switchstandplots.lua")
+	--MsgC(Trakpak3.Magenta, "[5/7] Loading Signal Plots\n")
 	include("trakpak3/signalplots.lua")
+	--MsgC(Trakpak3.Magenta, "[6/7] Loading Sign Library\n")
 	include("trakpak3/signtext.lua")
+	--MsgC(Trakpak3.Magenta, "[7/7] Loading Dispatch Library\n")
 	include("trakpak3/dispatch.lua")
 	
 	AddCSLuaFile("trakpak3/cl_nodesetup.lua")

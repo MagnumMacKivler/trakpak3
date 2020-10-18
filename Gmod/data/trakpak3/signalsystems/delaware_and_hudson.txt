@@ -1,0 +1,549 @@
+{
+	"panels": {
+		"nodes": [
+			{
+				"icon": "icon16/bullet_go.png",
+				"nextnode": 2.0,
+				"name": "START",
+				"canattach": true,
+				"parent": 1.0
+			},
+			{
+				"id_else": 4.0,
+				"id_then": 3.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"CTC",
+					"==",
+					"HOLD",
+					")",
+					"or",
+					"(",
+					"OCCUPIED",
+					")",
+					"or",
+					"(",
+					"SPEED",
+					"==",
+					"STOP/DANGER",
+					")"
+				],
+				"parent": 1.0,
+				"name": "IF ( CTC == HOLD ) or ( OCCUPIED ) or ( SPEED == STOP/DANGER )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 5.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 2.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 10.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 2.0
+			},
+			{
+				"id_else": 7.0,
+				"id_then": 6.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"TAGS.abs",
+					")"
+				],
+				"parent": 3.0,
+				"name": "IF ( TAGS.abs )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 8.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 5.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 9.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 5.0
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Stop And Proceed",
+				"parent": 6.0,
+				"name": "Stop And Proceed"
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Stop",
+				"parent": 7.0,
+				"name": "Stop"
+			},
+			{
+				"id_else": 12.0,
+				"id_then": 11.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"SPEED",
+					"==",
+					"MEDIUM",
+					")",
+					"or",
+					"(",
+					"TAGS.medium",
+					")"
+				],
+				"parent": 4.0,
+				"name": "IF ( SPEED == MEDIUM ) or ( TAGS.medium )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 13.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 10.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 22.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 10.0
+			},
+			{
+				"id_else": 15.0,
+				"id_then": 14.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"NEXTSPEED",
+					"<",
+					"MEDIUM",
+					")"
+				],
+				"parent": 11.0,
+				"name": "IF ( NEXTSPEED < MEDIUM )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 16.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 13.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 17.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 13.0
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Medium Approach",
+				"parent": 14.0,
+				"name": "Medium Approach"
+			},
+			{
+				"id_else": 19.0,
+				"id_then": 18.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"NEXTSPEED",
+					"==",
+					"MEDIUM",
+					")"
+				],
+				"parent": 15.0,
+				"name": "IF ( NEXTSPEED == MEDIUM )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 20.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 17.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 21.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 17.0
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Medium Approach Medium",
+				"parent": 18.0,
+				"name": "Medium Approach Medium"
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Medium Clear",
+				"parent": 19.0,
+				"name": "Medium Clear"
+			},
+			{
+				"id_else": 24.0,
+				"id_then": 23.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"NEXTSPEED",
+					"<",
+					"MEDIUM",
+					")"
+				],
+				"parent": 12.0,
+				"name": "IF ( NEXTSPEED < MEDIUM )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 25.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 22.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 26.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 22.0
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Approach",
+				"parent": 23.0,
+				"name": "Approach"
+			},
+			{
+				"id_else": 28.0,
+				"id_then": 27.0,
+				"icon": "icon16/lightning.png",
+				"isconditional": true,
+				"conditions": [
+					"(",
+					"TAGS.adv",
+					")",
+					"and",
+					"(",
+					"NEXTASPECT",
+					"==",
+					"\"Approach\"",
+					")"
+				],
+				"parent": 24.0,
+				"name": "IF ( TAGS.adv ) and ( NEXTASPECT == \"Approach\" )"
+			},
+			{
+				"icon": "icon16/monitor_add.png",
+				"nextnode": 29.0,
+				"name": "THEN",
+				"canattach": true,
+				"parent": 26.0
+			},
+			{
+				"icon": "icon16/monitor_delete.png",
+				"nextnode": 30.0,
+				"name": "ELSE",
+				"canattach": true,
+				"parent": 26.0
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Advance Approach",
+				"parent": 27.0,
+				"name": "Advance Approach"
+			},
+			{
+				"icon": "icon16/book_open.png",
+				"aspect": "Clear",
+				"parent": 28.0,
+				"name": "Clear"
+			}
+		]
+	},
+	"sigtypes": {
+		"cl_high": {
+			"Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"Advance Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"test": true,
+			"Stop": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"Stop And Proceed": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"Medium Approach Medium": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "6"
+			},
+			"Approach Medium": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "6",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"Medium Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "6",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"Medium Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			}
+		},
+		"uq_high": {
+			"Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"Advance Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"test": true,
+			"Stop": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"Stop And Proceed": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"Medium Approach Medium": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "1",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "6",
+				"cycle2": "0.5"
+			},
+			"Approach Medium": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "6",
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"Medium Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"Medium Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "6",
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"Clear": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			}
+		}
+	},
+	"tags": {
+		"abs": true,
+		"medium": true,
+		"adv": true
+	},
+	"func_text": "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC)\n\tif ( ( CTC == 0 ) ) or ( ( OCCUPIED ) ) or ( ( SPEED == 0 ) ) then\n\t\tif ( ( TAGS.abs ) ) then\n\t\t\treturn \"Stop And Proceed\"\n\t\telse\n\t\t\treturn \"Stop\"\n\t\tend\n\telse\n\t\tif ( ( SPEED == 3 ) ) or ( ( TAGS.medium ) ) then\n\t\t\tif ( ( NEXTSPEED < 3 ) ) then\n\t\t\t\treturn \"Medium Approach\"\n\t\t\telse\n\t\t\t\tif ( ( NEXTSPEED == 3 ) ) then\n\t\t\t\t\treturn \"Medium Approach Medium\"\n\t\t\t\telse\n\t\t\t\t\treturn \"Medium Clear\"\n\t\t\t\tend\n\t\t\tend\n\t\telse\n\t\t\tif ( ( NEXTSPEED < 3 ) ) then\n\t\t\t\treturn \"Approach\"\n\t\t\telse\n\t\t\t\tif ( ( TAGS.adv ) and ( NEXTASPECT == \"Approach\" ) ) then\n\t\t\t\t\treturn \"Advance Approach\"\n\t\t\t\telse\n\t\t\t\t\treturn \"Clear\"\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\tend\nend",
+	"rules": [
+		{
+			"color": "Red",
+			"description": "Stop",
+			"name": "Stop",
+			"speed": "STOP/DANGER"
+		},
+		{
+			"color": "Red",
+			"description": "Stop, then proceed at RESTRICTED speed until the train has passed a more favorable signal.",
+			"name": "Stop And Proceed",
+			"speed": "RESTRICTED"
+		},
+		{
+			"color": "Amber",
+			"description": "Proceed at MEDIUM speed prepared to stop at next signal.",
+			"name": "Medium Approach",
+			"speed": "MEDIUM"
+		},
+		{
+			"color": "Amber",
+			"description": "Proceed prepared to stop at next signal.",
+			"name": "Approach",
+			"speed": "FULL"
+		},
+		{
+			"color": "Yellow-Green",
+			"description": "Proceed at MEDIUM speed prepared to pass next signal at MEDIUM speed.",
+			"name": "Medium Approach Medium",
+			"speed": "MEDIUM"
+		},
+		{
+			"color": "Yellow-Green",
+			"description": "Proceed at MEDIUM speed until train has cleared interlocking or switches.",
+			"name": "Medium Clear",
+			"speed": "MEDIUM"
+		},
+		{
+			"color": "Green",
+			"description": "Next signal is APPROACH. Proceed.",
+			"name": "Advance Approach",
+			"speed": "FULL"
+		},
+		{
+			"color": "Green",
+			"description": "Proceed prepared to pass next signal at MEDIUM speed.",
+			"name": "Approach Medium",
+			"speed": "FULL"
+		},
+		{
+			"color": "Green",
+			"description": "Proceed.",
+			"name": "Clear",
+			"speed": "FULL"
+		}
+	],
+	"sysname": "delaware_and_hudson"
+}

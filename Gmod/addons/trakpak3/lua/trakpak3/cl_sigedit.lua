@@ -609,10 +609,10 @@ function Trakpak3.OpenSigEdit(page)
 		mb3:SetSize(1,24)
 		mb3:Dock(TOP)
 		mb3:SetValue(Trakpak3.SigEdit.intmodels[3])
-		function mb2:OnEnter(text)
-			Trakpak3.SigEdit.intmodels[2] = text
-			mv2:SetModel(text)
-			Trakpak3.SigEdit.init_anim[2] = true
+		function mb3:OnEnter(text)
+			Trakpak3.SigEdit.intmodels[3] = text
+			mv3:SetModel(text)
+			Trakpak3.SigEdit.init_anim[3] = true
 		end
 		
 		--Aspect Sheet
@@ -2065,7 +2065,7 @@ Trakpak3.SigEdit.dictionary = {
 	["Track Occupancy"] = "OCCUPIED",
 	["Route Diverging"] = "DIVERGING",
 	["Route Speed"] = "SPEED",
-	["Next Signal Aspect"] = "NEXTASPECT",
+	["Next Signal Rule"] = "NEXTASPECT",
 	["Next Signal Speed"] = "NEXTSPEED",
 	["CTC State"] = "CTC"
 }

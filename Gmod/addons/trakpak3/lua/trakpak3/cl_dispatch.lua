@@ -829,6 +829,19 @@ end
 --Select & Deselect
 function Dispatch.Select(id, newprop)
 	if Dispatch.selected then
+	
+		if Dispatch then
+			if Dispatch.Boards then
+				if Dispatch.Boards[Dispatch.page] then
+					if Dispatch.Boards[Dispatch.page].elements then
+						if Dispatch.Boards[Dispatch.page].elements[Dispatch.selected] then
+							
+						else print("Element is Nil!") end
+					else print("Element Table is Nil!") end
+				else print("Page Table is Nil!") end
+			else print("Boards Table is Nil!") end
+		else print("Dispatch Table is Nil! You're fucked") end
+				
 		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
 	end
 	Dispatch.selected = id
@@ -840,7 +853,19 @@ end
 
 function Dispatch.Deselect()
 	if Dispatch.selected then
-		--print("Deselected: ",Dispatch.selected)
+	
+		if Dispatch then
+			if Dispatch.Boards then
+				if Dispatch.Boards[Dispatch.page] then
+					if Dispatch.Boards[Dispatch.page].elements then
+						if Dispatch.Boards[Dispatch.page].elements[Dispatch.selected] then
+							
+						else print("Element is Nil!") end
+					else print("Element Table is Nil!") end
+				else print("Page Table is Nil!") end
+			else print("Boards Table is Nil!") end
+		else print("Dispatch Table is Nil! You're fucked") end
+		
 		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
 	end
 	Dispatch.selected = nil

@@ -19,6 +19,9 @@ if SERVER then
 		maxspeed = "number",
 		acceleration = "number",
 		
+		powered = "boolean",
+		locked = "boolean",
+		
 		sound_start = "string",
 		sound_stop = "string"
 	}
@@ -54,6 +57,8 @@ if SERVER then
 		self.synctime = nil
 		
 		self.startangle = self.angles.yaw
+		
+		self.pushers = {}
 		
 		self.soundstage = false
 		--Process Stop Angles
@@ -192,35 +197,68 @@ if SERVER then
 			end
 			
 			--Motion!
-			if self.active then
+			if true then
+				local throttle = 0
+				local maxspeedmul = 1
 				
 				--Control Input
-				local throttle = 0
 				if self.driver then
-					local move_fwd = self.driver:KeyDown(IN_FORWARD)
-					local move_rev = self.driver:KeyDown(IN_BACK)
-					local stop_move = self.driver:KeyDown(IN_JUMP)
-					
-					if move_fwd then
-						throttle = 1
-					elseif move_rev then
-						throttle = -1
-					end
-					
-					if not self.forcestop and (math.abs(self.speed)>0) and stop_move then
-						self.forcestop = true
-					end
-					--start sound
-					if (throttle!=0) and not self.soundstage then
-						self.soundstage = true
-						if self.sound_start then
-							self.sound = CreateSound(self,self.sound_start)
-							self.sound:Play()
-							self.sound:ChangePitch(50)
-							self.sound:ChangeVolume(0.5)
+					if not self.locked then
+						local move_fwd = self.driver:KeyDown(IN_FORWARD)
+						local move_rev = self.driver:KeyDown(IN_BACK)
+						local stop_move = self.driver:KeyDown(IN_JUMP)
+						
+						if move_fwd then
+							throttle = 1
+						elseif move_rev then
+							throttle = -1
+						end
+						
+						if not self.forcestop and (math.abs(self.speed)>0) and stop_move then
+							self.forcestop = true
+						end
+						--start sound
+						if (throttle!=0) and not self.soundstage then
+							self.soundstage = true
+							if self.sound_start then
+								self.sound = CreateSound(self,self.sound_start)
+								self.sound:Play()
+								self.sound:ChangePitch(50)
+								self.sound:ChangeVolume(0.5)
+							end
+						end
+					elseif self.locked then
+						--Play a locked sound if you try to drive the turntable while it's locked
+						local move_fwd = self.driver:KeyDown(IN_FORWARD)
+						local move_rev = self.driver:KeyDown(IN_BACK)
+						
+						if (move_fwd or move_rev) and not self.lockq then
+							self.lockq = true
+							self.pod_ent:EmitSound("doors/door_locked2.wav")
+						elseif not (move_fwd or move_rev) and self.lockq then
+							self.lockq = false
 						end
 					end
+				elseif not self.locked then --WE MUST POOSH LEETLE TURNTABLE
+					
+					for k, ply in pairs(self.pushers) do
+						if ply:KeyDown(IN_USE) then --Player in the zone is pressing +use
+							local eyevec = (ply:GetAimVector() * Vector(1,1,0)):GetNormalized()
+							local dir2ply = ( (ply:GetPos() - self:GetPos())*Vector(1,1,0) ):GetNormalized()
+							
+							local tfactor = (dir2ply:Cross(eyevec)).z
+							
+							
+							throttle = throttle + 0.25*tfactor
+						end
+						
+						maxspeedmul = math.min(math.abs(throttle),0.5)
+					end
+					
 				end
+				
+				
+				local mspeed = self.maxspeed*maxspeedmul
 				
 				--Acceleration
 				if (throttle==0) and self.forcestop then --decelerate to a stop
@@ -240,21 +278,20 @@ if SERVER then
 						end
 					end
 					self.targetangle = nil
-				elseif (throttle==0) and (math.abs(self.speed)>0) and not self.forcestop then
+				elseif (throttle==0) and (math.abs(self.speed)>0) and not self.forcestop then --coast
 					--Get target angle
 					if not self.targetangle then
 						local stopdist = self:GetStoppingDistance(self.speed, self.acceleration)*Trakpak3.Sign(self.speed)
 						self.targetangle = self:GetNextStop(self.stops, math.NormalizeAngle(self.angrelative + stopdist), self.speed)
 						self.maxlandingspeed = math.abs(self.speed)
 					end
-					
-				elseif (throttle==1) and (self.speed<self.maxspeed) then --accel forward
-					self.speed = self.speed + self.acceleration/10
-					if self.speed>self.maxspeed then self.speed = self.maxspeed end
+				elseif (throttle > 0) and (self.speed < (mspeed)) then --accel forward
+					self.speed = self.speed + throttle*self.acceleration/10
+					if self.speed > mspeed then self.speed = mspeed end
 					self.targetangle = nil
-				elseif (throttle==-1) and (self.speed>-self.maxspeed) then --accel backwards
-					self.speed = self.speed - self.acceleration/10
-					if self.speed<-self.maxspeed then self.speed = -self.maxspeed end
+				elseif (throttle < 0) and (self.speed > -mspeed) then --accel backwards
+					self.speed = self.speed + throttle*self.acceleration/10
+					if self.speed<-mspeed then self.speed = -mspeed end
 					self.targetangle = nil
 				end
 				
@@ -286,6 +323,36 @@ if SERVER then
 		--do the gofast
 		self:NextThink(CurTime())
 		return true
+	end
+	
+	--Disable Physgun
+	function ENT:PhysgunPickup() return false end
+	
+	--Hammer Input Handler
+	function ENT:AcceptInput( iname, activator, caller, data )
+		if iname=="Lock" then
+			self.locked = true
+			self.pushers = {}
+		elseif iname=="Unlock" then
+			self.locked = false
+		elseif iname=="AddPusher" then
+			if activator and activator:IsPlayer() then 
+				local newply = true
+				for _, ply in pairs(self.pushers) do
+					if activator == ply then newply = false end
+				end
+				if newply then table.insert(self.pushers, activator) end
+			end
+		elseif iname=="RemovePusher" then
+			if activator and activator:IsPlayer() then
+				for index, ply in pairs(self.pushers) do
+					if activator==ply then
+						table.remove(self.pushers, index)
+						break
+					end
+				end
+			end
+		end
 	end
 	
 	--Teleport player to exit point

@@ -24,6 +24,7 @@ if SERVER then
 		
 		linked_stand = "entity",
 		locked = "boolean",
+		nowire = "boolean",
 		
 		OnUse = "output",
 		OnThrownMain = "output",
@@ -69,10 +70,12 @@ if SERVER then
 		
 		--Wire I/O
 		if WireLib then
-			local names = {"ThrowMain","ThrowDiverging","ThrowToggle","Throw"}
-			local types = {"NORMAL","NORMAL","NORMAL","NORMAL"}
-			local descs = {}
-			WireLib.CreateSpecialInputs(self, names, types, descs)
+			if not self.nowire then
+				local names = {"ThrowMain","ThrowDiverging","ThrowToggle","Throw"}
+				local types = {"NORMAL","NORMAL","NORMAL","NORMAL"}
+				local descs = {}
+				WireLib.CreateSpecialInputs(self, names, types, descs)
+			end
 			
 			local names = {"Main","Diverging","AutomaticOnly","Blocked","Broken"}
 			local types = {"NORMAL","NORMAL","NORMAL","NORMAL","NORMAL"}
@@ -282,13 +285,15 @@ if SERVER then
 	end
 	
 	function ENT:Think()
-		--Begin actuation if current state does not match target state
-		if not self.animating and not self.occupied and (self.state != self.targetstate) then
-			if self.switch then self.switch:SwitchThrow(self.targetstate) end
-			self:Actuate(self.targetstate)
+		if Trakpak3.InitPostEntity then
+			--Begin actuation if current state does not match target state
+			if not self.animating and not self.occupied and (self.state != self.targetstate) then
+				if self.switch then self.switch:SwitchThrow(self.targetstate) end
+				self:Actuate(self.targetstate)
+			end
+			self:NextThink(CurTime())
+			return true
 		end
-		self:NextThink(CurTime())
-		return true
 	end
 	
 	--Hammer Input Handler
@@ -298,7 +303,7 @@ if SERVER then
 		elseif inputname=="ThrowMain" then
 			self:SetTargetState(false)
 		elseif inputname=="ThrowDiverging" then
-			self:SetTargetState(false)
+			self:SetTargetState(true)
 		elseif inputname=="SetAutoOnly" then
 			self.locked = true
 			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",1) end

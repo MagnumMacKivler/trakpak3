@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_ca/signage/streetsigns_qc"
+	"$surfaceprop" "MetalVent"
+	"$halflambert" "1"
+}

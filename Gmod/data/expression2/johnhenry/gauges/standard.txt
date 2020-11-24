@@ -14,6 +14,7 @@ RidiculousTies = 3 #Changes how ties and roadbed are handled. Note that switches
 MakeBallast = 2 #0 for No Ballast, 1 for Trapezoidal Ballast, 2 for Peaked Ballast (Recommended!). 
 AnimateSwitches = 1 #Give the switches animations? This applies only to models compiled in SMD mode.
 InterpolateTies = 1 #Make the ties' angles smoothly blend around curves?
+TextureRailEnds = 0 #Add a face at the ends of the rails. Useful for bridge tracks.
 
 #----------------
 #Basic Dimensions

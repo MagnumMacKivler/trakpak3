@@ -10,13 +10,11 @@ RidiculousTies = 3 #Changes how ties and roadbed are handled. Note that switches
 #0 - Composite Textures: Uses one texture for the roadbed and ties. Cheapest option but limits the number of skins.
 #1 - 2D Ties: Splits the ties and roadbed into two textures, placing the ties a small distance above the other. This greatly increases skin limit but adds a small number of extra polygons.
 #2 - 2.5D Ties: Each tie is its own flat rectangle. This eliminates a lot of tiling issues seen with the above two modes, but adds a modest amount to the polygon count.
-#3 - 3D Ties: Each tie is a 5-faced box. The most realistic tie option, but adds a lot of extra polygons. Use only when needed.
-MakeBallast = 0 #Should this track have ballast at all? Normally 1, but disabling it can be useful for bridge track.
-ForceSegmentType = 1 #Sets the minimum physics level, limited applicability to switches:
-#0 - Allows trapezoidal or convexed ballast and block rails. This is the default mode.
-#1 - Allows block ballast and block rails, like flat curves (VMF).
-#2 - Allows triangular ballast and block rails, like banked curves (VMF).
-#3 - Forces all segments to have triangular ballast and triangular rails, like a curved ramp (VMF). Very expensive, don't use unless you know what you're doing.
+#3 - 3D Ties: Each tie is a 5-faced box. The most realistic tie option, but adds a lot of extra polygons. The model won't lag, but the compile time will be longer!
+MakeBallast = 0 #0 for No Ballast, 1 for Trapezoidal Ballast, 2 for Peaked Ballast (Recommended!). 
+AnimateSwitches = 1 #Give the switches animations? This applies only to models compiled in SMD mode.
+InterpolateTies = 1 #Make the ties' angles smoothly blend around curves?
+TextureRailEnds = 1 #Add a face at the ends of the rails. Useful for bridge tracks.
 
 #----------------
 #Basic Dimensions
@@ -25,6 +23,7 @@ ForceSegmentType = 1 #Sets the minimum physics level, limited applicability to s
 #Ballast/Origin
 OriginHeight = 24 #Height of the model origin off the ground - This should be higher than the top of the railhead.
 BallastHeight = 8 #Height of ballast trapezoid off the ground.
+PeakHeight = 8 #Height of the ballast peak, if used.
 
 #Rails
 RailTopHeight = 16 #Height from ground to top of rail (railhead).
@@ -33,7 +32,7 @@ BankHeight = 4 #Height of the outer rail above the inner rail for banked track.
 CheckLength = 64 #Length of check rails (For switches).
 
 #Ties
-TieTopHeight = RailBottomHeight #Height from ground to top of tie (3D or Tie Plane)
+TieTopHeight = 8 #Height from ground to top of tie (3D or Tie Plane)
 TieBottomHeight = TieTopHeight-8 #Height from ground to bottom of tie (3D or Tie Plane)
 TieSeparation = 16 #Distance between the centers of ties (3D ties only)
 TieWidth = 120 #Nominal width of a tie

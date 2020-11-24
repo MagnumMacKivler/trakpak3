@@ -1,40 +1,42 @@
-@name johnhenry/gauges/capetest
+@name johnhenry/gauges/standard_guard
 #-------------------
 #Big Important Stuff
 #-------------------
 
-GaugeName = "cape_test" #Short abbreviation for the gauge, used for auto-naming.
-Scale = 2 #Overall scale factor for brush generation. Model will be scaled back down in the QC. Should be a power of two (1, 2, 4, etc).
+GaugeName = "rsg_guard" #Short abbreviation for the gauge, used for auto-naming.
+Scale = 1 #Overall scale factor for brush generation. Model will be scaled back down in the QC. Should be a power of two (1, 2, 4, etc).
 # !!! Be careful about using large numbers with large track pieces. An 8192-radius 90 degree curve at 2x scale will go off the hammer grid !!!
-RidiculousTies = 3 #Changes how ties and roadbed are handled. Note that switches will use whatever they need to in order to look correct.
+RidiculousTies = 0 #Changes how ties and roadbed are handled. Note that switches will use whatever they need to in order to look correct.
 #0 - Composite Textures: Uses one texture for the roadbed and ties. Cheapest option but limits the number of skins.
 #1 - 2D Ties: Splits the ties and roadbed into two textures, placing the ties a small distance above the other. This greatly increases skin limit but adds a small number of extra polygons.
 #2 - 2.5D Ties: Each tie is its own flat rectangle. This eliminates a lot of tiling issues seen with the above two modes, but adds a modest amount to the polygon count.
-#3 - 3D Ties: Each tie is a 5-faced box. The most realistic tie option, but adds a lot of extra polygons.
-MakeBallast = 2 #0 for No Ballast, 1 for Trapezoidal Ballast, 2 for Peaked Ballast.
-AnimateSwitches = 1 #Give the switches animations? This applies only to models compiled in SMD mode.
+#3 - 3D Ties: Each tie is a 5-faced box. The most realistic tie option, but adds a lot of extra polygons. The model won't lag, but the compile time will be longer!
+MakeBallast = 0 #0 for No Ballast, 1 for Trapezoidal Ballast, 2 for Peaked Ballast (Recommended!). 
+AnimateSwitches = 0 #Give the switches animations? This applies only to models compiled in SMD mode.
+InterpolateTies = 0 #Make the ties' angles smoothly blend around curves?
+TextureRailEnds = 1 #Add a face at the ends of the rails. Useful for bridge tracks.
 
 #----------------
 #Basic Dimensions
 #----------------
 
 #Ballast/Origin
-OriginHeight = 40 #Height of the model origin off the ground - This should be higher than the top of the railhead.
-BallastHeight = 22 #Height of ballast trapezoid off the ground.
-PeakHeight = 23 #Height of the ballast peak, if used.
+OriginHeight = 16 #Height of the model origin off the ground - This should be higher than the top of the railhead.
+BallastHeight = 6 #Height of ballast trapezoid off the ground.
+PeakHeight = 6 #Height of the ballast peak, if used.
 
 #Rails
-RailTopHeight = 32 #Height from ground to top of rail (railhead).
-RailBottomHeight = 24 #Height from ground to bottom of rail.
-BankHeight = 4 #Height of the outer rail above the inner rail for banked track.
+RailTopHeight = 6 #Height from ground to top of rail (railhead).
+RailBottomHeight = 0 #Height from ground to bottom of rail.
+BankHeight = 2 #Height of the outer rail above the inner rail for banked track.
 CheckLength = 64 #Length of check rails (For switches).
 
 #Ties
-TieTopHeight = 24 #Height from ground to top of tie (3D or Tie Plane)
-TieBottomHeight = 18 #Height from ground to bottom of tie (3D or Tie Plane)
+TieTopHeight = 6 #Height from ground to top of tie (3D or Tie Plane)
+TieBottomHeight = 0 #Height from ground to bottom of tie (3D or Tie Plane)
 TieSeparation = 20 #Distance between the centers of ties (3D ties only)
-TieWidth = 76 #Nominal width of a tie
-TieThickness = 8 #Nominal thickness of a tie
+TieWidth = 100 #Nominal width of a tie
+TieThickness = 10 #Nominal thickness of a tie
 TiePlateWidth = 14 #Nominal width of a tie plate
 TiePlateCenter = 30 #Distance from tie plate center to tie center
 
@@ -51,31 +53,31 @@ SwitchThrow = 4 #Distance for switch points to move
 
 #Ang0 (North, 0 Right / 4 Forward)
 TrackFace_Ang0 = table()
-TrackFace_Ang0["rail_inner",vector2] = vec2(21,0)
-TrackFace_Ang0["rail_outer",vector2] = vec2(25,0)
-TrackFace_Ang0["ballast_corner",vector2] = vec2(64,0)
-TrackFace_Ang0["ballast_edge",vector2] = vec2(128,0)
+TrackFace_Ang0["rail_inner",vector2] = vec2(16,0)
+TrackFace_Ang0["rail_outer",vector2] = vec2(20,0)
+TrackFace_Ang0["ballast_corner",vector2] = vec2(20,0)
+TrackFace_Ang0["ballast_edge",vector2] = vec2(20,0)
 
 #Ang1 (Northeast, 1 Right / 4 Forward, about 14 degrees)
 TrackFace_Ang1 = table()
-TrackFace_Ang1["rail_inner",vector2] = vec2(21,6)
-TrackFace_Ang1["rail_outer",vector2] = vec2(35,7)
-TrackFace_Ang1["ballast_corner",vector2] = vec2(60,15)
-TrackFace_Ang1["ballast_edge",vector2] = vec2(124,31)
+TrackFace_Ang1["rail_inner",vector2] = vec2(16,4)
+TrackFace_Ang1["rail_outer",vector2] = vec2(20,5)
+TrackFace_Ang1["ballast_corner",vector2] = vec2(20,5)
+TrackFace_Ang1["ballast_edge",vector2] = vec2(20,5)
 
 #Ang2 (Northeast, 2 Right / 4 Forward, about 28 degrees)
 TrackFace_Ang2 = table()
-TrackFace_Ang2["rail_inner",vector2] = vec2(19,10)
-TrackFace_Ang2["rail_outer",vector2] = vec2(23,12)
-TrackFace_Ang2["ballast_corner",vector2] = vec2(58,29)
-TrackFace_Ang2["ballast_edge",vector2] = vec2(114,57)
+TrackFace_Ang2["rail_inner",vector2] = vec2(14,7)
+TrackFace_Ang2["rail_outer",vector2] = vec2(18,9)
+TrackFace_Ang2["ballast_corner",vector2] = vec2(18,9)
+TrackFace_Ang2["ballast_edge",vector2] = vec2(18,9)
 
 #Ang2 (Northeast, 4 Right / 4 Forward, exactly 45 degrees)
 TrackFace_Ang4 = table()
-TrackFace_Ang4["rail_inner",vector2] = vec2(15,15)
-TrackFace_Ang4["rail_outer",vector2] = vec2(18,18)
-TrackFace_Ang4["ballast_corner",vector2] = vec2(42,42)
-TrackFace_Ang4["ballast_edge",vector2] = vec2(90,90)
+TrackFace_Ang4["rail_inner",vector2] = vec2(11,11)
+TrackFace_Ang4["rail_outer",vector2] = vec2(14,14)
+TrackFace_Ang4["ballast_corner",vector2] = vec2(14,14)
+TrackFace_Ang4["ballast_edge",vector2] = vec2(14,14)
 
 #The rest of the angles will be auto-generated based on these.
 
@@ -198,7 +200,7 @@ TiePlateSkins = array( #Used for all 3D ties
 
 #Rail Materials - Not Skinned
 Mat_RailSide = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_SIDE"
-Mat_RailTop = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_TOP_SHINY"
+Mat_RailTop = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_TOP_RUSTY"
 Mat_RailTop_Rusty = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_TOP_RUSTY"
 
 #Texture Dimensions
@@ -206,16 +208,16 @@ Mat_RailTop_Rusty = "TRAKPAK3_COMMON/TRACKS/RAILS/RAIL_TOP_RUSTY"
 #Scale is the texture scale that will be applied in hammer (Overall Scale will auto-compensate this)
 BallastU = 512
 BallastV = 512
-BallastScale = 0.1875
+BallastScale = 0.25
 RailSideU = 512
 RailSideV = 32
-RailSideScale = 0.25
+RailSideScale = 0.1875
 RailTopU = 512
 RailTopV = 32
 RailTopScale = 0.25
 TieU = 512
 TieV = 64
-TieScale = 0.1875
+TieScale = 0.25
 
 #-----------------------------------------------------------
 #End of User Config - Don't touch anything after this point!
@@ -256,7 +258,6 @@ TieTopHeight *= Scale
 BankHeight *= Scale
 CheckLength *= Scale
 TieSeparation *= Scale
-PeakHeight *= Scale
 
 TieWidth *= Scale
 TieThickness *= Scale

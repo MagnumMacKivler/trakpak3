@@ -1,0 +1,342 @@
+//STRAIGHT, DIR 0, LENGTH 32, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n32;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 48, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n48;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 64, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n64;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 96, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n96;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 128, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 128, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n0;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 192, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n192;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 256, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 256, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n0;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 256, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n0;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 384, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 384, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n0;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 512, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 512, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n0;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 512, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n0;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 512, HEIGHT 16
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n16;'Dir":n0;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n0;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 768, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n0;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 0, LENGTH 768, HEIGHT 24
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n24;'Dir":n0;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 32, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n32;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 48, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n48;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 64, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n64;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 96, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n96;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 128, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 128, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n1;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 192, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n192;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 256, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 256, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n1;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 256, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n1;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 384, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 384, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n1;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 512, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 512, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 512, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 512, HEIGHT 16
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n16;'Dir":n1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n1;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 768, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n1;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 1, LENGTH 768, HEIGHT 24
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n24;'Dir":n1;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 32, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n32;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 48, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n48;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 64, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n64;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 96, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n96;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 128, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 128, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n-1;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 192, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n192;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 256, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 256, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n-1;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 256, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n-1;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 384, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 384, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n-1;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 512, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 512, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n-1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 512, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n-1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 512, HEIGHT 16
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n16;'Dir":n-1;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-1;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 768, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n-1;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -1, LENGTH 768, HEIGHT 24
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n24;'Dir":n-1;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 32, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n32;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 48, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n48;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 64, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n64;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 96, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n96;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 128, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 128, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n2;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 192, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n192;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 256, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 256, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n2;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 256, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n2;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 384, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 384, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n2;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 512, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 512, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 512, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 512, HEIGHT 16
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n16;'Dir":n2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n2;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 768, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n2;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 2, LENGTH 768, HEIGHT 24
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n24;'Dir":n2;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 32, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n32;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 48, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n48;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 64, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n64;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 96, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n96;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 128, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 128, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n-2;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 192, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n192;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 256, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 256, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n-2;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 256, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n-2;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 384, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 384, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n-2;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 512, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 512, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n-2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 512, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n-2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 512, HEIGHT 16
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n16;'Dir":n-2;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n-2;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 768, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n-2;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR -2, LENGTH 768, HEIGHT 24
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n24;'Dir":n-2;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 32, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n32;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 48, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n48;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 64, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n64;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 96, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n96;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 128, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 128, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n4;'Type":'straight"'Length":n128;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 192, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n192;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 256, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 256, HEIGHT 4
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n4;'Dir":n4;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 256, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n4;'Type":'straight"'Length":n256;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 384, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 384, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n4;'Type":'straight"'Length":n384;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 512, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 512, HEIGHT 8
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n8;'Dir":n4;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 512, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n4;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 512, HEIGHT 16
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n16;'Dir":n4;'Type":'straight"'Length":n512;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 768, HEIGHT 0
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n0;'Dir":n4;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 768, HEIGHT 12
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n12;'Dir":n4;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%
+//STRAIGHT, DIR 4, LENGTH 768, HEIGHT 24
+~'ntypes":{}'size":n7;'n":{}'s":{~'Segments":n1;'Height":n24;'Dir":n4;'Type":'straight"'Length":n768;'StartPos":{n0;0}'Index":n1}'stypes":{~'Segments":'n"'Height":'n"'Dir":'n"'Type":'s"'Length":'n"'StartPos":'xv2"'Index":'n"}
+%END%

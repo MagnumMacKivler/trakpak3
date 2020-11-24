@@ -2,14 +2,14 @@
 @inputs Active InputVons:array VonGo FileBuffer:entity
 @outputs NextFrame EntID SmoothPolyID FileName:string FileText:string
 #Gauge Settings
-@persist GaugeName:string RidiculousTies InterpolateTies MakeBallast Scale AnimateSwitches
+@persist GaugeName:string RidiculousTies InterpolateTies MakeBallast Scale AnimateSwitches TextureRailEnds
 @persist OriginHeight BallastHeight RailBottomHeight RailTopHeight TieBottomHeight TieTopHeight BankHeight CheckLength SwitchThrow TieSeparation TieWidth TieThickness TiePlateWidth TiePlateCenter
 @persist [BallastSkins BallastTrackbedSkins BallastTiesSkins TiesSkins TieNoPlateSkins TiePlateSkins]:array
 @persist [Mat_Ballast Mat_Trackbed_NoTies Mat_Trackbed_Ties Mat_Ties Mat_RailSide Mat_RailTop Mat_RailTop_Rusty Mat_Tie Mat_Tie_Plates]:string
 @persist BallastU BallastV BallastScale RailSideU RailSideV RailSideScale RailTopU RailTopV RailTopScale TieU TieV TieScale
 @persist [TrackSep_Ang0 TrackSep_Ang1 TrackSep_Ang2 TrackSep_Ang4]:vector2 [TrackFace_Ang0 TrackFace_Ang1 TrackFace_Ang2 TrackFace_Ang4 Textures]:table
 #Compile Data
-@persist SegID InternalBrushID StartingBrushID NearPoints:array FarPoints:array SegmentTypes:array SegType [JA JB JC JD JE JF JG JH JI JK JL JM JN]:array BrushWriteStep Tex:table
+@persist SegID InternalBrushID StartingBrushID NearPoints:array FarPoints:array SegmentTypes:array SegType TexCodes:array TexNear TexFar [JA JB JC JD JE JF JG JH JI JK JL JM JN]:array BrushWriteStep Tex:table
 @persist EntID [MasterString EntString]:string [BrushStrings Entities EntBrushMins EntBrushMaxs EntClasses EntVisGroups EntOrigins EntTargets]:array EntSkins:table BID MinBID MaxBID CompileStep NumBrushes
 @persist SwitchCompileStep SWP_MN:array SWP_DV:array SwitchXover WholeSwitchXover
 @persist O:entity E:entity SoundIndex CompileStartTime
@@ -61,6 +61,7 @@
 @persist [SingleTieCenters SingleTieAngles SingleTieHeights]:array STC TieID LeftMaxSeg RightMaxSeg LeftMinPos RightMinPos [SegOfTieMN SegOfTieDV]:array
 @persist [PlatePointGroups BridgePointGroups]:table [PlateTexCenters BridgeTexCenters SideStates]:array PlateID BridgeID MaxPlates MaxBridges MN_MinZ DV_MinZ MN_MinZ_Seg DV_MinZ_Seg
 @persist VisGroups:array
+@persist TexRailEnds:table
 
 #Visualization
 
@@ -78,7 +79,7 @@
 
 if(first()){
     #What track gauge are you developing for?
-    #include "johnhenry/gauges/standard"
+    #include "johnhenry/gauges/standard_guard"
     
     SMDQC = 1 #Generate SMD and QC files instead of VMF files... Recommended.
     
@@ -117,22 +118,22 @@ if(first()){
         ".newpiece straight 1",
         ".define startpos 0 0",
         ".define dir 0",
-        ".define length 1024",
+        ".define length 512",
         ".define height 0",
         ".define segments 1",
-        ".plot",
-        ".draw",
+        ".plot"
+        #".draw",
         
-        ".newpiece arc 1",
-        ".define startpos 0 0",
-        ".define startdir 0",
-        ".define endpos 192 768",
-        ".define enddir -2",
-        ".define radius 1536",
-        ".define segments 6",
-        ".define height 0",
-        ".plot",
-        ".draw",
+        #".newpiece arc 1",
+        #".define startpos 0 0",
+        #".define startdir 0",
+        #".define endpos 192 768",
+        #".define enddir -2",
+        #".define radius 1536",
+        #".define segments 6",
+        #".define height 0",
+        #".plot",
+        #".draw",
         
         #".newpiece bezier 1",
         #".define startpos 0 0",
@@ -145,11 +146,11 @@ if(first()){
         #".plot"
         #".draw"
         
-        ".newpiece switch pootis",
-        ".define mainpiece 1",
-        ".define divpiece 2",
-        ".define split main",
-        ".plot"
+        #".newpiece switch pootis",
+        #".define mainpiece 1",
+        #".define divpiece 2",
+        #".define split main",
+        #".plot"
     )
     
     ScriptLine = 1
@@ -1089,17 +1090,22 @@ if(clk("makebrush")){
             NearPoints = pointPack(PieceID,N,Plots,(InternalBrushID>0) ? JointsLists : PhysJointsLists)
             FarPoints = pointPack(PieceID,F,Plots,(InternalBrushID>0) ? JointsLists : PhysJointsLists)
             
+            TexNear = (TexCodes[SegID,number] == 1) | (TexCodes[SegID,number] == 3)
+            TexFar = (TexCodes[SegID,number] == 2) | (TexCodes[SegID,number] == 3)
+            
+            #print(TexNear,TexFar)
+            
             BrushWriteStep = 1
             timer("makebrush",100)
-            break
+        break
         case 1, #Build Brush: BrushStrings[ARRAY] to store individual brush strings.
             local MadeLastBrush = 0
             switch(SegType){
                 case -1, #Left Rail Only
                     if(SMDQC){
-                        buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                        buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                     }else{
-                        BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                        BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                     }
                     
                     SegID++ #Move on to next segment
@@ -1109,30 +1115,30 @@ if(clk("makebrush")){
                         BrushWriteStep = 0 #Start over for next segment
                     }
                     
-                    break
+                break
                 case -1.5, #Left Rail + Left PB
                     switch(InternalBrushID){
                         case 1, #Rail
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Ballast Center Tris
                             if(SMDQC){
-                                buildMesh("ballast_peaked_left_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_peaked_left_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID=4
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_tri_left",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_tri_left",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 3, "Ballast Edges"
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Done
                             SegID++ #Move on to next segment
                             if(SegID > MaxSegment){ #Finished with last segment?
@@ -1142,31 +1148,31 @@ if(clk("makebrush")){
                             }
                             break
                     }
-                    break
+                break
                 case -1.75, #Left Rail + Full PB
                     switch(InternalBrushID){
                         case 1, #Rail
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Ballast Center Tris
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID=4
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 3, "Ballast Edges"
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Done
                             SegID++ #Move on to next segment
                             if(SegID > MaxSegment){ #Finished with last segment?
@@ -1176,12 +1182,12 @@ if(clk("makebrush")){
                             }
                             break
                     }
-                    break
+                break
                 case -2, #Right Rail Only
                     if(SMDQC){
-                        buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                        buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                     }else{
-                        BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                        BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                     }
                     
                     SegID++ #Move on to next segment
@@ -1191,30 +1197,30 @@ if(clk("makebrush")){
                         BrushWriteStep = 0 #Start over for next segment
                     }
                     
-                    break
+                break
                 case -2.5, #Right Rail + Right PB
                     switch(InternalBrushID){
                         case 1, #Rail
                             if(SMDQC){
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Ballast Center Tris
                             if(SMDQC){
-                                buildMesh("ballast_peaked_right_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_peaked_right_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID=4
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_tri_right",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_tri_right",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 3, "Ballast Edges"
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Done
                             SegID++ #Move on to next segment
                             if(SegID > MaxSegment){ #Finished with last segment?
@@ -1222,33 +1228,33 @@ if(clk("makebrush")){
                             }else{
                                 BrushWriteStep = 0 #Start over for next segment
                             }
-                            break
+                        break
                     }
-                    break
+                break
                 case -2.75, #Right Rail + Full PB
                     switch(InternalBrushID){
                         case 1, #Rail
                             if(SMDQC){
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Ballast Center Tris
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID=4
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 3, "Ballast Edges"
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Done
                             SegID++ #Move on to next segment
                             if(SegID > MaxSegment){ #Finished with last segment?
@@ -1256,16 +1262,16 @@ if(clk("makebrush")){
                             }else{
                                 BrushWriteStep = 0 #Start over for next segment
                             }
-                            break
+                        break
                     }
-                    break
+                break
                 case -3, #Both Rails Only
                     if(SMDQC){
-                        buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                        buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                        buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                        buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                     }else{
-                        BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                        BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                        BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                        BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                     }
                     
                     SegID++ #Move on to next segment
@@ -1275,29 +1281,31 @@ if(clk("makebrush")){
                         BrushWriteStep = 0 #Start over for next segment
                     }
                     
-                    break
+                break
                 case -4, #Chopped-Up Rails
                 
                     local MN = (SwitchCompileStep==1)|(SwitchCompileStep==4)
+                    local TN = TexNear #Was gonna do something with these but whatever.
+                    local TF = TexFar #It's like 12 extra triangles at most
                     if(MN){
                         if(Rail1MN:count()>0){
-                            if(SMDQC){buildGenericRailMesh(Rail1MN,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1MN,Textures,0,0,0,0,MakeBallast)}
+                            if(SMDQC){buildGenericRailMesh(Rail1MN,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1MN,Textures,TF,TN,0,0,MakeBallast)}
                         }
                         if(Rail2MN:count()>0){
-                            if(SMDQC){buildGenericRailMesh(Rail2MN,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2MN,Textures,0,0,0,0,MakeBallast)}
+                            if(SMDQC){buildGenericRailMesh(Rail2MN,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2MN,Textures,TF,TN,0,0,MakeBallast)}
                         }
                         if(Rail3MN:count()>0){
-                            if(SMDQC){buildGenericRailMesh(Rail3MN,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3MN,Textures,0,0,0,0,MakeBallast)}
+                            if(SMDQC){buildGenericRailMesh(Rail3MN,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3MN,Textures,TF,TN,0,0,MakeBallast)}
                         }
                     }else{
                         if(Rail1DV:count()>0){
-                            if(SMDQC){buildGenericRailMesh(Rail1DV,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1DV,Textures,0,0,0,0,MakeBallast)}
+                            if(SMDQC){buildGenericRailMesh(Rail1DV,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1DV,Textures,TF,TN,0,0,MakeBallast)}
                         }
                         if(Rail2DV:count()>0){
-                            if(SMDQC){buildGenericRailMesh(Rail2DV,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2DV,Textures,0,0,0,0,MakeBallast)}
+                            if(SMDQC){buildGenericRailMesh(Rail2DV,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2DV,Textures,TF,TN,0,0,MakeBallast)}
                         }
                         if(Rail3DV:count()>0){
-                            if(SMDQC){buildGenericRailMesh(Rail3DV,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3DV,Textures,0,0,0,0,MakeBallast)}
+                            if(SMDQC){buildGenericRailMesh(Rail3DV,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3DV,Textures,TF,TN,0,0,MakeBallast)}
                         }
                     }
                 
@@ -1307,48 +1315,50 @@ if(clk("makebrush")){
                     }else{
                         BrushWriteStep = 0 #Start over for next segment
                     }
-                    break
+                break
                 case -4.5, #Chopped-Up Rails with PB
                     switch(InternalBrushID){
                         case 1, #Rail
                             local MN = (SwitchCompileStep==1)|(SwitchCompileStep==4)
+                            local TN = TexNear #Was gonna do something with these but whatever.
+                            local TF = TexFar #It's like 12 extra triangles at most
                             if(MN){
                                 if(Rail1MN:count()>0){
-                                    if(SMDQC){buildGenericRailMesh(Rail1MN,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1MN,Textures,0,0,0,0,MakeBallast)}
+                                    if(SMDQC){buildGenericRailMesh(Rail1MN,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1MN,Textures,TF,TN,0,0,MakeBallast)}
                                 }
                                 if(Rail2MN:count()>0){
-                                    if(SMDQC){buildGenericRailMesh(Rail2MN,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2MN,Textures,0,0,0,0,MakeBallast)}
+                                    if(SMDQC){buildGenericRailMesh(Rail2MN,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2MN,Textures,TF,TN,0,0,MakeBallast)}
                                 }
                                 if(Rail3MN:count()>0){
-                                    if(SMDQC){buildGenericRailMesh(Rail3MN,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3MN,Textures,0,0,0,0,MakeBallast)}
+                                    if(SMDQC){buildGenericRailMesh(Rail3MN,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3MN,Textures,TF,TN,0,0,MakeBallast)}
                                 }
                             }else{
                                 if(Rail1DV:count()>0){
-                                    if(SMDQC){buildGenericRailMesh(Rail1DV,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1DV,Textures,0,0,0,0,MakeBallast)}
+                                    if(SMDQC){buildGenericRailMesh(Rail1DV,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail1DV,Textures,TF,TN,0,0,MakeBallast)}
                                 }
                                 if(Rail2DV:count()>0){
-                                    if(SMDQC){buildGenericRailMesh(Rail2DV,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2DV,Textures,0,0,0,0,MakeBallast)}
+                                    if(SMDQC){buildGenericRailMesh(Rail2DV,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail2DV,Textures,TF,TN,0,0,MakeBallast)}
                                 }
                                 if(Rail3DV:count()>0){
-                                    if(SMDQC){buildGenericRailMesh(Rail3DV,0,0,Textures,0,0,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3DV,Textures,0,0,0,0,MakeBallast)}
+                                    if(SMDQC){buildGenericRailMesh(Rail3DV,0,0,Textures,TF,TN,0,0,MakeBallast)}else{BrushStrings:buildGenericRailBrush(Rail3DV,Textures,TF,TN,0,0,MakeBallast)}
                                 }
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Ballast Center Tris
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID=4
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 3, "Ballast Edges"
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Done
                             SegID++ #Move on to next segment
                             if(SegID > MaxSegment){ #Finished with last segment?
@@ -1356,9 +1366,9 @@ if(clk("makebrush")){
                             }else{
                                 BrushWriteStep = 0 #Start over for next segment
                             }
-                            break
+                        break
                     }
-                    break
+                break
                 case -5, #True Skip
                     SegID++ #Move on to next segment
                     if(SegID > MaxSegment){ #Finished with last segment?
@@ -1366,23 +1376,23 @@ if(clk("makebrush")){
                     }else{
                         BrushWriteStep = 0 #Start over for next segment
                     }
-                    break
+                break
                 case -5.5, #Skip rails, Full PB
                     switch(InternalBrushID){
                         case 1, #Ballast Center Tris
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID=3
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 2, "Ballast Edges"
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 3, #Done
                             SegID++ #Move on to next segment
                             if(SegID > MaxSegment){ #Finished with last segment?
@@ -1390,9 +1400,9 @@ if(clk("makebrush")){
                             }else{
                                 BrushWriteStep = 0 #Start over for next segment
                             }
-                            break
+                        break
                     }
-                    break
+                break
                 case 0, #Straight - Trap Ballast, Block Rails
                     #1 - Ballast
                     #2 - Rail 1
@@ -1403,19 +1413,19 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast
                             if(SMDQC){
-                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("ballast_trapezoid",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_trapezoid",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Rails
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1425,22 +1435,22 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Ballast PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("ballast_trapezoid_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_trapezoid_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1450,11 +1460,49 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                     }
                     
                     
-                    break
+                break
+                case 0.25, #Block Rails Only (With Physics)
+                    switch(InternalBrushID){
+                        case 1, #Rails
+                            if(SMDQC){
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }else{
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }
+                            
+                            SegID++ #Move on to next segment
+                            if(SegID > MaxSegment){ #Finished with last segment?
+                                MadeLastBrush = 1 #set Flag
+                            }else{
+                                BrushWriteStep = 0 #Start over for next segment
+                            }
+                            hitSound()
+                        break
+                        case -1, #Rails PM
+                            if(SMDQC){
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }else{
+                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }
+                            
+                            SegID++
+                            if(SegID > MaxSegment){ #Finished with last segment?
+                                MadeLastBrush = 1 #set Flag
+                            }else{
+                                BrushWriteStep = 0 #Start over for next segment
+                            }
+                            hitSound()
+                        break
+                    }
+                break
                 case 0.5, #Straight - Peaked Ballast, Block Rails
                     #1 - Ballast
                     #2 - Rail 1
@@ -1465,19 +1513,19 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_simple",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_simple",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID++
-                            break
+                        break
                         case 2, #Rails
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1487,22 +1535,22 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Ballast PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("ballast_trapezoid_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_trapezoid_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1512,11 +1560,11 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                     }
                     
                     
-                    break
+                break
                 case 1, #Flat Curve - Block Ballast, Block Rails
                     #1 - Ballast Center
                     #2 - Ballast Edges 1
@@ -1527,28 +1575,28 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast center
                             if(SMDQC){
-                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID = 4
                             }else{
-                                BrushStrings:buildBrush("ballast_block",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_block",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 2, #Ballast edges 1
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 3, #Ballast edges 2
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Rails
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1558,22 +1606,22 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Ballast PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast) #Still a convex don't worry
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar) #Still a convex don't worry
                             }else{
-                                BrushStrings:buildBrush("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1583,11 +1631,11 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         
                     }
                     
-                    break
+                break
                 case 1.5, #Flat Curve - Tri Peaked Ballast, Block Rails
                     #1 - Ballast Center Tris
                     #2 - Ballast Edges 1
@@ -1598,28 +1646,28 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast Center Triangles
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID = 4
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 2, #Ballast Edges 1
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 3, #Ballast Edges 2
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Rails
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1629,22 +1677,22 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Ballast PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1654,9 +1702,9 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                     }
-                    break
+                break
                 case 2, #Banked Curve - Tri Ballast, Block Rails
                     #1 - Ballast Center Tris
                     #2 - Ballast Edges 1
@@ -1667,28 +1715,28 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast Center Triangles
                             if(SMDQC){
-                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID = 4
                             }else{
-                                BrushStrings:buildBrush("ballast_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 2, #Ballast Edges 1
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 3, #Ballast Edges 2
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Rails
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1698,22 +1746,22 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Ballast PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_block_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                BrushStrings:buildBrush("rail_block_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1723,9 +1771,10 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                     }
-                    break
+                break
+                
                 case 3, #Curved Ramp - Tri Ballast, Tri Rails
                     #1 - Ballast Center Tris
                     #2 - Ballast Edges 1
@@ -1738,31 +1787,31 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast Center Triangles
                             if(SMDQC){
-                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_trapezoid_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID = 5
                             }else{
-                                BrushStrings:buildBrush("ballast_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 2, #Ballast Edges 1
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 3, #Ballast Edges 2
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Rail Tris 1
-                            BrushStrings:buildBrush("rail_triangles_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("rail_triangles_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 5, #Rail Tris 2
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_triangles_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_triangles_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1772,21 +1821,21 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Rails Tri 2 PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_triangles_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_triangles_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails Tri 1 PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_triangles_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_triangles_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1796,9 +1845,57 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                     }
-                    break
+                break
+                case 3.25, #Tri Rails Only (With Physics)
+                    switch(InternalBrushID){
+                        case 1, #Rail Tris 1
+                            if(!SMDQC){
+                                BrushStrings:buildBrush("rail_triangles_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }
+                            InternalBrushID++
+                        break
+                        case 2, #Rail Tris 2
+                            if(SMDQC){
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }else{
+                                BrushStrings:buildBrush("rail_triangles_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }
+                            
+                            SegID++ #Move on to next segment
+                            if(SegID > MaxSegment){ #Finished with last segment?
+                                MadeLastBrush = 1 #set Flag
+                            }else{
+                                BrushWriteStep = 0 #Start over for next segment
+                            }
+                            hitSound()
+                        break
+                        case -1, #Rails Tri 2 PM
+                            if(!SMDQC){
+                                BrushStrings:buildBrush("rail_triangles_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }
+                            InternalBrushID--
+                        break
+                        case -2, #Rails Tri 1 PM
+                            if(SMDQC){
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }else{
+                                BrushStrings:buildBrush("rail_triangles_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                            }
+                            
+                            SegID++
+                            if(SegID > MaxSegment){ #Finished with last segment?
+                                MadeLastBrush = 1 #set Flag
+                            }else{
+                                BrushWriteStep = 0 #Start over for next segment
+                            }
+                            hitSound()
+                        break
+                    }
+                break
                 case 3.5, #Peaked Curved Ramp - Peaked Tri Ballast, Tri Rails
                     #1 - Ballast Center Tris
                     #2 - Ballast Edges 1
@@ -1810,31 +1907,31 @@ if(clk("makebrush")){
                     switch(InternalBrushID){
                         case 1, #Ballast Center Triangles
                             if(SMDQC){
-                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                buildMesh("ballast_peaked_ref",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID = 5
                             }else{
-                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast)
+                                BrushStrings:buildBrush("ballast_peaked_triangles",NearPoints,FarPoints,Textures,RidiculousTies==0,RidiculousTies==1,MakeBallast,TexNear,TexFar)
                                 InternalBrushID++
                             }
-                            break
+                        break
                         case 2, #Ballast Edges 1
-                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 3, #Ballast Edges 2
-                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("ballast_edges_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 4, #Rail Tris 1
-                            BrushStrings:buildBrush("rail_triangles_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                            BrushStrings:buildBrush("rail_triangles_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             InternalBrushID++
-                            break
+                        break
                         case 5, #Rail Tris 2
                             if(SMDQC){
-                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_1_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_2_ref",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_triangles_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_triangles_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++ #Move on to next segment
@@ -1844,21 +1941,21 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                         case -1, #Rails Tri 2 PM
                             if(SMDQC){
-                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("ballast_block_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_triangles_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_triangles_1_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             InternalBrushID--
-                            break
+                        break
                         case -2, #Rails Tri 1 PM
                             if(SMDQC){
-                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast)
-                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                buildMesh("rail_convex_phys_1",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
+                                buildMesh("rail_convex_phys_2",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }else{
-                                BrushStrings:buildBrush("rail_triangles_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast)
+                                BrushStrings:buildBrush("rail_triangles_2_phys",NearPoints,FarPoints,Textures,0,0,MakeBallast,TexNear,TexFar)
                             }
                             
                             SegID++
@@ -1868,9 +1965,9 @@ if(clk("makebrush")){
                                 BrushWriteStep = 0 #Start over for next segment
                             }
                             hitSound()
-                            break
+                        break
                     }
-                    break
+                break
                 
             }
             if(!MadeLastBrush){
@@ -1946,7 +2043,7 @@ if(clk("makebrush")){
                     
                 }
             }
-            break
+        break
     }
     
     
@@ -2949,7 +3046,7 @@ if(clk("makebrush")){
     SegID = 1
     StartingBrushID = maxBrushID()
     if(StartingBrushID==0){StartingBrushID = 1}
-    jprint("Reference Drushes Done! Building Physics Brushes...")
+    jprint("Reference Brushes Done! Building Physics Brushes...")
     
     timer("makebrush",100)
 }elseif(clk("makemarkermeshes")){ #SMDQC is 1
@@ -7175,6 +7272,8 @@ if(clk("makebrush")){
             local TotalSegments = Points:count()
             local Type = TrackTypes[SelectedTrack,string]
             
+            local OnlyRails = (RidiculousTies==0) & (MakeBallast==0)
+            
             for(N=1,TotalSegments){
                 local SegType = 0
                 
@@ -7214,7 +7313,7 @@ if(clk("makebrush")){
                     }
                 }else{ #Trapezoidal/None Ballast Mode
                     if(IsTransitionSeg){
-                        SegType = 3 #Tri Ballast, Tri Rails
+                        SegType = OnlyRails ? 3.25 : 3 #Tri Ballast, Tri Rails
                     }else{
                         local D1 = Trace[N-1,vector]
                         local D2 = Trace[N,vector]
@@ -7223,11 +7322,11 @@ if(clk("makebrush")){
                         local Z2 = Points[N,vector]:z()
                         
                         if(D1==D2){ #Straight - Block Rails & Trapezoid Ballast
-                            SegType = 0
+                            SegType = OnlyRails ? 0.25 : 0
                         }elseif(Z1==Z2){ #Flat Curve - Block Rails & Block Ballast
-                            SegType = (Type=="banked_arc") ? 2 : 1
+                            SegType = OnlyRails ? 0.25 : (Type=="banked_arc") ? 2 : 1
                         }else{ #Curved Ramp - Tri Rails & Tri Ballast
-                            SegType = 3
+                            SegType = OnlyRails ? 3.25 : 3
                         }
                     }
                 }
@@ -7237,6 +7336,17 @@ if(clk("makebrush")){
             #print(TotalSegments)
             #printTable(Points)
             #printTable(SegAssignments)
+            
+            local TC = array()
+            if(TextureRailEnds){
+                if(TotalSegments==1){
+                    TC[1,number] = 3
+                }else{
+                    TC[1,number] = 1
+                    TC[TotalSegments,number] = 2
+                }
+            }
+            TexRailEnds[SelectedTrack,array] = TC
             
             SegTypeLists[SelectedTrack,array] = SegAssignments
             EntID = 1
@@ -7257,9 +7367,11 @@ if(clk("makebrush")){
             }
             #Assign Segment Codes:
             #3.5 for Tri Rail/Peaked Tri Ballast (Graded Curves)
+            #3.25 for Tri Rails with Physics
             #1.5 for Block Rail/Peaked Tri Ballast (Flat Curves)
             #1 for Block Rail/Block Ballast (diverging paths after sewed ballast)
             #0.5 for Block Rail/Peaked Ballast (Straights only)
+            #0.25 for Block Rails with physics
             #0 for Block Rail/Trapezoidal Ballast (diverging paths after sewed ballast)
             #-1 for Left Rail only (before initial divergence, and for the stock rails up to the frog segment if #4 or #5 does not apply)
             #-1.5 for Left Rail/Left PB Only
@@ -7378,6 +7490,30 @@ if(clk("makebrush")){
             #print("Stock Index MN: "+StockIndexMN)
             #print("Stock Index DV: "+StockIndexDV)
             
+            local TC = array()
+            if(TextureRailEnds){
+                if(NumSegsMN==1){
+                    TC[1,number] = 3
+                }else{
+                    TC[1,number] = 1
+                    local X = BezXovers[MN,number]
+                    TC[X ? NumSegsMN/2 : NumSegsMN,number] = 2
+                }
+            }
+            TexRailEnds[MN,array] = TC
+            
+            local TC = array()
+            if(TextureRailEnds){
+                if(NumSegsDV==1){
+                    TC[1,number] = 3
+                }else{
+                    TC[1,number] = 1
+                    local X = BezXovers[DV,number]
+                    TC[X ? NumSegsDV/2 : NumSegsDV,number] = 2
+                }
+            }
+            TexRailEnds[DV,array] = TC
+            
             SegTypeLists[MN,array] = SegAssignmentsMN
             SegTypeLists[DV,array] = SegAssignmentsDV
             EntID = 1
@@ -7416,7 +7552,8 @@ if(clk("makebrush")){
                 SwitchXover = 0
             }
             
-            
+            TexCodes = TexRailEnds[PieceID,array]
+            #printTable(TexCodes)
             SegmentTypes = SegTypeLists[PieceID,array]
             #printTable(SegmentTypes)
             local JList = JointsLists[PieceID,table]

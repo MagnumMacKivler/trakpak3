@@ -295,7 +295,7 @@ function array array:buildMarkerBrushes(Points:array, Textures:table){
     
     return This
 }
-function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, Textures:table, Ties, AddPlane, AddBallast){
+function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, Textures:table, Ties, AddPlane, AddBallast, TexNear, TexFar){
     #1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
     #P A B C D E F G H I  J  K  L  M  N
     validate()
@@ -1155,10 +1155,26 @@ function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, 
             SideID++
             Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
             SideID++
-            Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            
+            if(TexNear){
+                local Angle = -heading(vec(),ang(),MN-KN)
+                local Center = (KN/4 + MN/4 + GN/4 + IN/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,IN,MN,KN,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            }
             SideID++
-            Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            if(TexFar){
+                local Angle = -heading(vec(),ang(),MF-KF)
+                local Center = (KF/4 + MF/4 + GF/4 + IF/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,GF,KF,MF,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            }
             SideID++
+            
             Sides += side(SideID,IN,GN,GF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
             SideID++
             
@@ -1196,9 +1212,23 @@ function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, 
             SideID++
             Sides += side(SideID,HF,LF,LN,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outer
             SideID++
-            Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            if(TexNear){
+                local Angle = -heading(vec(),ang(),LN-NN)
+                local Center = (NN/4 + LN/4 + JN/4 + HN/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,HN,LN,NN,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            }
             SideID++
-            Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            if(TexFar){
+                local Angle = -heading(vec(),ang(),LF-NF)
+                local Center = (NF/4 + LF/4 + JF/4 + HF/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,JF,NF,LF,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            }
             SideID++
             Sides += side(SideID,HN,JN,JF,AddBallast ? Mat_Nodraw : Mat_RailTop_Rusty,TexTop["U_Axis",vector], TexTop["V_Axis",vector], TexTop["UTranslation",number], TexTop["VTranslation",number], RailTopScale,0) #Bottom
             SideID++
@@ -1237,7 +1267,14 @@ function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, 
             SideID++
             Sides += side(SideID,IF,MF,MN,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inside of rail
             SideID++
-            Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            if(TexFar){
+                local Angle = -heading(vec(),ang(),MF-KF)
+                local Center = (KF/4 + MF/4 + GF/4 + IF/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,GF,KF,MF,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,GF,KF,MF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            }
             SideID++
             Sides += side(SideID,IN,MN,KF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
             SideID++
@@ -1256,7 +1293,14 @@ function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, 
             SideID++
             Sides += side(SideID,GN,KN,KF,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outside of Rail
             SideID++
-            Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            if(TexNear){
+                local Angle = -heading(vec(),ang(),MN-KN)
+                local Center = (KN/4 + MN/4 + GN/4 + IN/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,IN,MN,KN,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,IN,MN,KN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            }
             SideID++
             Sides += side(SideID,GF,KF,MN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
             SideID++
@@ -1297,7 +1341,14 @@ function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, 
             SideID++
             Sides += side(SideID,HF,LF,LN,Mat_RailSide,TexOuter["U_Axis",vector], TexOuter["V_Axis",vector], TexOuter["UTranslation",number], TexOuter["VTranslation",number], RailSideScale, 0) #Outside of rail
             SideID++
-            Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            if(TexFar){
+                local Angle = -heading(vec(),ang(),LF-NF)
+                local Center = (NF/4 + LF/4 + JF/4 + HF/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,JF,NF,LF,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,JF,NF,LF,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Back
+            }
             SideID++
             Sides += side(SideID,HN,LN,NF,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
             SideID++
@@ -1322,7 +1373,14 @@ function array array:buildBrush(Type:string, NearPoints:array, FarPoints:array, 
             SideID++
             Sides += side(SideID,JN,NN,NF,Mat_RailSide,TexInner["U_Axis",vector], TexInner["V_Axis",vector], TexInner["UTranslation",number], TexInner["VTranslation",number], RailSideScale, 0) #Inside of Rail
             SideID++
-            Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            if(TexNear){
+                local Angle = -heading(vec(),ang(),LN-NN)
+                local Center = (NN/4 + LN/4 + JN/4 + HN/4)
+                local Tex = railUV(RailSideU, RailSideV, RailSideScale, Center, Angle)
+                Sides += side(SideID,HN,LN,NN,Mat_RailSide,Tex["U_Axis",vector],Tex["V_Axis",vector],Tex["UTranslation",number],Tex["VTranslation",number], RailSideScale, 0) #Front
+            }else{
+                Sides += side(SideID,HN,LN,NN,Mat_Nodraw,GY,GZ,0,0,0.25,0) #Front
+            }
             SideID++
             Sides += side(SideID,JF,NF,LN,Mat_Nodraw,GX,GZ,0,0,0.25,0) #Cut
             SideID++

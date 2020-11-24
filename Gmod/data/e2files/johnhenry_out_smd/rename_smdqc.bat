@@ -1,4 +1,4 @@
-REM --John Henry Automatic File Copier/Renamer V1.0 by Magnum, SMD/QC Edition--
+REM --John Henry Automatic File Copier/Renamer V1.1 by Magnum, SMD/QC Edition--
 REM Copy this Batch file into every folder you want to synchronize to propsource
 
 REM Set this to your johnhenry_out_smd folder (located in Garry's Mod\data\e2files)
@@ -20,11 +20,11 @@ MKDIR temp
 COPY "*.txt" "temp"
 
 REM Make destination folders...
-CD "%binfolder%"
+CD /D "%binfolder%"
 MKDIR "%foldertomake%"
 
 REM Rename TXTs to SMD and QC and Copy files over...
-CD "%originaldir%\temp"
+CD /D "%originaldir%\temp"
 REN "*_ref.txt" "*.smd"
 REN "*_throw.txt" "*.smd"
 REN "*_phys.txt" "*.smd"
@@ -33,7 +33,7 @@ COPY /Y "*.smd" "%binfolder%\%foldertomake%"
 COPY /Y "*.qc" "%binfolder%\%foldertomake%"
 
 REM Delete Temp Folder
-CD "%originaldir%"
+CD /D "%originaldir%"
 RD /S /Q temp
 
 pause

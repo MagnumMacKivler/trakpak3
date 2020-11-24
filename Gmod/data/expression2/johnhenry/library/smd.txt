@@ -358,7 +358,7 @@ function buildMarkerMeshes(Points:array,Textures:table){
     new_flatquad(Mat_Invis,Center2+vec(-8,8,0),Center2+vec(-8,-8,0),Center2+vec(8,-8,0),Center2+vec(8,8,0),array(64,64,0.25,vec(1,0,0),vec(0,-1,0),Center2),"markers")
 }
 
-function buildMesh(Type:string, NearPoints:array, FarPoints:array, Textures:table, Ties, AddPlane, AddBallast){
+function buildMesh(Type:string, NearPoints:array, FarPoints:array, Textures:table, Ties, AddPlane, AddBallast, TexNear, TexFar){
     
     #local Offset = Type:find("phys") ? vec(0,0,-128) : vec()
     
@@ -580,6 +580,20 @@ function buildMesh(Type:string, NearPoints:array, FarPoints:array, Textures:tabl
             new_flatquad(Mat_RailTop,KF,KN,MN,MF,TexTop,"rail_top_ref")
             new_flatquad(Mat_RailSide,GF,GN,KN,KF,TexInner,"rail_side_r_ref")
             new_flatquad(Mat_RailSide,MF,MN,IN,IF,TexOuter,"rail_side_l_ref")
+            
+            if(TexNear){
+                local Center = (KN/4 + MN/4 + GN/4 + IN/4)
+                local Angle = -heading(vec(),ang(),MN-KN)
+                local Tex = railUVa(RailSideU,RailSideV,RailSideScale,Center,Angle)
+                new_flatquad(Mat_RailSide,KN,GN,IN,MN,Tex,"rail_near_l_ref")
+            }
+            if(TexFar){
+                local Center = (KF/4 + MF/4 + GF/4 + IF/4)
+                local Angle = -heading(vec(),ang(),MF-KF)
+                local Tex = railUVa(RailSideU,RailSideV,RailSideScale,Center,Angle)
+                new_flatquad(Mat_RailSide,MF,IF,GF,KF,Tex,"rail_far_l_ref")
+            }
+            
             if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,IF,IN,GN,GF,TexTop,"rail_bottom_ref")}
         break
         case "rail_2_ref",
@@ -606,6 +620,20 @@ function buildMesh(Type:string, NearPoints:array, FarPoints:array, Textures:tabl
             new_flatquad(Mat_RailTop,NF,NN,LN,LF,TexTop,"rail_top_ref")
             new_flatquad(Mat_RailSide,JF,JN,NN,NF,TexInner,"rail_side_l_ref")
             new_flatquad(Mat_RailSide,LF,LN,HN,HF,TexOuter,"rail_side_r_ref")
+            
+            if(TexNear){
+                local Center = (NN/4 + LN/4 + JN/4 + HN/4)
+                local Angle = -heading(vec(),ang(),LN-NN)
+                local Tex = railUVa(RailSideU,RailSideV,RailSideScale,Center,Angle)
+                new_flatquad(Mat_RailSide,NN,JN,HN,LN,Tex,"rail_near_r_ref")
+            }
+            if(TexFar){
+                local Center = (NF/4 + LF/4 + JF/4 + HF/4)
+                local Angle = -heading(vec(),ang(),LF-NF)
+                local Tex = railUVa(RailSideU,RailSideV,RailSideScale,Center,Angle)
+                new_flatquad(Mat_RailSide,LF,HF,JF,NF,Tex,"rail_far_r_ref")
+            }
+            
             if(!AddBallast){new_flatquad(Mat_RailTop_Rusty,HF,HN,JN,JF,TexTop,"rail_bottom_ref")}
         break
         case "ballast_convex_phys", #May have some problems with physics bugs - trying ballast block instead

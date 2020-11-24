@@ -1,4 +1,4 @@
-REM --John Henry Automatic File Copier/Renamer V1.0 by Magnum--
+REM --John Henry Automatic File Copier/Renamer V1.1 by Magnum--
 REM Copy this Batch file into every folder you want to synchronize to Hammer
 
 REM Set this to your johnhenry_out folder (located in Garry's Mod\data\e2files)
@@ -20,16 +20,16 @@ MKDIR temp
 COPY "*.txt" "temp"
 
 REM Make destination folders...
-CD "%binfolder%"
+CD /D "%binfolder%"
 MKDIR "%foldertomake%"
 
 REM Rename TXTs to VMFs and Copy VMFs over...
-CD "%originaldir%\temp"
+CD /D "%originaldir%\temp"
 REN "*.txt" "*.vmf"
 COPY /Y "*.vmf" "%binfolder%\%foldertomake%"
 
 REM Delete Temp Folder
-CD "%originaldir%"
+CD /D "%originaldir%"
 RD /S /Q temp
 
 pause

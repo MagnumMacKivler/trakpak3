@@ -47,26 +47,29 @@ concommand.Add("tp3_signal_vision",function()
 end)
 
 --The Heavy Lifting
+
+--Draw a box around this signal and add text labels
+function SignalVision.drawSignalBox(ent, distance, color, addtext)
+	local data = ent:GetPos():ToScreen()
+	local centerx = data.x
+	local centery = data.y
+	
+	local size = math.Clamp(math.Remap(distance,256,4096,ScrW()/16,ScrW()/128), ScrW()/128, ScrW()/16)
+	
+	--Set Color
+	if addtext then
+		draw.SimpleTextOutlined(ent:GetNWString("Nickname","Signal"), "DermaDefault", centerx, centery - size/2 - 32, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, Color(0,0,0,color.a))
+		draw.SimpleTextOutlined("("..ent:GetNWString("Aspect","Error")..")", "DermaDefault", centerx, centery - size/2 - 16, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, Color(0,0,0,color.a))
+	end
+	surface.SetDrawColor(color)
+	
+	--Draw Rectangle
+	surface.DrawOutlinedRect(centerx - size/2, centery - size/2, size, size)
+end
+
 hook.Add("HUDPaint","Trakpak3_SignalVision",function()
 	
-	--Draw a box around this signal and add text labels
-	local function drawSignalBox(ent, distance, color, addtext)
-		local data = ent:GetPos():ToScreen()
-		local centerx = data.x
-		local centery = data.y
-		
-		local size = math.Clamp(math.Remap(distance,256,4096,ScrW()/16,ScrW()/128), ScrW()/128, ScrW()/16)
-		
-		--Set Color
-		if addtext then
-			draw.SimpleTextOutlined(ent:GetNWString("Nickname","Signal"), "DermaDefault", centerx, centery - size/2 - 32, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, Color(0,0,0,color.a))
-			draw.SimpleTextOutlined("("..ent:GetNWString("Aspect","Error")..")", "DermaDefault", centerx, centery - size/2 - 16, color, TEXT_ALIGN_CENTER, TEXT_ALIGN_TOP, 1, Color(0,0,0,color.a))
-		end
-		surface.SetDrawColor(color)
-		
-		--Draw Rectangle
-		surface.DrawOutlinedRect(centerx - size/2, centery - size/2, size, size)
-	end
+	
 	
 	if SignalVision.active and SignalVision.signals and not table.IsEmpty(SignalVision.signals) then --show all signals you're looking at
 		SignalVision.selected = nil
@@ -104,7 +107,7 @@ hook.Add("HUDPaint","Trakpak3_SignalVision",function()
 					color = table.Copy(SignalVision.colortable[cname])
 					examine = true
 				end
-				drawSignalBox(v, distances[k],color,examine)
+				SignalVision.drawSignalBox(v, distances[k],color,examine)
 			end
 		end
 		
@@ -120,7 +123,7 @@ hook.Add("HUDPaint","Trakpak3_SignalVision",function()
 			color.a = alpha
 			
 		end
-		drawSignalBox(SignalVision.selected, SignalVision.selected:GetPos():Distance(EyePos()), color, true)
+		SignalVision.drawSignalBox(SignalVision.selected, SignalVision.selected:GetPos():Distance(EyePos()), color, true)
 		
 		if CurTime() > SignalVision.flashtime then SignalVision.flashtime = nil end
 	end

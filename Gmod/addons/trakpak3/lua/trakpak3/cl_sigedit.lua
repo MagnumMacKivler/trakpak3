@@ -1992,7 +1992,7 @@ function Trakpak3.SigEdit.IntAssignData()
 	data.bg3 = Trakpak3.SigEdit.panels.cfg.bgbox3:GetValue()
 	data.cycle3 = Trakpak3.SigEdit.panels.cfg.cyclebox3:GetValue()
 	
-	print(data.cycle1, data.cycle2, data.cycle3)
+	--print(data.cycle1, data.cycle2, data.cycle3)
 	
 	if aspect and sigtypes and data then
 		

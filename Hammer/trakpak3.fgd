@@ -38,6 +38,12 @@
 	seq_idle_open(string) : "Idle Open Seq" : "idle_open" : "The sequence to use when the switch is locked in its diverging (open) position."
 	seq_throw_close(string) : "Throw Closed Seq" : "throw_close" : "The sequence to use when the switch is being thrown main (closed)."
 	
+	targetstate(choices) : "Initial Position" : 0 : "The lever will throw itself to this position immediately when the map starts." =
+	[
+		0 : "Main/Closed"
+		1 : "Diverging/Open"
+	]
+	
 	behavior(choices) : "Trailing Switch Behavior" : 1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
 	[
 		0 : "Manual, Derail"
@@ -90,6 +96,7 @@
 [
 	model(studio) : "Model" : "" : "The model path for the turntable."
 	skin(integer) : "Skin" : 0 : "The skin for the turntable model."
+	bodygroups(string) : "Bodygroups" : "" : "The model's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	
 	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the turntable."
 	exitpoint(origin) : "Seat Exit Point" : : "Teleport the player here when they get out of the seat."
@@ -98,20 +105,24 @@
 	maxspeed(float) : "Max Speed" : "7.5" : "Max rotational speed, in degrees per second."
 	//creepspeed(float) : "Creep Speed" : "2.5" : "Minimum speed turntable will assume when approaching a stop. You probably don't need to change this."
 	acceleration(float) : "Acceleration Factor" : "2.5" : "Acceleration/Deceleration rate in degrees per second per second. You probably don't need to change this."
+	
+	key_ccw(choices) : "Move Counter-Clockwise Key" : "+forward" : "Key that the operator should press to move the table counterlockwise. Respects local keybinds - WASD given for refence only." =
+	[
+		"+forward" : "Forward (W)"
+		"+back" : "Back (S)"
+		"+moveleft" : "Left (A)"
+		"+moveright" : "Right (D)"
+	]
+	key_cw(choices) : "Move Clockwise Key" : "+back" : "Key that the operator should press to move the table clockwise. Respects local keybinds - WASD given for refence only." =
+	[
+		"+forward" : "Forward (W)"
+		"+back" : "Back (S)"
+		"+moveleft" : "Left (A)"
+		"+moveright" : "Right (D)"
+	]
+	
 	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the turntable makes when it starts to move."
-	sound_stop(sound) : "Start Move Sound" : "doors/garage_stop1.wav" : "The sound the turntable makes when it comes to a complete stop."
-	
-	powered(choices) : "Mode of Operation" : 1 : "How should this turntable be operated? Powered turntables require a seat (prop_vehicle_prisoner_pod) for the operator to sit in. Armstrong (Manual) turntables require one or more trigger_multiples around a solid part of the turntable (a pushbar) that players are supposed to walk into." =
-	[
-		0 : "Armstrong (Manual)"
-		1 : "Powered (Seat)"
-	]
-	
-	locked(choices) : "Start Locked" : 1 : "Should the turntable start locked?" =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
+	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the turntable makes when it comes to a complete stop."
 	
 	input Lock(void) : "Lock the turntable, preventing it from moving this should be required before moving a train on or off!"
 	input Unlock(void) : "Unlock the turntable, allowing it to move again."
@@ -124,10 +135,11 @@
 //Transfer Table
 @PointClass base(Targetname, Angles) studioprop() = tp3_transfertable : "A table that slides back and forth to move rolling stock from one track onto another."
 [
-	model(studio) : "Model" : "" : "The model path for the turntable."
-	skin(integer) : "Skin" : 0 : "The skin for the turntable model."
+	model(studio) : "Model" : "" : "The model path for the transfer table."
+	skin(integer) : "Skin" : 0 : "The skin for the transfer table model."
+	bodygroups(string) : "Bodygroups" : "" : "The model's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	
-	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the turntable."
+	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the transfer table."
 	exitpoint(origin) : "Seat Exit Point" : : "Teleport the player here when they get out of the seat."
 	
 	table_axis(vector) : "Table Axis (X Y Z)" : "1 0 0" : "Axis of table movement. '1 0 0' is East, '0 -1 0' is South, etc. The move distances scale to the magnitude of the vector (Magnitude =  sqrt(X^2 + Y^2 + Z^2). For transfer tables that move pure North, South, East, or West that should be 1. For transfer tables that move diagonally, it's okay to use a vector like '1 0.5 0', which makes it easier to snap to grid on diagonals."
@@ -136,10 +148,98 @@
 	maxspeed(float) : "Max Speed" : "30" : "Max linear speed, in inches per second."
 	//creepspeed(float) : "Creep Speed" : "2.5" : "Minimum speed table will assume when approaching a stop. You probably don't need to change this."
 	acceleration(float) : "Acceleration Factor" : "10" : "Acceleration/Deceleration rate in inches per second per second. You probably don't need to change this."
-	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the table makes when it starts to move."
-	sound_stop(sound) : "Start Move Sound" : "doors/garage_stop1.wav" : "The sound the table makes when it comes to a complete stop."
+	
+	key_fwd(choices) : "Move Forward Key" : "+forward" : "Key that the operator should press to move the table forward, (positive along Table Axis). Respects local keybinds - WASD given for refence only." =
+	[
+		"+forward" : "Forward (W)"
+		"+back" : "Back (S)"
+		"+moveleft" : "Left (A)"
+		"+moveright" : "Right (D)"
+	]
+	key_rev(choices) : "Move Backward Key" : "+back" : "Key that the operator should press to move the table backward, (negative along Table Axis). Respects local keybinds - WASD given for refence only." =
+	[
+		"+forward" : "Forward (W)"
+		"+back" : "Back (S)"
+		"+moveleft" : "Left (A)"
+		"+moveright" : "Right (D)"
+	]
+	
+	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the table makes when it starts to move under power."
+	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the table makes when it comes to a complete stop under power."
 	sound_crash(sound) : "Crash Sound" : "plats/tram_hit4.wav" : "The sound the table makes when it comes to a complete stop due to being slammed into the track ends."
 	
+	input Lock(void) : "Lock the turntable, preventing it from moving this should be required before moving a train on or off!"
+	input Unlock(void) : "Unlock the turntable, allowing it to move again."
+]
+
+//Movable Bridge
+@PointClass base(Targetname, Angles) studioprop() = tp3_movable_bridge : "A movable bridge (bascule, swing, lift, etc.) that uses a model's animations, rather than a func_door_rotating or something to that effect."
+[
+	model(studio) : "Model" : "" : "The model path for the animated part of the bridge."
+	skin(integer) : "Skin" : 0 : "The skin for the bridge model."
+	bodygroups(string) : "Bodygroups" : "" : "The bridge's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	
+	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the bridge."
+	exitpoint(origin) : "Seat Exit Point" : : "Teleport the player here when they get out of the seat."
+	
+	deck1(target_destination) : "Deck Rails (1/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
+	deck2(target_destination) : "Deck Rails (2/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
+	deck3(target_destination) : "Deck Rails (3/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
+	deck4(target_destination) : "Deck Rails (4/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
+	
+	maxcycle(float) : "Max Animation Cycle" : "1.0" : "The highest point in the model's animation cycle (for the sequence named 'range'). This is a decimal between 0 and 1 that represents the progress along the animation path; '0' means the start, '1' means the end, '0.5' is halfway through, etc. The minimum cycle is always 0."
+	maxspeed(float) : "Max Speed" : "0.1" : "Max animation speed, in animation cycle per second."
+	acceleration(float) : "Acceleration Factor" : "0.25" : "Acceleration/Deceleration rate in cycle per second per second. You probably don't need to change this."
+	
+	key_open(choices) : "Open Bridge Key" : "+forward" : "Key that the operator should press to move the bridge open. Respects local keybinds - WASD given for refence only." =
+	[
+		"+forward" : "Forward (W)"
+		"+back" : "Back (S)"
+		"+moveleft" : "Left (A)"
+		"+moveright" : "Right (D)"
+	]
+	key_close(choices) : "Close Bridge Key" : "+back" : "Key that the operator should press to move the bridge closed. Respects local keybinds - WASD given for refence only." =
+	[
+		"+forward" : "Forward (W)"
+		"+back" : "Back (S)"
+		"+moveleft" : "Left (A)"
+		"+moveright" : "Right (D)"
+	]
+	
+	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the bridge makes when it starts to move under power."
+	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the bridge makes when it comes to a complete stop under power."
+	sound_crank_start(sound) : "Start Crank Sound" : : "The sound the bridge makes when it starts to move from cranking."
+	sound_crank_stop(sound) : "Stop Crank Sound" : : "The sound the bridge makes when it comes to a complete stop from cranking."
+	
+	phystoggle(choices) : "Disable Physics when Unlocked/Open" : 1 : "Make this bridge non-solid when the bridge is open or unlocked, allowing trains to fall through if the proper precautions are not taken." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	
+	nowire(choices) : "Disable Wiremod Input" : 0 : "If set, the bridge will ignore wiremod inputs." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	
+	input Lock(void) : "Lock the bridge, preventing it from moving. This should be required before moving a train on or off!"
+	input Unlock(void) : "Unlock the bridge, allowing it to move again."
+	
+	input GoToCycle(float) : "Make the bridge move automatically to this animation cycle."
+	input Stop(void) : "Stop the bridge's movement."
+	input Open(float) : "Make the bridge move automatically to the fully open position (max animation cycle)."
+	input Close(float) : "Make the bridge move automatically to the fully closed position (min animation cycle)."
+	
+	input AddPusher(void) : "Add the !activator to the bridge's pusher list."
+	input RemovePusher(void) : "Remove the !activator from the bridge's pusher list."
+	
+	output OnFullyClosed(void) : "Fired when the bridge reaches minimum animation cycle (fully closed)."
+	output OnFullyOpen(void) : "Fired when the bridge reaches maximum animation cycle (fully open)."
+	output OnBridgeStarted(void) : "Fired when the bridge starts moving for any reason."
+	output OnBridgeStopped(float) : "Fired when the bridge stops for any reason, and supplies the animation cycle as a parameter."
+	
+	output OnInitialize(void) : "Fired when the map finishes loading. Useful for parenting things to the bascule bridge leaf via SetParentAttachmentMaintainOffset."
 ]
 
 //Signal Block
@@ -528,6 +628,47 @@
 [
 	board(string) : "Dispatch Board Name" : "" : "The name of the dispatch board page to use."
 	endpos(vector) : "Bottom Corner" : : "The bottom right corner of the dispatch board. This entity's position is the top left corner."
+]
+
+//Dispatch-Hammer Interface
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_dispatch_proxy.vmt") = tp3_dispatch_proxy : 
+"An entity that allows users to control map entities from a dispatch board using the general I/O system. Each generic button on a dispatch board is linked to one of these and will fire one of eight different outputs based on its current state (0 to 7)."
+[
+	state(choices) : "Initial State" : 0 : "Starting state for this dispatch proxy." =
+	[
+		0 : "0"
+		1 : "1"
+		2 : "2"
+		3 : "3"
+		4 : "4"
+		5 : "5"
+		6 : "6"
+		7 : "7"
+	]
+	maxstate(choices) : "Maximum State" : 7 : "Maximum state for this dispatch proxy (for use with the AddState and SubtractState inputs)." =
+	[
+		0 : "0"
+		1 : "1"
+		2 : "2"
+		3 : "3"
+		4 : "4"
+		5 : "5"
+		6 : "6"
+		7 : "7"
+	]
+	
+	input SetState(integer) : "Set this dispatch proxy's state and update the buttons on dispatch boards accordingly."
+	input AddState(integer) : "Increase this dispatch proxy's state value by the supplied parameter (default: 1). If the resulting state value exceeds the maximum, it will wrap around."
+	input SubtractState(integer) : "Decrease this dispatch proxy's state value by the supplied parameter (default: 1)."
+	output OnFireAny(integer) : "Fired when the player presses the linked button on a dispatch board. Supplies the current state number as a parameter. If the resulting state value exceeds the minimum (0), it will wrap around."
+	output OnFire0(void) : "Fired when the current state is 0 and the player presses the linked button on a dispatch board."
+	output OnFire1(void) : "Fired when the current state is 1 and the player presses the linked button on a dispatch board."
+	output OnFire2(void) : "Fired when the current state is 2 and the player presses the linked button on a dispatch board."
+	output OnFire3(void) : "Fired when the current state is 3 and the player presses the linked button on a dispatch board."
+	output OnFire4(void) : "Fired when the current state is 4 and the player presses the linked button on a dispatch board."
+	output OnFire5(void) : "Fired when the current state is 5 and the player presses the linked button on a dispatch board."
+	output OnFire6(void) : "Fired when the current state is 6 and the player presses the linked button on a dispatch board."
+	output OnFire7(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
 ]
 
 // Track Node - Deprecated

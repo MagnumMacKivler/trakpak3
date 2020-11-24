@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_us/signage/speedsigns_white"
+	"$surfaceprop" "MetalVent"
+	
+	"$detail" "detail\metal_detail_01"
+	"$detailscale" "0.25"
+	"$detailblendfactor" ".25"
+	"$detailblendmode" "0"
+	
+	"$halflambert" "1"
+}

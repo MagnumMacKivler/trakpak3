@@ -3,7 +3,7 @@
 
 hook.Add("InitPostEntity","TP3_NodeLoad",function()
 	
-	print("\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA")
+	--print("\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA")
 
 	local json = file.Read("trakpak3/nodes/"..game.GetMap()..".lua","LUA")
 

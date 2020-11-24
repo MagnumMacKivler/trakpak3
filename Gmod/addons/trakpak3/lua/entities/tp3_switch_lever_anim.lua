@@ -17,6 +17,7 @@ if SERVER then
 		seq_throw_open = "string",
 		behavior = "number",
 		autoreset = "boolean",
+		targetstate = "boolean",
 		
 		bodygroups_closed = "string",
 		bodygroups_motion = "string",
@@ -50,7 +51,7 @@ if SERVER then
 		
 		self.animate = self.seq_idle_close and self.seq_idle_open and self.seq_throw_close and self.seq_throw_open
 		self.state = false
-		self.targetstate = false
+		self.targetstate = self.targetstate or false
 		self.animating = false
 		
 		self:SetUseType(SIMPLE_USE)
@@ -90,6 +91,11 @@ if SERVER then
 		
 		--Initial Broadcast
 		hook.Run("TP3_SwitchUpdate",self:GetName(),0)
+		
+		self:SetNWInt("state",0)
+		self:SetNWBool("locked",self.locked)
+		self:SetNWBool("blocked",false)
+		self:SetNWBool("broken",false)
 	end
 	
 	--Functions called by the switch
@@ -137,6 +143,7 @@ if SERVER then
 		timer.Simple(60,function()
 			if self.broken then self:StandFix() end
 		end)
+		self:SetNWBool("broken",true)
 	end
 	
 	function ENT:StandFix()
@@ -154,6 +161,7 @@ if SERVER then
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"broken",0)
 		
 		if self.state then self:CompleteThrowDV() else self:CompleteThrowMN() end
+		self:SetNWBool("broken",false)
 	end
 	
 	--Receive occupancy status
@@ -170,6 +178,7 @@ if SERVER then
 		if self.autoreset and self.targetstate then
 			self:SetTargetState(false)
 		end
+		self:SetNWBool("blocked",occ)
 	end
 	
 	
@@ -193,6 +202,8 @@ if SERVER then
 		--Broadcast
 		hook.Run("TP3_SwitchUpdate",self:GetName(),0)
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"state",0)
+		
+		self:SetNWInt("state",0)
 	end
 	
 	function ENT:CompleteThrowDV()
@@ -211,6 +222,8 @@ if SERVER then
 		--Broadcast
 		hook.Run("TP3_SwitchUpdate",self:GetName(),1)
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"state",1)
+		
+		self:SetNWInt("state",1)
 	end
 	
 	--Animate Yourself - should be called after all other state-dependent logic is done!
@@ -229,6 +242,8 @@ if SERVER then
 				--Broadcast
 				hook.Run("TP3_SwitchUpdate",self:GetName(),2)
 				Trakpak3.Dispatch.SendInfo(self:GetName(),"state",2)
+				
+				self:SetNWInt("state",2)
 				
 				if self.bodygroups_motion then self:SetBodygroups(self.bodygroups_motion) end
 				--When throw animation is done:
@@ -251,6 +266,8 @@ if SERVER then
 				--Broadcast
 				hook.Run("TP3_SwitchUpdate",self:GetName(),2)
 				Trakpak3.Dispatch.SendInfo(self:GetName(),"state",2)
+				
+				self:SetNWInt("state",2)
 				
 				if self.bodygroups_motion then self:SetBodygroups(self.bodygroups_motion) end
 				--when throw animation is done:
@@ -306,9 +323,11 @@ if SERVER then
 			self:SetTargetState(true)
 		elseif inputname=="SetAutoOnly" then
 			self.locked = true
+			self:SetNWBool("locked",true)
 			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",1) end
 		elseif inputname=="SetAllowManual" then
 			self.locked = false
+			self:SetNWBool("locked",false)
 			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",0) end
 		end
 	end

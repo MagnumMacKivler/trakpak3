@@ -1,0 +1,6 @@
+"UnlitGeneric"
+{
+	"$basetexture" "trakpak3_common/misc/footprints_white"
+	"$alphatest" 1
+	"$nodecal" 1
+}

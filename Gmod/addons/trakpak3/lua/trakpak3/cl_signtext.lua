@@ -6,7 +6,7 @@ local SignText = Trakpak3.SignText
 SignText.Signs = {}
 SignText.Fonts = {}
 
-CreateClientConVar("tp3_sign_rdist","4096",true,false,"Draw Distance for Trakpak3 sign text",0,16384)
+--CreateClientConVar("tp3_sign_rdist","4096",true,false,"Draw Distance for Trakpak3 sign text",0,16384)
 
 --Checks to see if a given font already exists (each parameter combo has exactly one font) and if not, creates it.
 function SignText.GetFont(fontname, size, weight, italic, underline, strike, shadow)
@@ -49,14 +49,16 @@ end
 hook.Add("InitPostEntity","Trakpak3_RequestSignData",function()
 	net.Start("tp3_register_sign")
 	net.SendToServer()
-	--print("[Trakpak3] Requesting Sign Data...")
+	print("[Trakpak3] Requesting Sign Data...")
 end)
 
 --Net message triggered by each sign entity to register their info on client.
 net.Receive("tp3_register_sign",function(mlen, ply)
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
+	
+	local ent = net.ReadEntity()
+	local JSON = net.ReadString()
 	local data = util.JSONToTable(JSON)
+	local index = net.ReadUInt(8)
 	
 	--On-Delivery Processing
 	
@@ -107,7 +109,8 @@ net.Receive("tp3_register_sign",function(mlen, ply)
 		end
 	end
 	
-	SignText.Signs[data.id] = {
+	if not SignText.Signs[data.id] then SignText.Signs[data.id] = {} end
+	SignText.Signs[data.id][index] = {
 		pos = data.pos,
 		angle = data.angle, --angle should be pre-rotated
 		scale = data.scale,
@@ -121,7 +124,7 @@ net.Receive("tp3_register_sign",function(mlen, ply)
 		color2 = data.color2,
 		outw = data.outw,
 		--glow = data.glow,
-		nocull = data.nocull
+		--nocull = data.nocull
 	}
 	
 	--print("[Trakpak3] Received Sign:")
@@ -129,7 +132,35 @@ net.Receive("tp3_register_sign",function(mlen, ply)
 	
 end)
 
+function SignText.DrawSign(ent,index)
+	local signtable = SignText.Signs[ent:EntIndex()]
+	
+	if not signtable then return end
+	--print("AAA")
+	local data = signtable[index]
+	
+	--if index>1 then print(index) end
+	
+	if not data then return end
+	--print("BBB")
+	cam.Start3D2D(data.pos, data.angle, data.scale)
+		for n = 1, #data.textlines do
+			
+			local text = data.textlines[n]
+			local height = data.textpositions[n]
+			if data.outline then --text should have an outline
+				draw.SimpleTextOutlined(text, data.font, 0, height, data.color, data.h_align, data.v_align, data.outw, data.color2)
+			else --text does not have an outline
+				draw.SimpleText(text, data.font, 0, height, data.color, data.h_align, data.v_align)
+			end
+		end
+	cam.End3D2D()
+
+	
+end
+
 --Draw the Sign Text
+--[[
 hook.Add("PostDrawTranslucentRenderables","Trakpak3_RenderSigns",function()
 	
 	if true then
@@ -163,3 +194,4 @@ hook.Add("PostDrawTranslucentRenderables","Trakpak3_RenderSigns",function()
 		end
 	end
 end)
+]]--

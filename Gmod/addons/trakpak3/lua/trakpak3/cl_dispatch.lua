@@ -480,6 +480,10 @@ function Dispatch.OpenEditor()
 				local x, y = self:GetGridCoords(self:LocalCursorPos())
 				Dispatch.AddBlock(nil, x, y)
 				self:DoRightClick()
+			elseif Dispatch.placetype=="proxy" then
+				local x, y = self:GetGridCoords(self:LocalCursorPos())
+				Dispatch.AddProxy(nil, x, y)
+				self:DoRightClick()
 			end
 		elseif Dispatch.placing==2 then --Second click when placing
 			if Dispatch.placetype=="line" then
@@ -506,7 +510,7 @@ function Dispatch.OpenEditor()
 				local x2, y2 = self:GetGridCoords(self:LocalCursorPos())
 				Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:Update(true, Dispatch.placex, Dispatch.placey, x2, y2)
 				self:DoRightClick()
-			elseif (Dispatch.placetype=="signal") or (Dispatch.placetype=="switch") or (Dispatch.placetype=="block") then
+			elseif (Dispatch.placetype=="signal") or (Dispatch.placetype=="switch") or (Dispatch.placetype=="block") or (Dispatch.placetype=="proxy") then
 				local x, y = self:GetGridCoords(self:LocalCursorPos())
 				--print(Dispatch.page, Dispatch.selected)
 				Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:Update(true, x, y)
@@ -578,7 +582,7 @@ function Dispatch.OpenEditor()
 	
 	--Add Elements Frame
 	local epanel = vgui.Create("DPanel",rpanel)
-	epanel:SetSize(1,288)
+	epanel:SetSize(1,320)
 	epanel:Dock(TOP)
 	local label = vgui.Create("DLabel",epanel)
 	label:SetSize(1,24)
@@ -627,6 +631,19 @@ function Dispatch.OpenEditor()
 		Dispatch.Deselect()
 		Dispatch.placing = 1
 		Dispatch.placetype = "block"
+		Dispatch.PopulatePage(canvas, Dispatch.page, true)
+	end
+	
+	--Proxy
+	local button = vgui.Create("DButton",scroll)
+	button:SetSize(1,36)
+	button:Dock(TOP)
+	button:SetText("Dispatch Proxy")
+	button:SetIcon("trakpak3_common/icons/generic_star.png")
+	function button:DoClick()
+		Dispatch.Deselect()
+		Dispatch.placing = 1
+		Dispatch.placetype = "proxy"
 		Dispatch.PopulatePage(canvas, Dispatch.page, true)
 	end
 	
@@ -1462,6 +1479,192 @@ function Dispatch.AddBlock(ent, x, y, block)
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
 
+function Dispatch.StringToColor(cstring)
+	local carray = string.Explode(" ",cstring)
+	for n = 1,3 do
+		carray[n] = tonumber(carray[n])
+	end
+	
+	if carray[1] and carray[2] and carray[3] then
+		return Color(carray[1], carray[2], carray[3])
+	else
+		return Color(255,255,255)
+	end
+end
+
+--Dispatch Proxy
+function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, color0, color1, color2, color3, color4, color5, color6, color7)
+	local element = Dispatch.AddElement(ent)
+	element.type = "proxy"
+	element.proporder = { "x", "y", "proxy", "icon0", "color0", "icon1", "color1", "icon2", "color2", "icon3", "color3", "icon4", "color4", "icon5", "color5", "icon6", "color6", "icon7", "color7"}
+	element.properties = {
+		x = "integer",
+		y = "integer",
+		proxy = "string",
+		icon0 = "string",
+		icon1 = "string",
+		icon2 = "string",
+		icon3 = "string",
+		icon4 = "string",
+		icon5 = "string",
+		icon6 = "string",
+		icon7 = "string",
+		color0 = "string",
+		color1 = "string",
+		color2 = "string",
+		color3 = "string",
+		color4 = "string",
+		color5 = "string",
+		color6 = "string",
+		color7 = "string",
+	}
+	element.mins = {
+		x = 0,
+		y = 0
+	}
+	element.maxs = {
+		x = Dispatch.Boards[Dispatch.page].x_res,
+		y = Dispatch.Boards[Dispatch.page].y_res
+	}
+	element.header = "trakpak3_common/icons/"
+	
+	function element:OnSelect(editor)
+		local button = self.button
+		local canvas = button:GetParent()
+		
+		--Update Image
+		button:SetImage(self.header..self.icon1)
+		button:SetColor(Dispatch.StringToColor(self.color1))
+		
+		--Set function to set up movement
+		local e = self
+		function button:DoClick()
+			Dispatch.editing = 2
+			Dispatch.placex = e.x
+			Dispatch.placey = e.y
+			Dispatch.placetype = "proxy"
+			Dispatch.PopulatePage(canvas, Dispatch.page, true)
+		end
+	end
+	function element:OnDeselect()
+		local button = self.button
+		--Update Image
+		button:SetImage(self.header..self.icon0)
+		button:SetColor(Dispatch.StringToColor(self.color0))
+		
+		--Setup function to select again
+		local e = self
+		function button:DoClick()
+			if e.entity then e.entity:Select(e:GetIndex()) else Dispatch.Select(e:GetIndex(),true) end
+		end
+	end
+	
+	function element:Update(newprop, x, y, proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, color0, color1, color2, color3, color4, color5, color6, color7) 
+		self.x = x or self.x
+		self.y = y or self.y
+		
+		self.proxy = proxy or self.proxy or ""
+		
+		self.icon0 = icon0 or self.icon0 or "generic_0.png"
+		self.icon1 = icon1 or self.icon1 or "generic_1.png"
+		self.icon2 = icon2 or self.icon2 or "generic_2.png"
+		self.icon3 = icon3 or self.icon3 or "generic_3.png"
+		self.icon4 = icon4 or self.icon4 or "generic_4.png"
+		self.icon5 = icon5 or self.icon5 or "generic_5.png"
+		self.icon6 = icon6 or self.icon6 or "generic_6.png"
+		self.icon7 = icon7 or self.icon7 or "generic_7.png"
+		
+		self.color0 = color0 or self.color0 or "255 255 255"
+		self.color1 = color1 or self.color1 or "255 255 255"
+		self.color2 = color2 or self.color2 or "255 255 255"
+		self.color3 = color3 or self.color3 or "255 255 255"
+		self.color4 = color4 or self.color4 or "255 255 255"
+		self.color5 = color5 or self.color5 or "255 255 255"
+		self.color6 = color6 or self.color6 or "255 255 255"
+		self.color7 = color7 or self.color7 or "255 255 255"
+		
+		if Dispatch.selectnew then timer.Simple(0.1,function() Dispatch.Select(self:GetIndex(),newprop) end) end
+	end
+	
+	function element:Generate(pnl,nohelpers,selected,editor)
+		local button = vgui.Create("DImageButton",pnl)
+		self.button = button
+		button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
+		local px, py = pnl:GetPanelCoords(self.x, self.y)
+		button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+		if editor then
+			if selected then 
+				button:SetImage(self.header..self.icon0)
+				button:SetColor(Dispatch.StringToColor(self.color0))
+			else
+				button:SetImage(self.header..self.icon1)
+				button:SetColor(Dispatch.StringToColor(self.color1))
+			end
+		else
+			if self.proxy and (self.proxy!="") then
+				local proxy = Dispatch.RealData[self.proxy]
+				if proxy then
+					local state = proxy.setstate
+					self.state = state
+					button:SetImage(self.header..self["icon"..state])
+					button:SetColor(Dispatch.StringToColor(self["color"..state]))
+					
+					local e = self
+					function button:DoClick()
+						Dispatch.SendCommand(e.proxy, "fire", e.state)
+					end
+					
+				else
+					ErrorNoHalt("[Trakpak3] Dispatch Board Proxy name '"..self.proxy.."' does not match an existing entity.")
+				end
+			else
+				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Proxy with no proxy name.")
+			end
+			
+		end
+	end
+	
+	function element:GenerateEditor(pnl,nohelpers,selected)
+		local button = self.button
+		if button and button:IsValid() then
+			if nohelpers then
+				function button.DoClick() pnl:DoClick() end
+			else
+				local e = self
+				function button:DoClick() 
+					Dispatch.Select(e:GetIndex(),true)
+				end
+			end
+		end
+		element.maxs = {
+			x = Dispatch.Boards[Dispatch.page].x_res,
+			y = Dispatch.Boards[Dispatch.page].y_res
+		}
+	end
+	
+	function element:Render(pnl)
+		--Update Pos
+		local px, py = pnl:GetPanelCoords(self.x, self.y)
+		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+	end
+	
+	--Receive Info from World (Occupancy)
+	function element:UpdateValue(name, parm, value)
+		--print(e.proxy, name, parm, value)
+		if (name==self.proxy) and (parm=="setstate") then
+			local button = self.button
+			if button and button:IsValid() then
+				button:SetImage(self.header..self["icon"..value])
+				button:SetColor(Dispatch.StringToColor(self["color"..value]))
+				self.state = value
+			end
+		end
+	end
+	
+	element:Update(true,x,y,proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, color0, color1, color2, color3, color4, color5, color6, color7)
+	
+end
+
 --Create Line
 function Dispatch.AddLine(ent, x1, y1, x2, y2)
 	local element = Dispatch.AddElement(ent)
@@ -2186,6 +2389,14 @@ function Dispatch.SaveBoards()
 				new.y1 = element.y1
 				new.x2 = element.x2
 				new.y2 = element.y2
+			elseif new.type=="proxy" then
+				new.x = element.x
+				new.y = element.y
+				new.proxy = element.proxy
+				for n = 0,7 do
+					new["icon"..n] = element["icon"..n]
+					new["color"..n] = element["color"..n]
+				end
 			else --text
 				new.x1 = element.x1
 				new.y1 = element.y1
@@ -2258,6 +2469,11 @@ function Dispatch.LoadBoards(fromdata, ent)
 						Dispatch.AddBox(ent, element.x1, element.y1, element.x2, element.y2)
 					elseif element.type=="text" then
 						Dispatch.AddText(ent, element.x1, element.y1, element.x2, element.y2, element.text)
+					elseif element.type=="proxy" then
+						Dispatch.AddProxy(ent, element.x, element.y, element.proxy,
+							element.icon0, element.icon1, element.icon2, element.icon3, element.icon4, element.icon5, element.icon6, element.icon7,
+							element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7
+						)
 					end
 				end
 				
@@ -2293,6 +2509,11 @@ function Dispatch.LoadBoards(fromdata, ent)
 						Dispatch.AddBox(nil, element.x1, element.y1, element.x2, element.y2)
 					elseif element.type=="text" then
 						Dispatch.AddText(nil, element.x1, element.y1, element.x2, element.y2, element.text)
+					elseif element.type=="proxy" then
+						Dispatch.AddProxy(nil, element.x, element.y, element.proxy,
+							element.icon0, element.icon1, element.icon2, element.icon3, element.icon4, element.icon5, element.icon6, element.icon7,
+							element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7
+						)
 					end
 				end
 				
@@ -2335,7 +2556,7 @@ function Dispatch.SendCommand(target, cmd, arg)
 	net.Start("tp3_dispatch_comm")
 		net.WriteString(target)
 		net.WriteString(cmd)
-		net.WriteUInt(arg,2)
+		net.WriteUInt(arg,3)
 	net.SendToServer()
 	LocalPlayer():EmitSound("buttons/lightswitch2.wav")
 end
@@ -2344,8 +2565,8 @@ end
 net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	local entname = net.ReadString()
 	local parm = net.ReadString()
-	local value = net.ReadUInt(2)
-	--print("Dispatch Command: ", entname, parm, value)
+	local value = net.ReadUInt(3)
+	--print("Dispatch Update: ", entname, parm, value)
 	if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
 	Dispatch.RealData[entname][parm] = value
 	for page, board in pairs(Dispatch.Boards) do

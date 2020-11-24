@@ -1,0 +1,12 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_us/roads/road_decals_2"
+	"$alphatest" 1
+	//"$bumpmap" "trakpak3_us/roads/road_asphalt_nrm"
+	"$surfaceprop" "Concrete"
+	
+	"$detail" "detail\noise_detail_01"
+	"$detailscale" "7.74"
+	"$detailblendfactor" "0.8"
+	"$detailblendmode" "0"
+}

@@ -53,7 +53,7 @@ if SERVER then
 		local underline = self.spawnflags[2]
 		local strike = self.spawnflags[3]
 		local glow = self.spawnflags[4]
-		local nocull = self.spawnflags[5]
+		--local nocull = self.spawnflags[5]
 		
 		
 		
@@ -64,6 +64,8 @@ if SERVER then
 			local att = self:LookupAttachment("text"..n)
 			--print("SIGN SHIT", att, text)
 			if text and (text!="") and (att>0) then
+				
+				self:SetNWBool("sign"..n,true)
 				
 				att = self:GetAttachment(att)
 				
@@ -77,7 +79,7 @@ if SERVER then
 				local scale = self["text_size_"..n] / self.text_res --inches per pixel?
 				
 				self["text_data_"..n] = {
-					id = self:EntIndex() + n*0.1,
+					id = self:EntIndex(),
 					--World Placement
 					pos = pos,
 					angle = ang,
@@ -100,34 +102,15 @@ if SERVER then
 					color2 = self.text_color2,
 					--Rendering Options
 					glow = glow,
-					nocull = nocull
+					--nocull = nocull
 				}
+				Trakpak3.SignText.UpdateSign(self, self["text_data_"..n], n)
 			end
 		end
 	end
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
-	
-	function ENT:UpdateSign(ply,index)
-		if index then
-			local JSON = util.TableToJSON(self["text_data_"..index])
-			JSON = util.Compress(JSON)
-			net.Start("tp3_register_sign")
-			net.WriteData(JSON,#JSON)
-			net.Send(ply)
-		else
-			for n = 1, 4 do
-				if self["text_data_"..n] then
-					local JSON = util.TableToJSON(self["text_data_"..n])
-					JSON = util.Compress(JSON)
-					net.Start("tp3_register_sign")
-					net.WriteData(JSON,#JSON)
-					net.Send(ply)
-				end
-			end
-		end
-	end
 	
 	function ENT:AcceptInput(iname, activator, caller, data)
 		local update = false
@@ -160,7 +143,28 @@ if SERVER then
 		end
 		
 		if update then
-			for _, ply in pairs(player.GetAll()) do self:UpdateSign(ply,index) end
+			if index then
+				Trakpak3.UpdateSign(self, self["text_data_"..index], index)
+			else
+				for index = 1,4 do
+					if self["text_data_"..index] then
+						Trakpak3.SignText.UpdateSign(self, self["text_data_"..index], index)
+						Trakpak3.SignText.SyncSign(self, self["text_data_"..index], index)
+					end
+				end
+			end
+		end
+		
+	end
+end
+
+if CLIENT then
+	function ENT:DrawTranslucent(flags)
+		self:Draw(flags)
+		for index = 1,4 do
+			if self:GetNWBool("sign"..index) then
+				Trakpak3.SignText.DrawSign(self,index)
+			end
 		end
 	end
 end

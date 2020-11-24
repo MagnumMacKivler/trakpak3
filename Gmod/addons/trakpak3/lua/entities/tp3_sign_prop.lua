@@ -48,9 +48,9 @@ if SERVER then
 		local underline = self.spawnflags[2]
 		local strike = self.spawnflags[3]
 		local glow = self.spawnflags[4]
-		local nocull = self.spawnflags[5]
+		--local nocull = self.spawnflags[5]
 		
-		self.text_data = {
+		self.text_data_1 = {
 			id = self:EntIndex(),
 			--World Placement
 			pos = pos,
@@ -74,26 +74,21 @@ if SERVER then
 			color2 = self.text_color2,
 			--Rendering Options
 			glow = glow,
-			nocull = nocull
+			--nocull = nocull
 		}
+		
+		Trakpak3.SignText.UpdateSign(self, self.text_data_1, 1)
 		
 		--Set the prop stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		if self.skin then self:SetSkin(self.skin) end
-		if self.bodygroups then for n, p in pairs(string.Explode(" ",self.bodygroups)) do self:SetBodygroup(n,tonumber(p)) end end
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 	end
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
 	
-	function ENT:UpdateSign(ply)
-		local JSON = util.TableToJSON(self.text_data)
-		JSON = util.Compress(JSON)
-		net.Start("tp3_register_sign")
-		net.WriteData(JSON,#JSON)
-		net.Send(ply)
-	end
 	
 	function ENT:AcceptInput(iname, activator, caller, data)
 		local update = false
@@ -112,7 +107,15 @@ if SERVER then
 		end
 		
 		if update then
-			for _, ply in pairs(player.GetAll()) do self:UpdateSign(ply) end
+			Trakpak3.SignText.UpdateSign(self, self.text_data_1, 1)
+			Trakpak3.SignText.SyncSign(self, self.text_data_1, 1)
 		end
+	end
+end
+
+if CLIENT then
+	function ENT:DrawTranslucent(flags)
+		self:Draw(flags)
+		Trakpak3.SignText.DrawSign(self,1)
 	end
 end

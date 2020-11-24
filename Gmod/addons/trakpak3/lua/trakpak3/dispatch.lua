@@ -36,6 +36,12 @@ hook.Add("InitPostEntity","TP3_DispLoad",function()
 				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ } end
 			end
 			
+			for id, ent in pairs(ents.FindByClass("tp3_dispatch_proxy")) do
+				local state = ent.state or 0
+				local name = ent:GetName()
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { setstate = state } end
+			end
+			
 			Trakpak3.Dispatch.Loaded = true
 		else
 			--MsgC(Trakpak3.Magenta,"Could not convert JSON to Table correctly!")
@@ -85,10 +91,11 @@ function Trakpak3.Dispatch.SendInfo(entname, parm, value)
 		--if Trakpak3.Dispatch.InitData then print("InitData") end
 		--if Trakpak3.Dispatch.InitData[entname] then print("Entname") end
 		Trakpak3.Dispatch.InitData[entname][parm] = value
+		--print("Sending to Client: ",entname, parm, value)
 		net.Start("tp3_dispatch_comm")
 			net.WriteString(entname)
 			net.WriteString(parm)
-			net.WriteUInt(value,2)
+			net.WriteUInt(value,3)
 		net.Broadcast()
 	end
 end
@@ -100,7 +107,7 @@ net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	
 	local entname = net.ReadString()
 	local cmd = net.ReadString()
-	local arg = net.ReadUInt(2)
+	local arg = net.ReadUInt(3)
 	
 	--print("Update from map: ", entname, cmd, arg)
 	

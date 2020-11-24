@@ -19,8 +19,8 @@ if SERVER then
 		maxspeed = "number",
 		acceleration = "number",
 		
-		powered = "boolean",
-		locked = "boolean",
+		key_ccw = "string",
+		key_cw = "string",
 		
 		sound_start = "string",
 		sound_stop = "string"
@@ -55,6 +55,7 @@ if SERVER then
 		self.speed = 0
 		self.targetangle = nil
 		self.synctime = nil
+		self.locked = true
 		
 		self.startangle = self.angles.yaw
 		
@@ -110,6 +111,30 @@ if SERVER then
 		--Control Seat
 		self:RegisterEntity("pod",self.pod)
 		self.exitpoint = self:WorldToLocal(self.exitpoint)
+		
+		--Process controls
+		self.enumccw = 0
+		if self.key_ccw=="+forward" then
+			self.enumccw = IN_FORWARD
+		elseif self.key_ccw=="+back" then
+			self.enumccw = IN_BACK
+		elseif self.key_ccw=="+moveleft" then
+			self.enumccw = IN_MOVELEFT
+		elseif self.key_ccw=="+moveright" then
+			self.enumccw = IN_MOVERIGHT
+		end
+		
+		self.enumcw = 0
+		if self.key_cw=="+forward" then
+			self.enumcw = IN_FORWARD
+		elseif self.key_cw=="+back" then
+			self.enumcw = IN_BACK
+		elseif self.key_cw=="+moveleft" then
+			self.enumcw = IN_MOVELEFT
+		elseif self.key_cw=="+moveright" then
+			self.enumcw = IN_MOVERIGHT
+		end
+		
 	end
 	
 	function ENT:TT_Driver()
@@ -187,13 +212,17 @@ if SERVER then
 			if self.driver and not self.active then
 				self.active = true
 				net.Start("TP3_TurnTable_ControlInfo")
-					net.WriteTable({ccw="+forward",cw="+back",stop="+jump"})
+					net.WriteTable({
+						ccw = self.key_ccw,
+						cw = self.key_cw,
+						stop = "+jump"
+					})
 				net.Send(self.driver)
-				print("Enabled.")
+				--print("Enabled.")
 			elseif not self.driver and self.active and (self.speed==0) then
 				self.active = false
 				self:DisableMover()
-				print("Disabled.")
+				--print("Disabled.")
 			end
 			
 			--Motion!
@@ -204,8 +233,8 @@ if SERVER then
 				--Control Input
 				if self.driver then
 					if not self.locked then
-						local move_fwd = self.driver:KeyDown(IN_FORWARD)
-						local move_rev = self.driver:KeyDown(IN_BACK)
+						local move_fwd = self.driver:KeyDown(self.enumccw)
+						local move_rev = self.driver:KeyDown(self.enumcw)
 						local stop_move = self.driver:KeyDown(IN_JUMP)
 						
 						if move_fwd then
@@ -357,21 +386,25 @@ if SERVER then
 	
 	--Teleport player to exit point
 	hook.Add("PlayerLeaveVehicle","Trakpak3_TurnTableExit", function(ply, veh)
-		if ply and veh then
-			for k, self in pairs(ents.FindByClass("tp3_turntable")) do
-				if self.pod_valid and self.exitpoint and (veh==self.pod_ent) then
-					ply:SetPos(self:LocalToWorld(self.exitpoint))
-					--print("Player Exit!")
+		timer.Simple(0,function()
+			if ply and veh then
+				for k, self in pairs(ents.FindByClass("tp3_turntable")) do
+					if self.pod_valid and self.exitpoint and (veh==self.pod_ent) then
+						ply:SetPos(self:LocalToWorld(self.exitpoint))
+						--print("Player Exit!")
+					end
 				end
 			end
-		end
+		end)
 	end)
 	
 end
 
 if CLIENT then
+	
 	net.Receive("TP3_TurnTable_ControlInfo",function()
 		local binds = net.ReadTable()
+		
 		local ccw = string.upper(input.LookupBinding(binds.ccw))
 		local cw = string.upper(input.LookupBinding(binds.cw))
 		local stop = string.upper(input.LookupBinding(binds.stop))

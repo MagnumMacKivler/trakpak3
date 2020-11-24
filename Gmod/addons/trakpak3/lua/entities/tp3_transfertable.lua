@@ -19,6 +19,9 @@ if SERVER then
 		maxspeed = "number",
 		acceleration = "number",
 		
+		key_fwd = "string",
+		key_rev = "string",
+		
 		sound_start = "string",
 		sound_stop = "string",
 		sound_crash = "string"
@@ -77,6 +80,31 @@ if SERVER then
 		--Control Seat
 		self:RegisterEntity("pod",self.pod)
 		self.exitpoint = self:WorldToLocal(self.exitpoint)
+		
+		--Process controls
+		self.enumf = 0
+		if self.key_fwd=="+forward" then
+			self.enumf = IN_FORWARD
+		elseif self.key_fwd=="+back" then
+			self.enumf = IN_BACK
+		elseif self.key_fwd=="+moveleft" then
+			self.enumf = IN_MOVELEFT
+		elseif self.key_fwd=="+moveright" then
+			self.enumf = IN_MOVERIGHT
+		end
+		
+		self.enumr = 0
+		if self.key_rev=="+forward" then
+			self.enumr = IN_FORWARD
+		elseif self.key_rev=="+back" then
+			self.enumr = IN_BACK
+		elseif self.key_rev=="+moveleft" then
+			self.enumr = IN_MOVELEFT
+		elseif self.key_rev=="+moveright" then
+			self.enumr = IN_MOVERIGHT
+		end
+		
+		
 	end
 	
 	--Get numeric position of transfer table
@@ -145,6 +173,7 @@ if SERVER then
 				self.sound:Play()
 				if hard and self.sound_crash then
 					self.sound2 = CreateSound(self,self.sound_crash)
+					self.sound2:SetSoundLevel(85)
 					self.sound2:Play()
 					--util.ScreenShake(self:GetPos(),5,5,1,2048)
 				end
@@ -166,45 +195,65 @@ if SERVER then
 			if self.driver and not self.active then
 				self.active = true
 				net.Start("TP3_TransTable_ControlInfo")
-					net.WriteTable({left="+moveleft",right="+moveright",stop="+jump"})
+					net.WriteTable({
+						fwd = self.key_fwd,
+						rev = self.key_rev,
+						stop = "+jump"
+					})
 				net.Send(self.driver)
-				print("Enabled.")
+				--print("Enabled.")
 			elseif not self.driver and self.active and (self.speed==0) then
 				self.active = false
 				self:DisableMover()
-				print("Disabled.")
+				--print("Disabled.")
 			end
 			
 			--Motion!
 			if self.active then
 				
+				local atmin = self.pos <= self.minpos
+				local atmax = self.pos >= self.maxpos
+				
 				--Control Input
 				local throttle = 0
-				if self.driver then
-					local move_fwd = self.driver:KeyDown(IN_MOVERIGHT) and (self.pos<self.maxpos)
-					local move_rev = self.driver:KeyDown(IN_MOVELEFT) and (self.pos>self.minpos)
-					local stop_move = self.driver:KeyDown(IN_JUMP)
-					
-					if move_fwd then
-						throttle = 1
-					elseif move_rev then
-						throttle = -1
-					end
-					
-					if not self.forcestop and (math.abs(self.speed)>0) and stop_move then
-						self.forcestop = true
-					end
-					--start sound
-					if (throttle!=0) and not self.soundstage then
-						self.soundstage = true
-						if self.sound_start then
-							self.sound = CreateSound(self,self.sound_start)
-							self.sound:Play()
-							self.sound:ChangePitch(50)
-							self.sound:ChangeVolume(0.5)
+					if self.driver then
+						if not self.locked then
+							local move_fwd = self.driver:KeyDown(self.enumf)
+							local move_rev = self.driver:KeyDown(self.enumr)
+							local stop_move = self.driver:KeyDown(IN_JUMP)
+							
+							if move_fwd and not atmax then
+								throttle = 1
+							elseif move_rev and not atmin then
+								throttle = -1
+							end
+							
+							if not self.forcestop and (math.abs(self.speed)>0) and stop_move then
+								self.forcestop = true
+							end
+							--start sound
+							if (throttle!=0) and not self.soundstage then
+								self.soundstage = true
+								if self.sound_start then
+									self.sound = CreateSound(self,self.sound_start)
+									self.sound:Play()
+									self.sound:ChangePitch(50)
+									self.sound:ChangeVolume(0.5)
+								end
+							end
+						elseif self.locked then
+							--Play a locked sound if you try to drive the turntable while it's locked
+							local move_fwd = self.driver:KeyDown(IN_FORWARD)
+							local move_rev = self.driver:KeyDown(IN_BACK)
+							
+							if (move_fwd or move_rev) and not self.lockq then
+								self.lockq = true
+								self.pod_ent:EmitSound("doors/door_locked2.wav")
+							elseif not (move_fwd or move_rev) and self.lockq then
+								self.lockq = false
+							end
 						end
 					end
-				end
 				
 				--Acceleration
 				if (throttle==0) and self.forcestop then --decelerate to a stop
@@ -282,28 +331,61 @@ if SERVER then
 		return true
 	end
 	
+	--Disable Physgun
+	function ENT:PhysgunPickup() return false end
+	
+	--Hammer Input Handler
+	function ENT:AcceptInput( iname, activator, caller, data )
+		if iname=="Lock" then
+			self.locked = true
+		elseif iname=="Unlock" then
+			self.locked = false
+		end
+	end
+	
 	--Teleport player to exit point
 	hook.Add("PlayerLeaveVehicle","Trakpak3_TransferTableExit", function(ply, veh)
-		if ply and veh then
-			for k, self in pairs(ents.FindByClass("tp3_transfertable")) do
-				if self.pod_valid and self.exitpoint and (veh==self.pod_ent) then
-					ply:SetPos(self:LocalToWorld(self.exitpoint))
-					--print("Player Exit!")
+		timer.Simple(0,function()
+			if ply and veh then
+				for k, self in pairs(ents.FindByClass("tp3_transfertable")) do
+					if self.pod_valid and self.exitpoint and (veh==self.pod_ent) then
+						ply:SetPos(self:LocalToWorld(self.exitpoint))
+						--print("Player Exit!")
+					end
 				end
 			end
-		end
+		end)
 	end)
 	
 end
 
 if CLIENT then
+	
+	local function getKeyDirection(bind)
+		if bind=="+forward" then
+			return "Forward"
+		elseif bind=="+back" then
+			return "Backward"
+		elseif bind=="+moveleft" then
+			return "Left"
+		elseif bind=="+moveright" then
+			return "Right"
+		else
+			return "Unknown"
+		end
+	end
+	
 	net.Receive("TP3_TransTable_ControlInfo",function()
 		local binds = net.ReadTable()
-		local left = string.upper(input.LookupBinding(binds.left))
-		local right = string.upper(input.LookupBinding(binds.right))
+		
+		local df = getKeyDirection(binds.fwd)
+		local dr = getKeyDirection(binds.rev)
+		
+		local fwd = string.upper(input.LookupBinding(binds.fwd))
+		local rev = string.upper(input.LookupBinding(binds.rev))
 		local stop = string.upper(input.LookupBinding(binds.stop))
 		
-		local message = "Transfer Table Controls:\n"..left.." - Move Left\n"..right.." - Move Right\n"..stop.." - Manual Stop"
+		local message = "Transfer Table Controls:\n"..fwd.." - Move "..df.."\n"..rev.." - Move "..dr.."\n"..stop.." - Manual Stop"
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end)

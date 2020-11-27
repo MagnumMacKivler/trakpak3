@@ -39,6 +39,10 @@ If you want to use the Trakpak3 assets in a different source mod (Source SDK 201
 
 ### Community Contribution
 
-A few people have expressed interest in contributing to Trakpak3 development, in either helping me flesh out the American stuff, or in making props for international maps. I am very grateful for the help, and to keep things organized, those contributors will be hand-picked. More information will be available as the V3.0 Release gets closer.
+Thanks to all the members of our community who helped (and continue to help) make this project a reality!
 
--Magnum
+* MrLazorz
+* GrovestreetGman
+* Titus Studios
+* The Southeastern Railway Museum
+* Engineer Productions

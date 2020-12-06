@@ -1,0 +1,16 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_us/signals/bluelight/redlight_xhatch_fl"
+	"$surfaceprop" "Glass"
+	"$halflambert" "1"
+	"$selfillum" "1"
+	Proxies
+	{
+		AnimatedTexture
+		{
+			animatedtexturevar $basetexture
+			animatedtextureframenumvar $frame
+			animatedtextureframerate "2"
+		}
+	}
+}

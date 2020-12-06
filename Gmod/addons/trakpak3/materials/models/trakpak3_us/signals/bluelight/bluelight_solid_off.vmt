@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_us/signals/bluelight/bluelight_solid"
+	"$surfaceprop" "Glass"
+	"$halflambert" 1
+}

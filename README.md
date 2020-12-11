@@ -43,6 +43,7 @@ Thanks to all the members of our community who helped (and continue to help) mak
 
 * MrLazorz
 * GrovestreetGman
+* ThaPatMan54
 * Titus Studios
 * The Southeastern Railway Museum
 * Engineer Productions

@@ -163,6 +163,8 @@ if SERVER then
 	end
 	
 	function ENT:Think()
+		if not self.xing_valid then return end
+		
 		if not self.working then
 			if self.trigger and not self.triggered then
 				self.triggered = true
@@ -194,10 +196,14 @@ if SERVER then
 	--Add offsets to controller
 	hook.Add("InitPostEntity","Trakpak3_CrossingGateOffsets",function()
 		for k, self in pairs(ents.FindByClass("tp3_crossing_gate")) do
-			local addoffset = 0
-			if self.warning then addoffset = self.warning end
-			if self.anim_trans2 then addoffset = addoffset + self:SequenceDuration(self:LookupSequence(self.anim_trans2)) end
-			self.xing_ent:InputDelay(addoffset)
+			if self.xing_valid then
+				local addoffset = 0
+				if self.warning then addoffset = self.warning end
+				if self.anim_trans2 then addoffset = addoffset + self:SequenceDuration(self:LookupSequence(self.anim_trans2)) end
+				self.xing_ent:InputDelay(addoffset)
+			else
+				print("[Trakpak3] tp3_crossing_gate without a corresponding tp3_crossing: ["..self:EntIndex().."], "..self:GetModel())
+			end
 		end
 	end)
 end

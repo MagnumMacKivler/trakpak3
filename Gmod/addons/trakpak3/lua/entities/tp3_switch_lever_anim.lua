@@ -98,13 +98,40 @@ if SERVER then
 		self:SetNWBool("broken",false)
 	end
 	
+	util.AddNetworkString("tp3_request_polyswitches")
+	
+	--Receive request for switch assignments from player
+	net.Receive("tp3_request_polyswitches",function(length, ply)
+		local standtable = {}
+		for k, stand in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
+			if stand.switches and (#stand.switches > 0) then
+				local lintable = {}
+				for l, switch in pairs(stand.switches) do
+					table.insert(lintable, {stand:GetPos(), switch:GetPos()})
+				end
+				standtable[stand:EntIndex()] = lintable
+			end
+		end
+		net.Start("tp3_request_polyswitches")
+		net.WriteTable(standtable)
+		net.Send(ply)
+	end)
+	
 	--Functions called by the switch
 	
 	--Initial Handshake to link the entities
 	function ENT:StandSetup(ent)
-		--print("Stand "..self:GetName().." set up with switch "..ent:EntIndex().." with behavior mode "..self.behavior)
-		self.switch = ent
-		ent:SwitchSetup(self.behavior or 1)
+		if not self.switches then self.switches = {} end
+		table.insert(self.switches,ent)
+		if #self.switches==1 then --First Switch
+			self.switch = ent
+			ent:SwitchSetup(self.behavior or 1)
+		else --Second or More Switch
+			if not self.overflow then
+				self.overflow = true
+				ErrorNoHalt("[Trakpak3] Switch Stand '"..self:GetName().."' linked by multiple switches! Use the command 'tp3_switch_debug' to identify the links.\n")
+			end
+		end
 	end
 	
 	--Force the switch stand to throw to the specified state (a result of trailing)
@@ -374,4 +401,31 @@ if CLIENT then
 	net.Receive("tp3_switchblocked_notify", function()
 		chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
 	end)
+	
+	concommand.Add("tp3_switch_debug",function(ply, cmd, args)
+		Trakpak3.SwitchDebug = not Trakpak3.SwitchDebug
+		if Trakpak3.SwitchDebug then
+			net.Start("tp3_request_polyswitches")
+			net.SendToServer()
+			local regcolor = Color(0,127,255)
+			MsgC(regcolor,"[Trakpak3] Switch Debug Enabled. ",Color(0,255,0),"Green Lines ",regcolor,"indicate monogamous switches (set up correctly). ",Color(255,0,0),"Red Lines ",regcolor,"indicate polygamous switches (will not work, causes the error).")
+		end
+	end)
+	
+	net.Receive("tp3_request_polyswitches",function()
+		Trakpak3.PolySwitchStands = net.ReadTable()
+	end)
+	
+	hook.Add("PostDrawTranslucentRenderables","Trakpak3_RenderSwitchLinks",function()
+		if Trakpak3.SwitchDebug and Trakpak3.PolySwitchStands then
+			for k, stand in pairs(Trakpak3.PolySwitchStands) do
+				local lcolor = Color(0,255,0)
+				if #stand > 1 then lcolor = Color(255,0,0) end
+				for l, line in pairs(stand) do
+					render.DrawLine(line[1],line[2],lcolor)
+				end
+			end
+		end
+	end)
+	
 end

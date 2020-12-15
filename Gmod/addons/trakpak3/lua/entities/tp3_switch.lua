@@ -333,10 +333,21 @@ if SERVER then
 		local oldmodel = self:GetModel()
 		self:SetModel(model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
-		--timer.Simple(1,function() self:SetModel(oldmodel) end)
 		self:SetModel(oldmodel)
-		--print("Quickphys!")
 	end
+	
+	concommand.Add("tp3_switch",function(ply, cmd, args)
+		local id = tonumber(args[1])
+		local state = args[2]
+		
+		if id and state then
+			Entity(id):Switch(state=="1")
+		end
+	end)
+	
+	hook.Add("tp3_switch","Trakpak3_OhGodHelp",function(ent,state)
+		ent:Switch(state)
+	end)
 	
 	--Change Switch Full (Model and Physics, Reset all state data)
 	function ENT:Switch(state, force)
@@ -366,7 +377,7 @@ if SERVER then
 		
 		if ap_idx>0 then self.autopoint = self:GetAttachment(ap_idx).Pos else self.autopoint = nil end
 		if fp_idx>0 then self.frogpoint = self:GetAttachment(fp_idx).Pos else self.frogpoint = nil end
-		if bp_idx>0 then self.bladepoint = self:GetAttachment(bp_idx).Pos else self.frogpoint = nil end
+		if bp_idx>0 then self.bladepoint = self:GetAttachment(bp_idx).Pos else self.bladepoint = nil end
 		
 	end
 	

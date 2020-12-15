@@ -91,6 +91,19 @@
 	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
 ]
 
+//Diamond
+@PointClass base(Angles) studioprop() = tp3_diamond : "A stationary piece of track that will play frog sounds on four attachment points, named 'frog1' through 'frog4'."
+[
+	model(studio) : "Model" : "" : "The model path for the diamond."
+	skin(integer) : "Skin" : 0 : "The skin for the diamond."
+	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer" : "Disables the toolgun on this entity except for the tools listed here."
+	disableshadows(choices) : "Disable Shadows" : 1 : "Most if not all track should have shadows disabled because they are part of the ground." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+]
+
 //Turntable Test
 @PointClass base(Targetname, Angles) studioprop() = tp3_turntable : "A piece of track that rotates to allow reversing of rolling stock and changing tracks."
 [

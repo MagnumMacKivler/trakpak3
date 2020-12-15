@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8506"
-	"mapversion" "256"
+	"mapversion" "260"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -32,13 +32,13 @@ viewsettings
 	"bSnapToGrid" "1"
 	"bShowGrid" "1"
 	"bShowLogicalGrid" "0"
-	"nGridSpacing" "8"
+	"nGridSpacing" "32"
 	"bShow3DGrid" "0"
 }
 world
 {
 	"id" "1"
-	"mapversion" "256"
+	"mapversion" "260"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -16609,6 +16609,462 @@ entity
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
 		"logicalpos" "[500 1500]"
+	}
+}
+entity
+{
+	"id" "22367"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2560 1792 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22421"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2560 0 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22425"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s1024_1lt_0pg_+1024x-0256x0000.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2656 0 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22456"
+	"classname" "tp3_switch"
+	"angles" "0 270 0"
+	"animated" "1"
+	"disableshadows" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "slip_stand_1b"
+	"model" "models/trakpak3_rsg/switches/slips/ds0fw_1lt_left_mn.mdl"
+	"skin" "7"
+	"origin" "2560 384 24"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22476"
+	"classname" "tp3_switch"
+	"angles" "0 90 0"
+	"animated" "1"
+	"disableshadows" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"lever" "slip_stand_1a"
+	"model" "models/trakpak3_rsg/switches/slips/ds0fw_1lt_left_mn.mdl"
+	"skin" "7"
+	"origin" "2560 384 24"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22504"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s1024_1lt_0pg_+1024x-0256x0000.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2208 1792 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22532"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/trackends/end_ang0fw.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2560 1792 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22563"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/trackends/end_ang0fw.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2560 -1024 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22583"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/trackends/end_ang1lt.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2912 -1024 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22602"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/trackends/end_ang1lt.mdl"
+	"skin" "7"
+	"solid" "6"
+	"origin" "2208 1792 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22622"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/bumpers/bumper_knuckle_ang1lt.mdl"
+	"skin" "2"
+	"solid" "6"
+	"origin" "2208 1792 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22649"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/bumpers/bumper_knuckle_ang1lt.mdl"
+	"skin" "2"
+	"solid" "6"
+	"origin" "2912 -1024 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22673"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/bumpers/bumper_knuckle_ang0fw.mdl"
+	"skin" "1"
+	"solid" "6"
+	"origin" "2560 -1024 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22696"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/spl/bumpers/bumper_knuckle_ang0fw.mdl"
+	"skin" "0"
+	"solid" "6"
+	"origin" "2560 1792 24"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "22716"
+	"classname" "tp3_switch_lever_anim"
+	"angles" "0 277 0"
+	"autoreset" "0"
+	"behavior" "0"
+	"bodygroups" "5 2 1"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"locked" "0"
+	"model" "models/trakpak3_us/switchstands/bethlehem_51a_left.mdl"
+	"nowire" "0"
+	"seq_idle_close" "idle_close"
+	"seq_idle_open" "idle_open"
+	"seq_throw_close" "throw_close"
+	"seq_throw_open" "throw_open"
+	"skin" "0"
+	"targetname" "slip_stand_1a"
+	"targetstate" "0"
+	"origin" "2384 544 7"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "22773"
+	"classname" "tp3_switch_lever_anim"
+	"angles" "0 97 0"
+	"autoreset" "0"
+	"behavior" "0"
+	"bodygroups" "5 2 1"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"locked" "0"
+	"model" "models/trakpak3_us/switchstands/bethlehem_51a_left.mdl"
+	"nowire" "0"
+	"seq_idle_close" "idle_close"
+	"seq_idle_open" "idle_open"
+	"seq_throw_close" "throw_close"
+	"seq_throw_open" "throw_open"
+	"skin" "0"
+	"targetname" "slip_stand_1b"
+	"targetstate" "0"
+	"origin" "2736 224 7"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "23124"
+	"classname" "tp3_diamond"
+	"angles" "0 90 0"
+	"disableshadows" "1"
+	"gmod_allowtools" "advdupe2 tp3_node_editor tp3_node_chainer"
+	"model" "models/trakpak3_rsg/diamonds/d0fw_4lt.mdl"
+	"skin" "8"
+	"origin" "-2816 640 20"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "23154"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s6144_0fw_0pg_+6144x00000x0000.mdl"
+	"skin" "8"
+	"solid" "6"
+	"origin" "-2816 768 20"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "23212"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s6144_0fw_0pg_+6144x00000x0000.mdl"
+	"skin" "8"
+	"solid" "6"
+	"origin" "-2816 -5632 20"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "23228"
+	"classname" "prop_static"
+	"angles" "0 90 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/arcs/r2048/a0fw_4lt_left_0pg_+1568x-0640x0000.mdl"
+	"skin" "8"
+	"solid" "6"
+	"origin" "-3552 2304 20"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "23263"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/arcs/r2048/a0fw_4lt_left_0pg_+1568x-0640x0000.mdl"
+	"skin" "8"
+	"solid" "6"
+	"origin" "-2080 -1024 20"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "23275"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s4096_0fw_0pg_+4096x00000x0000.mdl"
+	"skin" "8"
+	"solid" "6"
+	"origin" "-3552 2304 20"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "23298"
+	"classname" "prop_static"
+	"angles" "0 270 0"
+	"fademindist" "-1"
+	"fadescale" "1"
+	"model" "models/trakpak3_rsg/straights/s4096_0fw_0pg_+4096x00000x0000.mdl"
+	"skin" "8"
+	"solid" "6"
+	"origin" "-2080 -5120 20"
+	editor
+	{
+		"color" "255 255 0"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
 	}
 }
 cameras

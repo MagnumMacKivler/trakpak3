@@ -1,0 +1,12 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/xings/pad_concrete"
+	"$surfaceprop" "Concrete"
+	
+	"$detail" "detail\noise_detail_01"
+	"$detailscale" "6"
+	"$detailblendfactor" .6
+	"$detailblendmode" 0
+	
+	"$halflambert" "1"
+}

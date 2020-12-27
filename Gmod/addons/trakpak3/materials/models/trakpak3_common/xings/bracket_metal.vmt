@@ -1,0 +1,7 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/xings/bracket_metal"
+	"$surfaceprop" "Metal"
+	
+	"$halflambert" "1"
+}

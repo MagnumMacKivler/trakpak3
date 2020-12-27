@@ -1,0 +1,5 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_common/xings/pad_wood_nobolts"
+	"$surfaceprop" "Wood_Plank"
+}

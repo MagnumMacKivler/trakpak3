@@ -1,4 +1,5 @@
 "LightmappedGeneric"
 {
 	"$basetexture" "trakpak3_common/switchstands/target_green"
+	"$surfaceprop" "metal"
 }

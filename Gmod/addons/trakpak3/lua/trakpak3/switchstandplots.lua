@@ -1,5 +1,3 @@
---MsgC(Trakpak3.Magenta,"Running Switch Stand Plots\n")
-
 --[[
 
 ==================
@@ -23,7 +21,7 @@ To include custom switch stands with your addon, make a file <youraddon>/lua/tra
 ]]--
 
 --RACOR 112E
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_112e_left.mdl"] = {
+local r112 = {
 	{0,0},
 	{25,0},
 	{30,1/9},
@@ -31,10 +29,11 @@ Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_112e_left.mdl"]
 	{40,1},
 	{60,1}
 }
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_112e_right.mdl"] = Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_112e_left.mdl"]
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_112e_right.mdl"] = r112
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_112e_left.mdl"] = r112
 
 --Bethlehem Steel 51A
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/bethlehem_51a_left.mdl"] = {
+local b51a = {
 	{0,0},
 	{15,0},
 	{50,0.55},
@@ -44,18 +43,58 @@ Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/bethlehem_51a_left.md
 	{95,1},
 	{100,1}
 }
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/bethlehem_51a_right.mdl"] = Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/bethlehem_51a_left.mdl"]
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/bethlehem_51a_right.mdl"] = b51a
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/bethlehem_51a_left.mdl"] = b51a
+
+--Racor 22 and 22E
+local r22 = {
+	{0,0},
+	{15,0},
+	{50,0.5},
+	{70,0.6},
+	{75,0.6},
+	{80,0.7},
+	{83,1},
+	{90,1}
+}
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_22_right.mdl"] = r22
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_22_left.mdl"] = r22
+
+local r22e = {
+	{0,0},
+	{15,0},
+	{60,0.5},
+	{80,0.62},
+	{85,0.62},
+	{90,0.7},
+	{95,1},
+	{120,1}
+	
+}
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_22e_right.mdl"] = r22e
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/racor_22e_left.mdl"] = r22e
 
 --GRS Model 5
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_left.mdl"] = {
+local g5 = {}
+g5["throw_open"] = {
 	{0,0},
 	{90,0},
 	{180,1},
 	{270,1}
 }
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_right.mdl"] = Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_left.mdl"]
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_rh_left.mdl"] = Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_left.mdl"]
-Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_rh_right.mdl"] = Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_left.mdl"]
+g5["throw_open_fast"] = {
+	{0,0},
+	{45,0},
+	{135,1},
+	{180,1}
+}
+g5["throw_close"] = g5["throw_open"]
+g5["throw_close_fast"] = g5["throw_open_fast"]
+
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_left.mdl"] = g5
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_lh_right.mdl"] = g5
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_rh_left.mdl"] = g5
+Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/grs_model5_rh_right.mdl"] = g5
 
 --Armstrong (Interlocking Lever Frame)
 Trakpak3.SwitchStandPlots["models/trakpak3_us/switchstands/armstrong.mdl"] = {

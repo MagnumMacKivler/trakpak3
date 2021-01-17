@@ -1,0 +1,8 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/glass/window_glass_unlit"
+	"$surfaceprop" "glass"
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[0.25 0.25 0.25]"
+	"$halflambert" "1"
+}

@@ -23,6 +23,10 @@ if SERVER then
 		bodygroups_motion = "string",
 		bodygroups_open = "string",
 		
+		collision_mn = "boolean",
+		collision_dv = "boolean",
+		levertype = "number",
+		
 		linked_stand = "entity",
 		locked = "boolean",
 		nowire = "boolean",
@@ -40,8 +44,12 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		self:SetSkin(self.skin)
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
+		if self.collision_mn then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
 		
 		--transform sequences into ID numbers for faster usage
+		self.sname_open = self.seq_throw_open
+		self.sname_close = self.seq_throw_close
+		
 		self.seq_idle_close = self:LookupSequence(self.seq_idle_close)
 		self.seq_idle_open = self:LookupSequence(self.seq_idle_open)
 		self.seq_throw_open, self.dur_throw_open = self:LookupSequence(self.seq_throw_open)
@@ -56,6 +64,10 @@ if SERVER then
 		
 		self:SetUseType(SIMPLE_USE)
 		
+		if self.levertype==2 then
+			self:SetTrigger(true)
+		end
+		
 		--Store old pos and ang
 		self.originalpos = self:GetPos()
 		self.originalang = self:GetAngles()
@@ -63,11 +75,7 @@ if SERVER then
 		--Link Stands
 		self:RegisterEntity("linked_stand",self.linked_stand)
 		
-		--find max frame for animation plot
-		if Trakpak3.SwitchStandPlots and Trakpak3.SwitchStandPlots[self.model] then
-			self.Plot = Trakpak3.SwitchStandPlots[self.model]
-			self.MaxFrame = self.Plot[#self.Plot][1] or 0
-		end
+		
 		
 		--Wire I/O
 		if WireLib then
@@ -96,6 +104,23 @@ if SERVER then
 		self:SetNWBool("locked",self.locked)
 		self:SetNWBool("blocked",false)
 		self:SetNWBool("broken",false)
+		self:SetNWInt("levertype",self.levertype)
+	end
+	
+	--Set this model's animation plot and find the max frame
+	function ENT:SetAnimationPlot(sequence)
+		local ssp = Trakpak3.SwitchStandPlots
+		if ssp and ssp[self.model] then --Entry exists for this model
+			if ssp[self.model][sequence] then --This specific sequence has an override
+				self.Plot = Trakpak3.SwitchStandPlots[self.model][sequence]
+			else
+				self.Plot = Trakpak3.SwitchStandPlots[self.model] --Only one for the whole model
+			end			
+			self.MaxFrame = self.Plot[#self.Plot][1] or 0
+		else
+			self.Plot = {{0,0},{1,1}}
+			self.MaxFrame = 1
+		end
 	end
 	
 	util.AddNetworkString("tp3_request_polyswitches")
@@ -224,6 +249,7 @@ if SERVER then
 			WireLib.TriggerOutput(self,"Diverging",0)
 		end
 		if self.bodygroups_closed then self:SetBodygroups(self.bodygroups_closed) end
+		if self.collision_mn then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
 		self:TriggerOutput("OnThrownMain",self)
 		if self.switch then self.switch:Switch(false) end
 		--Broadcast
@@ -244,6 +270,7 @@ if SERVER then
 			WireLib.TriggerOutput(self,"Diverging",1)
 		end
 		if self.bodygroups_open then self:SetBodygroups(self.bodygroups_open) end
+		if self.collision_dv then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
 		self:TriggerOutput("OnThrownDiverging",self)
 		if self.switch then self.switch:Switch(true) end
 		--Broadcast
@@ -260,6 +287,7 @@ if SERVER then
 			self.state = true
 			if self.animate then
 				self.animating = true
+				self:SetAnimationPlot(self.sname_open)
 				self:ResetSequence(self.seq_throw_open)
 				if WireLib then
 					WireLib.TriggerOutput(self,"Main",0)
@@ -284,6 +312,7 @@ if SERVER then
 			self.state = false
 			if self.animate then
 				self.animating = true
+				self:SetAnimationPlot(self.sname_close)
 				self:ResetSequence(self.seq_throw_close)
 				if WireLib then
 					WireLib.TriggerOutput(self,"Main",0)
@@ -372,6 +401,56 @@ if SERVER then
 			self:SetTargetState(new)
 		end
 	end
+	
+	--Derail Mode (Levertype 2) Trigger
+	function ENT:StartTouch(ent)
+		
+		if not self.touchents then
+			self.touchents = {}
+			self.hastouchers = false
+		end
+		
+		if not (self:GetCollisionGroup() == COLLISION_GROUP_NONE) then return end --only process if the entity actually has collisions
+		
+		if ent:IsValid() and ent:GetClass()=="prop_physics" then
+			self.touchents[ent:EntIndex()] = true
+			if not self.hastouchers then
+				self:StartTouchAll()
+				self.hastouchers = true
+			end
+		end
+	end
+	
+	function ENT:EndTouch(ent)
+		if ent:IsValid() and ent:GetClass()=="prop_physics" then
+			if self.touchents[ent:EntIndex()] then
+				self.touchents[ent:EntIndex()] = nil
+				
+				--Apply a surface prop to slow the train down
+				local physobj = ent:GetPhysicsObject()
+				local physprop = {GravityToggle = true, Material = "metal"}
+				if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
+			end
+			
+			local stillhas = false
+			for index, touching in pairs(self.touchents) do
+				if Entity(index):IsValid() and touching then
+					stillhas = true
+				else
+					self.touchents[index] = nil
+				end
+			end
+			if not stillhas then
+				self.hastouchers = false
+				self:EndTouchAll()
+			end
+		end
+		
+	end
+	
+	function ENT:StartTouchAll() end
+	function ENT:EndTouchAll() end
+	
 	
 	--Receive DS commands
 	hook.Add("TP3_Dispatch_Command", "Trakpak3_DS_Switches", function(name, cmd, val)

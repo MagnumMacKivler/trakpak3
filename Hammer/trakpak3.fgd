@@ -5,18 +5,31 @@
 //Switch
 @PointClass base(Angles) studioprop() = tp3_switch : "A simple switch. Swaps between two models to change tracks. All Input/Output and Control functions are handled by the Switch Stand."
 [
-	model(studio) : "Model (Main)" : "" : "The model path for this switch when in its main (closed) position."
-	model_div(studio) : "Model (Diverging, Optional)" : "" : "The model path for this switch when in its diverging (open) position. If left blank, it will be picked automatically based on the main (closed) model."
+	model(studio) : "Model (Main/Normal)" : "" : "The model path for this switch when in its Main/Normal position."
+	model_div(studio) : "Model (Diverging/Reverse, Optional)" : "" : "The model path for this switch when in its Diverging/Reverse position. If left blank, it will be picked automatically based on the Main/Normal model."
+	bodygroups(string) : "Bodygroups" : "" : "The model's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	skin(integer) : "Skin" : 0 : "The skin to apply to the switch models."
-	lever(target_destination) : "Switch Stand" : : "The name of the tp3_switch_lever_anim or tp3_switch_lever_bg that controls this switch."
+	lever(target_destination) : "Switch Stand" : : "The name of the tp3_switch_lever_anim that controls this switch."
 	animated(choices) : "Animate Switch?" : 1 : "Does this switch use smooth throwing animations?" =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
-	//opensound(sound) : "Open Sound" : "buttons/lever6.wav" : "The sound the lever makes when the switch is thrown diverging (open). If blank, no sound will be played."
-	//closesound(sound) : "Close Sound" : "" : "The sound the lever makes when the switch is thrown main (closed). If blank, uses whatever the Open Sound is set to."
-	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
+	collision_mn(choices) : "Collisions (Main/Normal)" : 1 : "Should the switch have collisions when thrown to the Main/Normal Position? Same effect as a Gmod NoCollide All. This is only applied when a switch completes throwing - it will not work with trailing switches. Should only be set to 'No' if the tp3_switch is a derailer or something that must be nocollided in this position." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	collision_dv(choices) : "Collisions (Diverging/Reverse)" : 1 : "Should the switch have collisions when thrown to the Diverging/Reverse Position? Same effect as a Gmod NoCollide All. This is only applied when a switch completes throwing - it will not work with trailing switches. Should only be set to 'No' if the tp3_switch is a derailer or something that must be nocollided in this position." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	derail(choices) : "Switch Type" : 0 : "Should this switch behave like a switch or a derail? If a derail, props that touch it will have their momentum arrested." =
+	[
+		0 : "Switch/Other"
+		1 : "Derail"
+	]
 	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer" : "Disables the toolgun on this entity except for the tools listed here."
 	disableshadows(choices) : "Disable Shadows" : 1 : "Most if not all track should have shadows disabled because they are part of the ground." =
 	[
@@ -29,19 +42,18 @@
 @PointClass base(Targetname, Parentname, Angles) studioprop() line(0 255 0, targetname, targetname, targetname, linked_stand) = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
 [
 	model(studio) : "Model" : "" : "The model path for the switch lever."
-	//switch(target_destination) : "Target Switch" : : "The tp3_switch to which this lever is linked. Multiple levers can link to the same switch."
 	bodygroups(string) : "Bodygroups" : "" : "The switch stand's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	skin(integer) : "Skin" : 0 : "The skin to apply to the switch lever."
 	
-	seq_idle_close(string) : "Idle Closed Seq" : "idle_close" : "The default sequence to use when the switch is locked in its main (closed) position."
-	seq_throw_open(string) : "Throw Open Seq" : "throw_open" : "The sequence to use when the switch is being thrown diverging (open)."
-	seq_idle_open(string) : "Idle Open Seq" : "idle_open" : "The sequence to use when the switch is locked in its diverging (open) position."
-	seq_throw_close(string) : "Throw Closed Seq" : "throw_close" : "The sequence to use when the switch is being thrown main (closed)."
+	seq_idle_close(string) : "Idle Main/Normal Seq" : "idle_close" : "The default sequence to use when the switch is locked in its Main/Normal position."
+	seq_idle_open(string) : "Idle Diverging/Reverse Seq" : "idle_open" : "The sequence to use when the switch is locked in its Diverging/Reverse position."
+	seq_throw_open(string) : "Throw Diverging/Reverse Seq" : "throw_open" : "The sequence to use when the switch is being thrown Diverging/Reverse."
+	seq_throw_close(string) : "Throw Main/Normal Seq" : "throw_close" : "The sequence to use when the switch is being thrown Main/Normal."
 	
 	targetstate(choices) : "Initial Position" : 0 : "The lever will throw itself to this position immediately when the map starts." =
 	[
-		0 : "Main/Closed"
-		1 : "Diverging/Open"
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
 	]
 	
 	behavior(choices) : "Trailing Switch Behavior" : 1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
@@ -52,15 +64,34 @@
 		3 : "Spring Switch"
 	]
 	
-	autoreset(choices) : "Auto-Reset?" : 0 : "Should this switch automatically reset back to main (closed) position after the train has passed over it? Great for heavily-trafficked, mainline switches." =
+	autoreset(choices) : "Auto-Reset?" : 0 : "Should this switch automatically reset back to Main/Normal position after the train has passed over it? Great for heavily-trafficked, mainline switches." =
 	[
 		0 : "No"
 		1 : "Yes"
 	]
 	
-	bodygroups_closed(string) : "Bodygroups (Closed)" : "" : "Bodygroups to set when the switch stand is thrown main (closed). See the regular 'Bodygroups' keyvalue for formatting help."
+	bodygroups_closed(string) : "Bodygroups (Main/Normal)" : "" : "Bodygroups to set when the switch stand is thrown Main/Normal. See the regular 'Bodygroups' keyvalue for formatting help."
 	bodygroups_motion(string) : "Bodygroups (Motion)" : "" : "Bodygroups to set when the switch stand is in motion. See the regular 'Bodygroups' keyvalue for formatting help."
-	bodygroups_open(string) : "Bodygroups (Open)" : "" : "Bodygroups to set when the switch stand is thrown diverging (open). See the regular 'Bodygroups' keyvalue for formatting help."
+	bodygroups_open(string) : "Bodygroups (Diverging/Reverse)" : "" : "Bodygroups to set when the switch stand is thrown Diverging/Reverse. See the regular 'Bodygroups' keyvalue for formatting help."
+	
+	collision_mn(choices) : "Collisions (Main/Normal)" : 1 : "Should the switch stand have collisions when thrown to the Main/Normal Position? Same effect as a Gmod NoCollide All." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	collision_dv(choices) : "Collisions (Diverging/Reverse)" : 1 : "Should the switch stand have collisions when thrown to the Diverging/Reverse Position? Same effect as a Gmod NoCollide All." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	levertype(choices) : "Lever Type/Purpose" : 0 : "What does this tp3_switch_lever_anim do? Used mostly for nomenclature. The 'I AM a DERAIL' option allows the entity to arrest the momentum of cars passing over it." =
+	[
+		0 : "I operate a SWITCH"
+		1 : "I operate a DERAIL"
+		2 : "I AM a DERAIL"
+		3 : "I do something else"
+	]
+	
 	
 	linked_stand(target_destination) : "Linked Switch Stand" : : "Another tp3_switch_lever_anim that this stand will attempt to match states with. You do not need to point the linked stand back to this one; the switch stand will do that automatically."
 	
@@ -79,14 +110,14 @@
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
-	input ThrowMain(void) : "Throws the switch to main (closed)."
-	input ThrowDiverging(void) : "Throws the switch to diverging (open)."
+	input ThrowMain(void) : "Throws the switch to Main/Normal."
+	input ThrowDiverging(void) : "Throws the switch to Diverging/Reverse."
 	
 	input SetAutoOnly(void) : "Set this switch stand to disallow manual operation (by pressing +Use). The switch stand can still be controlled from dispatch boards, Wiremod, or Hammer I/O."
 	input SetAllowManual(void) : "Set this switch stand to allow manual operation."
 	
-	output OnThrownMain(void) : "Fires when the switch is thrown main (closed)."
-	output OnThrownDiverging(void) : "Fires when the switch is thrown diverging (open)."
+	output OnThrownMain(void) : "Fires when the switch is thrown Main/Normal."
+	output OnThrownDiverging(void) : "Fires when the switch is thrown Diverging/Reverse."
 	
 	output OnUse(void) : "Fires when someone presses +Use (E) on the switch lever."
 ]
@@ -417,26 +448,50 @@
 	stand_1(target_destination) : "Switch Stand 1" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_1(choices) : "Switch Stand 1 State" : 0 : "Switch Stand 1's Required State." =
 	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
 	]
 	stand_2(target_destination) : "Switch Stand 2" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_2(choices) : "Switch Stand 2 State" : 0 : "Switch Stand 2's Required State." =
 	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
 	]
 	stand_3(target_destination) : "Switch Stand 3" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_3(choices) : "Switch Stand 3 State" : 0 : "Switch Stand 3's Required State." =
 	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
 	]
 	stand_4(target_destination) : "Switch Stand 4" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_4(choices) : "Switch Stand 4 State" : 0 : "Switch Stand 4's Required State." =
 	[
-		0 : "Main (Closed)"
-		1 : "Diverging (Open)"
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
+	]
+	stand_5(target_destination) : "Switch Stand 5" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_5(choices) : "Switch Stand 5 State" : 0 : "Switch Stand 5's Required State." =
+	[
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
+	]
+	stand_6(target_destination) : "Switch Stand 6" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_6(choices) : "Switch Stand 6 State" : 0 : "Switch Stand 6's Required State." =
+	[
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
+	]
+	stand_7(target_destination) : "Switch Stand 7" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_7(choices) : "Switch Stand 7 State" : 0 : "Switch Stand 7's Required State." =
+	[
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
+	]
+	stand_8(target_destination) : "Switch Stand 8" : : "A tp3_switch_lever_anim/bg to monitor."
+	state_8(choices) : "Switch Stand 8 State" : 0 : "Switch Stand 8's Required State." =
+	[
+		0 : "Main/Normal"
+		1 : "Diverging/Reverse"
 	]
 	
 	input SetSpeed(integer) : "Set this path's maximum speed code, an integer from 1-5."
@@ -683,48 +738,3 @@
 	output OnFire6(void) : "Fired when the current state is 6 and the player presses the linked button on a dispatch board."
 	output OnFire7(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
 ]
-
-// Track Node - Deprecated
-//@MoveClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_track_node.vmt") line(255 255 255, targetname, targetname, targetname, target) wirebox(hullmin, hullmax) = tp3_track_node :
-//	"Track Node, used for defining track blocks. "+
-//	"You may find it easier to make the path using path_tracks, then change all back to this class. "+
-//	"This is because Hammer's auto-renaming feature is hard-coded to work only with specific entities."
-//[
-//	target(target_destination) : "Next Node" : : "The next node in the chain."
-//	notrace(choices) : "Skip Trace?" : 0 : "Skip to the next node instead of tracing to it (useful for intermittent non-signal-scanned track such as road crossings)?" =
-//	[
-//		0 : "No"
-//		1 : "Yes"
-//	]
-//	hullmin(vector) : "Hull Minimum" : "-48 -48 -96" : "The minimum corner of the hull (box) that will be traced to the next node."
-//	hullmax(vector) : "Hull Maximum" : "48 48 96" : "The maximum corner of the hull (box) that will be traced to the next node."
-//]
-
-//Switch Controller - Deprecated
-//@PointClass base(Targetname) = tp3_switch_old : "Switch Controller. Changes Switches."
-//[
-//	startopen(choices) : "Start Open" : 0 : "Starting State for the Switch." =
-//	[
-//		0 : "Main (Closed)"
-//		1 : "Diverging (Open)"
-//	]
-//	
-//	prop_mn(target_destination) : "Main Prop" : : "The name of a prop_dynamic track piece that will be used when the switch is thrown main (closed)."
-//	prop_dv(target_destination) : "Diverging Prop" : : "The name of a prop_dynamic track piece that will be used when the switch is thrown diverging (open)."
-//	lever(target_destination) : "Throw Lever" : : "The name of a prop_dynamic switch stand, ground throw, or actuator box."
-//	opensound(sound) : "Open Sound" : "buttons/lever6.wav" : "The sound the lever makes when the switch is thrown diverging (open). If blank, no sound will be played."
-//	closesound(sound) : "Close Sound" : "" : "The sound the lever makes when the switch is thrown main (closed). If blank, uses whatever the Open Sound is set to."
-//	
-//	autothrow(choices) : "Auto-Throw?" : 1 : "Should this switch automatically throw if the switch is misaligned? (aka 'Autoswitches')?" =
-//	[
-//		0 : "No - Manual Only"
-//		1 : "Yes"
-//	]
-//	
-//	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
-//	input ThrowMain(void) : "Throws the switch to main (closed)."
-//	input ThrowDiverging(void) : "Throws the switch to diverging (open)."
-//	
-//	output OnThrownMain(void) : "Fires when the switch is thrown main (closed). NOTE: You do not need to wire this to the switch props, Lua will handle that automatically."
-//	output OnThrownDiverging(void) : "Fires when the switch is thrown diverging (open). NOTE: You do not need to wire this to the switch props, Lua will handle that automatically."
-//]

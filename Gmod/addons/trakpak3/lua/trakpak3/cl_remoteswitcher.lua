@@ -10,6 +10,8 @@ RemoteSwitcher.Colors = {
 	r_blocked = Color(127,95,0),
 	n_locked = Color(127,191,127),
 	r_locked = Color(159,143,63),
+	derail_on = Color(0,127,255),
+	derail_off = Color(127,255,255),
 	broken = Color(255,0,0),
 	moving = Color(255,255,255),
 	deselected = Color(127,127,127)
@@ -121,19 +123,35 @@ function RemoteSwitcher.drawStandBox(ent, distance, addtext, alpha)
 	local blocked = ent:GetNWBool("blocked")
 	local locked = ent:GetNWBool("locked")
 	
+	local levertype = ent:GetNWInt("levertype",0)
+	local isderail = (levertype==1) or (levertype==2)
+	
 	local toptext = "Switch Stand"
 	local bottomtext = "Unknown"
 	local color = RemoteSwitcher.Colors.deselected
 	
 	if addtext then
 	
-		if broken then
+		if broken then --Broken 
 			color = RemoteSwitcher.Colors.broken
 			bottomtext = "Broken"
-		elseif state==2 then
+		elseif isderail then --Derail (All 3 States)
+			toptext = "Derail"
+			if state==2 then
+				color = RemoteSwitcher.Colors.moving
+				bottomtext = "Moving"
+			elseif state==1 then
+				color = RemoteSwitcher.Colors.derail_off
+				bottomtext = "Derail Off"
+			else
+				color = RemoteSwitcher.Colors.derail_on
+				bottomtext = "Derail On"
+			end			
+		elseif state==2 then --Moving
 			color = RemoteSwitcher.Colors.moving
 			bottomtext = "Moving"
-		elseif state==1 then
+		
+		elseif state==1 then --Diverging
 			if locked then
 				color = RemoteSwitcher.Colors.r_locked
 				bottomtext = "Locked Reverse"
@@ -144,7 +162,7 @@ function RemoteSwitcher.drawStandBox(ent, distance, addtext, alpha)
 				color = RemoteSwitcher.Colors.r
 				bottomtext = "Reverse"
 			end
-		elseif state==0 then
+		elseif state==0 then --Main
 			if locked then
 				color = RemoteSwitcher.Colors.n_locked
 				bottomtext = "Locked Normal"

@@ -214,6 +214,46 @@
 				"icon7": "generic_7.png",
 				"icon5": "generic_5.png",
 				"icon4": "generic_4.png"
+			},
+			{
+				"x2": 29.0,
+				"x1": 23.0,
+				"type": "line",
+				"y2": 17.0,
+				"y1": 17.0
+			},
+			{
+				"x2": 35.0,
+				"x1": 29.0,
+				"type": "line",
+				"y2": 14.0,
+				"y1": 17.0
+			},
+			{
+				"x2": 35.0,
+				"x1": 29.0,
+				"type": "line",
+				"y2": 17.0,
+				"y1": 17.0
+			},
+			{
+				"x2": 23.0,
+				"x1": 29.0,
+				"type": "line",
+				"y2": 20.0,
+				"y1": 17.0
+			},
+			{
+				"type": "switch",
+				"x": 33.0,
+				"y": 16.0,
+				"switch": "slip_stand_1a"
+			},
+			{
+				"type": "switch",
+				"x": 25.0,
+				"y": 18.0,
+				"switch": "slip_stand_1b"
 			}
 		],
 		"y_res": "48",

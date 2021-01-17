@@ -1,0 +1,12 @@
+"vertexlitgeneric"
+{
+	"$basetexture" "metal/metalwall014a"
+	"$surfaceprop"  "metal"
+	"$detail" "detail\metal_detail_01"
+	"$detailscale" "4.283"
+	"$detailblendfactor" .8
+	"$detailblendmode" "0"
+
+	"%keywords" "c17industrial,wasteland"
+	"$bumpmap" "metal/metalwall001a_normal"
+}

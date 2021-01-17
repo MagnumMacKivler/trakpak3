@@ -16,7 +16,7 @@ hook.Add("InitPostEntity","Trakpak3_MapVehicleAnims",function()
 				end
 			else --Search the vehicle table and assign one based on class and model
 				for key, vtable in pairs(Vehicles) do
-					if (veh:GetClass()==vtable.Class) and (veh:GetModel()==vtable.Model) then
+					if (veh:GetClass()==vtable.Class) and (veh:GetModel()==vtable.Model) and vtable.Members then
 						veh.HandleAnimation = vtable.Members.HandleAnimation
 						Trakpak3.MapVehicleScripts[veh:EntIndex()] = key
 						break

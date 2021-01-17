@@ -1,0 +1,6 @@
+"LightmappedGeneric"
+{
+	"$basetexture" "trakpak3_common/misc/physmesh"
+	"%tooltexture" "trakpak3_common/misc/physmesh"
+	"$surfaceprop" "Default"
+}

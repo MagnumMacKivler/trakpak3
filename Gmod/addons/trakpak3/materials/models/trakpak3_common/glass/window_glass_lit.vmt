@@ -1,0 +1,8 @@
+"UnlitGeneric"
+{
+	"$model" "1"
+	"$basetexture" "trakpak3_common/glass/window_glass_lit"
+	"$surfaceprop" "glass"
+	"$envmap" "env_cubemap"
+	"$envmaptint" "[0.25 0.25 0.25]"
+}

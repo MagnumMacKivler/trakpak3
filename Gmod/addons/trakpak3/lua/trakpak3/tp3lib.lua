@@ -265,3 +265,4 @@ Trakpak3.BlacklistClass("prop_combine_ball")
 
 --Blacklist the goddamn switches
 Trakpak3.BlacklistClass("tp3_switch")
+Trakpak3.BlacklistClass("tp3_diamond")

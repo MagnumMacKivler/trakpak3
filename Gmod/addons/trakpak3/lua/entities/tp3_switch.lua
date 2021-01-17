@@ -15,12 +15,10 @@ if SERVER then
 		--switchstate = "boolean",
 		skin = "number",
 		lever = "entity",
-		animated = "boolean"
-		--autothrow = "boolean",
-		--autoreset = "boolean",
-		--behavior = "number",
-		--OnThrownMain = "output",
-		--OnThrownDiverging = "output"
+		animated = "boolean",
+		collision_mn = "boolean",
+		collision_dv = "boolean",
+		derail = "boolean"
 		
 	}
 	
@@ -282,10 +280,11 @@ if SERVER then
 			local stand = self.lever_ent
 			local frame = stand:GetCycle()*stand.MaxFrame
 			frame = math.Clamp(frame,0,stand.MaxFrame)
+			local plot = stand.Plot
 			--get piecewise region of plot
 			local lastpoint = 1
-			for n = 1, #stand.Plot do
-				if frame <= stand.Plot[n][1] then
+			for n = 1, #plot do
+				if frame <= plot[n][1] then
 					lastpoint = n-1
 					break
 				end
@@ -293,10 +292,10 @@ if SERVER then
 			if lastpoint<1 then lastpoint = 1 end
 			
 			--interpolate
-			local t1 = stand.Plot[lastpoint][1]
-			local t2 = stand.Plot[lastpoint+1][1]
-			local c1 = stand.Plot[lastpoint][2]
-			local c2 = stand.Plot[lastpoint+1][2]
+			local t1 = plot[lastpoint][1]
+			local t2 = plot[lastpoint+1][1]
+			local c1 = plot[lastpoint][2]
+			local c2 = plot[lastpoint+1][2]
 			
 			local prog = (frame - t1) / (t2 - t1)
 			local cycle = c1 + prog*(c2 - c1)
@@ -354,15 +353,18 @@ if SERVER then
 		if state and (not self.switchstate or force) then --Throw DV
 			self.switchstate = true
 			self:SetModel(self.model_div)
+			if self.collision_dv then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
 		elseif not state and (self.switchstate or force) then --Throw MN
 			self.switchstate = false
 			self:SetModel(self.model)
+			if self.collision_mn then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
 		end
 		self.animating = false
 		self.trailing = false
 		self.against = false
 		self:SetAutomaticFrameAdvance(false)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.skin then self:SetSkin(self.skin) end
 		--print("Switch ",state)
 		self:FindAttachments()
@@ -400,7 +402,15 @@ if SERVER then
 	
 	function ENT:EndTouch(ent)
 		if ent:IsValid() and ent:GetClass()=="prop_physics" then
-			self.touchents[ent:EntIndex()] = nil
+			if self.touchents[ent:EntIndex()] then
+				self.touchents[ent:EntIndex()] = nil
+				if self.derail then
+					--Apply a surface prop to slow the train down
+					local physobj = ent:GetPhysicsObject()
+					local physprop = {GravityToggle = true, Material = "metal"}
+					if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
+				end
+			end
 			
 			local stillhas = false
 			for index, touching in pairs(self.touchents) do

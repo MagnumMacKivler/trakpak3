@@ -6,7 +6,7 @@ Trakpak3 is officially in the Pre-Release stage. That means there will be a usab
 
 ## Instructions for Installation
 
-1. Download the Latest Release or the Source Code zip file and navigate into the `trakpak3-master` folder.
+1. Download the [Latest Release](https://github.com/MagnumMacKivler/trakpak3/releases)'s Source Code zip file and navigate into the `trakpak3-master` folder.
 2. Navigate into the `Hammer` folder and place `trakpak3.fgd` into `GarrysMod/bin`.
 3. Download the test VMFs to wherever you want Hammer to load them from (typically `GarrysMod/bin` but I recommend making a subfolder for VMFs).
 4. Navigate into the `Gmod` folder and merge `addons` and `data` with your Garry's Mod's `addons` and `data` folders.

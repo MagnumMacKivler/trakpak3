@@ -1,16 +1,12 @@
 # Trakpak 3 Developer Resources
 
-Trakpak 3.0 "Beta", Copyright 2019-2020 by Magnum MacKivler
+Trakpak 3.0 Pre-Release, Copyright 2019-2021 by Magnum MacKivler
 
-(I'm only calling it Beta because there was technically an Alpha like, a year ago, to test out standard gauge physics.)
+Trakpak3 is officially in the Pre-Release stage. That means there will be a usable release available for mappers to download and use! There will likely be a period of bug checking before the first official release. The addon will be uploaded to the Workshop when the first official release is initiated.
 
-Trakpak3 is currently in development. This will be the master list for materials, models, brushwork, and other things needed to develop for trakpak. I'm changing my plan for Trakpak3's release schedule. Instead of releasing everything at once (which will take a great deal of time), I plan to release an initial set of resources, enough to get people (including myself) started on mapping, and the rest will be filled in as time goes by.
+## Instructions for Installation
 
-**The files uploaded here are incomplete and unfinished. Downloading trakpak3 at the current stage of development is NOT recommended!**
-
-But since you're going to do it anyway, I might as well tell you how.
-
-1. Download the Source Code zip file and navigate into the `trakpak3-master` folder.
+1. Download the Latest Release or the Source Code zip file and navigate into the `trakpak3-master` folder.
 2. Navigate into the `Hammer` folder and place `trakpak3.fgd` into `GarrysMod/bin`.
 3. Download the test VMFs to wherever you want Hammer to load them from (typically `GarrysMod/bin` but I recommend making a subfolder for VMFs).
 4. Navigate into the `Gmod` folder and merge `addons` and `data` with your Garry's Mod's `addons` and `data` folders.

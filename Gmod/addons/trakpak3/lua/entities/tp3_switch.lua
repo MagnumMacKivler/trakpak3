@@ -335,6 +335,7 @@ if SERVER then
 		self:SetModel(oldmodel)
 	end
 	
+	--[[
 	concommand.Add("tp3_switch",function(ply, cmd, args)
 		local id = tonumber(args[1])
 		local state = args[2]
@@ -347,6 +348,7 @@ if SERVER then
 	hook.Add("tp3_switch","Trakpak3_OhGodHelp",function(ent,state)
 		ent:Switch(state)
 	end)
+	]]--
 	
 	--Change Switch Full (Model and Physics, Reset all state data)
 	function ENT:Switch(state, force)
@@ -404,7 +406,7 @@ if SERVER then
 		if ent:IsValid() and ent:GetClass()=="prop_physics" then
 			if self.touchents[ent:EntIndex()] then
 				self.touchents[ent:EntIndex()] = nil
-				if self.derail then
+				if self.derail and not self.switchstate then
 					--Apply a surface prop to slow the train down
 					local physobj = ent:GetPhysicsObject()
 					local physprop = {GravityToggle = true, Material = "metal"}

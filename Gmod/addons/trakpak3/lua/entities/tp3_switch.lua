@@ -431,9 +431,9 @@ if SERVER then
 	end
 	
 	function ENT:StartTouchAll()
-		self.lever_ent:StandSetOccupied(true)
+		if self.lever_valid then self.lever_ent:StandSetOccupied(true) end
 	end
 	function ENT:EndTouchAll()
-		self.lever_ent:StandSetOccupied(false)
+		if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 	end
 end

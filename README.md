@@ -1,10 +1,10 @@
 # Trakpak 3 Developer Resources
 
-Trakpak 3.0 Pre-Release, Copyright 2019-2021 by Magnum MacKivler
+Trakpak 3.0 Release Version, Copyright 2019-2021 by Magnum MacKivler
 
-Trakpak3 is officially in the Pre-Release stage. That means there will be a usable release available for mappers to download and use! There will likely be a period of bug checking before the first official release. The addon will be uploaded to the Workshop when the first official release is initiated.
+Trakpak3 is officially released! If you're trying to install it just to use it in-game, please use the [Workshop Addon](https://steamcommunity.com/sharedfiles/filedetails/?id=2379202601) instead. The files on this Github are intended for mappers and developers.
 
-## Instructions for Installation
+## Instructions for Installation (For Mappers)
 
 1. Download the [Latest Release](https://github.com/MagnumMacKivler/trakpak3/releases)'s Source Code zip file and navigate into the `trakpak3-master` folder.
 2. Navigate into the `Hammer` folder and place `trakpak3.fgd` into `GarrysMod/bin`.

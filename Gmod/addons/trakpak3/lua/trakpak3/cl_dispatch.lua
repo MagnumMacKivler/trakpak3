@@ -387,6 +387,8 @@ function Dispatch.OpenEditor()
 	button.DoClick = function()
 		if Dispatch.page > 1 then
 			Dispatch.PopulatePage(Dispatch.Panels.canvas, Dispatch.page - 1)
+		else
+			Dispatch.PopulatePage(Dispatch.Panels.canvas, #Dispatch.boards)
 		end
 	end
 	
@@ -408,6 +410,8 @@ function Dispatch.OpenEditor()
 	button.DoClick = function()
 		if Dispatch.page < #Dispatch.Boards then
 			Dispatch.PopulatePage(Dispatch.Panels.canvas, Dispatch.page + 1)
+		else
+			Dispatch.PopulatePage(Dispatch.Panels.canvas, 1)
 		end
 	end
 	
@@ -759,6 +763,7 @@ function Dispatch.PopulatePage(canvas, page, nohelpers)
 	--Set Labels and Boxes
 	if page then
 		if (page != Dispatch.page) and editor then
+			--print("Page Switch, deselecting p"..Dispatch.page.." element #"..(Dispatch.selected or "nil"))
 			Dispatch.Deselect()
 		end
 		Dispatch.page = page
@@ -846,20 +851,22 @@ end
 --Select & Deselect
 function Dispatch.Select(id, newprop)
 	if Dispatch.selected then
-	
+		--print("Currently Selected: "..Dispatch.selected)
 		if Dispatch then
 			if Dispatch.Boards then
 				if Dispatch.Boards[Dispatch.page] then
 					if Dispatch.Boards[Dispatch.page].elements then
 						if Dispatch.Boards[Dispatch.page].elements[Dispatch.selected] then
-							
-						else print("Element is Nil!") end
-					else print("Element Table is Nil!") end
-				else print("Page Table is Nil!") end
-			else print("Boards Table is Nil!") end
-		else print("Dispatch Table is Nil! You're fucked") end
+							Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
+						else print("Element is Nil.") end
+					else print("Element Table is Nil.") end
+				else print("Page Table is Nil.") end
+			else print("Boards Table is Nil.") end
+		else print("Dispatch Table is Nil. You're fucked.") end
 				
-		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
+		
+	else
+		--print("Nothing is selected.")
 	end
 	Dispatch.selected = id
 	--print("Selected: ",Dispatch.selected)
@@ -870,20 +877,22 @@ end
 
 function Dispatch.Deselect()
 	if Dispatch.selected then
-	
+		--print("Currently Selected: "..Dispatch.selected)
 		if Dispatch then
 			if Dispatch.Boards then
 				if Dispatch.Boards[Dispatch.page] then
 					if Dispatch.Boards[Dispatch.page].elements then
 						if Dispatch.Boards[Dispatch.page].elements[Dispatch.selected] then
-							
-						else print("Element is Nil!") end
-					else print("Element Table is Nil!") end
-				else print("Page Table is Nil!") end
-			else print("Boards Table is Nil!") end
-		else print("Dispatch Table is Nil! You're fucked") end
+							Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
+						else print("Element is Nil.") end
+					else print("Element Table is Nil.") end
+				else print("Page Table is Nil.") end
+			else print("Boards Table is Nil.") end
+		else print("Dispatch Table is Nil. You're fucked.") end
 		
-		Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:OnDeselect(Dispatch.Panels.editor)
+		
+	else
+		--print("Nothing is selected.")
 	end
 	Dispatch.selected = nil
 	Dispatch.editing = nil
@@ -995,8 +1004,17 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 		else
 			local mpanel = vgui.Create("DPanel",canvas)
 			mpanel:SetSize(96,144)
-			local cx, cy, sx, sy = button:GetBounds()
-			mpanel:SetPos(cx+ sx/2,cy + sy/2)
+			local cx, cy, sx, sy = button:GetBounds() --Button Pos (relative to canvas) and size
+			local psx, psy = canvas:GetSize() --Canvas Size
+			
+			cx = cx + sx/2
+			cy = cy + sy/2
+			
+			--Adjust position of CTC menu to ensure it doesn't go off screen
+			if cx > (psx - 96) then cx = psx - 96 end
+			if cy > (psy - 144) then cy = psy - 144 end
+			
+			mpanel:SetPos(cx,cy)
 			self.menu = mpanel
 			
 			local button = vgui.Create("DButton",mpanel)
@@ -1006,8 +1024,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			button:SetImage("trakpak3_common/icons/signal_red_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 0)
-				mpanel:Remove()
-				self.menu = nil
+				--mpanel:Remove()
+				--self.menu = nil
+				Dispatch.Deselect()
 			end
 			
 			local button = vgui.Create("DButton",mpanel)
@@ -1017,8 +1036,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			button:SetImage("trakpak3_common/icons/signal_yel_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 1)
-				mpanel:Remove()
-				self.menu = nil
+				--mpanel:Remove()
+				--self.menu = nil
+				Dispatch.Deselect()
 			end
 			
 			local button = vgui.Create("DButton",mpanel)
@@ -1028,8 +1048,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			button:SetImage("trakpak3_common/icons/signal_grn_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 2)
-				mpanel:Remove()
-				self.menu = nil
+				--mpanel:Remove()
+				--self.menu = nil
+				Dispatch.Deselect()
 			end
 			
 			local button = vgui.Create("DButton",mpanel)
@@ -1039,8 +1060,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			button:SetImage("trakpak3_common/icons/signal_lun_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 3)
-				mpanel:Remove()
-				self.menu = nil
+				--mpanel:Remove()
+				--self.menu = nil
+				Dispatch.Deselect()
 			end
 		end
 	end
@@ -2629,6 +2651,8 @@ function Dispatch.OpenDispatcher()
 	button.DoClick = function()
 		if Dispatch.page > 1 then
 			Dispatch.PopulatePage(Dispatch.Panels.canvas, Dispatch.page - 1)
+		else
+			Dispatch.PopulatePage(Dispatch.Panels.canvas, #Dispatch.Boards)
 		end
 	end
 	
@@ -2650,9 +2674,22 @@ function Dispatch.OpenDispatcher()
 	button.DoClick = function()
 		if Dispatch.page < #Dispatch.Boards then
 			Dispatch.PopulatePage(Dispatch.Panels.canvas, Dispatch.page + 1)
+		else
+			Dispatch.PopulatePage(Dispatch.Panels.canvas, 1)
 		end
 	end
 	
+	local label = vgui.Create("DLabel",bottombar)
+	label:Dock(FILL)
+	label:SetContentAlignment(5)
+	label:SetText("Unless you're the designated dispatcher, always make sure to ask before changing signals and switches!")
+	label:SetTextColor(dark)
+	surface.CreateFont("TP3_DispatchWarning",{
+		font = "Roboto",
+		size = 24,
+		weight = 600
+	})
+	label:SetFont("TP3_DispatchWarning")
 	
 	local lpanel = vgui.Create("DPanel",frame)
 	function lpanel:Paint() end

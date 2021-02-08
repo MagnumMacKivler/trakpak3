@@ -18,7 +18,8 @@ if SERVER then
 		animated = "boolean",
 		collision_mn = "boolean",
 		collision_dv = "boolean",
-		derail = "boolean"
+		derail = "boolean",
+		usetrigger = "boolean"
 		
 	}
 	
@@ -79,9 +80,11 @@ if SERVER then
 				start = self.autopoint,
 				endpos = self.autopoint + Vector(0,0,64),
 				filter = Trakpak3.GetBlacklist(),
-				ignoreworld = true
+				ignoreworld = true,
+				mins = Vector(-4,-4,-8),
+				maxs = Vector(4,4,8)
 			}
-			local tr = util.TraceLine(trace)
+			local tr = util.TraceHull(trace)
 			
 			--Auto Throw
 			if tr.Hit then
@@ -123,6 +126,29 @@ if SERVER then
 			end
 		end
 		
+		--Better Occupancy Detection
+		if self.softoccupied and not self.usetrigger and self.rangerpoint1 and self.rangerpoint2 then
+			local trace = {
+				start = self.rangerpoint1,
+				endpos = self.rangerpoint2,
+				filter = Trakpak3.GetBlacklist(),
+				ignoreworld = true,
+				mins = Vector(-48,-48,-8),
+				maxs = Vector(48,48,8)
+			}
+			
+			local tr = util.TraceHull(trace)
+			--print(tr.Hit)
+			if tr.Hit then self.blocking_ent = tr.Entity else self.blocking_ent = nil end
+			if tr.Hit and not self.hardoccupied then
+				self.hardoccupied = true
+				if self.lever_valid then self.lever_ent:StandSetOccupied(true) end
+			elseif not tr.Hit and self.hardoccupied then
+				self.hardoccupied = false
+				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+			end
+		end
+		
 		if self.trailing then
 			
 			if self.behavior==1 and self.against then --Breakable: throw, but fuck the switch stand for a little bit.
@@ -130,8 +156,8 @@ if SERVER then
 				local trace = {
 					start = self.bladepoint,
 					endpos = self.frogpoint,
-					maxs = Vector(16,16,0),
-					mins = Vector(-16,-16,-8),
+					maxs = Vector(48,48,0),
+					mins = Vector(-48,-48,-8),
 					filter = Trakpak3.GetBlacklist(),
 					ignoreworld = true
 				}
@@ -383,6 +409,16 @@ if SERVER then
 		if fp_idx>0 then self.frogpoint = self:GetAttachment(fp_idx).Pos else self.frogpoint = nil end
 		if bp_idx>0 then self.bladepoint = self:GetAttachment(bp_idx).Pos else self.bladepoint = nil end
 		
+		--Attachment Points for Better Occupancy Detection
+		if self.frogpoint then
+			self.rangerpoint2 = self.frogpoint
+			if self.bladepoint then self.rangerpoint1 = self.bladepoint else self.rangerpoint1 = self:GetPos() end
+			--print("Yes Better Points")
+		else
+			self.rangerpoint1 = nil
+			self.rangerpoint2 = nil
+			--print("No Better Points")
+		end
 	end
 	
 	--Trigger Functions
@@ -431,9 +467,18 @@ if SERVER then
 	end
 	
 	function ENT:StartTouchAll()
-		if self.lever_valid then self.lever_ent:StandSetOccupied(true) end
+		self.softoccupied = true
+		if self.usetrigger and self.lever_valid then self.lever_ent:StandSetOccupied(true) end
 	end
 	function ENT:EndTouchAll()
-		if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+		self.softoccupied = false
+		if self.usetrigger then
+			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+		else
+			if self.hardoccupied then
+				self.hardoccupied = false
+				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+			end
+		end
 	end
 end

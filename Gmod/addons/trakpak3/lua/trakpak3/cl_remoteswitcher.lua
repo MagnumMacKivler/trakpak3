@@ -205,7 +205,7 @@ hook.Add("HUDPaint","Trakpak3_RemoteSwitcher",function()
 		local maxdot = 0
 		local ep = EyePos()
 		local ev = EyeVector()
-		--find which signal you're looking at
+		--find which switch you're looking at
 		for k, stand in pairs(RemoteSwitcher.Stands) do
 			local disp = (stand:GetPos() - ep)
 			local dist = math.max(disp:Length(),1)

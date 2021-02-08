@@ -218,19 +218,31 @@ if SERVER then
 	
 	--Receive occupancy status
 	function ENT:StandSetOccupied(occ)
-		if occ then
+		self.my_occ = occ
+		if self.linked_stand_valid then
+			self.linked_stand_ent.linked_occ = occ
+			self.linked_stand_ent:EvaluateOccupancy()
+		end
+		self:EvaluateOccupancy()
+	end
+	
+	function ENT:EvaluateOccupancy()
+		
+		self.occupied = self.my_occ or self.linked_occ or false
+		--print(self.occupied)
+		if self.occupied then
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"blocked",1)
 		else
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"blocked",0)
+			
 		end
-		self.occupied = occ
 		local occn = 0
-		if occ then occn = 1 end
+		if self.occupied then occn = 1 end
 		if WireLib then WireLib.TriggerOutput(self,"Blocked",occn) end
-		if self.autoreset and self.targetstate then
+		if self.autoreset and self.targetstate and not self.broken then
 			self:SetTargetState(false)
 		end
-		self:SetNWBool("blocked",occ)
+		self:SetNWBool("blocked",self.occupied)
 	end
 	
 	
@@ -349,7 +361,13 @@ if SERVER then
 			self:StandFix()
 		elseif not self.locked then
 			if not self.animating and self.occupied then
+				local data = {}
+				if self.switch and self.switch.blocking_ent then
+					data.ent = tostring(self.switch.blocking_ent)
+					data.model = self.switch.blocking_ent:GetModel()
+				end
 				net.Start("tp3_switchblocked_notify")
+					net.WriteTable(data)
 				net.Send(ply)
 			elseif not self.animating then
 				self:SetTargetState(not self.targetstate)
@@ -478,7 +496,12 @@ end
 
 if CLIENT then
 	net.Receive("tp3_switchblocked_notify", function()
-		chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
+		local data = net.ReadTable()
+		if data.ent and data.model then
+			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked by "..data.ent.." ("..data.model..").")
+		else
+			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
+		end
 	end)
 	
 	concommand.Add("tp3_switch_debug",function(ply, cmd, args)

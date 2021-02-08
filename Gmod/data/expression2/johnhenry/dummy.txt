@@ -1,0 +1,8 @@
+@name johnhenry/dummy
+@inputs Active InputVons:array VonGo FileBuffer:entity CS:wirelink Pod:entity EGP:wirelink
+@outputs NextFrame FileName:string FileText:string
+@persist 
+@trigger 
+@model models/workshop/weapons/c_models/c_sledgehammer/c_sledgehammer.mdl
+
+setName("Upload John Henry into me!\n(Left Click Upload Only!)")

@@ -74,12 +74,19 @@
 @persist SMDQC AutoVis AutoDraw AutoName Script:array ScriptLine RunningScript SuppressOutput DrawCheap AutoVMFName VMFName:string ForceSegmentType BufferWrite
 @persist AutoCompile AutoCompileID FinalCompileID
 
+#Version Info
+
+@persist Version:string
+
 @trigger 
 @model models/workshop/weapons/c_models/c_sledgehammer/c_sledgehammer.mdl
 
 if(first()){
+    #Version Info - Don't Change This!
+    Version = "1.1"
+    
     #What track gauge are you developing for?
-    #include "johnhenry/gauges/standard_guard"
+    #include "johnhenry/gauges/standard"
     
     SMDQC = 1 #Generate SMD and QC files instead of VMF files... Recommended.
     
@@ -391,65 +398,7 @@ if(first()){
         return vec2(V:x(),-V:y())
     }
     
-    function vector2 tp3dir(Direction){
-        local Dir = vec2()
-        switch(abs(Direction)){
-            case 0,
-                Dir = vec2(0,4)
-                break
-                
-            case 1,
-                Dir = vec2(-1,4)
-                break
-            case 2,
-                Dir = vec2(-2,4)
-                break
-            case 4,
-                Dir = vec2(-4,4)
-                break
-            
-            case 6,
-                Dir = vec2(-4,2)
-                break
-            case 7,
-                Dir = vec2(-4,1)
-                break
-            case 8,
-                Dir = vec2(-4,0)
-                break
-                
-            case 9,
-                Dir = vec2(-4,-1)
-                break
-            case 10,
-                Dir = vec2(-4,-2)
-                break
-            case 12,
-                Dir = vec2(-4,-4)
-                break
-                
-            case 14,
-                Dir = vec2(-2,-4)
-                break
-            case 15,
-                Dir = vec2(-1,-4)
-                break
-            case 16,
-                Dir = vec2(0,-4)
-                break
-            
-            default,
-                Dir = vec2(0,4)
-                break
-        }
-        Dir = vec2(Dir:x()*sign(Direction), Dir:y())
-        return Dir/4
-    }
-    function number tp3ang(Dir){
-        local D = vec(tp3dir(Dir),0)
-        local Angle = -bearing(vec(),ang(),D)
-        return Angle
-    }
+    
     function number dir2ang(Dir:vector2){
         local D = vec(Dir,0)
         local Angle = -bearing(vec(),ang(),D)
@@ -995,10 +944,17 @@ if(first()){
     holoParent(0,E)
     
     #Intro Printo
-    jprint("Welcome to John Henry, the Trakpak3 Track Generator! Type .newpiece <type> <name> to begin!")
+    jprint("Welcome to John Henry, the Trakpak3 Track Generator!")
+    if(->CS & ->EGP & ->Pod & ->Active){
+        cprint("Ready to generate a track piece from the EGP Interface.")
+    }elseif(->InputVons & ->VonGo & ->FileBuffer){
+        cprint("Ready to generate pieces from a Von Docket.")
+    }else{
+        cprint("Please connect a Console Screen/EGP/Pod Controller (Single Piece Compile), or a Von Docket Loader, File Buffer, and Button (Mass Compile).")
+    }
     
     if(hardQuota()<1e+6){
-        jprint("Warning: wire_expression2_unlimited is set to 0! If you are making switches, JH may overload!")
+        jprint("Warning: tick rate is too low! Use the console command 'tp3_jh_prep' to set E2 limits before running.")
         vocalize("vo/engineer_positivevocalization01.mp3")
     }else{
         local Sounds = array(
@@ -6292,7 +6248,7 @@ if(clk("makebrush")){
                                     
                                     if(AutoName){
                                         #arcs/r(Radius)/a(StartDir)_(EndDir)_(Curvature)_(Grade)_(Dims)
-                                        #banked/r(Radius)/ab(StartDir)_(EndDir)_(Curvature)_(StartBanked)(EndBanked)_(Dims)
+                                        #banked/r(Radius)/ab(StartDir)_(EndDir)_(Curvature)_(Grade)_(StartBanked)(EndBanked)_(Dims)
                                         
                                         #Init
                                         local NewName = "trakpak3_"+GaugeName+"/"+(Banked ? "banked" : "arcs")+"/"
@@ -6512,7 +6468,7 @@ if(clk("makebrush")){
                             NewName += (Curvature>0 ? "left" : "right")+"_"
                             
                             #Radius
-                            local MinR = Radius:minsnap(array(0,512,1024,1536,2048,3072,4096,6144,8192,12288,16384))
+                            local MinR = (Radius):minsnap(array(0,512,1024,1536,2048,3072,4096,6144,8192,12288,16384))
                             NewName += "minr"+pad4(MinR)+"_"
                             
                             
@@ -6707,7 +6663,7 @@ if(clk("makebrush")){
                                     #Categorize Combination
                                     if((TypeMN=="straight") & (TypeDV=="arc")){
                                         #switches/turnouts/r(Radius)/t(StartDir)_(EndDir)_(Curvature)_(Dims)
-                                        NewName += "turnouts/r"+ArcRadius[DV,number]+"/t"
+                                        NewName += "turnouts/r"+ArcRadius[DV,number]/Scale+"/t"
                                         
                                         #Directions
                                         if(StartDMN==0){
@@ -6833,7 +6789,7 @@ if(clk("makebrush")){
                                             }
                                             
                                             #Radius
-                                            NewName += "r"+ArcRadius[MN,number]+"_"
+                                            NewName += "r"+(ArcRadius[MN,number]/Scale)+"_"
                                         }else{
                                             #switches/arc_arc/m(StartDir)_(EndDirMN)_(EndDirDV)_r(RadiusMN)_r(RadiusDV)_(CurvatureMN)_(CurvatureDV)_(Dims)
                                             NewName += "arc_arc/m"
@@ -6862,7 +6818,7 @@ if(clk("makebrush")){
                                             }
                                             
                                             #Radius
-                                            NewName += "r"+ArcRadius[MN,number]+"_r"+ArcRadius[DV,number]+"_"
+                                            NewName += "r"+(ArcRadius[MN,number]/Scale)+"_r"+(ArcRadius[DV,number]/Scale)+"_"
                                             
                                             #Curvature
                                             NewName += (EndDMN>0 ? "left" : "right")+"_"+(EndDDV>0 ? "left" : "right")+"_"
@@ -6898,7 +6854,7 @@ if(clk("makebrush")){
                                         }
                                         
                                         #Radius
-                                        NewName += "r"+ArcRadius[MN,number]+"_"
+                                        NewName += "r"+(ArcRadius[MN,number]/Scale)+"_"
                                         local MinR = BezMinRadius[DV,number]:minsnap(array(0,512,1024,1536,2048,3072,4096,6144,8192,12288,16384))
                                         NewName += "minr"+pad4(MinR)+"_"
                                         

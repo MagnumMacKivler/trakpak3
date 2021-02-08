@@ -8,6 +8,10 @@
 
 #EGP Coordinate range is 0-511
 
+if(!entity():getName():find("John Henry Trakpak3 Track Generator")){
+    Version = "XX"
+}
+
 EGPScale = 4 #Inches per pixel
 EGPViewCenter = vec2(0,0) #World Coordinates on which the EGP view will be centered
 EGPGridSize = 32
@@ -277,6 +281,19 @@ function void wirelink:autoScale(Points:array){
     EGPGridSize = EGPScale*32
     return void
 }
+
+function string egpDirFormat(N){
+    if(N==0){
+        return "0fw"
+    }elseif(N==16 | N==-16){
+        return "16bw"
+    }elseif(N>0){
+        return N+"lt"
+    }elseif(N<0){
+        return toString(-N)+"rt"
+    }
+}
+
 function void wirelink:egpInitPage(PageID){
     
     EGP_Page = PageID
@@ -376,7 +393,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpColor(EGPID,ColorHammer)
             EGPID++
             
-            This:egpText(EGPID,"John Henry v1.0",vec2simple(252,244))
+            This:egpText(EGPID,"John Henry v"+Version,vec2simple(252,244))
             This:egpAlign(EGPID,2,1)
             This:egpSize(EGPID,24)
             EGPID++
@@ -408,12 +425,12 @@ function void wirelink:egpInitPage(PageID){
             for(N=1,EGP_Datas:count()){
                 local Data = EGP_Datas[N,table]
                 AllPoints = AllPoints:add(Data["plot",array])
-                if((Data["type",string]=="arc")|(Data["type",string]=="banked_arc")){
-                    AllPoints:pushVector2(Data["center",vector2])
-                }elseif(Data["type",string]=="bezier"){
-                    AllPoints:pushVector2(Data["cp1",vector2])
-                    AllPoints:pushVector2(Data["cp2",vector2])
-                }
+                #if((Data["type",string]=="arc")|(Data["type",string]=="banked_arc")){
+                    #AllPoints:pushVector2(Data["center",vector2])
+                #}elseif(Data["type",string]=="bezier"){
+                    #AllPoints:pushVector2(Data["cp1",vector2])
+                    #AllPoints:pushVector2(Data["cp2",vector2])
+                #}
             }
             if(EGPAutoScale){This:autoScale(AllPoints)}
             This:drawGrid()
@@ -425,7 +442,7 @@ function void wirelink:egpInitPage(PageID){
             local N = 0
             local Dir = vec2(0,4)
             local TextDist = 236
-            local TextSize = 32
+            local TextSize = 24
             local LineDist = 220
             
             local ACenter = vec2(-192,192)
@@ -457,7 +474,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -468,7 +485,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -479,7 +496,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -490,7 +507,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -501,7 +518,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -512,7 +529,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -523,7 +540,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -534,7 +551,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -545,7 +562,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -556,7 +573,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -567,7 +584,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -578,7 +595,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -589,7 +606,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -600,7 +617,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -611,7 +628,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -622,7 +639,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -633,7 +650,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -644,7 +661,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -655,7 +672,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -666,7 +683,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -677,7 +694,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -688,7 +705,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -699,7 +716,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)
@@ -710,7 +727,7 @@ function void wirelink:egpInitPage(PageID){
             This:egpLine(EGPID,vec2simple(0,0),vec2simple(LineDist*(Dir:normalized())))
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             EGPID++
-            This:egpText(EGPID,N:toString(),vec2simple(TextDist*(Dir:normalized())))
+            This:egpText(EGPID,egpDirFormat(N),vec2simple(TextDist*(Dir:normalized())))
             This:egpSize(EGPID,TextSize)
             This:egpColor(EGPID,((N==ForbiddenDirection1)|(N==ForbiddenDirection2)) ? EGP_ForbiddenDirection : (SelectedDirection==N) ? EGP_SelectedDirection : EGP_Direction)
             This:egpAlign(EGPID,1,1)

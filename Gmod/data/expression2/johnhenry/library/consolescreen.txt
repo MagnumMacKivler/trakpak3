@@ -29,6 +29,10 @@ VonMode = 0
 
 LastLine = array()
 
+if(!entity():getName():find("John Henry Trakpak3 Track Generator")){
+    Version = "XX"
+}
+
 fileLoad("johnhenry_saves/manifest.txt")
 
 function void wirelink:csClear(){
@@ -138,6 +142,11 @@ function vector2 tp3dir(Direction){
     }
     Dir = vec2(Dir:x()*sign(Direction), Dir:y())
     return Dir/4
+}
+function number tp3ang(Dir){
+    local D = vec(tp3dir(Dir),0)
+    local Angle = -bearing(vec(),ang(),D)
+    return Angle
 }
 function number parallel(A1, B1, A2, B2){
     local Para = 0
@@ -809,7 +818,7 @@ function void wirelink:initPage(PageID){ #Make default values for things
             MaxLine = 13
             Line = max(MinLine,LastLine[Page,number])
         
-            Lines["1",array] = array("","John Henry V1.0","",vec(),CS_Header,vec())
+            Lines["1",array] = array("","John Henry v"+Version,"",vec(),CS_Header,vec())
             Lines["2",array] = array("","Trakpak3 Track Generator","",vec(),CS_Header,vec())
             Lines["3",array] = array("","By Magnum MacKivler","",vec(),CS_Header,vec())
             
@@ -848,7 +857,7 @@ function void wirelink:initPage(PageID){ #Make default values for things
             Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
             
             Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["5",array] = array("Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Direction:","",egpDirFormat(Data[3,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["6",array] = array("Length:","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["7",array] = array("Height:","",Data[5,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["8",array] = array("Number of Segments:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
@@ -873,8 +882,8 @@ function void wirelink:initPage(PageID){ #Make default values for things
             Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
             
             Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["5",array] = array("Start Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["6",array] = array("End Direction:","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Start Direction:","",egpDirFormat(Data[3,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["6",array] = array("End Direction:","",egpDirFormat(Data[4,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["7",array] = array("End Pos:","",Data[5,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["8",array] = array("Radius:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["9",array] = array("Height:","",Data[7,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
@@ -900,8 +909,8 @@ function void wirelink:initPage(PageID){ #Make default values for things
             Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
             
             Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["5",array] = array("Start Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["6",array] = array("End Direction:","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Start Direction:","",egpDirFormat(Data[3,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["6",array] = array("End Direction:","",egpDirFormat(Data[4,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["7",array] = array("End Pos:","",Data[5,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["8",array] = array("Radius:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["9",array] = array("Height:","",Data[7,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
@@ -930,10 +939,10 @@ function void wirelink:initPage(PageID){ #Make default values for things
             Lines["2",array] = array("","Piece ID: "+CS_PieceID,"",vec(),CS_Header,vec())
             
             Lines["4",array] = array("Start Pos:","",Data[2,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["5",array] = array("Start Direction:","",Data[3,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["5",array] = array("Start Direction:","",egpDirFormat(Data[3,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["6",array] = array("Start CP Length","",Data[4,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["7",array] = array("End Pos:","",Data[5,vector2]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
-            Lines["8",array] = array("End Direction:","",Data[6,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
+            Lines["8",array] = array("End Direction:","",egpDirFormat(Data[6,number]),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["9",array] = array("End CP Length:","",Data[7,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["10",array] = array("Height:","",Data[8,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
             Lines["11",array] = array("Number of Segments:","",Data[9,number]:toString(),CompileReady ? CS_Locked : CS_Property,vec(),CS_Value_Edit)
@@ -1047,12 +1056,13 @@ function void wirelink:initPage(PageID){ #Make default values for things
             InitNumber = CS_Data[CS_PieceID,array][Address,number]
             AdjustNumber = InitNumber
             
-            Line = 4
+            Line = 5
             
             Lines["1",array] = array("","Adjust Direction","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","(lt > 0, rt < 0)","",vec(),CS_Header,vec())
             
-            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
-            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            Lines["4",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
             
             SelectedDirection = AdjustNumber
             EGP:egpInitPage(2)
@@ -1120,12 +1130,13 @@ function void wirelink:initPage(PageID){ #Make default values for things
             InitNumber = CS_Data[CS_PieceID,array][Address,number]
             AdjustNumber = InitNumber
             
-            Line = 4
+            Line = 5
             
             Lines["1",array] = array("","Adjust Segs","",vec(),CS_Header,vec())
+            Lines["2",array] = array("","(Space to auto-set)","",vec(),CS_Header,vec())
             
-            Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
-            Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+            Lines["4",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+            Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
             
             break
         case 16, #Length Adjust
@@ -1680,21 +1691,21 @@ function void wirelink:pressContinue(){
                     break
                 case 5, #Arc
                     getUniqueID()
-                    CS_Data[CS_PieceID,array] = array("arc",vec2(),0,-2,vec2(256,1024),1536,0,6) #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
+                    CS_Data[CS_PieceID,array] = array("arc",vec2(),0,-2,vec2(256,1024),2048,0,6) #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
                     This:applyArc()
                     This:initPage(3)
                     Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
                     break
                 case 6, #Banked Arc - does nothing yet
                     getUniqueID()
-                    CS_Data[CS_PieceID,array] = array("banked_arc",vec2(),0,-8,vec2(2048,2048),2048,0,16,vec2(0,2),vec2(0,2)) #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
+                    CS_Data[CS_PieceID,array] = array("banked_arc",vec2(),0,-8,vec2(2048,2048),2048,0,32,vec2(0,2),vec2(0,2)) #Startpos, StartDir, EndDir, EndPos, Radius, Height, Segments
                     This:applyBankedArc()
                     This:initPage(4)
                     Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
                     break
                 case 7, #Bez
                     getUniqueID()
-                    CS_Data[CS_PieceID,array] = array("bezier",vec2(),0,1024,vec2(256,2048),0,1024,0,8) #Startpos, StartDir, StartCP, EndPos, EndDir, EndCP, Height, Segments
+                    CS_Data[CS_PieceID,array] = array("bezier",vec2(),0,1024,vec2(256,2048),0,1024,0,16) #Startpos, StartDir, StartCP, EndPos, EndDir, EndCP, Height, Segments
                     This:applyBezier()
                     This:initPage(5)
                     Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
@@ -2485,8 +2496,8 @@ function void wirelink:pressW(){
         if((AdjustNumber==ForbiddenDirection1)|(AdjustNumber==ForbiddenDirection2)){
             AdjustNumber++
         }
-        Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
-        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["4",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+        Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
         This:updatePage()
         SelectedDirection = AdjustNumber
         EGP:egpInitPage(2)
@@ -2516,10 +2527,10 @@ function void wirelink:pressW(){
         Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
         This:updatePage()
         Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
-    }elseif((Page==15)|(Page==17)){ #Segments / Switch IDs
+    }elseif(Page==15){ #Segments
         AdjustNumber++
         
-        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
         if(Page==15){This:pressApply(0)}
         This:updatePage()
         Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
@@ -2529,6 +2540,13 @@ function void wirelink:pressW(){
         Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
         Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
         This:pressApply(0)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif(Page==17){ #Switch IDs
+        AdjustNumber++
+        
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        if(Page==15){This:pressApply(0)}
         This:updatePage()
         Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
     }elseif((Page==20)|(Page==21)){ #Snaps
@@ -2610,8 +2628,8 @@ function void wirelink:pressS(){
         if((AdjustNumber==ForbiddenDirection1)|(AdjustNumber==ForbiddenDirection2)){
             AdjustNumber--
         }
-        Lines["3",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
-        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["4",array] = array("Initial:","",InitNumber:toString(),CS_Property,vec(),CS_Value_Calc)
+        Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
         This:updatePage()
         SelectedDirection = AdjustNumber
         EGP:egpInitPage(2)
@@ -2640,10 +2658,10 @@ function void wirelink:pressS(){
         Lines[Ln:toString(),array] = array("Average Grade:","",round(EGP_Datas[CS_PieceID,table]["grade",number]*100,2)+"%",CS_Property,vec(),CS_Value_Calc)
         This:updatePage()
         Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
-    }elseif((Page==15)|(Page==17)){ #Segments / Switch IDs
+    }elseif((Page==15)){ #Segments
         if(AdjustNumber>1){AdjustNumber--}
         
-        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
         if(Page==15){This:pressApply(0)}
         This:updatePage()
         Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
@@ -2653,6 +2671,13 @@ function void wirelink:pressS(){
         Lines["6",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
         Lines["8",array] = array("New (# of Steps):","",round(AdjustNumber/CS_Snap,2):toString(),CS_Property,vec(),CS_Value_Calc)
         This:pressApply(0)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
+    }elseif((Page==17)){ #Switch IDs
+        if(AdjustNumber>1){AdjustNumber--}
+        
+        Lines["4",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        if(Page==15){This:pressApply(0)}
         This:updatePage()
         Pod:soundPlay(0,0.5,"ambient/machines/keyboard"+randint(1,6)+"_clicks.wav")
     }elseif((Page==20)|(Page==21)){
@@ -2821,9 +2846,51 @@ function void wirelink:pressDn(){
     return void
 }
 function void wirelink:pressSpace(){
-    if((Page==22)|((Page>=2)&(Page<=6))){
+    if((Page==22)|((Page>=2)&(Page<=6))){ #Camera AutoCenter
         EGPAutoScale = 1
         EGP:egpInitPage(1)
+    }elseif(Page==15){ #Segment Auto-Calc
+        #CS_Data[CS_PieceID,array][Address,number] = InitNumber
+        local Type = CS_Data[CS_PieceID,array][1,string]
+        switch(Type){
+            case "straight",
+                local Length = CS_Data[CS_PieceID,array][4,number]
+                AdjustNumber = ceil(Length/1024)
+                
+                break
+            case "arc",
+            case "banked_arc",
+                local Radius = CS_Data[CS_PieceID,array][6,number]
+                local MaxSegs = 0
+                if(Radius<=1024){
+                    MaxSegs = 16
+                }elseif(Radius<=2560){
+                    MaxSegs = 32
+                }elseif(Radius<=3584){
+                    MaxSegs = 40
+                }elseif(Radius<=5120){
+                    MaxSegs = 48
+                }elseif(Radius<=7168){
+                    MaxSegs = 56
+                }else{
+                    MaxSegs = 64
+                }
+                local StartDir = CS_Data[CS_PieceID,array][3,number]
+                local EndDir = CS_Data[CS_PieceID,array][4,number]
+                local AngSweep = angnorm(tp3ang(EndDir)-tp3ang(StartDir))
+                AdjustNumber = ceil(MaxSegs*abs(AngSweep)/90)
+                #print(MaxSegs,AngSweep,AdjustNumber)
+                break
+            case "bezier",
+                AdjustNumber = 16
+                break
+            default,
+                break
+        }
+        Lines["5",array] = array("New:","",AdjustNumber:toString(),CS_Property,vec(),CS_Value_Edit)
+        This:pressApply(0)
+        This:updatePage()
+        Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
     }
     return void
 }

@@ -5,7 +5,8 @@
 @trigger 
 @model models/props_lab/reciever01b.mdl
 
-if(first()){
+if(first()|dupefinished()){
+    setName("John Henry File Buffer\n(Wire all your JH 'FileBuffer'\nInputs to me!)")
     
     MaxGracePeriod = 1
     

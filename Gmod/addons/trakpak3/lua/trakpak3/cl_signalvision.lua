@@ -67,7 +67,7 @@ function SignalVision.drawSignalBox(ent, distance, color, addtext)
 	surface.DrawOutlinedRect(centerx - size/2, centery - size/2, size, size)
 end
 
-hook.Add("HUDPaint","Trakpak3_SignalVision",function()
+hook.Add("DrawOverlay","Trakpak3_SignalVision",function()
 	
 	
 	

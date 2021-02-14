@@ -41,6 +41,10 @@ if SERVER then
 		OnFullyClosed = "output",
 		OnBridgeStarted = "output",
 		OnBridgeStopped = "output",
+		
+		OnBecomeSafe = "output",
+		OnBecomeUnsafe = "output",
+		
 		OnInitialize = "output"
 	}
 	
@@ -74,6 +78,8 @@ if SERVER then
 		self.initfired = false
 		
 		self.oldcycle = self.cycle
+		
+		self.safe = false
 		
 		--Control Seat
 		self:RegisterEntity("pod",self.pod)
@@ -397,6 +403,17 @@ if SERVER then
 						self:SetTrackPhysics(false)
 					end
 				end
+				
+				--Safety Outputs
+				local safe = atmin and self.locked
+				if safe and not self.safe then
+					self.safe = true
+					self:TriggerOutput("OnBecomeSafe",self)
+				elseif not safe and self.safe then
+					self.safe = false
+					self:TriggerOutput("OnBecomeUnsafe",self)
+				end
+					
 				
 			end
 			

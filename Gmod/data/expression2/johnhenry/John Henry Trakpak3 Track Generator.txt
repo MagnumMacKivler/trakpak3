@@ -765,60 +765,60 @@ if(first()){
         #printTable(Data)
         switch(Type){
             case "straight", #StartPos Dir Length Height Segments
-                StraightStartPos[Index,vector2] = Data["StartPos",vector2]
+                StraightStartPos[Index,vector2] = Data["StartPos",vector2]*Scale
                 StraightStartPosDefined[Index,number] = 1
                 
                 StraightDir[Index,number] = Data["Dir",number]
                 StraightDirDefined[Index,number] = 1
                 
-                StraightLength[Index,number] = Data["Length",number]
+                StraightLength[Index,number] = Data["Length",number]*Scale
                 StraightLengthDefined[Index,number] = 1
                 
-                StraightHeight[Index,number] = Data["Height",number]
+                StraightHeight[Index,number] = Data["Height",number]*Scale
                 StraightHeightDefined[Index,number] = 1
                 
                 StraightSegments[Index,number] = Data["Segments",number]
                 StraightSegmentsDefined[Index,number] = 1
             break
             case "arc", #StartPos StartDir EndPos EndDir Radius Height Segments
-                ArcStartPos[Index,vector2] = Data["StartPos",vector2]
+                ArcStartPos[Index,vector2] = Data["StartPos",vector2]*Scale
                 ArcStartPosDefined[Index,number] = 1
                 
                 ArcStartDir[Index,number] = Data["StartDir",number]
                 ArcStartDirDefined[Index,number] = 1
                 
-                ArcEndPos[Index,vector2] = Data["EndPos",vector2]
+                ArcEndPos[Index,vector2] = Data["EndPos",vector2]*Scale
                 ArcEndPosDefined[Index,number] = 1
                 
                 ArcEndDir[Index,number] = Data["EndDir",number]
                 ArcEndDirDefined[Index,number] = 1
                 
-                ArcRadius[Index,number] = Data["Radius",number]
+                ArcRadius[Index,number] = Data["Radius",number]*Scale
                 ArcRadiusDefined[Index,number] = 1
                 
-                ArcHeight[Index,number] = Data["Height",number]
+                ArcHeight[Index,number] = Data["Height",number]*Scale
                 ArcHeightDefined[Index,number] = 1
                 
                 ArcSegments[Index,number] = Data["Segments",number]
                 ArcSegmentsDefined[Index,number] = 1
             break
             case "banked_arc", #StartPos StartDir EndPos EndDir Radius Height Segments BlendIn BlendOut
-                BankedArcStartPos[Index,vector2] = Data["StartPos",vector2]
+                BankedArcStartPos[Index,vector2] = Data["StartPos",vector2]*Scale
                 BankedArcStartPosDefined[Index,number] = 1
                 
                 BankedArcStartDir[Index,number] = Data["StartDir",number]
                 BankedArcStartDirDefined[Index,number] = 1
                 
-                BankedArcEndPos[Index,vector2] = Data["EndPos",vector2]
+                BankedArcEndPos[Index,vector2] = Data["EndPos",vector2]*Scale
                 BankedArcEndPosDefined[Index,number] = 1
                 
                 BankedArcEndDir[Index,number] = Data["EndDir",number]
                 BankedArcEndDirDefined[Index,number] = 1
                 
-                BankedArcRadius[Index,number] = Data["Radius",number]
+                BankedArcRadius[Index,number] = Data["Radius",number]*Scale
                 BankedArcRadiusDefined[Index,number] = 1
                 
-                BankedArcHeight[Index,number] = Data["Height",number]
+                BankedArcHeight[Index,number] = Data["Height",number]*Scale
                 BankedArcHeightDefined[Index,number] = 1
                 
                 BankedArcSegments[Index,number] = Data["Segments",number]
@@ -831,25 +831,25 @@ if(first()){
                 BankedArcBlendOutDefined[Index,number] = 1
             break
             case "bezier", #StartPos StartDir EndPos EndDir StartCPLength EndCPLength Height Segments
-                BezStartPos[Index,vector2] = Data["StartPos",vector2]
+                BezStartPos[Index,vector2] = Data["StartPos",vector2]*Scale
                 BezStartPosDefined[Index,number] = 1
                 
                 BezStartDir[Index,number] = Data["StartDir",number]
                 BezStartDirDefined[Index,number] = 1
                 
-                BezEndPos[Index,vector2] = Data["EndPos",vector2]
+                BezEndPos[Index,vector2] = Data["EndPos",vector2]*Scale
                 BezEndPosDefined[Index,number] = 1
                 
                 BezEndDir[Index,number] = Data["EndDir",number]
                 BezEndDirDefined[Index,number] = 1
                 
-                BezStartCPLength[Index,number] = Data["StartCPLength",number]
+                BezStartCPLength[Index,number] = Data["StartCPLength",number]*Scale
                 BezStartCPLengthDefined[Index,number] = 1
                 
-                BezEndCPLength[Index,number] = Data["EndCPLength",number]
+                BezEndCPLength[Index,number] = Data["EndCPLength",number]*Scale
                 BezEndCPLengthDefined[Index,number] = 1
                 
-                BezHeight[Index,number] = Data["Height",number]
+                BezHeight[Index,number] = Data["Height",number]*Scale
                 BezHeightDefined[Index,number] = 1
                 
                 BezSegments[Index,number] = Data["Segments",number]
@@ -6042,7 +6042,7 @@ if(clk("makebrush")){
                             local NewName = "trakpak3_"+GaugeName+"/straights/s"
                             
                             #Length
-                            NewName += pad4(Length)+"_"
+                            NewName += pad4(Length/Scale)+"_"
                             
                             #Direction
                             if(Dir==0){
@@ -6940,12 +6940,12 @@ if(clk("makebrush")){
                                     }
                                     
                                     #Dimensions
-                                    local DF = pad4s(((EndPMN-StartPMN):y()))
-                                    local DL = pad4s(((EndPMN-StartPMN):x()))
+                                    local DF = pad4s(((EndPMN-StartPMN):y())/Scale)
+                                    local DL = pad4s(((EndPMN-StartPMN):x())/Scale)
                                     NewName += DF+"x"+DL+"_"
                                     
-                                    local DF = pad4s(((EndPDV-StartPDV):y()))
-                                    local DL = pad4s(((EndPDV-StartPDV):x()))
+                                    local DF = pad4s(((EndPDV-StartPDV):y())/Scale)
+                                    local DL = pad4s(((EndPDV-StartPDV):x())/Scale)
                                     NewName += DF+"x"+DL
                                     
                                     #Rename

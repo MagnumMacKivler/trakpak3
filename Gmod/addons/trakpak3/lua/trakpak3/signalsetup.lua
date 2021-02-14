@@ -62,5 +62,8 @@ hook.Add("InitPostEntity","Trakpak3_SystemSetup",function()
 	for _, block in pairs(ents.FindByClass("tp3_signal_block")) do
 		block:InitialBroadcast()
 	end
+	for _, gate in pairs(ents.FindByClass("tp3_logic_gate")) do
+		gate:InitialBroadcast()
+	end
 	
 end)

@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8506"
-	"mapversion" "289"
+	"mapversion" "295"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -32,13 +32,13 @@ viewsettings
 	"bSnapToGrid" "1"
 	"bShowGrid" "1"
 	"bShowLogicalGrid" "0"
-	"nGridSpacing" "32"
+	"nGridSpacing" "16"
 	"bShow3DGrid" "0"
 }
 world
 {
 	"id" "1"
-	"mapversion" "289"
+	"mapversion" "295"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -17804,6 +17804,514 @@ entity
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
 		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26651"
+	"classname" "tp3_signal_block"
+	"blockmode" "0"
+	"hull_h" "192"
+	"hull_lw" "96"
+	"hull_offset" "0"
+	"scaninterval" "100"
+	"targetname" "transfer_block_1"
+	"origin" "3936 3840 64"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "26679"
+	"classname" "tp3_signal_block"
+	"blockmode" "0"
+	"hull_h" "192"
+	"hull_lw" "96"
+	"hull_offset" "0"
+	"scaninterval" "100"
+	"targetname" "transfer_block_2"
+	"origin" "3936 3648 64"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "26682"
+	"classname" "tp3_signal_block"
+	"blockmode" "0"
+	"hull_h" "192"
+	"hull_lw" "96"
+	"hull_offset" "0"
+	"scaninterval" "100"
+	"targetname" "transfer_block_3"
+	"origin" "3936 3456 64"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "26685"
+	"classname" "tp3_signal_block"
+	"blockmode" "0"
+	"hull_h" "192"
+	"hull_lw" "96"
+	"hull_offset" "0"
+	"scaninterval" "100"
+	"targetname" "transfer_block_4"
+	"origin" "3936 3264 64"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 0]"
+	}
+}
+entity
+{
+	"id" "26709"
+	"classname" "tp3_logic_gate"
+	"block_1" "transfer_block_1"
+	"block_2" "transfer_block_2"
+	"block_3" "transfer_block_3"
+	"block_4" "transfer_block_4"
+	"blockmode" "0"
+	"operator" "OR"
+	"targetname" "transfer_gate_or"
+	"origin" "4064 3840 256"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26730"
+	"classname" "tp3_logic_gate"
+	"block_1" "transfer_block_1"
+	"block_2" "transfer_block_2"
+	"block_3" "transfer_block_3"
+	"block_4" "transfer_block_4"
+	"blockmode" "0"
+	"operator" "AND"
+	"targetname" "transfer_gate_and"
+	"origin" "4064 3648 256"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26736"
+	"classname" "tp3_logic_gate"
+	"block_1" "transfer_block_1"
+	"block_2" "transfer_block_2"
+	"block_3" "transfer_block_3"
+	"block_4" "transfer_block_4"
+	"blockmode" "0"
+	"operator" "NOR"
+	"targetname" "transfer_gate_nor"
+	"origin" "4064 3456 256"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26742"
+	"classname" "tp3_logic_gate"
+	"block_1" "transfer_block_1"
+	"block_2" "transfer_block_2"
+	"block_3" "transfer_block_3"
+	"block_4" "transfer_block_4"
+	"blockmode" "0"
+	"operator" "NAND"
+	"targetname" "transfer_gate_nand"
+	"origin" "4064 3264 256"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26748"
+	"classname" "tp3_logic_gate"
+	"block_1" "transfer_block_1"
+	"block_2" "transfer_block_2"
+	"block_3" "transfer_block_3"
+	"block_4" "transfer_block_4"
+	"blockmode" "0"
+	"operator" "EQUAL"
+	"targetname" "transfer_gate_equal"
+	"origin" "4064 3072 256"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26754"
+	"classname" "tp3_logic_gate"
+	"block_1" "transfer_block_1"
+	"block_2" "transfer_block_2"
+	"block_3" "transfer_block_3"
+	"block_4" "transfer_block_4"
+	"blockmode" "0"
+	"operator" "UNEQUAL"
+	"targetname" "transfer_gate_unequal"
+	"origin" "4064 2880 256"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 500]"
+	}
+}
+entity
+{
+	"id" "26782"
+	"classname" "tp3_signal_master"
+	"angles" "0 180 0"
+	"automatic" "1"
+	"block" "transfer_gate_or"
+	"cs_pos" "4000 3840 160"
+	"ctc_state" "2"
+	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"model" "models/trakpak3_us/signals/colorlight/rx.mdl"
+	"sigtype" "cl_high"
+	"skin" "0"
+	"sysname" "snagroar"
+	"targetname" "transfer_signal_1"
+	"up_powered" "0"
+	"origin" "4000 3840 160"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "26830"
+	"classname" "tp3_signal_master"
+	"angles" "0 180 0"
+	"automatic" "1"
+	"block" "transfer_gate_and"
+	"cs_pos" "4000 3648 160"
+	"ctc_state" "2"
+	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"model" "models/trakpak3_us/signals/colorlight/rx.mdl"
+	"sigtype" "cl_high"
+	"skin" "0"
+	"sysname" "snagroar"
+	"targetname" "transfer_signal_2"
+	"up_powered" "0"
+	"origin" "4000 3648 160"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "26833"
+	"classname" "tp3_signal_master"
+	"angles" "0 180 0"
+	"automatic" "1"
+	"block" "transfer_gate_nor"
+	"cs_pos" "4000 3456 160"
+	"ctc_state" "2"
+	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"model" "models/trakpak3_us/signals/colorlight/rx.mdl"
+	"sigtype" "cl_high"
+	"skin" "0"
+	"sysname" "snagroar"
+	"targetname" "transfer_signal_3"
+	"up_powered" "0"
+	"origin" "4000 3456 160"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "26836"
+	"classname" "tp3_signal_master"
+	"angles" "0 180 0"
+	"automatic" "1"
+	"block" "transfer_gate_nand"
+	"cs_pos" "4000 3264 160"
+	"ctc_state" "2"
+	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"model" "models/trakpak3_us/signals/colorlight/rx.mdl"
+	"sigtype" "cl_high"
+	"skin" "0"
+	"sysname" "snagroar"
+	"targetname" "transfer_signal_4"
+	"up_powered" "0"
+	"origin" "4000 3264 160"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "26839"
+	"classname" "tp3_signal_master"
+	"angles" "0 180 0"
+	"automatic" "1"
+	"block" "transfer_gate_equal"
+	"cs_pos" "4000 3072 160"
+	"ctc_state" "2"
+	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"model" "models/trakpak3_us/signals/colorlight/rx.mdl"
+	"sigtype" "cl_high"
+	"skin" "0"
+	"sysname" "snagroar"
+	"targetname" "transfer_signal_5"
+	"up_powered" "0"
+	"origin" "4000 3072 160"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "26842"
+	"classname" "tp3_signal_master"
+	"angles" "0 180 0"
+	"automatic" "1"
+	"block" "transfer_gate_unequal"
+	"cs_pos" "4000 2880 160"
+	"ctc_state" "2"
+	"dn_powered" "2"
+	"gmod_allowtools" "wire_adv wire_debugger"
+	"model" "models/trakpak3_us/signals/colorlight/rx.mdl"
+	"sigtype" "cl_high"
+	"skin" "0"
+	"sysname" "snagroar"
+	"targetname" "transfer_signal_6"
+	"up_powered" "0"
+	"origin" "4000 2880 160"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1000]"
+	}
+}
+entity
+{
+	"id" "26893"
+	"classname" "tp3_sign_world"
+	"angles" "0 180 0"
+	"spawnflags" "8"
+	"text" "OR"
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "0 0 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "16"
+	"text_weight" "500"
+	"origin" "4000 3840 192"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1500]"
+	}
+}
+entity
+{
+	"id" "26916"
+	"classname" "tp3_sign_world"
+	"angles" "0 180 0"
+	"spawnflags" "8"
+	"text" "AND"
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "0 0 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "16"
+	"text_weight" "500"
+	"origin" "4000 3648 192"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1500]"
+	}
+}
+entity
+{
+	"id" "26918"
+	"classname" "tp3_sign_world"
+	"angles" "0 180 0"
+	"spawnflags" "8"
+	"text" "NOR"
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "0 0 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "16"
+	"text_weight" "500"
+	"origin" "4000 3456 192"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1500]"
+	}
+}
+entity
+{
+	"id" "26920"
+	"classname" "tp3_sign_world"
+	"angles" "0 180 0"
+	"spawnflags" "8"
+	"text" "NAND"
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "0 0 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "16"
+	"text_weight" "500"
+	"origin" "4000 3264 192"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1500]"
+	}
+}
+entity
+{
+	"id" "26922"
+	"classname" "tp3_sign_world"
+	"angles" "0 180 0"
+	"spawnflags" "8"
+	"text" "=="
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "0 0 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "16"
+	"text_weight" "500"
+	"origin" "4000 3072 192"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1500]"
+	}
+}
+entity
+{
+	"id" "26924"
+	"classname" "tp3_sign_world"
+	"angles" "0 180 0"
+	"spawnflags" "8"
+	"text" "=/="
+	"text_align_h" "0"
+	"text_align_v" "0"
+	"text_color" "0 0 0"
+	"text_color2" "0 0 0"
+	"text_font" "Roboto"
+	"text_offset" "0.25"
+	"text_outw" "4"
+	"text_res" "128"
+	"text_size" "16"
+	"text_weight" "500"
+	"origin" "4000 2880 192"
+	editor
+	{
+		"color" "220 30 220"
+		"visgroupshown" "1"
+		"visgroupautoshown" "1"
+		"logicalpos" "[0 1500]"
 	}
 }
 cameras

@@ -258,6 +258,8 @@ TieTopHeight *= Scale
 BankHeight *= Scale
 CheckLength *= Scale
 TieSeparation *= Scale
+PeakHeight *= Scale
+SwitchThrow *= Scale
 
 TieWidth *= Scale
 TieThickness *= Scale

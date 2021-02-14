@@ -1948,7 +1948,7 @@ function Trakpak3.SigEdit.IntFillBoxes()
 	local aspect = Trakpak3.SigEdit.int_aspect
 	local sigtype = Trakpak3.SigEdit.int_sigtype
 	--print(aspect, sigtype)
-	if aspect and sigtype then
+	if aspect and sigtype and Trakpak3.SigEdit.sigtypes then
 		local data = Trakpak3.SigEdit.sigtypes[sigtype][aspect]
 
 		if data then
@@ -1972,6 +1972,8 @@ function Trakpak3.SigEdit.IntFillBoxes()
 			for _, box in pairs(Trakpak3.SigEdit.panels.cfg) do box:SetValue("") end
 			--Trakpak3.SigEdit.SetModelInfo()
 		end
+	else
+		--ErrorNoHalt("Missing data for the sigtype, rule, or the table in general. If this error persists, close the editor and reopen it.")
 	end
 end
 

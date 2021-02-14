@@ -1,0 +1,8 @@
+"Sprite"
+{
+	"$basetexture" "trakpak3_common/hammer/tp3_logic_gate"
+	"$spriteorientation" "vp_parallel"
+	"$spriteorigin" "[ 0.50 0.50 ]"
+	"$alphatest" "1"
+	"$nocull" "1"
+}

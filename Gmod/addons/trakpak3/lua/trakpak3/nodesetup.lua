@@ -134,6 +134,26 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		
 	end
 	
+	--Logic Gates
+	local allgates = ents.FindByClass("tp3_logic_gate")
+	local gates = {}
+	if allgates then
+		for _, gate in pairs(allgates) do
+			local name = gate:GetName()
+			if name and (name!="") then
+				gates[name] = {pos = gate:GetPos(), occupied = gate.occupied}
+			end
+		end
+		
+		--Gate Pos & Occupancy
+		local JSON = util.TableToJSON(gates)
+		JSON = util.Compress(JSON)
+		util.AddNetworkString("tp3_gatepack")
+		net.Start("tp3_gatepack")
+		net.WriteData(JSON, #JSON)
+		net.Send(ply)
+	end
+	
 end)
 
 --Clipboard

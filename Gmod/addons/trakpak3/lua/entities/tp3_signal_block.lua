@@ -73,7 +73,7 @@ if SERVER then
 		net.Start("tp3_block_hull_update")
 		net.WriteString(self:GetName())
 		net.WriteBool(occupancy or false)
-		net.Send(player.GetAll())
+		net.Broadcast()
 	end
 	
 	function ENT:HandleNewState(state, natural, ent)
@@ -100,7 +100,7 @@ if SERVER then
 		end
 	end
 	
-	function ENT:InitialBroadcast() --Fired Externally by startup script
+	function ENT:InitialBroadcast() --Fired Externally by startup script (signalsetup)
 		hook.Run("TP3_BlockUpdate",self:GetName(),self.occupied,true)
 	end
 	
@@ -130,7 +130,7 @@ if SERVER then
 					}
 					local tr = util.TraceHull(ht)
 					if tr.Hit then --Trace hit something, block is occupied
-						self.scanid = 1
+						self.scanid = 0 --will be reset to 1 at the end
 						self.hitsomething = true
 						self:HandleNewState(true, true, Trakpak3.GetRoot(tr.Entity))
 					end

@@ -194,7 +194,7 @@ end
 
 --Rendering Code
 
-hook.Add("HUDPaint","Trakpak3_RemoteSwitcher",function()
+hook.Add("DrawOverlay","Trakpak3_RemoteSwitcher",function()
 	
 	if RemoteSwitcher.Active and RemoteSwitcher.Stands and not table.IsEmpty(RemoteSwitcher.Stands) then
 		
@@ -281,3 +281,22 @@ hook.Add("HUDPaint","Trakpak3_RemoteSwitcher",function()
 	end
 	
 end)
+
+--[[
+--Freezebug's Hook Blocking Checker - Checks to see if any hooks on HUDPaint are returning something.
+
+local dHooks = hook.GetTable()["HUDPaint"]
+
+for name,func in pairs(dHooks) do 
+    local res
+    pcall(function()
+        res = func() --Provide hook arguments here
+    end) 
+    if (res~=nil) then 
+        print("!!!!!!!!!" .. tostring(name) .. " !!!!!!! BLOCKING!") 
+        PrintTable(debug.getinfo(func,"flS"))
+    else 
+        print(tostring(name) .. " OK")
+    end     
+end
+]]--

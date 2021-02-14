@@ -234,11 +234,43 @@ net.Receive("tp3_switchpack",function(mlen)
 	Trakpak3.Switches = util.JSONToTable(JSON)
 end)
 
+--Receive Logic Gates
+net.Receive("tp3_gatepack",function(mlen)
+	local JSON = net.ReadData(mlen)
+	JSON = util.Decompress(JSON)
+	Trakpak3.LogicGates = util.JSONToTable(JSON)
+end)
+
 --Occupancy Update
 net.Receive("tp3_block_hull_update", function()
 	local block_name = net.ReadString()
 	local occupied = net.ReadBool()
-	if Trakpak3.BlockDims[block_name] then Trakpak3.BlockDims[block_name].occupied = occupied end
+	if Trakpak3.BlockDims then
+		if Trakpak3.BlockDims[block_name] then
+			Trakpak3.BlockDims[block_name].occupied = occupied
+		else
+			print("[Trakpak3] Signal Block '"..block_name.."' does not exist.")
+		end
+	else
+		print("[Trakpak3] Got a block update but blockpack does not exist, requesting a new one...")
+		net.Start("tp3_request_blockpack")
+		net.SendToServer()
+	end
+end)
+net.Receive("tp3_logic_gate_update", function()
+	local name = net.ReadString()
+	local occupied = net.ReadBool()
+	if Trakpak3.LogicGates then
+		if Trakpak3.LogicGates[name] then
+			Trakpak3.LogicGates[name].occupied = occupied
+		else
+			print("[Trakpak3] Logic Gate '"..name.."' does not exist.")
+		end
+	else
+		print("[Trakpak3] Got a logic gate update but logic gate info does not exist, requesting a new one...")
+		net.Start("tp3_request_blockpack")
+		net.SendToServer()
+	end
 end)
 
 --Rendering for tools
@@ -442,7 +474,7 @@ hook.Add("PostDrawTranslucentRenderables","TP3_NE_DRAW", function()
 			end
 		end
 		
-	elseif Trakpak3.ShowHulls and Trakpak3.NodeList and Trakpak3.NodeChainList and Trakpak3.BlockDims then --Draw live-updated block occupancy hulls
+	elseif Trakpak3.ShowHulls and Trakpak3.NodeList and Trakpak3.NodeChainList and Trakpak3.BlockDims then --Draw live-updated block occupancy hulls (tp3_showhulls active)
 		local rdist = (GetConVar("tp3_node_editor_drawdistance"):GetFloat() or 1024)^2
 		local mypos = LocalPlayer():GetPos()
 		
@@ -509,6 +541,51 @@ hook.Add("PostDrawTranslucentRenderables","TP3_NE_DRAW", function()
 					else --Outside the box
 						text = "Signal Block '"..block_name.."'"
 						tpos = (bpos + Vector(0,0,64)):ToScreen()
+					end
+					
+					cam.Start2D()
+						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, ChainColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
+					cam.End2D()
+				end
+			end
+		end
+		
+		--Logic Gates
+		if Trakpak3.LogicGates and (Trakpak3.ShowHulls==2) then
+			for name, gate in pairs(Trakpak3.LogicGates) do
+				--Determine Color
+				local ChainColor
+				if gate.occupied then
+					ChainColor = Trakpak3.OCCUPIED
+				else
+					ChainColor = Trakpak3.CLEAR
+				end
+				
+				--Draw Logic Gate Block
+				local pos = gate.pos
+				if mypos:DistToSqr(pos) < rdist then
+					local mins = Vector(-64,-64,-64)
+					local maxs = Vector(64,64,64)
+					
+					render.DrawWireframeBox(pos,Angle(),mins,maxs,ChainColor)
+					
+					local text
+					local tpos
+					
+					if mypos:WithinAABox(pos+mins, pos+maxs) then --Inside the box
+						text = "Logic Gate '"..name.."' (Press E to Copy to Clipboard)"
+						tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+						
+						incopyzone = true
+						if not Trakpak3.Clipboard then
+							Trakpak3.Clipboard = name
+							--net.Start("tp3_clipboard")
+								--net.WriteString(name)
+							--net.SendToServer()
+						end
+					else --Outside the box
+						text = "Logic Gate '"..name.."'"
+						tpos = (pos + Vector(0,0,64)):ToScreen()
 					end
 					
 					cam.Start2D()
@@ -708,7 +785,8 @@ function Trakpak3.NodeEditMenu(panel)
 		AYS:DockPadding(32,32,32,16)
 		
 		local warning = vgui.Create("DLabel",AYS)
-		warning:SetText("This will override the file in data/trakpak3/nodes/.")
+		warning:SetText("This will override the file in\ndata/trakpak3/nodes/.")
+		warning:SetSize(1,48)
 		warning:Dock(TOP)
 		
 		local yesbutton = vgui.Create("DButton", AYS)

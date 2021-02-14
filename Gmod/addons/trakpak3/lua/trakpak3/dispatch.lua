@@ -36,6 +36,13 @@ hook.Add("InitPostEntity","TP3_DispLoad",function()
 				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ } end
 			end
 			
+			for id, ent in pairs(ents.FindByClass("tp3_logic_gate")) do
+				local occ
+				if ent.occupied then occ = 1 else occ = 0 end
+				local name = ent:GetName()
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ } end
+			end
+			
 			for id, ent in pairs(ents.FindByClass("tp3_dispatch_proxy")) do
 				local state = ent.state or 0
 				local name = ent:GetName()

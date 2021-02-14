@@ -288,6 +288,9 @@
 	output OnBridgeStarted(void) : "Fired when the bridge starts moving for any reason."
 	output OnBridgeStopped(float) : "Fired when the bridge stops for any reason, and supplies the animation cycle as a parameter."
 	
+	output OnBecomeSafe(void) : "Fired when the bridge becomes safe for trains (locked and fully closed)."
+	output OnBecomeUnsafe(void) : "Fired when the bridge becomes unsafe for trains (unlocked or open)."
+	
 	output OnInitialize(void) : "Fired when the map finishes loading. Useful for parenting things to the bascule bridge leaf via SetParentAttachmentMaintainOffset."
 ]
 
@@ -525,11 +528,66 @@
 	]
 	
 	input Enable(void) : "Turn this entity on and allow it to monitor blocks normally."
-	input Disable(void) : "Turn this entity off, forcing to rely on their normal ABS logic."
+	input Disable(void) : "Turn this entity off, forcing the signals to rely on their normal ABS logic."
 	output OnBottomOccupied(void) : "Fires when a train enters from the bottom (the lowest block number in the chain). This output will not fire again until the whole chain is clear."
 	output OnTopOccupied(void) : "Fires when a train enters from the top (the highest block number in the chain). This output will not fire again until the whole chain is clear."
 	output OnMiddleOccupied(void) : "Fires when a train enters one of the intermediate blocks. This output will not fire again until the whole chain is clear."
 	output OnChainClear(void) : "Fires when all the blocks become cleared."
+]
+
+//Block Logic Gate
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_logic_gate.vmt") = tp3_logic_gate :
+"An entity that monitors multiple tp3_signal_block entities, applies a Boolean operator to them, and returns a result. This entity can be treated like a tp3_signal_block by other entities."
+[
+	blockmode(choices) : "Starting Mode" : 0 : "How should this logic gate behave?" =
+	[
+		0 : "Automatic (Test Logic)"
+		1 : "Force Occupied"
+		2 : "Force Clear"
+	]
+	
+	operator(choices) : "Logic Operator" : "OR" : "The Logical (Boolean) operator to apply to all the referenced Signal Blocks. Occupied = True, Clear = False. Blank entries are left out of the equation." =
+	[
+		"OR" : "OR"
+		"AND" : "AND"
+		"NOR" : "NOR"
+		"NAND" : "NAND"
+		"EQUAL" : "EQUAL"
+		"UNEQUAL" : "UNEQUAL"
+	]
+	
+	block_1(target_destination) : "Block 1" : : "A tp3_signal_block to monitor."
+	block_2(target_destination) : "Block 2" : : "A tp3_signal_block to monitor."
+	block_3(target_destination) : "Block 3" : : "A tp3_signal_block to monitor."
+	block_4(target_destination) : "Block 4" : : "A tp3_signal_block to monitor."
+	block_5(target_destination) : "Block 5" : : "A tp3_signal_block to monitor."
+	block_6(target_destination) : "Block 6" : : "A tp3_signal_block to monitor."
+	block_7(target_destination) : "Block 7" : : "A tp3_signal_block to monitor."
+	block_8(target_destination) : "Block 8" : : "A tp3_signal_block to monitor."
+	
+	// Inputs
+	input ForceOccupancy(integer) : "Force this logic gate to show up as occupied (1) or clear (0) based on the provided parameter. This stops normal logic monitoring."
+	input UnForceOccupancy(void) : "Stop forcing the logic gate to report a specific occupancy status and return to monitoring logic normally."
+	input TestOccupancy(void) : "Fires either OnTestedOccupied or OnTestedClear depending on the current logic state. Similar to the TouchTest input on a trigger."
+	
+	input SetBlock1(target_destination) : "Set this logic gate's Block 1 to this entity. If blank, the entry will be cleared."
+	input SetBlock2(target_destination) : "Set this logic gate's Block 2 to this entity. If blank, the entry will be cleared."
+	input SetBlock3(target_destination) : "Set this logic gate's Block 3 to this entity. If blank, the entry will be cleared."
+	input SetBlock4(target_destination) : "Set this logic gate's Block 4 to this entity. If blank, the entry will be cleared."
+	input SetBlock5(target_destination) : "Set this logic gate's Block 5 to this entity. If blank, the entry will be cleared."
+	input SetBlock6(target_destination) : "Set this logic gate's Block 6 to this entity. If blank, the entry will be cleared."
+	input SetBlock7(target_destination) : "Set this logic gate's Block 7 to this entity. If blank, the entry will be cleared."
+	input SetBlock8(target_destination) : "Set this logic gate's Block 8 to this entity. If blank, the entry will be cleared."
+	
+	// Outputs
+	output OnOccupied(void) : "Fires when the logic state changes from clear to occupied, either naturally or due to being forced."
+	output OnOccupiedNatural(void) : "Fires when the logic state changes from clear to occupied. Unlike OnOccupied, forcing logic state does not fire this input."
+	
+	output OnClear(void) : "Fires when the logic state changes from occupied to clear, either naturally or due to being forced."
+	output OnClearNatural(void) : "Fires when the logic state changes from occupied to clear. Unlike OnClear, forcing logic state does not fire this input."
+	
+	output OnTestedOccupied(void) : "Fires when the TestOccupancy input is triggered, if the logic state is occupied. Otherwise, OnTestedClear fires."
+	output OnTestedClear(void) : "Fires when the TestOccupancy input is triggered, if the logic state is clear. Otherwise, OnTestedOccupied fires."
 ]
 
 //Crossing Controller

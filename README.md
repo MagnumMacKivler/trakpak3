@@ -25,6 +25,8 @@ Trakpak3 is officially released! If you're trying to install it just to use it i
 
 If you want to use the Trakpak3 assets in a different source mod (Source SDK 2013 in order to use Propper), you will have to copy the materials and models into the folder you use. Because the folder can be different for every user, I will not detail that here - I trust you already know what you're doing.
 
+6. After launching Hammer, mount the Trakpak3.fgd file by going into Tools -> Options and adding the trakpak3.fgd file right under garrysmod.fgd. Then restart Hammer. 
+
 ### To-Do Lists
 
 [Master To-Do List](https://github.com/MagnumMacKivler/trakpak3/projects/1)

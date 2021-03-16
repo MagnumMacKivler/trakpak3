@@ -295,7 +295,7 @@
 ]
 
 //Signal Block
-@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_signal_block.vmt") line(255 255 255, targetname, targetname, targetname, startnode) = tp3_signal_block :
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_signal_block.vmt") = tp3_signal_block :
 	"Signal Block Controller. This entity scans a stretch of track nodes to determine block occupancy state. Track nodes are set in Gmod."
 [
 	blockmode(choices) : "Starting Mode" : 0 : "How should this signal block behave?" =
@@ -336,7 +336,7 @@
 
 
 //Master Signal
-@PointClass base(Targetname, Parentname) vecline(cs_pos) studioprop() = tp3_signal_master :
+@PointClass base(Targetname, Parentname) vecline(cs_pos) studioprop() line(255 255 255, targetname, targetname, targetname, slave_1) line(255 255 255, targetname, targetname, targetname, slave_2) = tp3_signal_master :
 	"A scripted signal prop. Can control two other props (extra 'heads' or other parts needed to make a signal work, such as the B&O CPL Marker Lamps) and can interface with the Hammer and Wiremod I/O systems."
 [
 		//Model Info
@@ -431,14 +431,10 @@
 //Path Loader
 @PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_path_loader.vmt") line(targetname, targetname, targetname, target) = tp3_path_loader : "An entity that modifies a signal (or two). Can be used to monitor switch stands and give different indications for diverging routes, or to modify a single signal path. Additional stand_x and state_x keyvalues can be added by disabling SmartEdit. NOTE: all stand_x and state_x keyvalues must have only one character after the underscore. Use a-z if you need more than 10."
 [
+	//Forward
 	target(target_destination) : "Signal to Modify" : : "The signal this path applies to."
 	block(target_destination) : "Signal Block" : : "The tp3_signal_block that this signal governs."
 	nextsignal(target_destination) : "Next Signal" : : "The tp3_signal_master that comes after this one."
-	
-	target2(target_destination) : "Signal to Modify (Reverse)" : : "The opposing signal this path applies to."
-	block2(target_destination) : "Signal Block (Reverse)" : : "The opposing tp3_signal_block that this signal governs."
-	nextsignal2(target_destination) : "Next Signal (Reverse)" : : "The opposing tp3_signal_master that comes after this one."
-	
 	diverging(choices) : "Path Main/Diverging" : 0 : "Is this path a main or a diverging path?" = 
 	[
 		0 : "Main"
@@ -453,6 +449,26 @@
 		1 : "Restricted"
 	]
 	
+	//Reverse
+	target2(target_destination) : "Signal to Modify (Reverse)" : : "The opposing signal this path applies to."
+	block2(target_destination) : "Signal Block (Reverse)" : : "The opposing tp3_signal_block that this signal governs."
+	nextsignal2(target_destination) : "Next Signal (Reverse)" : : "The opposing tp3_signal_master that comes after this one."
+	diverging2(choices) : "Path Main/Diverging (Reverse)" : 0 : "Is the opposing path a main or a diverging path?" = 
+	[
+		0 : "Main"
+		1 : "Diverging"
+	]
+	speed2(choices) : "Path Speed" : 0 : "The maximum allowable speed through the opposing path." = 
+	[
+		5 : "Full Rated"
+		4 : "Limited"
+		3 : "Medium"
+		2 : "Slow"
+		1 : "Restricted"
+		0 : "Same as Forward"
+	]
+	
+	//Switches
 	stand_1(target_destination) : "Switch Stand 1" : : "A tp3_switch_lever_anim/bg to monitor."
 	state_1(choices) : "Switch Stand 1 State" : 0 : "Switch Stand 1's Required State." =
 	[
@@ -502,7 +518,8 @@
 		1 : "Diverging/Reverse"
 	]
 	
-	input SetSpeed(integer) : "Set this path's maximum speed code, an integer from 1-5."
+	input SetSpeed(integer) : "Set this forward path's maximum speed code, an integer from 1-5."
+	input SetSpeed2(integer) : "Set this reverse path's maximum speed code, an integer from 1-5."
 	
 	output OnPathTrue(void) : "Fires when this Path Loader's path becomes selected."
 	output OnPathFalse(void) : "Fires when this Path Loader's path becomes de-selected."
@@ -763,7 +780,7 @@
 
 //Dispatch-Hammer Interface
 @PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_dispatch_proxy.vmt") = tp3_dispatch_proxy : 
-"An entity that allows users to control map entities from a dispatch board using the general I/O system. Each generic button on a dispatch board is linked to one of these and will fire one of eight different outputs based on its current state (0 to 7)."
+"An entity that allows users to control map entities from a dispatch board using the general I/O system. Each generic button on a dispatch board is linked to one of these and will fire one of ten different outputs based on its current state (0 to 9)."
 [
 	state(choices) : "Initial State" : 0 : "Starting state for this dispatch proxy." =
 	[
@@ -775,8 +792,10 @@
 		5 : "5"
 		6 : "6"
 		7 : "7"
+		8 : "8"
+		9 : "9"
 	]
-	maxstate(choices) : "Maximum State" : 7 : "Maximum state for this dispatch proxy (for use with the AddState and SubtractState inputs)." =
+	maxstate(choices) : "Maximum State" : 9 : "Maximum state for this dispatch proxy (for use with the AddState and SubtractState inputs)." =
 	[
 		0 : "0"
 		1 : "1"
@@ -786,6 +805,8 @@
 		5 : "5"
 		6 : "6"
 		7 : "7"
+		8 : "8"
+		9 : "9"
 	]
 	
 	input SetState(integer) : "Set this dispatch proxy's state and update the buttons on dispatch boards accordingly."
@@ -800,4 +821,6 @@
 	output OnFire5(void) : "Fired when the current state is 5 and the player presses the linked button on a dispatch board."
 	output OnFire6(void) : "Fired when the current state is 6 and the player presses the linked button on a dispatch board."
 	output OnFire7(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
+	output OnFire8(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
+	output OnFire9(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
 ]

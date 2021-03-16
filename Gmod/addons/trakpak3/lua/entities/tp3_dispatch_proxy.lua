@@ -19,7 +19,9 @@ if SERVER then
 		OnFire4 = "output",
 		OnFire5 = "output",
 		OnFire6 = "output",
-		OnFire7 = "output"
+		OnFire7 = "output",
+		OnFire8 = "output",
+		OnFire9 = "output"
 	}
 	
 	function ENT:Initialize()

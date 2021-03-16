@@ -70,8 +70,9 @@ if CLIENT then
 		
 		if self.hasparams and self.pagenum and not self.hasframe then
 			self.hasframe = true
+			local color = self.Boards[self.pagenum].color or "95 95 95"
 			
-			self:InitializeBoard()
+			self:InitializeBoard(color)
 		end
 		
 		if self.frame then
@@ -95,7 +96,7 @@ if CLIENT then
 		end
 	end
 	
-	function ENT:InitializeBoard()
+	function ENT:InitializeBoard(color)
 		local e = self
 		--Background Panel
 		self.frame = vgui.Create("DPanel")
@@ -108,7 +109,7 @@ if CLIENT then
 		backing:Dock(FILL)
 		backing:SetImage("trakpak3_common/icons/backing.png")
 		backing:SetKeepAspect(false)
-		
+		backing:SetImageColor(Dispatch.StringToColor(color))
 
 		--Canvas
 		local canvas = vgui.Create("DButton",self.frame)

@@ -2,7 +2,7 @@ versioninfo
 {
 	"editorversion" "400"
 	"editorbuild" "8506"
-	"mapversion" "295"
+	"mapversion" "297"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -32,13 +32,13 @@ viewsettings
 	"bSnapToGrid" "1"
 	"bShowGrid" "1"
 	"bShowLogicalGrid" "0"
-	"nGridSpacing" "16"
+	"nGridSpacing" "1"
 	"bShow3DGrid" "0"
 }
 world
 {
 	"id" "1"
-	"mapversion" "295"
+	"mapversion" "297"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -9926,7 +9926,7 @@ entity
 	"angles" "0 90 0"
 	"automatic" "1"
 	"block" "block_south_1"
-	"cs_pos" "-96 3488 27"
+	"cs_pos" "-96 3488 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
 	"gmod_allowtools" "wire_adv wire_debugger"
@@ -9938,7 +9938,7 @@ entity
 	"sysname" "snagroar"
 	"targetname" "signal_north_1_1"
 	"up_powered" "0"
-	"origin" "-256 3347 272"
+	"origin" "-256 3347 304"
 	editor
 	{
 		"color" "220 30 220"
@@ -9985,7 +9985,7 @@ entity
 	"skin" "0"
 	"targetname" "signal_north_1_2"
 	"up_powered" "0"
-	"origin" "-256 3347 216"
+	"origin" "-256 3347 248"
 	editor
 	{
 		"color" "220 30 220"
@@ -10005,7 +10005,7 @@ entity
 	"skin" "0"
 	"targetname" "signal_north_1_3"
 	"up_powered" "0"
-	"origin" "-256 3347 161"
+	"origin" "-256 3347 193"
 	editor
 	{
 		"color" "220 30 220"
@@ -10048,7 +10048,7 @@ entity
 	"angles" "0 90 0"
 	"automatic" "1"
 	"block" "block_south_2"
-	"cs_pos" "96 3488 27"
+	"cs_pos" "96 3488 16"
 	"ctc_state" "0"
 	"dn_powered" "2"
 	"gmod_allowtools" "wire_adv wire_debugger"
@@ -10060,7 +10060,7 @@ entity
 	"sysname" "snagroar"
 	"targetname" "signal_north_2_1"
 	"up_powered" "0"
-	"origin" "256 3347 272"
+	"origin" "256 3347 304"
 	editor
 	{
 		"color" "220 30 220"
@@ -10080,7 +10080,7 @@ entity
 	"skin" "0"
 	"targetname" "signal_north_2_2"
 	"up_powered" "0"
-	"origin" "256 3347 216"
+	"origin" "256 3347 248"
 	editor
 	{
 		"color" "220 30 220"
@@ -10100,7 +10100,7 @@ entity
 	"skin" "0"
 	"targetname" "signal_north_2_3"
 	"up_powered" "0"
-	"origin" "256 3347 161"
+	"origin" "256 3347 193"
 	editor
 	{
 		"color" "220 30 220"
@@ -10275,7 +10275,7 @@ entity
 	"sysname" "snagroar"
 	"targetname" "signal_east_1_1"
 	"up_powered" "0"
-	"origin" "560 -126 266"
+	"origin" "560 -126 298"
 	editor
 	{
 		"color" "220 30 220"
@@ -10291,11 +10291,11 @@ entity
 	"angles" "0 300 0"
 	"dn_powered" "2"
 	"gmod_allowtools" "wire_adv wire_debugger"
-	"model" "models/trakpak3_us/signals/colorlight/x.mdl"
+	"model" "models/trakpak3_us/signals/colorlight/ryg.mdl"
 	"skin" "0"
 	"targetname" "signal_east_1_2"
 	"up_powered" "0"
-	"origin" "560 -126 210"
+	"origin" "560 -126 253"
 	editor
 	{
 		"color" "220 30 220"
@@ -10315,7 +10315,7 @@ entity
 	"skin" "0"
 	"targetname" "signal_east_1_3"
 	"up_powered" "0"
-	"origin" "560 -126 164"
+	"origin" "560 -126 197"
 	editor
 	{
 		"color" "220 30 220"
@@ -10383,7 +10383,7 @@ entity
 	"angles" "0 270 0"
 	"automatic" "1"
 	"block" "block_east_1"
-	"cs_pos" "2404 -4672 16"
+	"cs_pos" "2394 -4672 16"
 	"ctc_state" "2"
 	"dn_powered" "2"
 	"gmod_allowtools" "wire_adv wire_debugger"
@@ -10397,7 +10397,7 @@ entity
 	"tags" "abs"
 	"targetname" "signal_east_2_1"
 	"up_powered" "0"
-	"origin" "2548 -4480 280"
+	"origin" "2548 -4480 312"
 	editor
 	{
 		"color" "220 30 220"
@@ -10417,7 +10417,7 @@ entity
 	"skin" "0"
 	"targetname" "signal_east_2_3"
 	"up_powered" "0"
-	"origin" "2548 -4480 168"
+	"origin" "2548 -4480 200"
 	editor
 	{
 		"color" "220 30 220"
@@ -10433,11 +10433,11 @@ entity
 	"angles" "0 270 0"
 	"dn_powered" "2"
 	"gmod_allowtools" "wire_adv wire_debugger"
-	"model" "models/trakpak3_us/signals/colorlight/x.mdl"
+	"model" "models/trakpak3_us/signals/colorlight/ryg.mdl"
 	"skin" "0"
 	"targetname" "signal_east_2_2"
 	"up_powered" "0"
-	"origin" "2572 -4480 216"
+	"origin" "2572 -4480 255"
 	editor
 	{
 		"color" "220 30 220"
@@ -10480,7 +10480,7 @@ entity
 	"angles" "0 120 0"
 	"automatic" "1"
 	"block" "block_east_2"
-	"cs_pos" "2304 -4144 16"
+	"cs_pos" "2304 -4144 40"
 	"ctc_state" "2"
 	"dn_powered" "2"
 	"gmod_allowtools" "wire_adv wire_debugger"
@@ -10491,7 +10491,7 @@ entity
 	"tags" "abs"
 	"targetname" "signal_east_3"
 	"up_powered" "0"
-	"origin" "2544 -4288 168"
+	"origin" "2544 -4288 192"
 	editor
 	{
 		"color" "220 30 220"
@@ -10674,6 +10674,7 @@ entity
 	"diverging" "1"
 	"nextsignal" "signal_east_3"
 	"speed" "2"
+	"speed2" "4"
 	"stand_1" "ss_x_2"
 	"stand_2" "ss_j_1"
 	"state_1" "0"
@@ -10873,7 +10874,7 @@ entity
 	"screenspacefade" "0"
 	"skin" "0"
 	"solid" "6"
-	"origin" "-256 3328 262"
+	"origin" "-256 3328 294"
 	editor
 	{
 		"color" "255 255 0"
@@ -10900,7 +10901,7 @@ entity
 	"screenspacefade" "0"
 	"skin" "0"
 	"solid" "6"
-	"origin" "256 3328 262"
+	"origin" "256 3328 294"
 	editor
 	{
 		"color" "255 255 0"
@@ -10927,7 +10928,7 @@ entity
 	"screenspacefade" "0"
 	"skin" "0"
 	"solid" "6"
-	"origin" "552 -112 264"
+	"origin" "552 -112 296"
 	editor
 	{
 		"color" "255 255 0"
@@ -10950,7 +10951,7 @@ entity
 	"ignorenormals" "0"
 	"maxdxlevel" "0"
 	"mindxlevel" "0"
-	"model" "models/trakpak3_us/signals/generic/mast_type0p_09ft.mdl"
+	"model" "models/trakpak3_us/signals/generic/mast_type0p_06ft.mdl"
 	"screenspacefade" "0"
 	"skin" "0"
 	"solid" "6"
@@ -10977,7 +10978,7 @@ entity
 	"ignorenormals" "0"
 	"maxdxlevel" "0"
 	"mindxlevel" "0"
-	"model" "models/trakpak3_us/signals/generic/mast_type0p_09ft.mdl"
+	"model" "models/trakpak3_us/signals/generic/mast_type0p_06ft.mdl"
 	"screenspacefade" "0"
 	"skin" "0"
 	"solid" "6"
@@ -11062,7 +11063,7 @@ entity
 	"screenspacefade" "0"
 	"skin" "0"
 	"solid" "6"
-	"origin" "2560 -4480 266"
+	"origin" "2560 -4480 298"
 	editor
 	{
 		"color" "255 255 0"
@@ -13354,6 +13355,7 @@ entity
 	"MinAnimTime" "5"
 	"mindxlevel" "0"
 	"model" "models/trakpak3_rsg_bridge/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
+	"modelscale" "1.0"
 	"PerformanceMode" "0"
 	"pressuredelay" "0"
 	"RandomAnimation" "0"
@@ -17340,6 +17342,7 @@ entity
 	"MinAnimTime" "5"
 	"mindxlevel" "0"
 	"model" "models/trakpak3_rsg_bridge/straights/s2048_0fw_0pg_+2048x00000x0000.mdl"
+	"modelscale" "1.0"
 	"PerformanceMode" "0"
 	"pressuredelay" "0"
 	"RandomAnimation" "0"

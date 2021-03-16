@@ -13,13 +13,15 @@ if SERVER then
 		target = "entity",
 		block = "entity",
 		nextsignal = "entity",
+		diverging = "boolean",
+		speed = "number",
 		
 		target2 = "entity",
 		block2 = "entity",
 		nextsignal2 = "entity",
+		diverging2 = "boolean",
+		speed2 = "number",
 		
-		diverging = "boolean",
-		speed = "number",
 		
 		OnPathTrue = "output",
 		OnPathFalse = "output",
@@ -35,6 +37,8 @@ if SERVER then
 		self:RegisterEntity("target",self.target)
 		self:RegisterEntity("target2",self.target2)
 		self:ValidateNumerics()
+		
+		if self.speed2==0 then self.speed2 = self.speed end
 		
 		self:ProcessLogic()
 		local condition = self:EvaluateLogic()
@@ -52,7 +56,7 @@ if SERVER then
 		end
 		if self.target2_valid then
 			self.pathname = self:EntIndex()
-			self.target2_ent:AddPath(self.pathname,self.diverging,self.speed,self.block2,self.nextsignal2,condition)
+			self.target2_ent:AddPath(self.pathname,self.diverging2,self.speed2,self.block2,self.nextsignal2,condition)
 		end
 	end
 	
@@ -138,7 +142,16 @@ if SERVER then
 	function ENT:AcceptInput(iname, activator, caller, data)
 		if iname=="SetSpeed" then
 			self.speed = tonumber(data) or Trakpak3.FULL
-			self.target_ent:AddPath(self.pathname,self.script,self.diverging,self.speed,self.block,self.nextsignal,self:ProcessLogic())
+			if self.target_valid then
+				self.pathname = self:EntIndex()
+				self.target_ent:AddPath(self.pathname,self.diverging,self.speed,self.block,self.nextsignal,condition)
+			end
+		elseif iname=="SetSpeed2" then
+			self.speed2 = tonumber(data) or Trakpak3.FULL
+			if self.target2_valid then
+				self.pathname = self:EntIndex()
+				self.target2_ent:AddPath(self.pathname,self.diverging2,self.speed2,self.block2,self.nextsignal2,condition)
+			end
 		end
 	end
 end

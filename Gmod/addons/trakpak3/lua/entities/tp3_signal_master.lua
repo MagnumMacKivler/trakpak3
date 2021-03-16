@@ -85,8 +85,8 @@ if SERVER then
 		
 		--Wire Setup
 		if WireLib then
-			local names = {"Aspect","Diverging","Speed","ColorCode"}
-			local types = {"STRING","NORMAL","NORMAL","NORMAL"}
+			local names = {"Aspect","Diverging","Speed","ColorCode","CabSignalAspect"}
+			local types = {"STRING","NORMAL","NORMAL","NORMAL","STRING"}
 			WireLib.CreateSpecialOutputs(self, names, types, descs)
 			--print("YAAAAAAAA")
 		end
@@ -167,6 +167,13 @@ if SERVER then
 		end
 	end
 	
+	--Accidentally marked as a slave signal
+	function ENT:HandleNewColor()
+		--self:SetColor(Color(255,0,0))
+		self:SetMaterial("models/error/new light1")
+		ErrorNoHalt("[Trakpak3] Error: MASTER Signal '"..self:GetName().."' ("..tostring(self)..") is marked as a slave signal by another signal! Signal has been marked with the flashing red error material.\n")
+	end
+	
 	--Handle New Aspect if applicable
 	function ENT:HandleNewAspect(aspect, force) --aspect is string
 		if aspect then
@@ -178,6 +185,13 @@ if SERVER then
 				local colordata = self.system.sigtypes[self.signaltype][aspect]
 				if colordata then
 					self.aspect = aspect
+					
+					timer.Simple(5,function()
+						self.aspect_delayed = aspect
+						if WireLib then
+							WireLib.TriggerOutput(self,"CabSignalAspect",aspect)
+						end
+					end)
 					
 					local data = {}
 					if colordata.skin1!="" then data.skin1 = tonumber(colordata.skin1) end
@@ -265,6 +279,7 @@ if SERVER then
 					self:SetNWString("Color",self.system.rules[aspect].color)
 				else
 					error("[Trakpak3] Error! Aspect "..aspect.." is not defined for signal type "..self.signaltype.."!")
+					self.aspect_delayed = nil
 				end
 			end
 		end
@@ -348,7 +363,7 @@ if SERVER then
 		end
 		
 		if self.block_valid then self.my_occupied = self.block_ent.occupied else self.my_occupied = false end
-		if self.nextsignal_valid then
+		if self.nextsignal_valid and self.nextsignal_ent.system then
 			self.my_nextaspect = self.nextsignal_ent.aspect
 			self.my_nextspeed = self.nextsignal_ent.system.rules[self.my_nextaspect].speed
 		else

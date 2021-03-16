@@ -23,20 +23,26 @@ end
 if SERVER then
 	
 	--This function is called on creation?
-	function ENT:Setup(spadspeed, restrictedspeed, units, lw, h)
-		print("Setup Cabsignal Box!")
-		self:SetupSpeedInfo(spadspeed,restrictedspeed,units, lw, h)
+	--function ENT:Setup(spadspeed, restrictedspeed, units, lw, h)
+	function ENT:Setup(spadspeed, units, lw, h)
+		--print("Setup Cabsignal Box!")
+		--self:SetupSpeedInfo(spadspeed,restrictedspeed,units, lw, h)
+		self:SetupSpeedInfo(spadspeed, units, lw, h)
+		
 	end
-
-	function ENT:SetupSpeedInfo(s,r,u,lw,h) --Sanity check the speed/scan values, assign default otherwise
+	
+	--Sanity check the speed/scan values, assign default otherwise
+	--function ENT:SetupSpeedInfo(s,r,u,lw,h) 
+	function ENT:SetupSpeedInfo(s,u,lw,h) 
 		local s_good = s and (tonumber(s)>=0)
-		local r_good = r and (tonumber(r)>=0)
+		--local r_good = r and (tonumber(r)>=0)
 		local u_good = (u=="mph") or (u=="kph") or (u=="ins")
 		
 		local lw_good = lw and tonumber(lw)>0
 		local h_good = h and tonumber(h)>0
 		
-		if s_good and r_good and u_good and lw_good and h_good then
+		--if s_good and r_good and u_good and lw_good and h_good then
+		if s_good and u_good and lw_good and h_good then
 			self.spadspeed = tonumber(s)
 			self.restrictedspeed = tonumber(r)
 			self.units = u
@@ -45,8 +51,8 @@ if SERVER then
 			self.h = tonumber(h)
 			
 		else
-			self.spadspeed = 5
-			self.restrictedspeed = 15
+			self.spadspeed = 10
+			--self.restrictedspeed = 15
 			self.units = "mph"
 			
 			self.lw = 128
@@ -54,7 +60,8 @@ if SERVER then
 		end
 		
 		self.scansize = Vector(self.lw/2, self.lw/2, self.h/2)
-		self:SetOverlayText("SPAD Trip: "..self.spadspeed.." "..self.units.."\nRestricting Trip: "..self.restrictedspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h)
+		--self:SetOverlayText("SPAD Trip: "..self.spadspeed.." "..self.units.."\nRestricting Trip: "..self.restrictedspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h)
+		self:SetOverlayText("SPAD Trip: "..self.spadspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h)
 	end
 	
 	Trakpak3.speedmul = {mph = 17.6, kph = 10.93, ins = 1.0}
@@ -225,8 +232,8 @@ if SERVER then
 		local clear = false
 		if homevalid then
 			--Get Aspect Info
-			local aspect = homesig.aspect
-			WireLib.TriggerOutput(self,"LastSignalAspect",homesig.aspect or "None")
+			local aspect = homesig.aspect_delayed
+			WireLib.TriggerOutput(self,"LastSignalAspect",aspect or "None")
 			
 			local system = homesig.system
 			if aspect and system then
@@ -259,8 +266,8 @@ if SERVER then
 			self.nextsignal = next_signal
 		
 			--Get Aspect Info
-			local aspect = nextsig.aspect
-			WireLib.TriggerOutput(self,"NextSignalAspect",nextsig.aspect or "None")
+			local aspect = nextsig.aspect_delayed
+			WireLib.TriggerOutput(self,"NextSignalAspect",aspect or "None")
 			
 			local system = nextsig.system
 			if aspect and system then
@@ -297,6 +304,8 @@ if SERVER then
 					WireLib.TriggerOutput(self,"EmBrake",0) --Reset after 1 second
 				end)
 			end
+		end
+		--[[
 		elseif speedcode==1 then --test SPAR
 			local root = Trakpak3.GetRoot(self)
 			local speed = root:GetVelocity():Length()
@@ -308,6 +317,7 @@ if SERVER then
 				end)
 			end
 		end
+		]]--
 		
 	end
 end

@@ -1,100 +1,116 @@
 [
 	{
+		"y_res": "48",
+		"color": "95",
 		"elements": [
 			{
-				"x2": 39.0,
+				"y1": 5.0,
 				"x1": 1.0,
+				"color": "0",
 				"type": "line",
 				"y2": 5.0,
-				"y1": 5.0
+				"x2": 39.0,
+				"weight": 3.0
 			},
 			{
-				"x2": 39.0,
+				"y1": 7.0,
 				"x1": 1.0,
+				"color": "0",
 				"type": "line",
 				"y2": 7.0,
-				"y1": 7.0
+				"x2": 39.0,
+				"weight": 3.0
 			},
 			{
 				"x": 7.0,
 				"orientation": 3.0,
 				"type": "signal",
-				"y": 8.0,
-				"signal": "signal_north_1_1"
+				"signal": "signal_north_1_1",
+				"style": false,
+				"y": 8.0
 			},
 			{
 				"x": 7.0,
 				"orientation": 3.0,
 				"type": "signal",
-				"y": 4.0,
-				"signal": "signal_north_2_1"
+				"signal": "signal_north_2_1",
+				"style": false,
+				"y": 4.0
 			},
 			{
-				"x2": 13.0,
+				"y1": 7.0,
 				"x1": 9.0,
+				"color": "0",
 				"type": "line",
 				"y2": 5.0,
-				"y1": 7.0
+				"x2": 13.0,
+				"weight": 2.0
 			},
 			{
-				"x2": 21.0,
+				"y1": 5.0,
 				"x1": 16.0,
+				"color": "0",
 				"type": "line",
 				"y2": 3.0,
-				"y1": 5.0
+				"x2": 21.0,
+				"weight": 3.0
 			},
 			{
+				"y1": 3.0,
+				"x1": 21.0,
+				"color": "0",
+				"type": "line",
+				"y2": 3.0,
 				"x2": 31.0,
-				"x1": 21.0,
-				"type": "line",
-				"y2": 3.0,
-				"y1": 3.0
+				"weight": 3.0
 			},
 			{
-				"x2": 25.0,
+				"y1": 5.0,
 				"x1": 21.0,
+				"color": "0",
 				"type": "line",
 				"y2": 7.0,
-				"y1": 5.0
+				"x2": 25.0,
+				"weight": 2.0
 			},
 			{
-				"x2": 31.0,
+				"y1": 7.0,
 				"x1": 28.0,
+				"color": "0",
 				"type": "line",
 				"y2": 9.0,
-				"y1": 7.0
+				"x2": 31.0,
+				"weight": 2.0
 			},
 			{
-				"x2": 31.0,
+				"y1": 9.0,
 				"x1": 31.0,
+				"color": "0",
 				"type": "line",
 				"y2": 12.0,
-				"y1": 9.0
+				"x2": 31.0,
+				"weight": 3.0
 			},
 			{
 				"x": 33.0,
 				"orientation": 4.0,
 				"type": "signal",
-				"y": 8.0,
-				"signal": "signal_south_1_1"
+				"signal": "signal_south_1_1",
+				"style": false,
+				"y": 8.0
 			},
 			{
 				"x": 33.0,
 				"orientation": 4.0,
 				"type": "signal",
-				"y": 4.0,
-				"signal": "signal_south_2_1"
+				"signal": "signal_south_2_1",
+				"style": false,
+				"y": 4.0
 			},
 			{
 				"type": "switch",
-				"x": 9.0,
-				"y": 7.0,
-				"switch": "ss_x_1"
-			},
-			{
-				"type": "switch",
-				"x": 13.0,
-				"y": 5.0,
+				"x": 11.0,
+				"y": 6.0,
 				"switch": "ss_x_2"
 			},
 			{
@@ -105,15 +121,9 @@
 			},
 			{
 				"type": "switch",
-				"x": 21.0,
-				"y": 5.0,
+				"x": 23.0,
+				"y": 6.0,
 				"switch": "ss_x_3"
-			},
-			{
-				"type": "switch",
-				"x": 25.0,
-				"y": 7.0,
-				"switch": "ss_x_4"
 			},
 			{
 				"type": "switch",
@@ -149,8 +159,9 @@
 				"x": 21.0,
 				"orientation": 4.0,
 				"type": "signal",
-				"y": 2.0,
-				"signal": "signal_east_1_1"
+				"signal": "signal_east_1_1",
+				"style": false,
+				"y": 2.0
 			},
 			{
 				"type": "block",
@@ -168,80 +179,89 @@
 				"x": 32.0,
 				"orientation": 1.0,
 				"type": "signal",
-				"y": 10.0,
-				"signal": "signal_west"
+				"signal": "signal_west",
+				"style": true,
+				"y": 10.0
 			},
 			{
-				"x": 15.0,
+				"x": 5.0,
 				"icon1": "generic_unlocked.png",
 				"icon2": "generic_2.png",
-				"y": 13.0,
+				"y": 14.0,
 				"color4": "255 255 255",
-				"color3": "255 255 255",
+				"icon5": "generic_5.png",
 				"icon6": "generic_6.png",
 				"color5": "255 255 255",
 				"color0": "0 255 0",
 				"icon0": "generic_locked.png",
 				"color1": "255 0 0",
 				"icon3": "generic_3.png",
-				"proxy": "bridge_ds_lock",
-				"color7": "255 255 255",
+				"icon4": "generic_4.png",
+				"color3": "255 255 255",
 				"color2": "255 255 255",
 				"color6": "255 255 255",
 				"type": "proxy",
 				"icon7": "generic_7.png",
-				"icon5": "generic_5.png",
-				"icon4": "generic_4.png"
+				"proxy": "bridge_ds_lock",
+				"color7": "255 255 255"
 			},
 			{
-				"x": 19.0,
+				"x": 5.0,
 				"icon1": "generic_o.png",
 				"icon2": "generic_minus.png",
-				"y": 13.0,
+				"y": 16.0,
 				"color4": "255 255 255",
-				"color3": "255 255 255",
+				"icon5": "generic_5.png",
 				"icon6": "generic_6.png",
 				"color5": "255 255 255",
 				"color0": "0 255 0",
 				"icon0": "generic_c.png",
 				"color1": "255 0 0",
 				"icon3": "generic_3.png",
-				"proxy": "bridge_ds_control",
-				"color7": "255 255 255",
+				"icon4": "generic_4.png",
+				"color3": "255 255 255",
 				"color2": "255 255 0",
 				"color6": "255 255 255",
 				"type": "proxy",
 				"icon7": "generic_7.png",
-				"icon5": "generic_5.png",
-				"icon4": "generic_4.png"
+				"proxy": "bridge_ds_control",
+				"color7": "255 255 255"
 			},
 			{
-				"x2": 29.0,
+				"y1": 17.0,
 				"x1": 23.0,
+				"color": "0",
 				"type": "line",
 				"y2": 17.0,
-				"y1": 17.0
+				"x2": 29.0,
+				"weight": 3.0
 			},
 			{
-				"x2": 35.0,
+				"y1": 17.0,
 				"x1": 29.0,
+				"color": "0",
 				"type": "line",
 				"y2": 14.0,
-				"y1": 17.0
+				"x2": 35.0,
+				"weight": 2.0
 			},
 			{
-				"x2": 35.0,
+				"y1": 17.0,
 				"x1": 29.0,
+				"color": "0",
 				"type": "line",
 				"y2": 17.0,
-				"y1": 17.0
+				"x2": 35.0,
+				"weight": 3.0
 			},
 			{
-				"x2": 23.0,
+				"y1": 17.0,
 				"x1": 29.0,
+				"color": "0",
 				"type": "line",
 				"y2": 20.0,
-				"y1": 17.0
+				"x2": 23.0,
+				"weight": 2.0
 			},
 			{
 				"type": "switch",
@@ -254,10 +274,65 @@
 				"x": 25.0,
 				"y": 18.0,
 				"switch": "slip_stand_1b"
+			},
+			{
+				"y1": 13.0,
+				"y2": 15.0,
+				"boxweight": 0.0,
+				"text": "Lock/Unlock",
+				"x2": 12.0,
+				"x1": 6.0,
+				"textsize": 1.0,
+				"textalign_h": -1.0,
+				"type": "text",
+				"textcolor": "0 0 0",
+				"boxcolor": "0 0 0",
+				"textalign_v": 0.0
+			},
+			{
+				"y1": 15.0,
+				"y2": 17.0,
+				"boxweight": 0.0,
+				"text": "Open/Close",
+				"x2": 12.0,
+				"x1": 6.0,
+				"textsize": 1.0,
+				"textalign_h": -1.0,
+				"type": "text",
+				"textcolor": "0 0 0",
+				"boxcolor": "0 0 0",
+				"textalign_v": 0.0
+			},
+			{
+				"y1": 11.0,
+				"y2": 18.0,
+				"boxweight": 2.0,
+				"text": "Bridge Controls",
+				"x2": 13.0,
+				"x1": 4.0,
+				"textsize": 2.0,
+				"textalign_h": 0.0,
+				"type": "text",
+				"textcolor": "0 0 0",
+				"boxcolor": "0 0 0",
+				"textalign_v": 1.0
+			},
+			{
+				"y1": 1.0,
+				"y2": 3.0,
+				"boxweight": 0.0,
+				"text": "trakpak3_testbed",
+				"x2": 19.0,
+				"x1": 1.0,
+				"textsize": 3.0,
+				"textalign_h": 0.0,
+				"type": "text",
+				"textcolor": "0 0 0",
+				"boxcolor": "0 0 0",
+				"textalign_v": 1.0
 			}
 		],
-		"y_res": "48",
-		"name": "Test Interlocking",
-		"x_res": "64"
+		"x_res": "64",
+		"name": "Test Interlocking"
 	}
 ]

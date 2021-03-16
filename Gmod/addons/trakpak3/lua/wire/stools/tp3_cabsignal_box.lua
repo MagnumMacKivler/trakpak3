@@ -1,6 +1,6 @@
 WireToolSetup.setCategory( "Trakpak3" )
 WireToolSetup.open( "tp3_cabsignal_box", "Trakpak3 Cab Signal Box", "gmod_wire_tp3_cabsignal_box", nil, "Trakpak3 Cab Signal Boxes" )
-WireToolSetup.SetupMax( 20 )
+WireToolSetup.SetupMax( 30 )
 WireToolSetup.BaseLang()
 
 if CLIENT then
@@ -14,8 +14,8 @@ end
 
 TOOL.ClientConVar = {
 	model = "models/gsgtrainprops/parts/cabsignals/cab_signal_box.mdl",
-	spadspeed = "5",
-	restrictedspeed = "15",
+	spadspeed = "10",
+	--restrictedspeed = "15",
 	units = "mph",
 	lw = "96",
 	h = "192"
@@ -23,7 +23,8 @@ TOOL.ClientConVar = {
 
 if SERVER then
 	function TOOL:GetConVars()
-		return self:GetClientInfo("spadspeed"), self:GetClientInfo("restrictedspeed"), self:GetClientInfo("units"), self:GetClientInfo("lw"), self:GetClientInfo("h")
+		--return self:GetClientInfo("spadspeed"), self:GetClientInfo("restrictedspeed"), self:GetClientInfo("units"), self:GetClientInfo("lw"), self:GetClientInfo("h")
+		return self:GetClientInfo("spadspeed"), self:GetClientInfo("units"), self:GetClientInfo("lw"), self:GetClientInfo("h")
 	end
 end
 
@@ -58,7 +59,7 @@ function TOOL.BuildCPanel(panel)
 	
 	--SPAD Speed Selector
 	local slider = vgui.Create("DNumSlider",panel)
-	slider:SetText("SPAD (Signal Passed At Danger) Speed:")
+	slider:SetText("SPAD Speed:")
 	slider:SetMin(0)
 	slider:SetMax(1000)
 	slider:SetDecimals(0)
@@ -66,7 +67,14 @@ function TOOL.BuildCPanel(panel)
 	slider:SetDark(true)
 	panel:AddPanel(slider)
 	
+	local label = vgui.Create("DLabel",panel)
+	label:SetText("(Signal Passed At Danger)")
+	label:SetContentAlignment(5)
+	label:SetTextColor(Color(0,0,0))
+	panel:AddPanel(slider)
+	
 	--SPAR Speed Selector
+	--[[
 	local slider = vgui.Create("DNumSlider",panel)
 	slider:SetText("Restricted Speed:")
 	slider:SetMin(0)
@@ -75,6 +83,7 @@ function TOOL.BuildCPanel(panel)
 	slider:SetConVar("wire_tp3_cabsignal_box_restrictedspeed")
 	slider:SetDark(true)
 	panel:AddPanel(slider)
+	]]--
 	
 	--Unit Selector
 	local cbox = vgui.Create("DComboBox",panel)
@@ -113,4 +122,5 @@ function TOOL.BuildCPanel(panel)
 	panel:AddPanel(label)
 end
 
-duplicator.RegisterEntityClass("gmod_wire_tp3_cabsignal_box", WireLib.MakeWireEnt, "Data", "spadspeed", "restrictedspeed", "units", "lw", "h")
+--duplicator.RegisterEntityClass("gmod_wire_tp3_cabsignal_box", WireLib.MakeWireEnt, "Data", "spadspeed", "restrictedspeed", "units", "lw", "h")
+duplicator.RegisterEntityClass("gmod_wire_tp3_cabsignal_box", WireLib.MakeWireEnt, "Data", "spadspeed", "units", "lw", "h")

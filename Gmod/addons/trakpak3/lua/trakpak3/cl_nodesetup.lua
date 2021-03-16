@@ -474,78 +474,81 @@ hook.Add("PostDrawTranslucentRenderables","TP3_NE_DRAW", function()
 			end
 		end
 		
-	elseif Trakpak3.ShowHulls and Trakpak3.NodeList and Trakpak3.NodeChainList and Trakpak3.BlockDims then --Draw live-updated block occupancy hulls (tp3_showhulls active)
+	elseif Trakpak3.ShowHulls then --Draw live-updated block occupancy hulls (tp3_showhulls active)
 		local rdist = (GetConVar("tp3_node_editor_drawdistance"):GetFloat() or 1024)^2
 		local mypos = LocalPlayer():GetPos()
 		
 		local incopyzone = false
 		
 		--Blocks and their Nodes
-		for block_name, chain in pairs(Trakpak3.NodeChainList) do
-			--Determine Color
-			local ChainColor
-			if Trakpak3.BlockDims[block_name].occupied then
-				ChainColor = Trakpak3.OCCUPIED
-			else
-				ChainColor = Trakpak3.CLEAR
-			end
-			
-			--Draw Node Hulls
-			local nodes = chain.Nodes
-			local skips = chain.Skips
-			local dims = Trakpak3.BlockDims[block_name]
-			local seq_end = table.Count(nodes)
-			
-			for seq = 1, seq_end do
-				local node_id = nodes[seq]
-				if mypos:DistToSqr(Trakpak3.NodeList[node_id]) < rdist then
-				
-					render.DrawWireframeBox(Trakpak3.NodeList[node_id] + Vector(0,0,dims.offset + dims.h/2), Angle(), Vector(-dims.lw/2, -dims.lw/2, -dims.h/2), Vector(dims.lw/2, dims.lw/2, dims.h/2), ChainColor, true)
-					
-					if seq<seq_end then
-						local c1 = Trakpak3.NodeList[ nodes[seq] ] + Vector(0,0,dims.offset + dims.h/2)
-						local c2 = Trakpak3.NodeList[ nodes[seq+1] ] + Vector(0,0,dims.offset + dims.h/2)
-						if skips[seq] then
-							render.DrawLine(c1, c2, Trakpak3.SKIP, true)
-						else
-							Trakpak3.DrawHullLines(c1, c2, dims.lw, dims.h, ChainColor)
-						end
-					end
+		if Trakpak3.NodeChainList then
+			for block_name, chain in pairs(Trakpak3.NodeChainList) do
+				--Determine Color
+				local ChainColor
+				if Trakpak3.BlockDims[block_name].occupied then
+					ChainColor = Trakpak3.OCCUPIED
+				else
+					ChainColor = Trakpak3.CLEAR
 				end
-			end 
-			
-			--Draw Block Block
-			if Trakpak3.Blocks and (Trakpak3.ShowHulls==2) then
-				local bpos = Trakpak3.Blocks[block_name].pos
-				if mypos:DistToSqr(bpos) < rdist then
 				
-					local mins = Vector(-64,-64,-8)
-					local maxs = Vector(64,64,128)
+				--Draw Node Hulls
+				if Trakpak3.NodeList and Trakpak3.BlockDims then
+					local nodes = chain.Nodes
+					local skips = chain.Skips
+					local dims = Trakpak3.BlockDims[block_name]
+					local seq_end = table.Count(nodes)
 					
-					render.DrawWireframeBox(bpos,Angle(),mins,maxs,ChainColor)
-					
-					local text
-					local tpos
-					
-					if mypos:WithinAABox(bpos+mins, bpos+maxs) then --Inside the box
-						text = "Signal Block '"..block_name.."' (Press E to Copy to Clipboard)"
-						tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+					for seq = 1, seq_end do
+						local node_id = nodes[seq]
+						if mypos:DistToSqr(Trakpak3.NodeList[node_id]) < rdist then
 						
-						incopyzone = true
-						if not Trakpak3.Clipboard then
-							Trakpak3.Clipboard = block_name
-							--net.Start("tp3_clipboard")
-								--net.WriteString(block_name)
-							--net.SendToServer()
+							render.DrawWireframeBox(Trakpak3.NodeList[node_id] + Vector(0,0,dims.offset + dims.h/2), Angle(), Vector(-dims.lw/2, -dims.lw/2, -dims.h/2), Vector(dims.lw/2, dims.lw/2, dims.h/2), ChainColor, true)
+							
+							if seq<seq_end then
+								local c1 = Trakpak3.NodeList[ nodes[seq] ] + Vector(0,0,dims.offset + dims.h/2)
+								local c2 = Trakpak3.NodeList[ nodes[seq+1] ] + Vector(0,0,dims.offset + dims.h/2)
+								if skips[seq] then
+									render.DrawLine(c1, c2, Trakpak3.SKIP, true)
+								else
+									Trakpak3.DrawHullLines(c1, c2, dims.lw, dims.h, ChainColor)
+								end
+							end
 						end
-					else --Outside the box
-						text = "Signal Block '"..block_name.."'"
-						tpos = (bpos + Vector(0,0,64)):ToScreen()
-					end
+					end 
+				end
+				--Draw Block Block
+				if Trakpak3.Blocks and (Trakpak3.ShowHulls==2) then
+					local bpos = Trakpak3.Blocks[block_name].pos
+					if mypos:DistToSqr(bpos) < rdist then
 					
-					cam.Start2D()
-						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, ChainColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
-					cam.End2D()
+						local mins = Vector(-64,-64,-8)
+						local maxs = Vector(64,64,128)
+						
+						render.DrawWireframeBox(bpos,Angle(),mins,maxs,ChainColor)
+						
+						local text
+						local tpos
+						
+						if mypos:WithinAABox(bpos+mins, bpos+maxs) then --Inside the box
+							text = "Signal Block '"..block_name.."' (Press E to Copy to Clipboard)"
+							tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+							
+							incopyzone = true
+							if not Trakpak3.Clipboard then
+								Trakpak3.Clipboard = block_name
+								--net.Start("tp3_clipboard")
+									--net.WriteString(block_name)
+								--net.SendToServer()
+							end
+						else --Outside the box
+							text = "Signal Block '"..block_name.."'"
+							tpos = (bpos + Vector(0,0,64)):ToScreen()
+						end
+						
+						cam.Start2D()
+							if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, ChainColor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
+						cam.End2D()
+					end
 				end
 			end
 		end

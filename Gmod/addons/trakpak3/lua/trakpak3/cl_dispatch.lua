@@ -20,9 +20,29 @@ local color_block2 = Color(255,95,0)
 
 Dispatch.elementsize = 20
 
-surface.CreateFont("tp3_dispatch",{
+surface.CreateFont("tp3_dispatch_1",{
 	font = "Roboto",
 	size = 16,
+	weight = 700
+})
+surface.CreateFont("tp3_dispatch_2",{
+	font = "Roboto",
+	size = 24,
+	weight = 700
+})
+surface.CreateFont("tp3_dispatch_3",{
+	font = "Roboto",
+	size = 32,
+	weight = 700
+})
+surface.CreateFont("tp3_dispatch_4",{
+	font = "Roboto",
+	size = 40,
+	weight = 700
+})
+surface.CreateFont("tp3_dispatch_5",{
+	font = "Roboto",
+	size = 48,
 	weight = 700
 })
 
@@ -316,9 +336,10 @@ function Dispatch.OpenEditor()
 	button:SetSize(24,1)
 	button:Dock(LEFT)
 	--button:SetText("")
-	button:SetImage("icon16/collision_on.png")
-	button.DoClick = function()
+	if Dispatch.showgrid then button:SetImage("icon16/collision_on.png") else button:SetImage("icon16/collision_off.png") end
+	function button:DoClick()
 		Dispatch.showgrid = not Dispatch.showgrid
+		if Dispatch.showgrid then self:SetImage("icon16/collision_on.png") else self:SetImage("icon16/collision_off.png") end
 	end
 	button:SetTooltip("Toggle Grid Display")
 	Dispatch.Panels.gridbutton = button
@@ -327,9 +348,10 @@ function Dispatch.OpenEditor()
 	local button = vgui.Create("DImageButton",topbar)
 	button:SetSize(24,1)
 	button:Dock(LEFT)
-	button:SetImage("icon16/picture_empty.png")
-	button.DoClick = function()
+	if not Dispatch.hidehelpers then button:SetImage("icon16/shape_handles.png") else button:SetImage("icon16/shape_square.png") end
+	function button:DoClick()
 		Dispatch.hidehelpers = not Dispatch.hidehelpers
+		if not Dispatch.hidehelpers then self:SetImage("icon16/shape_handles.png") else self:SetImage("icon16/shape_square.png") end
 		Dispatch.PopulatePage(Dispatch.Panels.canvas)
 	end
 	button:SetTooltip("Toggle Helpers")
@@ -340,6 +362,7 @@ function Dispatch.OpenEditor()
 	button:SetSize(24,1)
 	button:Dock(LEFT)
 	button:SetImage("icon16/layers.png")
+	if Trakpak3.ShowHulls then button:SetColor(Color(255,255,255)) else button:SetColor(Color(255,127,127)) end
 	button:SetTooltip("Toggle Map Block Hulls and Switch/Signal Display")
 	function button:DoClick()
 		if Trakpak3.ShowHulls != 2 then
@@ -347,7 +370,32 @@ function Dispatch.OpenEditor()
 		else
 			Trakpak3.ShowHulls = false
 		end
+		if Trakpak3.ShowHulls then self:SetColor(Color(255,255,255)) else self:SetColor(Color(255,127,127)) end
 	end
+	
+	--Backing Color
+	local label = vgui.Create("DLabel",topbar)
+	label:SetSize(64,1)
+	label:Dock(LEFT)
+	label:DockMargin(4,4,4,4)
+	label:SetText("BG Color:")
+	label:SetTextColor(dark)
+	label:SetContentAlignment(6)
+	
+	local colorbox = vgui.Create("DTextEntry",topbar)
+	colorbox:SetSize(72,1)
+	colorbox:Dock(LEFT)
+	colorbox:SetValue("255 255 255")
+	
+	function colorbox:OnEnter(value)
+		local page = Dispatch.page
+		if page > 0 then
+			Dispatch.Boards[page].color = value
+			Dispatch.PopulatePage(Dispatch.Panels.canvas)
+		end
+	end
+	
+	Dispatch.Panels.colorbox = colorbox
 	
 	--Save Button
 	local button = vgui.Create("DButton",topbar)
@@ -415,6 +463,196 @@ function Dispatch.OpenEditor()
 		end
 	end
 	
+	--Icon Browser
+	local button = vgui.Create("DButton",bottombar)
+	button:SetSize(96,1)
+	button:Dock(LEFT)
+	button:SetText("Icon Browser")
+	button.DoClick = function()
+		if not Dispatch.iconbrowser then
+			Dispatch.iconbrowser = true
+			
+			local iconframe = vgui.Create("DFrame")
+			iconframe:SetSize(256,384)
+			iconframe:SetPos(0,0)
+			iconframe:SetScreenLock(true)
+			iconframe:SetTitle("Icon Browser")
+			iconframe:SetIcon("trakpak3_common/icons/generic_star.png")
+			function iconframe:OnClose() Dispatch.iconbrowser = false end
+			iconframe:MakePopup()
+			
+			local copy = vgui.Create("DButton",iconframe)
+			copy:SetSize(1,36)
+			copy:Dock(BOTTOM)
+			copy:SetText("Copy To Clipboard")
+			
+			local tray = vgui.Create("DPanel",iconframe)
+			tray:SetSize(1,48)
+			tray:Dock(BOTTOM)
+			function tray:Paint() end
+			
+			local icondisplay = vgui.Create("DImage",tray)
+			icondisplay:SetSize(48,1)
+			icondisplay:Dock(LEFT)
+			
+			local icontext = vgui.Create("DTextEntry",tray)
+			icontext:Dock(FILL)
+			icontext:DockMargin(4,12,4,12)
+			icontext:SetDisabled(true)
+			
+			local scrollbase = vgui.Create("DPanel",iconframe)
+			scrollbase:Dock(FILL)
+			
+			local iconscroll = vgui.Create("DScrollPanel",scrollbase)
+			iconscroll:Dock(FILL)
+			
+			local iconselected = ""
+			
+			local folderpath = "trakpak3_common/icons/"
+			
+			local iconlist = {
+				"toggle_up",
+				"toggle_down",
+				"toggle_left",
+				"toggle_right",
+				
+				"generic_blank",
+				"generic_up",
+				"generic_down",
+				"generic_left",
+				"generic_right",
+				"generic_locked",
+				"generic_unlocked",
+				"generic_star",
+				"generic_plus",
+				"generic_minus",
+				"generic_exclamation",
+				"generic_question",
+				
+				"generic_a",
+				"generic_b",
+				"generic_c",
+				"generic_d",
+				"generic_e",
+				"generic_f",
+				"generic_g",
+				"generic_h",
+				"generic_i",
+				"generic_j",
+				"generic_k",
+				"generic_l",
+				"generic_m",
+				"generic_n",
+				"generic_o",
+				"generic_p",
+				"generic_q",
+				"generic_r",
+				"generic_s",
+				"generic_t",
+				"generic_u",
+				"generic_v",
+				"generic_w",
+				"generic_x",
+				"generic_y",
+				"generic_z",
+				
+				"generic_0",
+				"generic_1",
+				"generic_2",
+				"generic_3",
+				"generic_4",
+				"generic_5",
+				"generic_6",
+				"generic_7",
+				"generic_8",
+				"generic_9",
+				
+				"signal_red_n",
+				"signal_red_s",
+				"signal_red_w",
+				"signal_red_e",
+				
+				"signal_yel_n",
+				"signal_yel_s",
+				"signal_yel_w",
+				"signal_yel_e",
+				
+				"signal_grn_n",
+				"signal_grn_s",
+				"signal_grn_w",
+				"signal_grn_e",
+				
+				"signal_lun_n",
+				"signal_lun_s",
+				"signal_lun_w",
+				"signal_lun_e",
+				
+				"signal_red_n_alt",
+				"signal_red_s_alt",
+				"signal_red_w_alt",
+				"signal_red_e_alt",
+				
+				"signal_yel_n_alt",
+				"signal_yel_s_alt",
+				"signal_yel_w_alt",
+				"signal_yel_e_alt",
+				
+				"signal_grn_n_alt",
+				"signal_grn_s_alt",
+				"signal_grn_w_alt",
+				"signal_grn_e_alt",
+				
+				"signal_lun_n_alt",
+				"signal_lun_s_alt",
+				"signal_lun_w_alt",
+				"signal_lun_e_alt",
+				
+				"block_clear",
+				"block_occupied",
+				
+				"switch_n_unlit",
+				"switch_n_lit",
+				"switch_r_unlit",
+				"switch_r_lit",
+				"switch_x_unlit",
+				"switch_x_lit",
+				"switch_hourglass_lit"
+			}
+			local index = 1
+			local numicons = #iconlist
+			local numrows = math.ceil(numicons/6)
+			for n = 1, numrows do
+				local row = vgui.Create("DPanel",iconscroll)
+				row:SetSize(1,36)
+				row:Dock(TOP)
+				function row:Paint() end
+				for m = 1,6 do
+					local ibutton = vgui.Create("DImageButton",row)
+					ibutton:SetSize(32,32)
+					ibutton:Dock(LEFT)
+					ibutton:DockMargin(2,2,2,2)
+					local img = iconlist[index]..".png"
+					local ifull = folderpath..img
+					ibutton:SetImage(ifull)
+					ibutton.DoClick = function()
+						iconselected = img
+						icondisplay:SetImage(ifull)
+						icontext:SetValue(img)
+					end
+					index = index + 1
+					if index > numicons then break end
+				end
+				
+			end
+			
+			copy.DoClick = function()
+				SetClipboardText(iconselected)
+				LocalPlayer():EmitSound("buttons/button9.wav")
+			end
+			
+		end
+	end
+	
 	--Cursor Coords
 	local label = vgui.Create("DLabel",bottombar)
 	label:SetSize(96,1)
@@ -434,6 +672,14 @@ function Dispatch.OpenEditor()
 	function lpanel:Paint() end
 	lpanel:Dock(FILL)
 	
+	--Help Text
+	local help = vgui.Create("DLabel",bottombar)
+	help:Dock(FILL)
+	help:SetText("")
+	help:SetContentAlignment(5)
+	help:SetTextColor(dark)
+	help:SetFont("tp3_dispatch_2")
+	Dispatch.Panels.help = help
 	
 	--The Main Area (Canvas)
 	
@@ -441,6 +687,7 @@ function Dispatch.OpenEditor()
 	backing:Dock(FILL)
 	backing:SetImage("trakpak3_common/icons/backing.png")
 	backing:SetKeepAspect(false)
+	Dispatch.Panels.backing = backing
 	
 	--Canvas
 	local canvas = vgui.Create("DButton",lpanel)
@@ -568,7 +815,19 @@ function Dispatch.OpenEditor()
 				local px, py = self:GetPanelCoords(Dispatch.placex, Dispatch.placey)
 				surface.SetDrawColor(cursor2)
 				surface.DrawOutlinedRect(px-5, py-5, 10, 10)
-				surface.DrawLine(px, py, cx, cy)
+				if (Dispatch.placetype=="box") or (Dispatch.placetype=="text") then
+				
+					local minx = math.min(px, cx)
+					local miny = math.min(py, cy)
+					
+					local sizex = math.abs(cx - px)
+					local sizey = math.abs(cy - py)
+					
+					surface.DrawOutlinedRect(minx, miny, sizex + 1, sizey + 1, 1)
+				else
+					surface.DrawLine(px, py, cx, cy)
+				end
+				
 				surface.SetDrawColor(cursor1)
 				surface.DrawOutlinedRect(cx-4, cy-4, 8, 8)
 			end
@@ -774,16 +1033,33 @@ function Dispatch.PopulatePage(canvas, page, nohelpers)
 	local Board = Dispatch.Boards[page]
 	if Board then
 		local name = Board.name
+		local bcolor = Board.color or "95 95 95"
 		Dispatch.Panels.pagelabel:SetText(name.." ("..page.."/"..#Dispatch.Boards..")")
 		if editor then
 			local xv, yv = Dispatch.Panels.xbox:GetValue(), Dispatch.Panels.ybox:GetValue()
 			if xv != Board.x_res then Dispatch.Panels.xbox:SetValue(Board.x_res) end
 			if yv != Board.y_res then Dispatch.Panels.ybox:SetValue(Board.y_res) end
+			Dispatch.Panels.colorbox:SetValue(bcolor)
 			Dispatch.Panels.xbox:SetDisabled(false)
 			Dispatch.Panels.ybox:SetDisabled(false)
 			Dispatch.Panels.gridbutton:SetDisabled(false)
+			Dispatch.Panels.helperbutton:SetDisabled(false)
 			Dispatch.Panels.canvas:SetDisabled(false)
+			Dispatch.Panels.colorbox:SetDisabled(false)
+			
+			--Help Text
+			local help = Dispatch.Panels.help
+			if Dispatch.placing then
+				help:SetText("Left Click to place item ("..Dispatch.placetype.."), Right Click to Cancel.")
+			elseif Dispatch.editing then
+				help:SetText("Left Click to move item ("..Dispatch.placetype.."), Right Click to Cancel.")
+			elseif Dispatch.selected then
+				help:SetText("Left Click on the selected object again to move it.")
+			else
+				help:SetText("")
+			end
 		end
+		Dispatch.Panels.backing:SetImageColor(Dispatch.StringToColor(bcolor))
 	else
 		Dispatch.Panels.pagelabel:SetText("No Boards")
 		if editor then
@@ -791,9 +1067,14 @@ function Dispatch.PopulatePage(canvas, page, nohelpers)
 			Dispatch.Panels.xbox:SetDisabled(true)
 			Dispatch.Panels.ybox:SetDisabled(true)
 			Dispatch.Panels.gridbutton:SetDisabled(true)
+			Dispatch.Panels.helperbutton:SetDisabled(true)
 			Dispatch.Panels.canvas:SetDisabled(true)
+			Dispatch.Panels.colorbox:SetDisabled(true)
+			
+			Dispatch.Panels.help:SetText("")
 		end
 	end
+		
 	
 	--Fill Canvas
 	nohelpers = nohelpers or Dispatch.hidehelpers
@@ -824,12 +1105,29 @@ function Dispatch.DisplayProperties(element)
 			local k = element.proporder[n]
 			local dt = element.properties[k]
 			local row = ptable:CreateRow("Properties",k)
+			
+			function row:DataChanged(val)
+				element[k] = val
+				element:Update(false)
+			end
+			
 			if dt=="integer" then
 				row:Setup("Int", {min = element.mins[k], max = element.maxs[k]})
+				function row:DataChanged(val)
+					val = math.Round(val)
+					row:SetValue(val)
+					element[k] = val
+					element:Update(false)
+				end
 			elseif dt=="float" then
 				row:Setup("Float", {min = element.mins[k], max = element.maxs[k]})
 			elseif dt=="boolean" then
 				row:Setup("Boolean")
+				function row:DataChanged(val)
+					val = val==1
+					element[k] = val
+					element:Update(false)
+				end
 			elseif dt=="string" then
 				row:Setup("Generic")
 			elseif dt=="choices" then
@@ -840,10 +1138,7 @@ function Dispatch.DisplayProperties(element)
 			end
 			
 			row:SetValue(element[k])
-			function row:DataChanged(val)
-				element[k] = val
-				element:Update(false)
-			end
+			
 		end
 	end)
 end
@@ -870,6 +1165,13 @@ function Dispatch.Select(id, newprop)
 	end
 	Dispatch.selected = id
 	--print("Selected: ",Dispatch.selected)
+	
+	--Help Text
+	if Dispatch.Panels.editor then
+		Dispatch.Panels.help:SetText("Left Click on the selected object again to move it.")
+		--print("AAA")
+	end
+	
 	local element = Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]
 	element:OnSelect(Dispatch.Panels.editor)
 	if newprop and Dispatch.Panels.editor then Dispatch.DisplayProperties(element) end
@@ -898,7 +1200,10 @@ function Dispatch.Deselect()
 	Dispatch.editing = nil
 	Dispatch.placing = nil
 	
-	
+	--Help Text
+	if Dispatch.Panels.editor then
+		Dispatch.Panels.help:SetText("")
+	end
 	
 	--Clear properties table
 	local ptable = Dispatch.Panels.ptable
@@ -958,15 +1263,16 @@ function Dispatch.DeleteElement(id)
 	Dispatch.PopulatePage(Dispatch.Panels.canvas)
 end
 --Create Signal
-function Dispatch.AddSignal(ent, x, y, orientation, signal)
+function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 	local element = Dispatch.AddElement(ent)
 	element.type = "signal"
-	element.proporder = { "x", "y", "orientation", "signal" }
+	element.proporder = { "x", "y", "orientation", "signal", "style" }
 	element.properties = {
 		x = "integer",
 		y = "integer",
 		orientation = "choices",
-		signal = "string"
+		signal = "string",
+		style = "boolean"
 	}
 	element.mins = {
 		x = 0,
@@ -991,7 +1297,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			--Update Image
 			local dt = {"n", "s", "e", "w"}
 			local dir = dt[self.orientation]
-			button:SetImage("trakpak3_common/icons/signal_grn_"..dir..".png")
+			local alt = ""
+			if self.style then alt = "_alt" end
+			button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
 			
 			--Set function to set up movement
 			function button:DoClick()
@@ -1073,7 +1381,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			--Update Image
 			local dt = {"n", "s", "e", "w"}
 			local dir = dt[self.orientation]
-			button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
+			local alt = ""
+			if self.style then alt = "_alt" end
+			button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
 			
 			--Setup function to select again
 			function button:DoClick()
@@ -1088,11 +1398,14 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 		
 	end
 	
-	function element:Update(newprop, x, y, orientation, signal) 
+	function element:Update(newprop, x, y, orientation, signal, style) 
 		self.x = x or self.x
 		self.y = y or self.y
 		self.orientation = orientation or self.orientation or 1
 		self.signal = signal or self.signal or ""
+		
+		if style != nil then self.style = style end
+		
 		if Dispatch.selectnew then timer.Simple(0.1,function() Dispatch.Select(self:GetIndex(),newprop) end) end
 	end
 	
@@ -1104,25 +1417,23 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 		button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
 		local dt = {"n", "s", "e", "w"}
 		local dir = dt[self.orientation]
+		local alt = ""
+		if self.style then alt = "_alt" end
 		if editor then
-			if selected then 
-				button:SetImage("trakpak3_common/icons/signal_grn_"..dir..".png")
-			else
-				button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
-			end
+			button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
 		else
 			if self.signal and (self.signal!="") then
 				local sig = Dispatch.RealData[self.signal]
 				if sig then
 					local state = sig.ctc_state
 					if state==0 then --Hold
-						button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
+						button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
 					elseif state==1 then --Once
-						button:SetImage("trakpak3_common/icons/signal_yel_"..dir..".png")
+						button:SetImage("trakpak3_common/icons/signal_yel_"..dir..alt..".png")
 					elseif state==2 then --Allow
-						button:SetImage("trakpak3_common/icons/signal_grn_"..dir..".png")
+						button:SetImage("trakpak3_common/icons/signal_grn_"..dir..alt..".png")
 					elseif state==3 then --Force
-						button:SetImage("trakpak3_common/icons/signal_lun_"..dir..".png")
+						button:SetImage("trakpak3_common/icons/signal_lun_"..dir..alt..".png")
 					end
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Signal name '"..self.signal.."' does not match an existing entity.")
@@ -1159,7 +1470,13 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 	function element:Render(pnl)
 		--Update Pos
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
-		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+		local size = Dispatch.elementsize
+		if self.button and self.button:IsValid() then self.button:SetPos(px - size/2, py - size/2) end
+		
+		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
+			surface.SetDrawColor(color_sel)
+			surface.DrawOutlinedRect(px - size/2 - 2, py - size/2 - 2, size + 4, size + 4, 2)
+		end
 	end
 	
 	--Receive Info from World (CTC State)
@@ -1169,20 +1486,22 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal)
 			if button and button:IsValid() then
 				local dt = {"n", "s", "e", "w"}
 				local dir = dt[self.orientation]
+				local alt = ""
+				if self.style then alt = "_alt" end
 				if value==0 then --Hold
-					button:SetImage("trakpak3_common/icons/signal_red_"..dir..".png")
+					button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
 				elseif value==1 then --Once
-					button:SetImage("trakpak3_common/icons/signal_yel_"..dir..".png")
+					button:SetImage("trakpak3_common/icons/signal_yel_"..dir..alt..".png")
 				elseif value==2 then --Allow
-					button:SetImage("trakpak3_common/icons/signal_grn_"..dir..".png")
+					button:SetImage("trakpak3_common/icons/signal_grn_"..dir..alt..".png")
 				else --Force
-					button:SetImage("trakpak3_common/icons/signal_lun_"..dir..".png")
+					button:SetImage("trakpak3_common/icons/signal_lun_"..dir..alt..".png")
 				end
 			end
 		end
 	end
 	
-	element:Update(true,x,y,orientation,signal)
+	element:Update(true,x,y,orientation,signal,style)
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
 
@@ -1209,7 +1528,7 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 		local canvas = button:GetParent()
 		
 		--Update Image
-		button:SetImage("trakpak3_common/icons/switch_r_lit.png")
+		--button:SetImage("trakpak3_common/icons/switch_r_lit.png")
 		
 		--Set function to set up movement
 		local e = self
@@ -1224,7 +1543,7 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 	function element:OnDeselect()
 		local button = self.button
 		--Update Image
-		button:SetImage("trakpak3_common/icons/switch_n_lit.png")
+		--button:SetImage("trakpak3_common/icons/switch_n_lit.png")
 		
 		--Setup function to select again
 		local e = self
@@ -1325,7 +1644,12 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 	function element:Render(pnl)
 		--Update Pos
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
+		local size = Dispatch.elementsize
 		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
+			surface.SetDrawColor(color_sel)
+			surface.DrawOutlinedRect(px - size/2 - 2, py - size/2 - 2, size + 4, size + 4, 2)
+		end
 	end
 	
 	--Receive Info from World (State and Occupancy)
@@ -1397,7 +1721,7 @@ function Dispatch.AddBlock(ent, x, y, block)
 		local canvas = button:GetParent()
 		
 		--Update Image
-		button:SetImage("trakpak3_common/icons/block_occupied.png")
+		--button:SetImage("trakpak3_common/icons/block_occupied.png")
 		
 		--Set function to set up movement
 		local e = self
@@ -1412,7 +1736,7 @@ function Dispatch.AddBlock(ent, x, y, block)
 	function element:OnDeselect()
 		local button = self.button
 		--Update Image
-		button:SetImage("trakpak3_common/icons/block_clear.png")
+		--button:SetImage("trakpak3_common/icons/block_clear.png")
 		
 		--Setup function to select again
 		local e = self
@@ -1480,7 +1804,12 @@ function Dispatch.AddBlock(ent, x, y, block)
 	function element:Render(pnl)
 		--Update Pos
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
+		local size = Dispatch.elementsize
 		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
+			surface.SetDrawColor(color_sel)
+			surface.DrawOutlinedRect(px - size/2 - 2, py - size/2 - 2, size + 4, size + 4, 2)
+		end
 	end
 	
 	--Receive Info from World (Occupancy)
@@ -1507,18 +1836,21 @@ function Dispatch.StringToColor(cstring)
 		carray[n] = tonumber(carray[n])
 	end
 	
-	if carray[1] and carray[2] and carray[3] then
+	if carray[1] and carray[2] and carray[3] then --RGB Color
 		return Color(carray[1], carray[2], carray[3])
+	elseif carray[1] then --Single number to Grayscale
+		return Color(carray[1], carray[1], carray[1])
 	else
 		return Color(255,255,255)
 	end
 end
 
 --Dispatch Proxy
-function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, color0, color1, color2, color3, color4, color5, color6, color7)
+function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, icon9, color0, color1, color2, color3, color4, color5, color6, color7, color8, color9)
 	local element = Dispatch.AddElement(ent)
 	element.type = "proxy"
-	element.proporder = { "x", "y", "proxy", "icon0", "color0", "icon1", "color1", "icon2", "color2", "icon3", "color3", "icon4", "color4", "icon5", "color5", "icon6", "color6", "icon7", "color7"}
+	element.proporder = { "x", "y", "proxy", "icon0", "color0", "icon1", "color1", "icon2", "color2", "icon3", "color3", "icon4", "color4", "icon5", "color5", "icon6", "color6", "icon7", "color7",
+	"icon8", "color8", "icon9", "color9"}
 	element.properties = {
 		x = "integer",
 		y = "integer",
@@ -1531,6 +1863,8 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		icon5 = "string",
 		icon6 = "string",
 		icon7 = "string",
+		icon8 = "string",
+		icon9 = "string",
 		color0 = "string",
 		color1 = "string",
 		color2 = "string",
@@ -1539,6 +1873,8 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		color5 = "string",
 		color6 = "string",
 		color7 = "string",
+		color8 = "string",
+		color9 = "string"
 	}
 	element.mins = {
 		x = 0,
@@ -1555,8 +1891,8 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		local canvas = button:GetParent()
 		
 		--Update Image
-		button:SetImage(self.header..self.icon1)
-		button:SetColor(Dispatch.StringToColor(self.color1))
+		button:SetImage(self.header..self.icon0)
+		button:SetColor(Dispatch.StringToColor(self.color0))
 		
 		--Set function to set up movement
 		local e = self
@@ -1581,7 +1917,7 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		end
 	end
 	
-	function element:Update(newprop, x, y, proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, color0, color1, color2, color3, color4, color5, color6, color7) 
+	function element:Update(newprop, x, y, proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, icon9, color0, color1, color2, color3, color4, color5, color6, color7, color8, color9) 
 		self.x = x or self.x
 		self.y = y or self.y
 		
@@ -1595,6 +1931,8 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		self.icon5 = icon5 or self.icon5 or "generic_5.png"
 		self.icon6 = icon6 or self.icon6 or "generic_6.png"
 		self.icon7 = icon7 or self.icon7 or "generic_7.png"
+		self.icon8 = icon8 or self.icon8 or "generic_8.png"
+		self.icon9 = icon9 or self.icon9 or "generic_9.png"
 		
 		self.color0 = color0 or self.color0 or "255 255 255"
 		self.color1 = color1 or self.color1 or "255 255 255"
@@ -1604,6 +1942,8 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		self.color5 = color5 or self.color5 or "255 255 255"
 		self.color6 = color6 or self.color6 or "255 255 255"
 		self.color7 = color7 or self.color7 or "255 255 255"
+		self.color8 = color8 or self.color8 or "255 255 255"
+		self.color9 = color9 or self.color9 or "255 255 255"
 		
 		if Dispatch.selectnew then timer.Simple(0.1,function() Dispatch.Select(self:GetIndex(),newprop) end) end
 	end
@@ -1615,12 +1955,12 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
 		button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
 		if editor then
-			if selected then 
+			if true then 
 				button:SetImage(self.header..self.icon0)
 				button:SetColor(Dispatch.StringToColor(self.color0))
 			else
-				button:SetImage(self.header..self.icon1)
-				button:SetColor(Dispatch.StringToColor(self.color1))
+				--button:SetImage(self.header..self.icon1)
+				--button:SetColor(Dispatch.StringToColor(self.color1))
 			end
 		else
 			if self.proxy and (self.proxy!="") then
@@ -1667,7 +2007,12 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 	function element:Render(pnl)
 		--Update Pos
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
+		local size = Dispatch.elementsize
 		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
+			surface.SetDrawColor(color_sel)
+			surface.DrawOutlinedRect(px - size/2 - 2, py - size/2 - 2, size + 4, size + 4, 2)
+		end
 	end
 	
 	--Receive Info from World (Occupancy)
@@ -1683,39 +2028,45 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		end
 	end
 	
-	element:Update(true,x,y,proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, color0, color1, color2, color3, color4, color5, color6, color7)
+	element:Update(true,x,y,proxy, icon0, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, icon9, color0, color1, color2, color3, color4, color5, color6, color7, color8, color9)
 	
 end
 
 --Create Line
-function Dispatch.AddLine(ent, x1, y1, x2, y2)
+function Dispatch.AddLine(ent, x1, y1, x2, y2, color, weight)
 	local element = Dispatch.AddElement(ent)
 	element.type = "line"
-	element.proporder = { "x1", "y1", "x2", "y2" }
+	element.proporder = { "x1", "y1", "x2", "y2", "color", "weight" }
 	element.properties = {
 		x1 = "integer",
 		y1 = "integer",
 		x2 = "integer",
-		y2 = "integer"
+		y2 = "integer",
+		color = "string",
+		weight = "integer"
 	}
 	element.mins = {
 		x1 = 0,
 		y1 = 0,
 		x2 = 0,
-		y2 = 0
+		y2 = 0,
+		weight = 1
 	}
 	element.maxs = {
 		x1 = Dispatch.Boards[Dispatch.page].x_res,
 		y1 = Dispatch.Boards[Dispatch.page].y_res,
 		x2 = Dispatch.Boards[Dispatch.page].x_res,
-		y2 = Dispatch.Boards[Dispatch.page].y_res
+		y2 = Dispatch.Boards[Dispatch.page].y_res,
+		weight = 5
 	}
 	
-	function element:Update(newprop, x1, y1, x2, y2)
+	function element:Update(newprop, x1, y1, x2, y2, color, weight)
 		self.x1 = x1 or self.x1
 		self.y1 = y1 or self.y1
 		self.x2 = x2 or self.x2
 		self.y2 = y2 or self.y2
+		self.color = color or self.color or "0 0 0"
+		self.weight = weight or self.weight or 3
 		
 		if self.x1==self.x2 then --line is vertical
 			if self.y1 > self.y2 then --line goes up
@@ -1800,18 +2151,15 @@ function Dispatch.AddLine(ent, x1, y1, x2, y2)
 		end
 		
 		--Set these here because they all have to do with grid dims and this func is called when the grid changes
-		self.mins = {
-			x1 = 0,
-			y1 = 0,
-			x2 = 0,
-			y2 = 0
-		}
-		self.maxs = {
-			x1 = Dispatch.Boards[Dispatch.page].x_res,
-			y1 = Dispatch.Boards[Dispatch.page].y_res,
-			x2 = Dispatch.Boards[Dispatch.page].x_res,
-			y2 = Dispatch.Boards[Dispatch.page].y_res
-		}
+		self.mins.x1 = 0
+		self.mins.y1 = 0
+		self.mins.x2 = 0
+		self.mins.y2 = 0
+		
+		self.maxs.x1 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y1 = Dispatch.Boards[Dispatch.page].y_res
+		self.maxs.x2 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y2 = Dispatch.Boards[Dispatch.page].y_res
 	end
 	
 	function element:Render(pnl, nohelpers, selected)
@@ -1821,14 +2169,15 @@ function Dispatch.AddLine(ent, x1, y1, x2, y2)
 		local px1, py1 = pnl:GetPanelCoords(self.x1, self.y1)
 		local px2, py2 = pnl:GetPanelCoords(self.x2, self.y2)
 		
-		local verts = Dispatch.GetLineVerts(px1, py1, self.corner1, 2)
-		table.Add(verts, Dispatch.GetLineVerts(px2, py2, self.corner2, 2))
+		local verts = Dispatch.GetLineVerts(px1, py1, self.corner1, self.weight)
+		table.Add(verts, Dispatch.GetLineVerts(px2, py2, self.corner2, self.weight))
 		
-		if selected then 
-			surface.SetDrawColor(color_sel)
-		else
-			surface.SetDrawColor(black)
-		end
+		
+		--if selected then 
+			--surface.SetDrawColor(color_sel)
+		--else
+		surface.SetDrawColor(Dispatch.StringToColor(self.color))
+		--end
 		surface.DrawPoly(verts)
 		
 		--Reposition Buttons
@@ -1837,6 +2186,12 @@ function Dispatch.AddLine(ent, x1, y1, x2, y2)
 		if self.handle and self.handle:IsValid() then
 			if selected then
 				self.handle:SetPos(px1 - 8, py1 - 8)
+				
+				local size = Dispatch.elementsize
+				surface.SetDrawColor(color_sel)
+				surface.DrawOutlinedRect(px1 - size/2 - 2, py1 - size/2 - 2, size + 4, size + 4, 2)
+				surface.DrawOutlinedRect(px2 - size/2 - 2, py2 - size/2 - 2, size + 4, size + 4, 2)
+				
 			else
 				self.handle:SetPos(cx - 8, cy - 8)
 			end
@@ -1845,42 +2200,50 @@ function Dispatch.AddLine(ent, x1, y1, x2, y2)
 	end
 	
 	--print("Created Track Line from point "..x1..", "..y1.." to "..x2..", "..y2)
-	element:Update(true, x1,y1,x2,y2)
+	element:Update(true, x1,y1,x2,y2,color,weight)
 	
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
 
 --Create Block Line
-function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
+function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block, color0, color1, weight)
 	local element = Dispatch.AddElement(ent)
 	element.type = "blockline"
-	element.proporder = { "x1", "y1", "x2", "y2", "block" }
+	element.proporder = { "x1", "y1", "x2", "y2", "block", "color0", "color1", "weight" }
 	element.properties = {
 		x1 = "integer",
 		y1 = "integer",
 		x2 = "integer",
 		y2 = "integer",
-		block = "string"
+		block = "string",
+		color0 = "string",
+		color1 = "string",
+		weight = "integer"
 	}
 	element.mins = {
 		x1 = 0,
 		y1 = 0,
 		x2 = 0,
-		y2 = 0
+		y2 = 0,
+		weight = 1
 	}
 	element.maxs = {
 		x1 = Dispatch.Boards[Dispatch.page].x_res,
 		y1 = Dispatch.Boards[Dispatch.page].y_res,
 		x2 = Dispatch.Boards[Dispatch.page].x_res,
-		y2 = Dispatch.Boards[Dispatch.page].y_res
+		y2 = Dispatch.Boards[Dispatch.page].y_res,
+		weight = 5
 	}
 	
-	function element:Update(newprop, x1, y1, x2, y2, block)
+	function element:Update(newprop, x1, y1, x2, y2, block, color0, color1, weight)
 		self.x1 = x1 or self.x1
 		self.y1 = y1 or self.y1
 		self.x2 = x2 or self.x2
 		self.y2 = y2 or self.y2
 		self.block = block or self.block or ""
+		self.color0 = color0 or self.color0 or "127 63 0"--color_block
+		self.color1 = color1 or self.color1 or "255 95 0" --color_block2
+		self.weight = weight or self.weight or 3
 		
 		if self.x1==self.x2 then --line is vertical
 			if self.y1 > self.y2 then --line goes up
@@ -1923,7 +2286,7 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 			Dispatch.editing = 2
 			Dispatch.placex = e.x2
 			Dispatch.placey = e.y2
-			Dispatch.placetype = "line"
+			Dispatch.placetype = "blockline"
 			self:Remove()
 			e.eh2:Remove()
 			Dispatch.PopulatePage(canvas, Dispatch.page, true)
@@ -1932,7 +2295,7 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 			Dispatch.editing = 2
 			Dispatch.placex = e.x1
 			Dispatch.placey = e.y1
-			Dispatch.placetype = "line"
+			Dispatch.placetype = "blockline"
 			e.handle:Remove()
 			self:Remove()
 			Dispatch.PopulatePage(canvas, Dispatch.page, true)
@@ -1976,18 +2339,15 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 		end
 		
 		--Set these here because they all have to do with grid dims and this func is called when the grid changes
-		self.mins = {
-			x1 = 0,
-			y1 = 0,
-			x2 = 0,
-			y2 = 0
-		}
-		self.maxs = {
-			x1 = Dispatch.Boards[Dispatch.page].x_res,
-			y1 = Dispatch.Boards[Dispatch.page].y_res,
-			x2 = Dispatch.Boards[Dispatch.page].x_res,
-			y2 = Dispatch.Boards[Dispatch.page].y_res
-		}
+		self.mins.x1 = 0
+		self.mins.y1 = 0
+		self.mins.x2 = 0
+		self.mins.y2 = 0
+		
+		self.maxs.x1 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y1 = Dispatch.Boards[Dispatch.page].y_res
+		self.maxs.x2 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y2 = Dispatch.Boards[Dispatch.page].y_res
 	end
 	
 	function element:Render(pnl, nohelpers, selected)
@@ -1997,18 +2357,18 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 		local px1, py1 = pnl:GetPanelCoords(self.x1, self.y1)
 		local px2, py2 = pnl:GetPanelCoords(self.x2, self.y2)
 		
-		local verts = Dispatch.GetLineVerts(px1, py1, self.corner1, 2)
-		table.Add(verts, Dispatch.GetLineVerts(px2, py2, self.corner2, 2))
+		local verts = Dispatch.GetLineVerts(px1, py1, self.corner1, self.weight)
+		table.Add(verts, Dispatch.GetLineVerts(px2, py2, self.corner2, self.weight))
 		
 		local occupied = false
 		if Dispatch.RealData[self.block] then
 			occupied = Dispatch.RealData[self.block].occupied
 		end
 		
-		if selected or occupied then 
-			surface.SetDrawColor(color_block2)
+		if occupied then --if selected or occupied then 
+			surface.SetDrawColor(Dispatch.StringToColor(self.color1))
 		else
-			surface.SetDrawColor(color_block)
+			surface.SetDrawColor(Dispatch.StringToColor(self.color0))
 		end
 		surface.DrawPoly(verts)
 		
@@ -2018,6 +2378,11 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 		if self.handle and self.handle:IsValid() then
 			if selected then
 				self.handle:SetPos(px1 - 8, py1 - 8)
+				
+				local size = Dispatch.elementsize
+				surface.SetDrawColor(color_sel)
+				surface.DrawOutlinedRect(px1 - size/2 - 2, py1 - size/2 - 2, size + 4, size + 4, 2)
+				surface.DrawOutlinedRect(px2 - size/2 - 2, py2 - size/2 - 2, size + 4, size + 4, 2)
 			else
 				self.handle:SetPos(cx - 8, cy - 8)
 			end
@@ -2026,40 +2391,48 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block)
 	end
 	
 	--print("Created Track Line from point "..x1..", "..y1.." to "..x2..", "..y2)
-	element:Update(true, x1,y1,x2,y2,block)
+	element:Update(true, x1,y1,x2,y2,block,color0,color1,weight)
 	
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
 
 --Create Box
-function Dispatch.AddBox(ent, x1, y1, x2, y2)
+function Dispatch.AddBox(ent, x1, y1, x2, y2, color, weight, solid)
 	local element = Dispatch.AddElement(ent)
 	element.type = "box"
-	element.proporder = { "x1", "y1", "x2", "y2" }
+	element.proporder = { "x1", "y1", "x2", "y2", "color", "weight", "solid" }
 	element.properties = {
 		x1 = "integer",
 		y1 = "integer",
 		x2 = "integer",
-		y2 = "integer"
+		y2 = "integer",
+		color = "string",
+		weight = "integer",
+		solid = "boolean"
 	}
 	element.mins = {
 		x1 = 0,
 		y1 = 0,
 		x2 = 0,
-		y2 = 0
+		y2 = 0,
+		weight = 1
 	}
 	element.maxs = {
 		x1 = Dispatch.Boards[Dispatch.page].x_res,
 		y1 = Dispatch.Boards[Dispatch.page].y_res,
 		x2 = Dispatch.Boards[Dispatch.page].x_res,
-		y2 = Dispatch.Boards[Dispatch.page].y_res
+		y2 = Dispatch.Boards[Dispatch.page].y_res,
+		weight = 5
 	}
 	
-	function element:Update(newprop, x1, y1, x2, y2)
+	function element:Update(newprop, x1, y1, x2, y2, color, weight, solid)
 		self.x1 = x1 or self.x1
 		self.y1 = y1 or self.y1
 		self.x2 = x2 or self.x2
 		self.y2 = y2 or self.y2
+		self.color = color or self.color or "0 0 0"
+		self.weight = weight or self.weight or 2
+		if solid != nil then self.solid = solid end
 		
 		--Make sure all the points are nicely ordered
 		local minx = math.min(self.x1, self.x2)
@@ -2083,7 +2456,7 @@ function Dispatch.AddBox(ent, x1, y1, x2, y2)
 			Dispatch.editing = 2
 			Dispatch.placex = e.x2
 			Dispatch.placey = e.y2
-			Dispatch.placetype = "line"
+			Dispatch.placetype = "box"
 			self:Remove()
 			e.eh2:Remove()
 			Dispatch.PopulatePage(canvas, Dispatch.page, true)
@@ -2092,7 +2465,7 @@ function Dispatch.AddBox(ent, x1, y1, x2, y2)
 			Dispatch.editing = 2
 			Dispatch.placex = e.x1
 			Dispatch.placey = e.y1
-			Dispatch.placetype = "line"
+			Dispatch.placetype = "box"
 			e.handle:Remove()
 			self:Remove()
 			Dispatch.PopulatePage(canvas, Dispatch.page, true)
@@ -2123,18 +2496,15 @@ function Dispatch.AddBox(ent, x1, y1, x2, y2)
 		end
 		
 		--Set these here because they all have to do with grid dims and this func is called when the grid changes
-		self.mins = {
-			x1 = 0,
-			y1 = 0,
-			x2 = 0,
-			y2 = 0
-		}
-		self.maxs = {
-			x1 = Dispatch.Boards[Dispatch.page].x_res,
-			y1 = Dispatch.Boards[Dispatch.page].y_res,
-			x2 = Dispatch.Boards[Dispatch.page].x_res,
-			y2 = Dispatch.Boards[Dispatch.page].y_res
-		}
+		self.mins.x1 = 0
+		self.mins.y1 = 0
+		self.mins.x2 = 0
+		self.mins.y2 = 0
+		
+		self.maxs.x1 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y1 = Dispatch.Boards[Dispatch.page].y_res
+		self.maxs.x2 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y2 = Dispatch.Boards[Dispatch.page].y_res
 	end
 	
 	function element:Render(pnl, nohelpers, selected)
@@ -2144,17 +2514,20 @@ function Dispatch.AddBox(ent, x1, y1, x2, y2)
 		local px1, py1 = pnl:GetPanelCoords(self.x1, self.y1)
 		local px2, py2 = pnl:GetPanelCoords(self.x2, self.y2)
 		
-		if selected then 
-			surface.SetDrawColor(color_sel)
-		else
-			surface.SetDrawColor(black)
-		end
-		
-		for n=1,2 do
-			local inset = (n-1)
-			local sx = px2 - px1 - 2*inset
-			local sy = py2 - py1 - 2*inset
-			surface.DrawOutlinedRect(px1 + inset, py1 + inset, sx, sy)
+		if self.solid or self.weight>0 then
+			if selected then 
+				surface.SetDrawColor(color_sel)
+				surface.DrawOutlinedRect(px1-2, py1-2, px2 - px1 + 5, py2 - py1 + 5, 2)
+			end
+			
+			surface.SetDrawColor(Dispatch.StringToColor(self.color))
+			
+			if self.solid then
+				surface.DrawRect(px1, py1, px2 - px1 + 1, py2 - py1 + 1)
+			else
+				surface.DrawOutlinedRect(px1, py1, px2 - px1 + 1, py2 - py1 + 1, self.weight)
+			end
+			
 		end
 		
 		--Reposition Button
@@ -2167,44 +2540,70 @@ function Dispatch.AddBox(ent, x1, y1, x2, y2)
 	end
 	
 	--print("Created Track Line from point "..x1..", "..y1.." to "..x2..", "..y2)
-	element:Update(true, x1,y1,x2,y2)
+	element:Update(true, x1,y1,x2,y2, color, weight, solid)
 	
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
 
 --Create Text
-function Dispatch.AddText(ent, x1, y1, x2, y2, text)
+function Dispatch.AddText(ent, x1, y1, x2, y2, text, textcolor, textsize, textalign_h, textalign_v, boxcolor, boxweight, boxsolid)
 	local element = Dispatch.AddElement(ent)
 	element.type = "text"
-	element.proporder = { "x1", "y1", "x2", "y2", "text" }
+	element.proporder = { "x1", "y1", "x2", "y2", "text", "textcolor", "textsize", "textalign_h", "textalign_v", "boxcolor", "boxweight", "boxsolid" }
 	element.properties = {
 		x1 = "integer",
 		y1 = "integer",
 		x2 = "integer",
 		y2 = "integer",
-		text = "string"
+		text = "string",
+		textcolor = "string",
+		textsize = "integer",
+		textalign_h = "integer",
+		textalign_v = "integer",
+		boxcolor = "string",
+		boxweight = "integer",
+		boxsolid = "boolean"
 	}
 	element.mins = {
 		x1 = 0,
 		y1 = 0,
 		x2 = 0,
-		y2 = 0
+		y2 = 0,
+		textsize = 1,
+		textalign_h = -1,
+		textalign_v = -1,
+		boxweight = 0
 	}
 	element.maxs = {
 		x1 = Dispatch.Boards[Dispatch.page].x_res,
 		y1 = Dispatch.Boards[Dispatch.page].y_res,
 		x2 = Dispatch.Boards[Dispatch.page].x_res,
-		y2 = Dispatch.Boards[Dispatch.page].y_res
+		y2 = Dispatch.Boards[Dispatch.page].y_res,
+		textsize = 5,
+		textalign_h = 1,
+		textalign_v = 1,
+		boxweight = 5
 	}
 	
-	function element:Update(newprop, x1, y1, x2, y2, text)
+	function element:Update(newprop, x1, y1, x2, y2, text, textcolor, textsize, textalign_h, textalign_v, boxcolor, boxweight, boxsolid)
 		self.x1 = x1 or self.x1
 		self.y1 = y1 or self.y1
 		self.x2 = x2 or self.x2
 		self.y2 = y2 or self.y2
-		self.text = text or self.text or ""
-		self.rendertext = string.Replace(self.text,"[n]","\n")
 		
+		self.text = text or self.text or ""
+		self.textcolor = textcolor or self.textcolor or "0 0 0"
+		self.textsize = textsize or self.textsize or 1
+		self.textalign_h = textalign_h or self.textalign_h or 0
+		self.textalign_v = textalign_v or self.textalign_v or 0
+		
+		self.boxcolor = boxcolor or self.boxcolor or "0 0 0"
+		self.boxweight = boxweight or self.boxweight or 2
+		if boxsolid != nil then self.boxsolid = boxsolid end
+		
+		--print(self.boxcolor)
+		
+		self.rendertext = string.Explode("[n]",self.text)
 		
 		--Make sure all the points are nicely ordered
 		local minx = math.min(self.x1, self.x2)
@@ -2254,11 +2653,13 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text)
 	end
 	
 	function element:Generate(pnl, nohelpers, selected)
+		--[[
 		local label = vgui.Create("DLabel",pnl)
 		label:SetFont("tp3_dispatch")
 		label:SetTextColor(black)
 		label:SetContentAlignment(5)
 		self.label = label
+		]]--
 		
 	end
 	
@@ -2273,18 +2674,15 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text)
 			Dispatch.Select(e:GetIndex(),true)
 		end
 		--Set these here because they all have to do with grid dims and this func is called when the grid changes
-		self.mins = {
-			x1 = 0,
-			y1 = 0,
-			x2 = 0,
-			y2 = 0
-		}
-		self.maxs = {
-			x1 = Dispatch.Boards[Dispatch.page].x_res,
-			y1 = Dispatch.Boards[Dispatch.page].y_res,
-			x2 = Dispatch.Boards[Dispatch.page].x_res,
-			y2 = Dispatch.Boards[Dispatch.page].y_res
-		}
+		self.mins.x1 = 0
+		self.mins.y1 = 0
+		self.mins.x2 = 0
+		self.mins.y2 = 0
+		
+		self.maxs.x1 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y1 = Dispatch.Boards[Dispatch.page].y_res
+		self.maxs.x2 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y2 = Dispatch.Boards[Dispatch.page].y_res
 	end
 	
 	function element:Render(pnl, nohelpers, selected)
@@ -2294,23 +2692,70 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text)
 		local px1, py1 = pnl:GetPanelCoords(self.x1, self.y1)
 		local px2, py2 = pnl:GetPanelCoords(self.x2, self.y2)
 		
-		local sx = px2 - px1
-		local sy = py2 - py1
+		local sx = px2 - px1 + 1
+		local sy = py2 - py1 + 1
 		
 		if selected then 
 			surface.SetDrawColor(color_sel)
-		else
-			surface.SetDrawColor(black)
+			surface.DrawOutlinedRect(px1-2, py1-2, px2 - px1 + 5, py2 - py1 + 5, 2)
 		end
 		
-		surface.DrawOutlinedRect(px1, py1, sx, sy)
+		surface.SetDrawColor(Dispatch.StringToColor(self.boxcolor))
+		
+		if self.boxsolid then
+			surface.DrawRect(px1, py1, sx, sy)
+		elseif self.boxweight > 0 then
+			surface.DrawOutlinedRect(px1, py1, sx, sy, self.boxweight)
+		end
 		
 		--Reposition Label
+		--[[
 		if self.label and self.label:IsValid() then
 			self.label:SetPos(px1,py1)
 			self.label:SetSize(sx,sy)
 			self.label:SetText(self.rendertext)
 		end
+		]]--
+		
+		--Draw Text
+		local numlines = #self.rendertext
+		local unit = (self.textsize*4 + 8)*1.25
+		local offset = 0
+		
+		local xalign
+		if self.textalign_h==1 then --Right
+			xalign = TEXT_ALIGN_RIGHT
+			cx = px2 - self.boxweight
+		elseif self.textalign_h == -1 then --Left
+			xalign = TEXT_ALIGN_LEFT
+			cx = px1 + self.boxweight
+		else --Center
+			xalign = TEXT_ALIGN_CENTER
+			cx = (px1 + px2)/2
+		end
+		
+		local cy
+		
+		if numlines > 0 then
+			
+			if self.textalign_v==1 then --Top
+				for n = 1, numlines do
+					cy = py1 + (n-1)*unit + self.boxweight
+					draw.DrawText(self.rendertext[n],"tp3_dispatch_"..self.textsize, cx, cy, Dispatch.StringToColor(self.textcolor),xalign)
+				end
+			elseif self.textalign_v==-1 then --Bottom
+				for n = 1, numlines do
+					cy = py2 - (numlines - n + 1)*unit - self.boxweight
+					draw.DrawText(self.rendertext[n],"tp3_dispatch_"..self.textsize, cx, cy, Dispatch.StringToColor(self.textcolor),xalign)
+				end
+			else --Center
+				for n = 1, numlines do
+					cy = (py1 + py2)/2 + unit*(-numlines/2 + (n-1))
+					draw.DrawText(self.rendertext[n],"tp3_dispatch_"..self.textsize, cx, cy, Dispatch.StringToColor(self.textcolor),xalign)
+				end
+			end
+		end
+		
 		
 		--Reposition Button
 		if nohelpers then return end
@@ -2323,7 +2768,7 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text)
 	end
 	
 	--print("Created Track Line from point "..x1..", "..y1.." to "..x2..", "..y2)
-	element:Update(true, x1,y1,x2,y2,text or "Sample Text")
+	element:Update(true, x1,y1,x2,y2,text or "Sample Text",textcolor, textsize, textalign_h, textalign_v, boxcolor, boxweight, boxsolid)
 	
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
@@ -2332,8 +2777,11 @@ end
 --Helper Functions for Elements
 
 --Line Rendering
-function Dispatch.GetLineVerts(px, py, corner, w)
+function Dispatch.GetLineVerts(px, py, corner, weight)
 	local verts = {}
+	
+	local w = (weight - 0.5)
+	
 	if corner==1 then
 		verts[1] = { x = px + w, y = py + w }
 		verts[2] = { x = px - w, y = py + w }
@@ -2376,12 +2824,23 @@ function Dispatch.SaveBoards()
 			name = board.name,
 			x_res = board.x_res,
 			y_res = board.y_res,
+			color = board.color,
 			elements = {}
 		}
 		
 		for id, element in pairs(board.elements) do
 			local new = {}
 			new.type = element.type
+			
+			for pname, _ in pairs(element.properties) do
+				new[pname] = element[pname]
+			end
+			
+			--if element.type=="line" then
+				--print(element.color)
+			--end
+			
+			--[[
 			if new.type=="signal" then
 				new.x = element.x
 				new.y = element.y
@@ -2400,6 +2859,7 @@ function Dispatch.SaveBoards()
 				new.y1 = element.y1
 				new.x2 = element.x2
 				new.y2 = element.y2
+				new.color = element.color
 			elseif new.type=="blockline" then
 				new.x1 = element.x1
 				new.y1 = element.y1
@@ -2426,6 +2886,7 @@ function Dispatch.SaveBoards()
 				new.y2 = element.y2
 				new.text = element.text
 			end
+			]]--
 			ftable[page].elements[id] = new
 		end
 	end
@@ -2460,6 +2921,32 @@ function Dispatch.LoadBoards(fromdata, ent)
 		
 		Dispatch.selectnew = false
 		
+		local function loadboard(mb)
+			for id, element in pairs(mb.elements) do
+				if element.type=="signal" then
+					Dispatch.AddSignal(ent, element.x, element.y, element.orientation, element.signal, element.style)
+				elseif element.type=="switch" then
+					Dispatch.AddSwitch(ent, element.x, element.y, element.switch)
+				elseif element.type=="block" then
+					Dispatch.AddBlock(ent, element.x, element.y, element.block)
+				elseif element.type=="line" then
+					Dispatch.AddLine(ent, element.x1, element.y1, element.x2, element.y2, element.color, element.weight)
+				elseif element.type=="blockline" then
+					Dispatch.AddBlockLine(ent, element.x1, element.y1, element.x2, element.y2, element.block, element.color0, element.color1, element.weight)
+				elseif element.type=="box" then
+					Dispatch.AddBox(ent, element.x1, element.y1, element.x2, element.y2, element.color, element.weight, element.solid)
+				elseif element.type=="text" then
+					--PrintTable(element)
+					Dispatch.AddText(ent, element.x1, element.y1, element.x2, element.y2, element.text, element.textcolor, element.textsize, element.textalign_h, element.textalign_v, element.boxcolor, element.boxweight, element.boxsolid)
+				elseif element.type=="proxy" then
+					Dispatch.AddProxy(ent, element.x, element.y, element.proxy,
+						element.icon0, element.icon1, element.icon2, element.icon3, element.icon4, element.icon5, element.icon6, element.icon7, element.icon8, element.icon9,
+						element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7, element.color8, element.color9
+					)
+				end
+			end
+		end
+		
 		if ent then --Load to a world board
 			--print("Loading ",ent)
 			ent:Deselect()
@@ -2472,32 +2959,12 @@ function Dispatch.LoadBoards(fromdata, ent)
 					name = mb.name,
 					x_res = mb.x_res,
 					y_res = mb.y_res,
+					color = mb.color,
 					elements = {}
 				}
 				Dispatch.page = page
 				--Fill it with stuff
-				for id, element in pairs(mb.elements) do
-					if element.type=="signal" then
-						Dispatch.AddSignal(ent, element.x, element.y, element.orientation, element.signal)
-					elseif element.type=="switch" then
-						Dispatch.AddSwitch(ent, element.x, element.y, element.switch)
-					elseif element.type=="block" then
-						Dispatch.AddBlock(ent, element.x, element.y, element.block)
-					elseif element.type=="line" then
-						Dispatch.AddLine(ent, element.x1, element.y1, element.x2, element.y2)
-					elseif element.type=="blockline" then
-						Dispatch.AddBlockLine(ent, element.x1, element.y1, element.x2, element.y2, element.block)
-					elseif element.type=="box" then
-						Dispatch.AddBox(ent, element.x1, element.y1, element.x2, element.y2)
-					elseif element.type=="text" then
-						Dispatch.AddText(ent, element.x1, element.y1, element.x2, element.y2, element.text)
-					elseif element.type=="proxy" then
-						Dispatch.AddProxy(ent, element.x, element.y, element.proxy,
-							element.icon0, element.icon1, element.icon2, element.icon3, element.icon4, element.icon5, element.icon6, element.icon7,
-							element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7
-						)
-					end
-				end
+				loadboard(mb)
 				
 			end
 			--print("Loaded ",ent)
@@ -2512,32 +2979,12 @@ function Dispatch.LoadBoards(fromdata, ent)
 					name = mb.name,
 					x_res = mb.x_res,
 					y_res = mb.y_res,
+					color = mb.color,
 					elements = {}
 				}
 				Dispatch.page = page
 				--Fill it with stuff
-				for id, element in pairs(mb.elements) do
-					if element.type=="signal" then
-						Dispatch.AddSignal(nil, element.x, element.y, element.orientation, element.signal)
-					elseif element.type=="switch" then
-						Dispatch.AddSwitch(nil, element.x, element.y, element.switch)
-					elseif element.type=="block" then
-						Dispatch.AddBlock(nil, element.x, element.y, element.block)
-					elseif element.type=="line" then
-						Dispatch.AddLine(nil, element.x1, element.y1, element.x2, element.y2)
-					elseif element.type=="blockline" then
-						Dispatch.AddBlockLine(nil, element.x1, element.y1, element.x2, element.y2, element.block)
-					elseif element.type=="box" then
-						Dispatch.AddBox(nil, element.x1, element.y1, element.x2, element.y2)
-					elseif element.type=="text" then
-						Dispatch.AddText(nil, element.x1, element.y1, element.x2, element.y2, element.text)
-					elseif element.type=="proxy" then
-						Dispatch.AddProxy(nil, element.x, element.y, element.proxy,
-							element.icon0, element.icon1, element.icon2, element.icon3, element.icon4, element.icon5, element.icon6, element.icon7,
-							element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7
-						)
-					end
-				end
+				loadboard(mb)
 				
 			end
 		end
@@ -2701,6 +3148,7 @@ function Dispatch.OpenDispatcher()
 	backing:Dock(FILL)
 	backing:SetImage("trakpak3_common/icons/backing.png")
 	backing:SetKeepAspect(false)
+	Dispatch.Panels.backing = backing
 	
 	--Canvas
 	local canvas = vgui.Create("DButton",lpanel)

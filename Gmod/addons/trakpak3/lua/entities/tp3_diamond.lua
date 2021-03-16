@@ -22,24 +22,105 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		self:SetTrigger(true)
 		
+		if string.find(self.model,"_alt.mdl") then --Model already has '_alt' for some reason
+			self.model_alt = string.Replace(self.model, "_alt.mdl", ".mdl")
+		else --Add _alt to the alt model
+			self.model_alt = string.Replace(self.model, ".mdl", "_alt.mdl")
+		end
+		
+		self:FindAttachments()
+		
+	end
+	
+	--Find all attachments
+	function ENT:FindAttachments()
+		
 		local frog1 = self:LookupAttachment("frog1")
-		if frog1 > 0 then self.frog1 = self:GetAttachment(frog1)["Pos"] end
+		if frog1 > 0 then self.frog1 = self:GetAttachment(frog1)["Pos"] else self.frog1 = nil end
 		local frog2 = self:LookupAttachment("frog2")
-		if frog2 > 0 then self.frog2 = self:GetAttachment(frog2)["Pos"] end
+		if frog2 > 0 then self.frog2 = self:GetAttachment(frog2)["Pos"] else self.frog2 = nil end
 		local frog3 = self:LookupAttachment("frog3")
-		if frog3 > 0 then self.frog3 = self:GetAttachment(frog3)["Pos"] end
+		if frog3 > 0 then self.frog3 = self:GetAttachment(frog3)["Pos"] else self.frog3 = nil end
 		local frog4 = self:LookupAttachment("frog4")
-		if frog4 > 0 then self.frog4 = self:GetAttachment(frog4)["Pos"] end
+		if frog4 > 0 then self.frog4 = self:GetAttachment(frog4)["Pos"] else self.frog4 = nil end
+		
+		local autopoint1 = self:LookupAttachment("autopoint1")
+		if autopoint1 > 0 then self.autopoint1 = self:GetAttachment(autopoint1)["Pos"] else self.autopoint1 = nil end
+		local autopoint2 = self:LookupAttachment("autopoint2")
+		if autopoint2 > 0 then self.autopoint2 = self:GetAttachment(autopoint2)["Pos"] else self.autopoint2 = nil end
 		
 	end
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
 	
-	--Scan for auto-switching and frogs
+	function ENT:Switch()
+		if self.alt then --Throw to main
+			self.alt = false
+			
+			self:SetModel(self.model)
+			self:PhysicsInitStatic(SOLID_VPHYSICS)
+			self:FindAttachments()
+			self.cooldown = true
+		else --Throw diverging
+			self.alt = true
+			
+			self:SetModel(self.model_alt)
+			self:PhysicsInitStatic(SOLID_VPHYSICS)
+			self:FindAttachments()
+			self.cooldown = true
+		end
+	end
+	
+	--Scan for auto-switching
 	function ENT:Think()
+		
+		local blist = Trakpak3.GetBlacklist()
+		
+		local fast = false
+		
+		if self.autopoint1 or self.autopoint2 then
+			
+			local tr1 = {}
+			local tr2 = {}
+			
+			if self.autopoint1 then
+				local trace = {
+					start = self.autopoint1,
+					endpos = self.autopoint1 + Vector(0,0,64),
+					filter = blist,
+					ignoreworld = true,
+					mins = Vector(-4,-4,-8),
+					maxs = Vector(4,4,8)
+				}
+				tr1 = util.TraceHull(trace)
+			end
+			
+			if self.autopoint2 then
+				local trace = {
+					start = self.autopoint2,
+					endpos = self.autopoint2 + Vector(0,0,64),
+					filter = blist,
+					ignoreworld = true,
+					mins = Vector(-4,-4,-8),
+					maxs = Vector(4,4,8)
+				}
+				tr2 = util.TraceHull(trace)
+			end
+			
+			if tr1.Hit or tr2.Hit then
+				if not self.cooldown then self:Switch() end
+			else
+				self.cooldown = false
+			end
+			
+			fast = true
+			
+		end
+		
+		--Frog Noises
 		if self.scanning then
-			local blist = Trakpak3.GetBlacklist()
+			
 			for n = 1, 4 do
 				if self["frog"..n] then
 					local tr = {
@@ -61,9 +142,14 @@ if SERVER then
 					end
 				end
 			end
+			fast = true
+		end
+		
+		if fast then
 			self:NextThink(CurTime()+0.1)
 			return true
 		end
+		
 	end
 	
 	--Trigger Functions

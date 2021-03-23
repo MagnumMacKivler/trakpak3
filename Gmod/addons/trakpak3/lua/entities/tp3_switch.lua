@@ -47,7 +47,10 @@ if SERVER then
 		
 		self:RegisterEntity("lever",self.lever) --self.lever_valid & self.lever_ent
 		
-		if self.lever_valid then self.lever_ent:StandSetup(self) end
+		if self.lever_valid then
+			self.lever_ent:StandSetup(self)
+			self:SetNWEntity("lever",self.lever_ent)
+		end
 		
 		self.behavior = self.behavior or 0 --Will be set later by switch stand
 	end
@@ -105,7 +108,7 @@ if SERVER then
 		end
 		
 		--Frog Sounds
-		if self.frogpoint then
+		if self.softoccupied and self.frogpoint then
 			
 			local trace = {
 				start = self.frogpoint,

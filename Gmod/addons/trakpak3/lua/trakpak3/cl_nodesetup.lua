@@ -634,7 +634,7 @@ hook.Add("PostDrawTranslucentRenderables","TP3_NE_DRAW", function()
 			end
 		end
 		
-		--Signals
+		--Switches
 		if Trakpak3.Switches and (Trakpak3.ShowHulls==2) then
 			local swicolor = Color(255,0,255)
 			for name, pos in pairs(Trakpak3.Switches) do

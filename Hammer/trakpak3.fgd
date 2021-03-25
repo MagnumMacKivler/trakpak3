@@ -35,7 +35,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
-	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer" : "Disables the toolgun on this entity except for the tools listed here."
+	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
 	disableshadows(choices) : "Disable Shadows" : 1 : "Most if not all track should have shadows disabled because they are part of the ground." =
 	[
 		0 : "No"
@@ -112,7 +112,7 @@
 	]
 	
 	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
-	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
+	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
 	input ThrowMain(void) : "Throws the switch to Main/Normal."
@@ -381,7 +381,7 @@
 	cs_pos(vector) : "Cab Signal Pos" : : "When a tp3_cabsignal_box passes over this point (moving in the correct direction), it will register as having passed this signal. Place it roughly level with the railheads, in the center of the two rails, and at least one locomotive length before the signal."
 	nickname(string) : "Nickname" : "" : "(Optional) The signal's nickname, used in-game to describe what it does. Unlike the targetname, this doesn't have to be unique."
 	
-	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
+	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input SetManual(string) : "Forces a signal to display the given aspect name (if given) and stops all automatic behavior."
 	input SetAutomatic(void) : "Forces the signal to resume responding to the signaling system normally."

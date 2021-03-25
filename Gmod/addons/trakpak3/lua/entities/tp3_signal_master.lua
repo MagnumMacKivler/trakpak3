@@ -72,6 +72,7 @@ if SERVER then
 		self.my_speed = Trakpak3.FULL
 		
 		if self.nickname then self:SetNWString("Nickname",self.nickname) end
+		if self:GetName() then self:SetNWString("Targetname",self:GetName()) end
 		
 		if not self.up_powered then self.up_powered = 0 end
 		if not self.dn_powered then self.dn_powered = 0 end
@@ -565,4 +566,13 @@ if SERVER then
 			end
 		end
 	end)
+end
+
+if CLIENT then
+	--Allow targetname clientside
+	function ENT:GetName()
+		local name = self:GetNWString("Targetname")
+		if name=="" then name = nil end
+		return name
+	end
 end

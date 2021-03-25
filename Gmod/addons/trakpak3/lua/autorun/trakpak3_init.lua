@@ -14,6 +14,7 @@ if SERVER then
 	include("trakpak3/dispatch.lua")
 	include("trakpak3/mapseats.lua")
 	include("trakpak3/remoteswitcher.lua")
+	include("trakpak3/pathconfig.lua")
 	include("trakpak3/shared.lua")
 	
 	AddCSLuaFile("trakpak3/cl_nodesetup.lua")
@@ -25,6 +26,7 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_makespawnlist.lua")
 	AddCSLuaFile("trakpak3/cl_mapseats.lua")
 	AddCSLuaFile("trakpak3/cl_remoteswitcher.lua")
+	AddCSLuaFile("trakpak3/cl_pathconfig.lua")
 	AddCSLuaFile("trakpak3/shared.lua")
 	
 	--Macro for E2 limits for JH
@@ -33,6 +35,7 @@ if SERVER then
 			RunConsoleCommand("wire_expression2_quotasoft", "1000000")
 			RunConsoleCommand("wire_expression2_quotatick", "1000000")
 			RunConsoleCommand("wire_expression2_quotahard", "2000000")
+			RunConsoleCommand("wire_expression2_file_maxsize", "3000")
 			print("[Trakpak3] Set E2 limits to allow John Henry to run efficiently.")
 		else
 			print("[Trakpak3] You really shouldn't be doing this in multiplayer.")
@@ -51,6 +54,7 @@ if CLIENT then
 	include("trakpak3/cl_makespawnlist.lua")
 	include("trakpak3/cl_mapseats.lua")
 	include("trakpak3/cl_remoteswitcher.lua")
+	include("trakpak3/cl_pathconfig.lua")
 	include("trakpak3/shared.lua")
 	
 	--[[

@@ -105,6 +105,7 @@ if SERVER then
 		self:SetNWBool("blocked",false)
 		self:SetNWBool("broken",false)
 		self:SetNWInt("levertype",self.levertype)
+		if self:GetName() then self:SetNWString("Targetname",self:GetName()) end
 	end
 	
 	--Set this model's animation plot and find the max frame
@@ -529,5 +530,12 @@ if CLIENT then
 			end
 		end
 	end)
+	
+	--Allow targetname clientside
+	function ENT:GetName()
+		local name = self:GetNWString("Targetname")
+		if name=="" then name = nil end
+		return name
+	end
 	
 end

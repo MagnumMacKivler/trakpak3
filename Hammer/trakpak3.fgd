@@ -30,11 +30,11 @@
 		0 : "Switch/Other"
 		1 : "Derail"
 	]
-	usetrigger(choices) : "Use Trigger For Occupancy" : 0 : "Should this switch use the model's Trigger Bounds to detect occupancy? Set this for Crossovers or any switch where you want a more conservative indication of something being on the switch." =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
+	//usetrigger(choices) : "Use Trigger For Occupancy" : 0 : "Should this switch use the model's Trigger Bounds to detect occupancy? Set this for Crossovers or any switch where you want a more conservative indication of something being on the switch." =
+	//[
+	//	0 : "No"
+	//	1 : "Yes"
+	//]
 	gmod_allowtools(string) readonly : "Allow Tools" : "advdupe2 tp3_node_editor tp3_node_chainer tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
 	disableshadows(choices) : "Disable Shadows" : 1 : "Most if not all track should have shadows disabled because they are part of the ground." =
 	[

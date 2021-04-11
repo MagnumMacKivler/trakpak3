@@ -50,6 +50,7 @@
 @persist [AutoPointMN AutoPointDV]:vector
 @persist MainLeft SplitMode:string [Inner_MN Outer_MN Inner_DV Outer_DV Inner_Split Outer_Split FinalTri_MN FinalTri_DV]:array SPLID
 @persist CardinalPoint:vector2 CardinalDir:vector2 CardinalAng:angle StockToChopMN StockToChopDV ClosureIndexMN ClosureIndexDV StockIndexMN StockIndexDV Adjusted_MN Adjusted_DV Need1MN Need1DV Rail1MN:array Rail2MN:array Rail3MN:array Rail1DV:array Rail2DV:array Rail3DV:array
+@persist [Patch1MN Patch2MN Patch1DV Patch2DV]:array
 @persist TopPointsMN:array TopPointsDV:array RailSegID RIMN RIDV I_Top:vector2 I_Bottom:vector2 FrogPos:vector
 @persist ClosurePointGroups:table ClosurePointGroupsMN:table ClosurePointGroupsDV:table ClosureThrowsMN:array ClosureThrowsDV:array ThrowAxisMN:vector2 ThrowAxisDV:vector2 BladeCenter:vector
 @persist [ClosurePointInnerMN ClosurePointOuterMN ClosureCornerMN ClosureCornerDV ClosureDirMN ClosurePointInnerDV ClosurePointOuterDV ClosureDirDV]:vector2 RailWidth
@@ -83,7 +84,7 @@
 
 if(first()){
     #Version Info - Don't Change This!
-    Version = "1.1"
+    Version = "1.2"
     
     #What track gauge are you developing for?
     #include "johnhenry/gauges/standard"
@@ -176,6 +177,7 @@ if(first()){
     }
     TrackGauge = 2*TrackFace_Ang0["rail_inner",vector2]:x()
     BallastBlockWidth = 2*TrackFace_Ang0["ballast_corner",vector2]:x()
+    EGP_DrawScale = 1/Scale
     
     Red = vec(255,0,0)
     Orange = vec(255,127,0)
@@ -1961,12 +1963,50 @@ if(clk("makebrush")){
                     }
                 }else{ #done with phys mesh - incorporate
                     if((SwitchCompileStep==7)|(SwitchCompileStep==9)){ #Done with MN, Add DV Part
+                        local MN = SwitchMainPiece[SelectedTrack,number]
+                        local DV = SwitchDivPiece[SelectedTrack,number]
+                        
+                        if((SwitchCompileStep==7) & (TrackTypes[DV,string]=="straight")){ #Done with MN's MN part; add patches
+                            if(Rail3DV:count()>0){
+                                if(SMDQC){buildGenericPhysMesh(Rail3DV,Textures)}else{BrushStrings:buildGenericPhysBrush(Rail3DV,Textures)}
+                            }
+                            
+                            local N = vec2(JointsLists[MainLeft ? MN : DV,table]["N",array][(MainLeft ? RIMN : RIDV),vector])
+                            local L = vec2(JointsLists[MainLeft ? MN : DV,table]["L",array][(MainLeft ? RIMN : RIDV),vector])
+                            local K = vec2(JointsLists[MainLeft ? DV : MN,table]["K",array][(MainLeft ? RIDV : RIMN),vector])
+                            local M = vec2(JointsLists[MainLeft ? DV : MN,table]["M",array][(MainLeft ? RIDV : RIMN),vector])
+                            
+                            local Verts = array()
+                            if(!MainLeft){Verts = array(L,N,I_Top+(N-L),I_Top)}else{Verts = array(M,K,I_Top,I_Top+(M-K))}
+                            if(SMDQC){buildGenericPhysMesh(Verts,Textures)}else{BrushStrings:buildGenericPhysBrush(Verts,Textures)}
+                        }
+                        
                         SwitchCompileStep++
                         timer(".makebrushes phys",100)
-                    }else{
+                    }else{ #Done with DV Part or done with regular track phys
+                        local MN = SwitchMainPiece[SelectedTrack,number]
+                        local DV = SwitchDivPiece[SelectedTrack,number]
+                        if((SwitchCompileStep==10) & (TrackTypes[MN,string]=="straight")){ #Done with DV's DV part; add patches
+                            if(Rail3MN:count()>0){
+                                if(SMDQC){buildGenericPhysMesh(Rail3MN,Textures)}else{BrushStrings:buildGenericPhysBrush(Rail3MN,Textures)}
+                            }
+
+                            local N = vec2(JointsLists[MainLeft ? MN : DV,table]["N",array][(MainLeft ? RIMN : RIDV),vector])
+                            local L = vec2(JointsLists[MainLeft ? MN : DV,table]["L",array][(MainLeft ? RIMN : RIDV),vector])
+                            local K = vec2(JointsLists[MainLeft ? DV : MN,table]["K",array][(MainLeft ? RIDV : RIMN),vector])
+                            local M = vec2(JointsLists[MainLeft ? DV : MN,table]["M",array][(MainLeft ? RIDV : RIMN),vector])
+                            
+                            local Verts = array()
+                            if(MainLeft){Verts = array(L,N,I_Top+(N-L),I_Top)}else{Verts = array(M,K,I_Top,I_Top+(M-K))}
+                            if(SMDQC){buildGenericPhysMesh(Verts,Textures)}else{BrushStrings:buildGenericPhysBrush(Verts,Textures)}
+                            
+                            #debugHoloArray(Verts,vec(255,0,0),vec(0,0,255))
+                        }
+                    
                         if(SMDQC){
                             timer("smooth_init",100)
                         }else{
+                            
                             EntBrushMins[EntID,number] = StartingBrushID #Set the starting and ending Brush IDs for this entity
                             EntBrushMaxs[EntID,number] = maxBrushID()-1
                             #Set Entity name and class
@@ -4782,6 +4822,7 @@ if(clk("makebrush")){
     
     if(Contact_Inner != ThePoint_Inner){
         Rail3MN = MainLeft ? array(ThePoint_Inner, ThePoint_Outer, Contact_Outer, Contact_Inner) : array(ThePoint_Outer, ThePoint_Inner, Contact_Inner, Contact_Outer)
+        Patch1MN = Rail3MN:clone()
     }
     
     #Set Variables
@@ -4872,6 +4913,7 @@ if(clk("makebrush")){
     local ThePoint_Outer = (IncidentDV>StockToChopDV) ? Iron_Outer : Ash_Outer
     if(Contact_Inner != ThePoint_Inner){
         Rail3DV = !MainLeft ? array(ThePoint_Inner, ThePoint_Outer, Contact_Outer, Contact_Inner) : array(ThePoint_Outer, ThePoint_Inner, Contact_Inner, Contact_Outer)
+        Patch1DV = Rail3DV:clone()
     }
     
     SWPointsFarDV = Contact_Inner
@@ -6521,6 +6563,8 @@ if(clk("makebrush")){
                         local TypeMN = TrackTypes[MN,string]
                         local TypeDV = TrackTypes[DV,string]
                         
+                        #print(TypeMN,TypeDV)
+                        
                         switch(TypeMN){
                             case "straight",
                                 StartPMN = StraightStartPos[MN,vector2]
@@ -6544,7 +6588,7 @@ if(clk("makebrush")){
                                 FlatMN = BezHeight[MN,number]==0
                                 break
                             default,
-                                jprint("Main Piece is unacceptable track type!")
+                                jprint("Main Piece is unacceptable track type! ("+TypeMN+")")
                                 AllGood = 0
                                 break
                         }
@@ -6564,7 +6608,7 @@ if(clk("makebrush")){
                                 FlatDV = BezHeight[DV,number]==0
                                 break
                             default,
-                                jprint("Diverging Piece is unacceptable track type!")
+                                jprint("Diverging Piece is unacceptable track type! ("+TypeDV+")")
                                 AllGood = 0
                                 break
                         }

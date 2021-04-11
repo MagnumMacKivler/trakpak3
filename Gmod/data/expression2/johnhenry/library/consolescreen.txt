@@ -1,7 +1,7 @@
 @name johnhenry/library/consolescreen
 @inputs CS:wirelink Pod:entity
 @outputs CS_PieceID CS_Pieces
-@persist TrackGauge BallastBlockWidth
+@persist TrackGauge BallastBlockWidth EGP_DrawScale
 @persist Page Line MaxLine MinLine Lines:table LastLine:array CS_PieceID CS_Pieces CS_Data:table CompileReady
 @persist [CS_Header CS_Button CS_Button_Important CS_Property CS_Value_Edit CS_Value_Calc CS_Locked]:vector CS_Snap CS_HeightSnap
 @persist Address Address2 InitVector:vector2 InitVector2:vector2 AdjustVector:vector2 AdjustVector2:vector2 InitNumber AdjustNumber
@@ -298,10 +298,10 @@ function table plotStraight(In:array){#Startpos, Dir, Length, Height, Segments
     local RailPointsR = array()
     for(N=1,Points:count()){
         local P = Points[N,vector2]
-        BallastPoints[N,vector2] = P + Right*BallastBlockWidth/2
-        BallastPoints[2*Points:count()-N+1,vector2] = P + Left*BallastBlockWidth/2
-        RailPointsR[N,vector2] = P + Right*TrackGauge/2
-        RailPointsL[N,vector2] = P + Left*TrackGauge/2
+        BallastPoints[N,vector2] = P + EGP_DrawScale*Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = P + EGP_DrawScale*Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = P + EGP_DrawScale*Right*TrackGauge/2
+        RailPointsL[N,vector2] = P + EGP_DrawScale*Left*TrackGauge/2
     }
     
     Out["startpos",vector2] = StartPos
@@ -401,10 +401,10 @@ function table plotArc(In:array){ #Startpos, StartDir, EndDir, EndPos, Radius, H
     local Left = DirN:rotate(90)
     local Right = DirN:rotate(-90)
     
-    BallastPoints[1,vector2] = StartPos + Right*BallastBlockWidth/2
-    BallastPoints[2*Points:count(),vector2] = StartPos + Left*BallastBlockWidth/2 
-    RailPointsR[1,vector2] = StartPos + Right*TrackGauge/2
-    RailPointsL[1,vector2] = StartPos + Left*TrackGauge/2
+    BallastPoints[1,vector2] = StartPos + EGP_DrawScale*Right*BallastBlockWidth/2
+    BallastPoints[2*Points:count(),vector2] = StartPos + EGP_DrawScale*Left*BallastBlockWidth/2 
+    RailPointsR[1,vector2] = StartPos + EGP_DrawScale*Right*TrackGauge/2
+    RailPointsL[1,vector2] = StartPos + EGP_DrawScale*Left*TrackGauge/2
     
     for(N=2,Points:count()-1){
         
@@ -416,20 +416,20 @@ function table plotArc(In:array){ #Startpos, StartDir, EndDir, EndPos, Radius, H
         Left = Dir:rotate(90)
         Right = Dir:rotate(-90)
         
-        BallastPoints[N,vector2] = Mid + Right*BallastBlockWidth/2
-        BallastPoints[2*Points:count()-N+1,vector2] = Mid + Left*BallastBlockWidth/2
-        RailPointsR[N,vector2] = Mid + Right*TrackGauge/2
-        RailPointsL[N,vector2] = Mid + Left*TrackGauge/2
+        BallastPoints[N,vector2] = Mid + EGP_DrawScale*Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = Mid + EGP_DrawScale*Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = Mid + EGP_DrawScale*Right*TrackGauge/2
+        RailPointsL[N,vector2] = Mid + EGP_DrawScale*Left*TrackGauge/2
     }
     
     DirN = tp3dir(EndDir):normalized()
     Left = DirN:rotate(90)
     Right = DirN:rotate(-90)
     
-    BallastPoints[Points:count(),vector2] = EndPos + Right*BallastBlockWidth/2
-    BallastPoints[Points:count()+1,vector2] = EndPos + Left*BallastBlockWidth/2 
-    RailPointsR[Points:count(),vector2] = EndPos + Right*TrackGauge/2
-    RailPointsL[Points:count(),vector2] = EndPos + Left*TrackGauge/2
+    BallastPoints[Points:count(),vector2] = EndPos + EGP_DrawScale*Right*BallastBlockWidth/2
+    BallastPoints[Points:count()+1,vector2] = EndPos + EGP_DrawScale*Left*BallastBlockWidth/2 
+    RailPointsR[Points:count(),vector2] = EndPos + EGP_DrawScale*Right*TrackGauge/2
+    RailPointsL[Points:count(),vector2] = EndPos + EGP_DrawScale*Left*TrackGauge/2
     
     
     Out["startpos",vector2] = StartPos
@@ -536,10 +536,10 @@ function table plotBankedArc(In:array){ #Startpos, StartDir, EndDir, EndPos, Rad
     local Left = DirN:rotate(90)
     local Right = DirN:rotate(-90)
     
-    BallastPoints[1,vector2] = StartPos + Right*BallastBlockWidth/2
-    BallastPoints[2*Points:count(),vector2] = StartPos + Left*BallastBlockWidth/2 
-    RailPointsR[1,vector2] = StartPos + Right*TrackGauge/2
-    RailPointsL[1,vector2] = StartPos + Left*TrackGauge/2
+    BallastPoints[1,vector2] = StartPos + EGP_DrawScale*Right*BallastBlockWidth/2
+    BallastPoints[2*Points:count(),vector2] = StartPos + EGP_DrawScale*Left*BallastBlockWidth/2 
+    RailPointsR[1,vector2] = StartPos + EGP_DrawScale*Right*TrackGauge/2
+    RailPointsL[1,vector2] = StartPos + EGP_DrawScale*Left*TrackGauge/2
     
     for(N=2,Points:count()-1){
         
@@ -551,20 +551,20 @@ function table plotBankedArc(In:array){ #Startpos, StartDir, EndDir, EndPos, Rad
         Left = Dir:rotate(90)
         Right = Dir:rotate(-90)
         
-        BallastPoints[N,vector2] = Mid + Right*BallastBlockWidth/2
-        BallastPoints[2*Points:count()-N+1,vector2] = Mid + Left*BallastBlockWidth/2
-        RailPointsR[N,vector2] = Mid + Right*TrackGauge/2
-        RailPointsL[N,vector2] = Mid + Left*TrackGauge/2
+        BallastPoints[N,vector2] = Mid + EGP_DrawScale*Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = Mid + EGP_DrawScale*Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = Mid + EGP_DrawScale*Right*TrackGauge/2
+        RailPointsL[N,vector2] = Mid + EGP_DrawScale*Left*TrackGauge/2
     }
     
     DirN = tp3dir(EndDir):normalized()
     Left = DirN:rotate(90)
     Right = DirN:rotate(-90)
     
-    BallastPoints[Points:count(),vector2] = EndPos + Right*BallastBlockWidth/2
-    BallastPoints[Points:count()+1,vector2] = EndPos + Left*BallastBlockWidth/2 
-    RailPointsR[Points:count(),vector2] = EndPos + Right*TrackGauge/2
-    RailPointsL[Points:count(),vector2] = EndPos + Left*TrackGauge/2
+    BallastPoints[Points:count(),vector2] = EndPos + EGP_DrawScale*Right*BallastBlockWidth/2
+    BallastPoints[Points:count()+1,vector2] = EndPos + EGP_DrawScale*Left*BallastBlockWidth/2 
+    RailPointsR[Points:count(),vector2] = EndPos + EGP_DrawScale*Right*TrackGauge/2
+    RailPointsL[Points:count(),vector2] = EndPos + EGP_DrawScale*Left*TrackGauge/2
     
     local BHs = array()
     local PC = Points:count()-1
@@ -678,10 +678,10 @@ function table plotBezier(In:array){ #Startpos, StartDir, StartCP, EndPos, EndDi
     local Left = DirN:rotate(90)
     local Right = DirN:rotate(-90)
     
-    BallastPoints[1,vector2] = StartPos + Right*BallastBlockWidth/2
-    BallastPoints[2*Points:count(),vector2] = StartPos + Left*BallastBlockWidth/2 
-    RailPointsR[1,vector2] = StartPos + Right*TrackGauge/2
-    RailPointsL[1,vector2] = StartPos + Left*TrackGauge/2
+    BallastPoints[1,vector2] = StartPos + EGP_DrawScale*Right*BallastBlockWidth/2
+    BallastPoints[2*Points:count(),vector2] = StartPos + EGP_DrawScale*Left*BallastBlockWidth/2 
+    RailPointsR[1,vector2] = StartPos + EGP_DrawScale*Right*TrackGauge/2
+    RailPointsL[1,vector2] = StartPos + EGP_DrawScale*Left*TrackGauge/2
     
     for(N=2,Points:count()-1){
         
@@ -694,10 +694,10 @@ function table plotBezier(In:array){ #Startpos, StartDir, StartCP, EndPos, EndDi
         Left = Dir:rotate(90)
         Right = Dir:rotate(-90)
         
-        BallastPoints[N,vector2] = Mid + Right*BallastBlockWidth/2
-        BallastPoints[2*Points:count()-N+1,vector2] = Mid + Left*BallastBlockWidth/2
-        RailPointsR[N,vector2] = Mid + Right*TrackGauge/2
-        RailPointsL[N,vector2] = Mid + Left*TrackGauge/2
+        BallastPoints[N,vector2] = Mid + EGP_DrawScale*Right*BallastBlockWidth/2
+        BallastPoints[2*Points:count()-N+1,vector2] = Mid + EGP_DrawScale*Left*BallastBlockWidth/2
+        RailPointsR[N,vector2] = Mid + EGP_DrawScale*Right*TrackGauge/2
+        RailPointsL[N,vector2] = Mid + EGP_DrawScale*Left*TrackGauge/2
     }
     
     DirN = tp3dir(EndDir):normalized()
@@ -705,10 +705,10 @@ function table plotBezier(In:array){ #Startpos, StartDir, StartCP, EndPos, EndDi
     Left = DirN:rotate(90)
     Right = DirN:rotate(-90)
     
-    BallastPoints[Points:count(),vector2] = EndPos + Right*BallastBlockWidth/2
-    BallastPoints[Points:count()+1,vector2] = EndPos + Left*BallastBlockWidth/2 
-    RailPointsR[Points:count(),vector2] = EndPos + Right*TrackGauge/2
-    RailPointsL[Points:count(),vector2] = EndPos + Left*TrackGauge/2
+    BallastPoints[Points:count(),vector2] = EndPos + EGP_DrawScale*Right*BallastBlockWidth/2
+    BallastPoints[Points:count()+1,vector2] = EndPos + EGP_DrawScale*Left*BallastBlockWidth/2 
+    RailPointsR[Points:count(),vector2] = EndPos + EGP_DrawScale*Right*TrackGauge/2
+    RailPointsL[Points:count(),vector2] = EndPos + EGP_DrawScale*Left*TrackGauge/2
     
     local MinRadius = inf()
     local TightestSeg = 0

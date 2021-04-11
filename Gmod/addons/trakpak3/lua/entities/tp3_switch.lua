@@ -18,8 +18,8 @@ if SERVER then
 		animated = "boolean",
 		collision_mn = "boolean",
 		collision_dv = "boolean",
-		derail = "boolean",
-		usetrigger = "boolean"
+		derail = "boolean"
+		--usetrigger = "boolean"
 		
 	}
 	
@@ -41,7 +41,8 @@ if SERVER then
 		
 		--Prop Init Stuff
 		self:Switch(false,true)
-		self:SetTrigger(true)
+		--self:SetTrigger(true)
+		self.trigger_ents = {}
 		
 		if invalid then self:SetColor(Color(255,0,0)) end --color it red if no valid DV is found
 		
@@ -76,8 +77,15 @@ if SERVER then
 	--Scan for auto-switching and frogs
 	function ENT:Think()
 		
+		--Trigger
+		if not self.next_trigger then self.next_trigger = CurTime() + 0.5 end
+		if CurTime() > self.next_trigger then
+			self.next_trigger = CurTime() + 0.5
+			self:ScanTrigger()
+		end
+		
 		--Detect approach of incoming trailing props
-		if (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
+		if self.softoccupied and (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
 			
 			local trace = {
 				start = self.autopoint,
@@ -107,7 +115,8 @@ if SERVER then
 			end
 		end
 		
-		--Frog Sounds
+		--Frog Sounds (Moved to Client)
+		--[[
 		if self.softoccupied and self.frogpoint then
 			
 			local trace = {
@@ -128,9 +137,9 @@ if SERVER then
 				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
 			end
 		end
-		
+		]]--
 		--Better Occupancy Detection
-		if self.softoccupied and not self.usetrigger and self.rangerpoint1 and self.rangerpoint2 then
+		if self.softoccupied and self.rangerpoint1 and self.rangerpoint2 then
 			local trace = {
 				start = self.rangerpoint1,
 				endpos = self.rangerpoint2,
@@ -416,10 +425,12 @@ if SERVER then
 		if self.frogpoint then
 			self.rangerpoint2 = self.frogpoint
 			if self.bladepoint then self.rangerpoint1 = self.bladepoint else self.rangerpoint1 = self:GetPos() end
+			self:SetNWVector("frogpoint",self.frogpoint)
 			--print("Yes Better Points")
 		else
 			self.rangerpoint1 = nil
 			self.rangerpoint2 = nil
+			self:SetNWVector("frogpoint",nil)
 			--print("No Better Points")
 		end
 	end
@@ -471,17 +482,113 @@ if SERVER then
 	
 	function ENT:StartTouchAll()
 		self.softoccupied = true
-		if self.usetrigger and self.lever_valid then self.lever_ent:StandSetOccupied(true) end
+		self:SetNWBool("occupied",true)
+		--if self.usetrigger and self.lever_valid then self.lever_ent:StandSetOccupied(true) end
+		--self:SetColor(Color(255,0,0))
 	end
 	function ENT:EndTouchAll()
 		self.softoccupied = false
-		if self.usetrigger then
+		self:SetNWBool("occupied",false)
+		
+		if self.hardoccupied then
+			self.hardoccupied = false
 			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
-		else
-			if self.hardoccupied then
-				self.hardoccupied = false
-				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+		end
+		--self:SetColor(Color(255,255,255))
+	end
+	
+	--DIY Triggering based on AABB
+	function ENT:ScanTrigger()
+		local mins, maxs = self:WorldSpaceAABB()
+		mins = mins + Vector(-64,-64,0)
+		maxs = maxs + Vector(64,64,32)
+		
+		for k, prop in pairs(ents.FindByClass("prop_physics")) do
+			local idx = prop:EntIndex()
+			local phys = prop:GetPhysicsObject()
+			
+			if prop:GetPos():WithinAABox(mins, maxs) and phys:IsMotionEnabled() then
+				if not self.trigger_ents[idx] then
+					self.trigger_ents[idx] = true
+					self:StartTouch(prop)
+				end
+			else
+				if self.trigger_ents[idx] then
+					self.trigger_ents[idx] = nil
+					self:EndTouch(prop)
+				end
 			end
 		end
+	end
+	
+	hook.Add("EntityRemoved","Trakpak3_SwitchTriggerDeleteProp",function(ent)
+		if ent:GetClass()=="prop_physics" then
+			local idx = ent:EntIndex()
+			for k, switch in pairs(ents.FindByClass("tp3_switch")) do
+				if switch.trigger_ents[idx] then
+					switch.trigger_ents[idx] = nil
+					switch:EndTouch(ent)
+				end
+			end
+		end
+	end)
+end
+
+if CLIENT then
+	
+	--Draw trigger wireframe boxes around all the switches
+	--[[
+	hook.Add("PostDrawTranslucentRenderables","Trakpak3_SwitchAABB",function()
+		for k, self in pairs(ents.FindByClass("tp3_switch")) do
+			local mins, maxs = self:WorldSpaceAABB()
+			mins = mins + Vector(-64,-64,0)
+			maxs = maxs + Vector(64,64,32)
+			local center = maxs/2 + mins/2
+			
+			render.DrawWireframeBox(center, Angle(), center - mins, center - maxs, Color(0,255,0),false)
+			render.DrawLine(mins, maxs)
+		end
+		
+	end)
+	]]--
+	
+	function ENT:Think()
+		
+		--Clientside Frog Sounds
+		
+		local occupied = self:GetNWBool("occupied",false)
+		local frogpoint = self:GetNWVector("frogpoint",nil)
+		local pdist
+		
+		if frogpoint then pdist = LocalPlayer():GetPos():DistToSqr(self:GetPos()) end
+		
+		if occupied and frogpoint and pdist and (pdist < 2048*2048) then
+			
+			local trace = {
+				start = frogpoint,
+				endpos = frogpoint + Vector(0,0,8),
+				filter = self,
+				ignoreworld = true
+			}
+			local tr = util.TraceLine(trace)
+			
+			--Clickety Clack
+			if tr.Hit and not self.froccupied then
+				self.froccupied = true
+				self.clicker = tr.Entity
+				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
+			elseif not tr.Hit and self.froccupied then
+				self.froccupied = false
+				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
+			end
+			
+			self:NextThink(CurTime() + 0.1)
+			return true
+			
+		else
+			self:NextThink(CurTime() + 0.5)
+			return true
+		end
+		
 	end
 end

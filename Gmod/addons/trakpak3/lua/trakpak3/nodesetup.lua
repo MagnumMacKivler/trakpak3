@@ -154,6 +154,21 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		net.Send(ply)
 	end
 	
+	--Path Config
+	if Trakpak3.PathConfig.Signals then
+		local psignals = {}
+		for signame, paths in pairs(Trakpak3.PathConfig.Signals) do
+			local signal, valid = Trakpak3.FindByTargetname(signame)
+			if valid then psignals[signame] = paths end
+		end
+		
+		local JSON = util.TableToJSON(psignals)
+		JSON = util.Compress(JSON)
+		util.AddNetworkString("tp3_pathpack")
+		net.Start("tp3_pathpack")
+		net.WriteData(JSON,#JSON)
+		net.Send(ply)
+	end
 end)
 
 --Clipboard

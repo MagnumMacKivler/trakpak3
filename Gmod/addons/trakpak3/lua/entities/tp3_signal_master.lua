@@ -398,7 +398,7 @@ if SERVER then
 	
 	--Update path state
 	function ENT:SetPathState(pathname,active)
-		--print("SetPathState",pathname,active)
+		--print("SetPathState",self:GetName(),pathname,active)
 		self.paths[pathname]["active"] = active
 		if active then --This path is the new active one
 			local pdata = self.paths[pathname]

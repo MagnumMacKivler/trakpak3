@@ -37,6 +37,8 @@ function RemoteSwitcher.Switch(stand)
 	end
 end
 
+CreateClientConVar("tp3_remote_switcher_angle", "5", true, false, "Search Cone Angle for the 'Numbers' Remote Switcher Mode. Default is 5.", 1, 90)
+
 --Enable/Disable Functions
 function RemoteSwitcher.Enable(forcenumber)
 	RemoteSwitcher.Active = true
@@ -45,7 +47,13 @@ function RemoteSwitcher.Enable(forcenumber)
 		RemoteSwitcher.NumberMode = true
 		RemoteSwitcher.Stands = {}
 		local origin = LocalPlayer():EyePos()
-		local allents = ents.FindInCone(origin,LocalPlayer():GetAimVector(),8192,math.cos(math.rad(5)))
+		
+		local cvar = GetConVar("tp3_remote_switcher_angle")
+		local cangle = cvar:GetFloat()
+		--print("Cone Angle: "..cangle)
+		if cangle==0 then cangle = 5 end
+		
+		local allents = ents.FindInCone(origin,LocalPlayer():GetAimVector(),8192,math.cos(math.rad(cangle)))
 		local allstands = {}
 		for k, ent in pairs(allents) do --Filter out stands and find distances
 			if ent:GetClass()=="tp3_switch_lever_anim" then

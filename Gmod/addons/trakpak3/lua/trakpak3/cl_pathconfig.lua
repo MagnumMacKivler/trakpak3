@@ -1,6 +1,8 @@
 Trakpak3.PathConfig = {}
 local PathConfig = Trakpak3.PathConfig
 
+PathConfig.Signals = {}
+
 local speednames = {[0] = "STOP/DANGER", [1] = "RESTRICTED", [2] = "SLOW", [3] = "MEDIUM", [4] = "LIMITED", [5] = "FULL"}
 local speeds = {["STOP/DANGER"] = 0, ["RESTRICTED"] = 1, ["SLOW"] = 2, ["MEDIUM"] = 3, ["LIMITED"] = 4, ["FULL"] = 5}
 
@@ -11,7 +13,7 @@ function PathConfig.SelectSignal(ent)
 		if name then
 			if PathConfig.selected and PathConfig.selected_path then --Add/Remove as NextSignal
 				local signal = PathConfig.selected_ent
-				local pc = signal.pconfigs[PathConfig.selected_path]
+				local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path] --signal.pconfigs[PathConfig.selected_path]
 				if signal != ent then
 					if pc.nextsignal==name then
 						pc.nextsignal = nil
@@ -59,7 +61,7 @@ function PathConfig.CycleSwitch(ent)
 		
 		if stand then
 			local signal = PathConfig.selected_ent
-			local pc = signal.pconfigs[PathConfig.selected_path]
+			local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 			local sl = pc.switchlist
 			
 			local name = stand:GetName()
@@ -95,7 +97,7 @@ function PathConfig.SelectBlock()
 			did = true
 			--print("Ding")
 			local signal = PathConfig.selected_ent
-			local pc = signal.pconfigs[PathConfig.selected_path]
+			local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 			
 			if pc.block==name then
 				pc.block = nil
@@ -116,10 +118,10 @@ function PathConfig.SelectBlock()
 			local bpos = gate.pos
 			
 			if mypos:WithinAABox(bpos+mins, bpos+maxs) then
-				--did = true
+				did = true
 				--print("Ding")
 				local signal = PathConfig.selected_ent
-				local pc = signal.pconfigs[PathConfig.selected_path]
+				local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 				
 				if pc.block==name then
 					pc.block = nil
@@ -132,6 +134,10 @@ function PathConfig.SelectBlock()
 				break
 			end
 		end
+	end
+	
+	if not did then
+		PathConfig.DeselectSignal()
 	end
 	
 end
@@ -171,13 +177,14 @@ function PathConfig.OpenMenu()
 		local speedname = speednames[tonumber(row:GetColumnText(2))]
 		
 		PathConfig.selected_path = index
+		local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 		
 		--Set Speed and Divergence boxes
 		speedbox:SetEnabled(true)
-		speedbox:SetValue(speednames[signal.pconfigs[PathConfig.selected_path].speed])
+		speedbox:SetValue(speednames[pc.speed])
 		
 		divbox:SetEnabled(true)
-		local div = signal.pconfigs[PathConfig.selected_path].divergence
+		local div = pc.divergence
 		divbox:SetChecked(div)
 		if div then divbox:SetText("Path is Diverging") else divbox:SetText("Path is Main") end
 		
@@ -188,16 +195,17 @@ function PathConfig.OpenMenu()
 		self:Clear()
 		
 		--Add List Items
-		if signal.pconfigs then
-			for n=1, #signal.pconfigs do
-				local pc = signal.pconfigs[n]
+		local pcs = PathConfig.Signals[PathConfig.selected]
+		if pcs then
+			for n=1, #pcs do
+				local pc = pcs[n]
 				self:AddLine(n, speednames[pc.speed], pc.divergence and "Diverging" or "Main", table.Count(pc.switchlist), pc.block, pc.nextsignal)
 			end
 		end
 		
-		if signal.pconfigs and PathConfig.selected_path then
+		if pcs and PathConfig.selected_path then
 			
-			
+			local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 			
 			--Select the Row
 			for k, v in pairs(self:GetLines()) do
@@ -210,11 +218,11 @@ function PathConfig.OpenMenu()
 			
 			--Set Speed Box Value
 			speedbox:SetEnabled(true)
-			speedbox:SetValue(speednames[signal.pconfigs[PathConfig.selected_path].speed])
+			speedbox:SetValue(speednames[pc.speed])
 			
 			--Set Divergence Checkbox
 			divbox:SetEnabled(true)
-			local div = signal.pconfigs[PathConfig.selected_path].divergence
+			local div = pc.divergence
 			divbox:SetChecked(div)
 			if div then divbox:SetText("Path is Diverging") else divbox:SetText("Path is Main") end
 			
@@ -241,9 +249,11 @@ function PathConfig.OpenMenu()
 	button:SetImage("icon16/add.png")
 	function button:DoClick()
 		
-		if not signal.pconfigs then signal.pconfigs = {} end
+		if not PathConfig.Signals[PathConfig.selected] then PathConfig.Signals[PathConfig.selected] = {} end
 		
-		table.insert(signal.pconfigs,{speed = 5, divergence = false, switchlist = {}, block = nil, nextsignal = nil})
+		local count = #PathConfig.Signals[PathConfig.selected]
+		
+		table.insert(PathConfig.Signals[PathConfig.selected],{speed = 5, divergence = (count > 0), switchlist = {}, block = nil, nextsignal = nil})
 		pathlist:Repopulate()
 	end
 	--Remove
@@ -258,7 +268,7 @@ function PathConfig.OpenMenu()
 		if not line then return end
 		
 		local index = tonumber(line:GetColumnText(1))
-		table.remove(signal.pconfigs,index)
+		table.remove(PathConfig.Signals[PathConfig.selected],index)
 		PathConfig.selected_path = nil
 		pathlist:Repopulate()
 	end
@@ -270,7 +280,7 @@ function PathConfig.OpenMenu()
 	button:SetTextColor(Color(191,0,0))
 	button:SetImage("icon16/bomb.png")
 	function button:DoClick()
-		signal.pconfigs = nil
+		PathConfig.Signals[PathConfig.selected] = nil
 		PathConfig.selected_path = nil
 		pathlist:Repopulate()
 	end
@@ -305,8 +315,8 @@ function PathConfig.OpenMenu()
 	speedbox:SetSortItems(false)
 	
 	function speedbox:OnSelect(_, value, data)
-		if PathConfig.selected_path and signal.pconfigs then
-			signal.pconfigs[PathConfig.selected_path].speed = data
+		if PathConfig.selected_path and PathConfig.Signals[PathConfig.selected] then
+			PathConfig.Signals[PathConfig.selected][PathConfig.selected_path].speed = data
 			pathlist:Repopulate()
 		end
 	end
@@ -321,8 +331,8 @@ function PathConfig.OpenMenu()
 	--divbox:SetText("Path is Main")
 	
 	function divbox:OnChange(val)
-		if PathConfig.selected_path and signal.pconfigs then
-			signal.pconfigs[PathConfig.selected_path].divergence = val
+		if PathConfig.selected_path and PathConfig.Signals[PathConfig.selected] then
+			PathConfig.Signals[PathConfig.selected][PathConfig.selected_path].divergence = val
 			pathlist:Repopulate()
 		end
 	end
@@ -334,8 +344,8 @@ function PathConfig.OpenMenu()
 	sbutton:SetText("Clear Switches")
 	sbutton:SetTextColor(Color(191,0,0))
 	function sbutton:DoClick()
-		if PathConfig.selected_path and signal.pconfigs then
-			signal.pconfigs[PathConfig.selected_path].switchlist = {}
+		if PathConfig.selected_path and PathConfig.Signals[PathConfig.selected] then
+			PathConfig.Signals[PathConfig.selected][PathConfig.selected_path].switchlist = {}
 			pathlist:Repopulate()
 		end
 	end
@@ -388,8 +398,10 @@ function PathConfig.Draw()
 			surface.DrawOutlinedRect(cx - elementsize + 2, cy - elementsize + 2, elementsize*2 - 4, elementsize*0.5 - 4, 1)
 			surface.DrawOutlinedRect(cx - elementsize + 2, cy + elementsize/2 + 2, elementsize*2 - 4, elementsize*0.5 - 4, 1)
 			
-			draw.SimpleText(speednames[signal.pconfigs[PathConfig.selected_path].speed], "tp3_dispatch_1", cx, cy - elementsize*0.75, color_signal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-			draw.SimpleText(signal.pconfigs[PathConfig.selected_path].divergence and "Diverging" or "Main", "tp3_dispatch_1", cx, cy + elementsize*0.75, color_signal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
+			
+			draw.SimpleText(speednames[pc.speed], "tp3_dispatch_1", cx, cy - elementsize*0.75, color_signal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			draw.SimpleText(pc.divergence and "Diverging" or "Main", "tp3_dispatch_1", cx, cy + elementsize*0.75, color_signal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 		end
 		
 	end
@@ -397,7 +409,7 @@ function PathConfig.Draw()
 	--Draw Switches, Nextsignal, Block
 	if PathConfig.selected and PathConfig.selected_path then
 		
-		local pc = signal.pconfigs[PathConfig.selected_path]
+		local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 		
 		--Switches
 		
@@ -517,7 +529,7 @@ function PathConfig.Draw()
 			--Draw Selection
 			if PathConfig.selected and PathConfig.selected_path then
 				local signal = PathConfig.selected_ent
-				local pc = signal.pconfigs[PathConfig.selected_path]
+				local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 				
 				local block = Trakpak3.Blocks[pc.block]
 				
@@ -566,7 +578,7 @@ function PathConfig.Draw()
 			--Draw Selection
 			if PathConfig.selected and PathConfig.selected_path then
 				local signal = PathConfig.selected_ent
-				local pc = signal.pconfigs[PathConfig.selected_path]
+				local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 				
 				local gate = Trakpak3.LogicGates[pc.block]
 				
@@ -592,3 +604,68 @@ function PathConfig.Draw()
 	end
 	
 end
+
+--Save PathConfig File
+function PathConfig.Save()
+	
+	local PCT = PathConfig.Signals
+	
+	local json = util.TableToJSON(PCT, true)
+	
+	file.CreateDir("trakpak3/pathconfig")
+	file.Write("trakpak3/pathconfig/"..game.GetMap()..".txt", json)
+	local gray = Color(127,255,255)
+	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/pathconfig/"..game.GetMap()..".txt! To include it with your map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/pathconfig/!")
+	
+end
+
+--Load PathConfig File
+function PathConfig.Load()
+	local json = file.Read("trakpak3/pathconfig/"..game.GetMap()..".txt", "DATA")
+	if json then
+		local PCT = util.JSONToTable(json)
+		PathConfig.Signals = PCT
+		chat.AddText(Color(127,255,255), "Loaded pathconfig file data/trakpak3/pathconfig/"..game.GetMap()..".txt successfully.")
+		
+		PathConfig.selected = nil
+		PathConfig.selected_ent = nil
+		PathConfig.selected_path = nil
+		
+	else
+		chat.AddText(Color(127,255,255),"Could not find pathconfig file data/trakpak3/pathconfig/"..game.GetMap()..".txt!")
+	end
+end
+
+--Load From Map
+function PathConfig.LoadFromServer(message)
+	
+	if PathConfig.MapSignals then
+		
+		PathConfig.Signals = PathConfig.MapSignals
+		
+		PathConfig.selected = nil
+		PathConfig.selected_ent = nil
+		PathConfig.selected_path = nil
+		
+		if message then chat.AddText(Color(127,255,255), "Loaded path config from map successfully.") end
+	else
+		if message then chat.AddText(Color(127,255,255), "Could not load path config from map (lua/trakpak3/pathconfig/"..game.GetMap()..".lua does not exist?)!") end
+	end
+end
+
+--Clear
+function PathConfig.Clear()
+	PathConfig.Signals = {}
+	PathConfig.selected = nil
+	PathConfig.selected_ent = nil
+	PathConfig.selected_path = nil
+end
+--Receive From Server
+net.Receive("tp3_pathpack", function(mlen)
+	print("[Trakpak3] Path Pack Received.")
+	local JSON = net.ReadData(mlen)
+	JSON = util.Decompress(JSON)
+	PathConfig.MapSignals = util.JSONToTable(JSON)
+	
+	PathConfig.LoadFromServer(false)
+end)

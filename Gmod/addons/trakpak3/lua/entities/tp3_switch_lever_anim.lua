@@ -506,7 +506,22 @@ if CLIENT then
 	end)
 	
 	concommand.Add("tp3_switch_debug",function(ply, cmd, args)
-		Trakpak3.SwitchDebug = not Trakpak3.SwitchDebug
+		--Trakpak3.SwitchDebug = not Trakpak3.SwitchDebug
+		local v = args[1]
+		if (not v) or v=="" then
+			if not Trakpak3.SwitchDebug then
+				Trakpak3.SwitchDebug = 1
+			elseif Trakpak3.SwitchDebug and (Trakpak3.SwitchDebug>0) then
+				Trakpak3.SwitchDebug = nil
+			end
+		else
+			local n = tonumber(v)
+			if (n == 1) or (n == 2) then
+				Trakpak3.SwitchDebug = n
+			else
+				Trakpak3.SwitchDebug = nil
+			end
+		end
 		if Trakpak3.SwitchDebug then
 			net.Start("tp3_request_polyswitches")
 			net.SendToServer()

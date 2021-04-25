@@ -44,6 +44,8 @@ if SERVER then
 		--self:SetTrigger(true)
 		self.trigger_ents = {}
 		
+		
+		
 		if invalid then self:SetColor(Color(255,0,0)) end --color it red if no valid DV is found
 		
 		self:RegisterEntity("lever",self.lever) --self.lever_valid & self.lever_ent
@@ -78,11 +80,13 @@ if SERVER then
 	function ENT:Think()
 		
 		--Trigger
+		--[[
 		if not self.next_trigger then self.next_trigger = CurTime() + 0.5 end
 		if CurTime() > self.next_trigger then
 			self.next_trigger = CurTime() + 0.5
 			self:ScanTrigger()
 		end
+		]]--
 		
 		--Detect approach of incoming trailing props
 		if self.softoccupied and (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
@@ -407,6 +411,9 @@ if SERVER then
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.skin then self:SetSkin(self.skin) end
 		--print("Switch ",state)
+		self.abmins, self.abmaxs = self:WorldSpaceAABB()
+		self.abmins = self.abmins + Vector(-64,-64,0)
+		self.abmaxs = self.abmaxs + Vector(64,64,32)
 		self:FindAttachments()
 	end
 	
@@ -498,28 +505,61 @@ if SERVER then
 	end
 	
 	--DIY Triggering based on AABB
-	function ENT:ScanTrigger()
-		local mins, maxs = self:WorldSpaceAABB()
-		mins = mins + Vector(-64,-64,0)
-		maxs = maxs + Vector(64,64,32)
+	function ENT:ScanTrigger(prop, idx, phys, pos, unfrozen)
+		local mins = self.abmins
+		local maxs = self.abmaxs
 		
-		for k, prop in pairs(ents.FindByClass("prop_physics")) do
-			local idx = prop:EntIndex()
-			local phys = prop:GetPhysicsObject()
-			
-			if prop:GetPos():WithinAABox(mins, maxs) and phys:IsMotionEnabled() then
-				if not self.trigger_ents[idx] then
-					self.trigger_ents[idx] = true
-					self:StartTouch(prop)
-				end
-			else
-				if self.trigger_ents[idx] then
-					self.trigger_ents[idx] = nil
-					self:EndTouch(prop)
-				end
+		if (not mins) or (not maxs) then return end
+		
+		--print("Scanning ",mins,maxs)
+		
+		--local idx = prop:EntIndex()
+		--local phys = prop:GetPhysicsObject()
+		--local unfrozen = phys:IsMotionEnabled()
+		
+		if pos:WithinAABox(mins, maxs) and unfrozen then
+			if not self.trigger_ents[idx] then
+				self.trigger_ents[idx] = true
+				self:StartTouch(prop)
+			end
+		else
+			if self.trigger_ents[idx] then
+				self.trigger_ents[idx] = nil
+				self:EndTouch(prop)
 			end
 		end
+		
 	end
+	
+	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
+		if Trakpak3 then
+			if not Trakpak3.NextSwitchTrigger then
+				Trakpak3.NextSwitchTrigger = CurTime() + 0.5
+			elseif CurTime() > Trakpak3.NextSwitchTrigger then
+				Trakpak3.NextSwitchTrigger = Trakpak3.NextSwitchTrigger + 0.5
+				
+				local switches = ents.FindByClass("tp3_switch")
+				
+				if #switches > 0 then
+				
+					for k, prop in pairs(ents.FindByClass("prop_physics")) do
+						local idx = prop:EntIndex()
+						local phys = prop:GetPhysicsObject()
+						local pos = prop:GetPos()
+						local unfrozen = phys:IsMotionEnabled()
+						
+						for m, switch in pairs(switches) do
+							switch:ScanTrigger(prop, idx, phys, pos, unfrozen)
+						end
+						
+					end
+				
+				end
+				
+			end
+			
+		end
+	end)
 	
 	hook.Add("EntityRemoved","Trakpak3_SwitchTriggerDeleteProp",function(ent)
 		if ent:GetClass()=="prop_physics" then
@@ -536,21 +576,26 @@ end
 
 if CLIENT then
 	
-	--Draw trigger wireframe boxes around all the switches
-	--[[
+	--Draw trigger wireframe boxes around all the switches. tp3_switch_debug is in the switch lever anim file.
+	
 	hook.Add("PostDrawTranslucentRenderables","Trakpak3_SwitchAABB",function()
-		for k, self in pairs(ents.FindByClass("tp3_switch")) do
-			local mins, maxs = self:WorldSpaceAABB()
-			mins = mins + Vector(-64,-64,0)
-			maxs = maxs + Vector(64,64,32)
-			local center = maxs/2 + mins/2
-			
-			render.DrawWireframeBox(center, Angle(), center - mins, center - maxs, Color(0,255,0),false)
-			render.DrawLine(mins, maxs)
+		if Trakpak3.SwitchDebug==2 then
+			for k, self in pairs(ents.FindByClass("tp3_switch")) do
+				local mins, maxs = self:WorldSpaceAABB()
+				mins = mins + Vector(-64,-64,0)
+				maxs = maxs + Vector(64,64,32)
+				local center = maxs/2 + mins/2
+				
+				local color = Color(0,255,0)
+				
+				if self:GetNWBool("occupied",false) then color = Color(255,0,0) end
+				
+				render.DrawWireframeBox(center, Angle(), center - mins, center - maxs, color, true)
+				--render.DrawLine(mins, maxs)
+			end
 		end
-		
 	end)
-	]]--
+	
 	
 	function ENT:Think()
 		

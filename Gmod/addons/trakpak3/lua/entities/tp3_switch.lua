@@ -505,7 +505,7 @@ if SERVER then
 	end
 	
 	--DIY Triggering based on AABB
-	function ENT:ScanTrigger(prop, idx, phys, pos, unfrozen)
+	function ENT:ScanTrigger(prop, idx, pos, unfrozen)
 		local mins = self.abmins
 		local maxs = self.abmaxs
 		
@@ -546,10 +546,12 @@ if SERVER then
 						local idx = prop:EntIndex()
 						local phys = prop:GetPhysicsObject()
 						local pos = prop:GetPos()
-						local unfrozen = phys:IsMotionEnabled()
+						local unfrozen = false
+						
+						if phys:IsValid() then unfrozen = phys:IsMotionEnabled() end
 						
 						for m, switch in pairs(switches) do
-							switch:ScanTrigger(prop, idx, phys, pos, unfrozen)
+							switch:ScanTrigger(prop, idx, pos, unfrozen)
 						end
 						
 					end

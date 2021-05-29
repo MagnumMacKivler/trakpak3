@@ -148,3 +148,79 @@ function SignalVision.Readout()
 		SignalVision.flashtime = CurTime()+5
 	end
 end
+
+--Signal System Printout
+
+--Request signal systems from server
+hook.Add("InitPostEntity","Trakpak3_GetSignalSystems",function()
+	net.Start("Trakpak3_GetSignalSystems") --Received in signalsetup.lua
+	net.SendToServer()
+end)
+
+net.Receive("Trakpak3_GetSignalSystems",function(length, ply)
+	--print("[Trakpak3] Signal Systems Received.")
+	local data = net.ReadData(length)
+	local json = util.Decompress(data)
+	if json then
+		Trakpak3.UsedSignalSystems = util.JSONToTable(json)
+		--print(table.Count(Trakpak3.UsedSignalSystems))
+	end
+end)
+
+local colortable = { --Shamelessly copy-pasted from cl_sigedit.lua
+	["Red"] = Color(255,0,0),
+	["Amber"] = Color(255,191,0),
+	["Lemon Yellow"] = Color(255,255,0),
+	["Yellow-Green"] = Color(203,255,0),
+	["Green"] = Color(0,255,63),
+	["Derail Blue"] = Color(0,63,255),
+	["Lunar White"] = Color(223,235,255),
+	["Purple"] = Color(127,63,191),
+	["White"] = Color(255,255,255),
+	["Black"] = Color(0,0,0)
+}
+local dictionary = {
+	[0] = "STOP/DANGER",
+	[1] = "RESTRICTED",
+	[2] = "SLOW",
+	[3] = "MEDIUM",
+	[4] = "LIMITED",
+	[5] = "FULL"
+}
+
+--Add autocompletes for all the signal systems in the map
+local function AutoComplete(cmd, arg)
+	if Trakpak3.UsedSignalSystems then
+		local tbl = {}
+		for sysname, system in pairs(Trakpak3.UsedSignalSystems) do
+			table.insert(tbl, "tp3_rulebook "..sysname)
+		end
+		return tbl
+	end
+end
+
+concommand.Add("tp3_rulebook", function(ply, cmd, args)
+	if Trakpak3.UsedSignalSystems then
+		local sysname = args[1]
+		local system = Trakpak3.UsedSignalSystems[sysname]
+		if (sysname!="") and system then
+			local rules = system.rules
+			local order = system.order
+			
+			MsgC(Color(255,255,255), "Trakpak3 Signal System '"..sysname.."':\n-------------------\n")
+			for n = 1, #order do
+				local name = order[n]
+				local rule = rules[name]
+				local clr = colortable[rule.color] or Color(255,255,255)
+				MsgC(clr, "\n"..name.." ["..dictionary[rule.speed].."] : "..(rule.desc or "No Description").."\n")
+				--PrintTable(rule)
+			end
+			
+		else
+			MsgC(Color(255,255,255),"List of loaded signal systems:\n")
+			for sysname, _ in pairs(Trakpak3.UsedSignalSystems) do MsgC(Color(0,255,255),sysname.."\n") end
+		end
+	else
+		MsgC(Color(255,255,255),"This map has no signal systems loaded.")
+	end
+end, AutoComplete, "Prints out a list of rules for the given signal system name.")

@@ -166,4 +166,11 @@ if SERVER then
 		end
 	end
 	
+	--Safely handle pathconfig finding one of these instead of a Master signal
+	function ENT:AddPath()
+		ErrorNoHalt("[Trakpak3] Signal ",self," '"..self:GetName().."' is incorrectly considered to be a Master Signal by PathConfig! Possibly caused this entity sharing a targetname with a Master Signal, or a Master Signal was re-classed to this without updating the pathconfig file. To fix this, make sure all the signals are uniquely named and sanitize & re-save the pathconfig file for the map.\n")
+	end
+	
+	function ENT:SetPathState() self:AddPath() end
+	
 end

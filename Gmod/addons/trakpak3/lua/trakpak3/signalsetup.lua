@@ -33,10 +33,12 @@ for k, filename in pairs(file.Find("trakpak3/signalsystems/"..map.."/*.lua","LUA
 			print("[TP3Signals] System name is: "..sysname)
 			currentsys.sysname = sysname
 			currentsys.rules = {}
+			currentsys.order = {}
 			for n = 1, #ftable.rules do
 				local rtable = ftable.rules[n]
 				local name = rtable.name
 				currentsys.rules[name] = {speed = speed_dict[rtable.speed], desc = rtable.description, color = rtable.color}
+				currentsys.order[n] = name
 				--print(name, rtable.speed, rtable.description)
 			end
 			currentsys.sigtypes = ftable.sigtypes
@@ -66,4 +68,19 @@ hook.Add("InitPostEntity","Trakpak3_SystemSetup",function()
 		gate:InitialBroadcast()
 	end
 	
+end)
+
+--Signal System Packing
+util.AddNetworkString("Trakpak3_GetSignalSystems")
+net.Receive("Trakpak3_GetSignalSystems",function(length, ply) --Received from cl_signalvision.lua
+	--print("Received Request for Signal Systems")
+	if TP3Signals and TP3Signals.systems then
+		local json = util.TableToJSON(TP3Signals.systems)
+		if json then
+			local data = util.Compress(json)
+			net.Start("Trakpak3_GetSignalSystems")
+			net.WriteData(data)
+			net.Send(ply)
+		end
+	end
 end)

@@ -6,7 +6,11 @@ ENT.Purpose = "Multi Track Drifting"
 ENT.Instructions = "Place in Hammer"
 --ENT.AutomaticFrameAdvance = true --Not needed for manual animation sync
 
+
+
 if SERVER then
+	
+	--print("AAAAAAAAAAAA")
 	
 	ENT.KeyValueMap = {
 		model = "string",
@@ -109,6 +113,7 @@ if SERVER then
 				if vel:Dot(self.frogpoint - pos) > 0 then --wheels are moving towards frog
 					if self.animated then
 						self:BeginSwitching(not self.switchstate, true)
+						--self:EmitSound("vo/npc/alyx/uggh02.wav")
 					else
 						self.trailing = true
 						self.against = true
@@ -142,7 +147,12 @@ if SERVER then
 			end
 		end
 		]]--
+		
+		local turbothink = false
+		
 		--Better Occupancy Detection
+		--rangerpoint1 = blade or origin
+		--rangerpoint2 = frog
 		if self.softoccupied and self.rangerpoint1 and self.rangerpoint2 then
 			local trace = {
 				start = self.rangerpoint1,
@@ -150,10 +160,11 @@ if SERVER then
 				filter = Trakpak3.GetBlacklist(),
 				ignoreworld = true,
 				mins = Vector(-48,-48,-8),
-				maxs = Vector(48,48,8)
+				maxs = Vector(48,48,2)
 			}
 			
 			local tr = util.TraceHull(trace)
+			if tr.Hit then self.clicker = tr.Entity end
 			--print(tr.Hit)
 			if tr.Hit then self.blocking_ent = tr.Entity else self.blocking_ent = nil end
 			if tr.Hit and not self.hardoccupied then
@@ -163,162 +174,138 @@ if SERVER then
 				self.hardoccupied = false
 				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 			end
-		end
-		
-		if self.trailing then
 			
-			if self.behavior==1 and self.against then --Breakable: throw, but fuck the switch stand for a little bit.
-				local midpoint = 0.5*self.bladepoint + 0.5*self.frogpoint -- used for throwing the points open
-				local trace = {
-					start = self.bladepoint,
-					endpos = self.frogpoint,
-					maxs = Vector(48,48,0),
-					mins = Vector(-48,-48,-8),
-					filter = Trakpak3.GetBlacklist(),
-					ignoreworld = true
-				}
-				local tr = util.TraceHull(trace)
-				local dist2 = 16384
-				if self.clicker:IsValid() then
-					dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
-				end
-				
-				if dist2>(self.measuredistance) then --backed out the way it came
-				
-					self:Switch(self.switchstate, true)
-					--print("Trailing Canceled")
-					--self:EmitSound("buttons/blip1.wav")
+			if self.trailing then
+			
+				if self.behavior==1 and self.against then --Breakable: throw, but fuck the switch stand for a little bit.
 					
-				elseif tr.Hit and (tr.Fraction<0.25) then --complete the throw
-				
-					self.against = false
+					local dist2 = 16384
 					
-					if self.animated then --Play and Terminate the animation
-						self:SetAutomaticFrameAdvance(true)
-
-					else --Just insta-throw it
-						self:Switch(not self.switchstate)
+					if self.clicker:IsValid() then
+						dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
 					end
-					local vel = 0
 					
-					if tr.Entity:IsValid() then vel = tr.Entity:GetVelocity():Length() end
-					if self.lever_valid then self.lever_ent:StandBreak(not self.switchstate, vel) end
+					if dist2>(self.measuredistance) then --backed out the way it came
 					
-				end
-			elseif self.behavior==2 and self.against then --Safety Throw: throw when something approaches the blades
-				local midpoint = 0.5*self.bladepoint + 0.5*self.frogpoint -- used for throwing the points open
-				local trace = {
-					start = self.bladepoint,
-					endpos = self.frogpoint,
-					maxs = Vector(16,16,0),
-					mins = Vector(-16,-16,-8),
-					filter = Trakpak3.GetBlacklist(),
-					ignoreworld = true
-				}
-				local tr = util.TraceHull(trace)
-				local dist2 = 16384
-				if self.clicker:IsValid() then
-					dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
-				end
-				
-				if dist2>(self.measuredistance) then --backed out the way it came
-				
-					self:Switch(self.switchstate, true)
-					--print("Trailing Canceled")
-					--self:EmitSound("buttons/blip1.wav")
+						self:Switch(self.switchstate, true)
+						--print("Trailing Canceled")
+						--self:EmitSound("buttons/blip1.wav")
+						
+					elseif tr.Hit and (tr.Fraction<0.25) then --complete the throw
 					
-				elseif tr.Hit and (tr.Fraction<0.25) then --complete the throw
-				
-					self.against = false
-					
-					if self.animated then --Play and Terminate the animation
-						self:SetAutomaticFrameAdvance(true)
-						if self.lever_valid then self.lever_ent:StandThrowTo(not self.switchstate) end
-						--print("Throwing completely")
+						self.against = false
+						
+						if self.animated then --Play and Terminate the animation
+							self:SetAutomaticFrameAdvance(true)
 
-					else --Just insta-throw it
-						if self.lever_valid then self.lever_ent:StandThrowTo(not self.switchstate) end
-						self:Switch(not self.switchstate)
+						else --Just insta-throw it
+							self:Switch(not self.switchstate)
+						end
+						local vel = 0
+						
+						if tr.Entity:IsValid() then vel = tr.Entity:GetVelocity():Length() end
+						if self.lever_valid then self.lever_ent:StandBreak(not self.switchstate, vel) end
+						
 					end
-				end
-				
-			elseif self.behavior==3 then --Spring Switch: throw partially and then reset
-				local cycle = 0
-				local facing_axis = self.frogpoint - self.bladepoint
-				local passpoint = self.bladepoint - facing_axis
-				local dot = 1
-				
-				local trace = {
-					start = self.bladepoint,
-					endpos = self.frogpoint,
-					maxs = Vector(16,16,0),
-					mins = Vector(-16,-16,-8),
-					filter = Trakpak3.GetBlacklist(),
-					ignoreworld = true
-				}
-				local tr = util.TraceHull(trace)
-				local dist2 = 16384
-				if self.clicker:IsValid() then
-					dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
-					dot = (self.clicker:GetPos()-passpoint):Dot(facing_axis)
-				end
-				if (dist2>(self.measuredistance)) or (dot<0) then --backed out or passed through completely
-					self:Switch(self.switchstate, true)
-					--print("Trailing Canceled")
-					--self:EmitSound("buttons/bell1.wav")
-				elseif tr.Hit then
-					if self.animated and tr.Fraction<0.75 then --Animated, modulate
-						local springpos = 1 - tr.Fraction/0.75
-						if self.springpos and (self.springpos > springpos) then
-							if (self.springpos>0) then
+				elseif self.behavior==2 and self.against then --Safety Throw: throw when something approaches the blades
+					local dist2 = 16384
+					if self.clicker:IsValid() then
+						dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
+					end
+					
+					if dist2>(self.measuredistance) then --backed out the way it came
+					
+						self:Switch(self.switchstate, true)
+						--print("Trailing Canceled")
+						--self:EmitSound("buttons/blip1.wav")
+						
+					elseif tr.Hit and (tr.Fraction<0.25) then --complete the throw
+					
+						self.against = false
+						
+						if self.animated then --Play and Terminate the animation
+							self:SetAutomaticFrameAdvance(true)
+							if self.lever_valid then self.lever_ent:StandThrowTo(not self.switchstate) end
+							--print("Throwing completely")
+
+						else --Just insta-throw it
+							if self.lever_valid then self.lever_ent:StandThrowTo(not self.switchstate) end
+							self:Switch(not self.switchstate)
+						end
+					end
+					
+				elseif self.behavior==3 then --Spring Switch: throw partially and then reset
+					local cycle = 0
+					local facing_axis = self.frogpoint - self.bladepoint
+					local passpoint = self.bladepoint - facing_axis
+					local dot = 1
+					local dist2 = 16384
+					if self.clicker:IsValid() then
+						dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
+						dot = (self.clicker:GetPos()-passpoint):Dot(facing_axis)
+					end
+					if (dist2>(self.measuredistance)) or (dot<0) then --backed out or passed through completely
+						self:Switch(self.switchstate, true)
+						--PrintMessage(HUD_PRINTTALK, "Trailing Canceled")
+						--PrintMessage(HUD_PRINTTALK, tostring(dist2).." "..tostring(self.measuredistance).." "..tostring(dot).." "..tostring(self.clicker))
+						--self:EmitSound("vo/npc/alyx/ohgod01.wav")
+					elseif tr.Hit then
+						if self.animated and tr.Fraction<0.75 then --Animated, modulate
+							local springpos = 1 - tr.Fraction/0.75
+							if self.springpos and (self.springpos > springpos) then
+								if (self.springpos>0) then
+									self.springpos = self.springpos - 2*engine.TickInterval()
+									if self.springpos<0 then self.springpos = 0 end
+								end
+								
+							elseif (not self.springpos) or (self.springpos < springpos) then
+								self.springpos = springpos
+							end
+							self:SetCycle(self.springpos or 0)
+						elseif self.animated then --Animated, don't modulate
+							if self.springpos and (self.springpos>0) then
 								self.springpos = self.springpos - 2*engine.TickInterval()
 								if self.springpos<0 then self.springpos = 0 end
 							end
-							
-						elseif (not self.springpos) or (self.springpos < springpos) then
-							self.springpos = springpos
+							self:SetCycle(self.springpos or 0)
+						elseif tr.Fraction<0.5 then --not animated, show opened
+							if self.switchstate and self:GetModel()==self.model then
+								self:SetModel(self.model_div)
+							elseif not self.switchstate and self:GetModel()==self.model_div then
+								self:SetModel(self.model)
+							end
+						else --not animated, show closed
+							if self.switchstate and self:GetModel()==self.model_div then
+								self:SetModel(self.model)
+							elseif not self.switchstate and self:GetModel()==self.model then
+								self:SetModel(self.model_div)
+							end
 						end
-						self:SetCycle(self.springpos or 0)
-					elseif self.animated then --Animated, don't modulate
-						if self.springpos and (self.springpos>0) then
-							self.springpos = self.springpos - 2*engine.TickInterval()
-							if self.springpos<0 then self.springpos = 0 end
-						end
-						self:SetCycle(self.springpos or 0)
-					elseif tr.Fraction<0.5 then --not animated, show opened
-						if self.switchstate and self:GetModel()==self.model then
-							self:SetModel(self.model_div)
-						elseif not self.switchstate and self:GetModel()==self.model_div then
-							self:SetModel(self.model)
-						end
-					else --not animated, show closed
-						if self.switchstate and self:GetModel()==self.model_div then
-							self:SetModel(self.model)
-						elseif not self.switchstate and self:GetModel()==self.model then
-							self:SetModel(self.model_div)
-						end
-					end
-				else --Nothing on the switch, though still trailing
-					if self.animated then
-						if self.springpos and (self.springpos>0) then
-							self.springpos = self.springpos - 2*engine.TickInterval()
-							if self.springpos<0 then self.springpos = 0 end
-						end
-						self:SetCycle(self.springpos or 0)
-						--print(0)
-					else
-						if self.switchstate and self:GetModel()==self.model_div then
-							self:SetModel(self.model)
-						elseif not self.switchstate and self:GetModel()==self.model then
-							self:SetModel(self.model_div)
+					else --Nothing on the switch, though still trailing
+						if self.animated then
+							if self.springpos and (self.springpos>0) then
+								self.springpos = self.springpos - 2*engine.TickInterval()
+								if self.springpos<0 then self.springpos = 0 end
+							end
+							self:SetCycle(self.springpos or 0)
+							--print(0)
+						else
+							if self.switchstate and self:GetModel()==self.model_div then
+								self:SetModel(self.model)
+							elseif not self.switchstate and self:GetModel()==self.model then
+								self:SetModel(self.model_div)
+							end
 						end
 					end
 				end
+				--self:NextThink(CurTime())
+				--return true
+				turbothink = true
 			end
-			self:NextThink(CurTime())
-			return true
-		elseif self.animating then --Normal Animated Stand throwing, follow the stand cycle
+		end
+		if not self.trailing and self.animating then --Normal Animated Stand throwing, follow the stand cycle
 			--get current frame
+			--print("AAA")
 			local stand = self.lever_ent
 			local frame = stand:GetCycle()*stand.MaxFrame
 			frame = math.Clamp(frame,0,stand.MaxFrame)
@@ -345,12 +332,17 @@ if SERVER then
 			--Set cycle
 			self:SetCycle(cycle)
 		
+			turbothink = true
+		end
+		
+		if turbothink then
 			self:NextThink(CurTime())
 			return true
 		else --Not trailing, not animating at all
 			self:NextThink(CurTime() + 0.1)
 			return true
 		end
+		
 	end
 	
 	--Start Animation
@@ -366,6 +358,8 @@ if SERVER then
 			--Set flags
 			self.trailing = trailing
 			self.against = trailing
+			
+			--print("AA")
 		end)
 	end
 	
@@ -413,7 +407,7 @@ if SERVER then
 		--print("Switch ",state)
 		self.abmins, self.abmaxs = self:WorldSpaceAABB()
 		self.abmins = self.abmins + Vector(-64,-64,0)
-		self.abmaxs = self.abmaxs + Vector(64,64,32)
+		self.abmaxs = self.abmaxs + Vector(64,64,40)
 		self:FindAttachments()
 	end
 	
@@ -497,12 +491,86 @@ if SERVER then
 		self.softoccupied = false
 		self:SetNWBool("occupied",false)
 		
+		if self.trailing then
+			self:Switch(self.switchstate, true)
+		end
+		
 		if self.hardoccupied then
 			self.hardoccupied = false
 			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 		end
 		--self:SetColor(Color(255,255,255))
 	end
+	
+	--DIY Triggering Take #3
+	CreateConVar("tp3_switch_scanrate", 5, FCVAR_NONE, "The max number of switches that will be tested for occupancy per tick.", 1, 20)
+	cvars.AddChangeCallback("tp3_switch_scanrate", function(cname, old, new)
+		if Trakpak3.SwitchMaxIndex then
+			local val = tonumber(new)
+			local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/val)*engine.TickInterval(),2)
+			print("\nSwitch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
+		end
+	end)
+	
+	--Find all the switches initially
+	hook.Add("InitPostEntity","Trakpak3_InitFindSwitches",function()
+		if Trakpak3 then
+			Trakpak3.Switches = ents.FindByClass("tp3_switch")
+			Trakpak3.SwitchMaxIndex = #Trakpak3.Switches
+			if Trakpak3.SwitchMaxIndex > 0 then
+				Trakpak3.SwitchScanIndex = 1
+				
+				local convar = GetConVar("tp3_switch_scanrate")
+				local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/(convar:GetInt() or 5))*engine.TickInterval(),2)
+				print("\nSwitch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
+			else
+				print("\nMap has no switches.\n")
+			end
+		end
+	end)
+	
+	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
+		if Trakpak3 and Trakpak3.SwitchScanIndex and Trakpak3.SwitchMaxIndex then
+				
+			local convar = GetConVar("tp3_switch_scanrate")
+			local rate = 5
+			if convar then
+				rate = convar:GetInt() or 5
+			end
+			
+			local sw_start = Trakpak3.SwitchScanIndex
+			local sw_end = Trakpak3.SwitchScanIndex + rate
+			local reset = false
+			if sw_end >= Trakpak3.SwitchMaxIndex then
+				sw_end = Trakpak3.SwitchMaxIndex
+				reset = true
+			end
+			
+			for k, prop in pairs(ents.FindByClass("prop_physics")) do
+				local idx = prop:EntIndex()
+				local phys = prop:GetPhysicsObject()
+				local pos = prop:GetPos()
+				local unfrozen = false
+				
+				if phys:IsValid() then unfrozen = phys:IsMotionEnabled() end
+				
+				for n=sw_start, sw_end do
+					local switch = Trakpak3.Switches[n]
+					switch:ScanTrigger(prop, idx, pos, unfrozen)
+				end
+				
+			end
+			
+			if reset then
+				Trakpak3.SwitchScanIndex = 1
+			else
+				Trakpak3.SwitchScanIndex = sw_end + 1
+			end
+
+				
+			
+		end
+	end)
 	
 	--DIY Triggering based on AABB
 	function ENT:ScanTrigger(prop, idx, pos, unfrozen)
@@ -531,6 +599,7 @@ if SERVER then
 		
 	end
 	
+	--[[
 	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
 		if Trakpak3 then
 			if not Trakpak3.NextSwitchTrigger then
@@ -562,7 +631,7 @@ if SERVER then
 			
 		end
 	end)
-	
+	]]--
 	hook.Add("EntityRemoved","Trakpak3_SwitchTriggerDeleteProp",function(ent)
 		if ent:GetClass()=="prop_physics" then
 			local idx = ent:EntIndex()
@@ -585,7 +654,7 @@ if CLIENT then
 			for k, self in pairs(ents.FindByClass("tp3_switch")) do
 				local mins, maxs = self:WorldSpaceAABB()
 				mins = mins + Vector(-64,-64,0)
-				maxs = maxs + Vector(64,64,32)
+				maxs = maxs + Vector(64,64,40)
 				local center = maxs/2 + mins/2
 				
 				local color = Color(0,255,0)

@@ -107,8 +107,10 @@ if SERVER then
 				--	print("Invalid signal type '"..signame.."'!")
 				--end
 				self.signaltype = sigtype
-			else
+			elseif sysname then
 				print("[Trakpak3] Cannot find signal system '"..sysname.."'!")
+			else
+				print("Signal ",self," has no signal system!")
 			end
 		else
 			print("[Trakpak3] Signal Table does not exist!")

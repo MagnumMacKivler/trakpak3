@@ -13,15 +13,15 @@ local PathConfig = Trakpak3.PathConfig
 			
 
 hook.Add("InitPostEntity","TP3_PathLoad",function()
-	
-	local json = file.Read("trakpak3/pathconfig/"..game.GetMap()..".lua","LUA")
+	local filepath = "trakpak3/pathconfig/"..game.GetMap()..".lua"
+	local json = file.Read(filepath,"LUA")
+
 	
 	if json then --found a file!
 		local ftable = util.JSONToTable(json)
 		if ftable then
 			
 			PathConfig.Signals = ftable
-			
 			for signame, paths in pairs(PathConfig.Signals) do --For each signal that has paths
 				PathConfig.ProcessLogic(signame)
 				PathConfig.EvaluateLogic(signame)
@@ -35,11 +35,14 @@ end)
 function PathConfig.ProcessLogic(signame) --Set Up Signal with Path Info
 	local paths = PathConfig.Signals[signame]
 	local signal, valid = Trakpak3.FindByTargetname(signame)
+	--print(signal, valid)
 	if not valid then return end
 	
 	--ENT:AddPath(pathname, diverging, speed, block, nextsignal, active)
 	for pindex, path in pairs(paths) do --For each path in the signal:
+		--if signal.AddPath then print("Signal ",signal," AddPath OK") else print("Signal ",signal," AddPath Failed") end
 		signal:AddPath(pindex, path.divergence, path.speed, path.block, path.nextsignal, false) --Add path
+		
 	end
 end
 

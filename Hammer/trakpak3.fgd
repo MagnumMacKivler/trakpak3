@@ -41,6 +41,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 ]
 
 //Switch Lever
@@ -114,6 +115,8 @@
 	//gmod_allowphysgun(integer) readonly : "Allow Physgun" : 0 : "Disables the physgun on this entity."
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
 	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
+	
 	input ThrowToggle(void) : "Toggle the switch state. This should probably be fired by a func_button."
 	input ThrowMain(void) : "Throws the switch to Main/Normal."
 	input ThrowDiverging(void) : "Throws the switch to Diverging/Reverse."
@@ -138,6 +141,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 ]
 
 //Turntable Test
@@ -172,6 +176,8 @@
 	
 	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the turntable makes when it starts to move."
 	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the turntable makes when it comes to a complete stop."
+	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	
 	input Lock(void) : "Lock the turntable, preventing it from moving this should be required before moving a train on or off!"
 	input Unlock(void) : "Unlock the turntable, allowing it to move again."
@@ -216,6 +222,8 @@
 	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the table makes when it starts to move under power."
 	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the table makes when it comes to a complete stop under power."
 	sound_crash(sound) : "Crash Sound" : "plats/tram_hit4.wav" : "The sound the table makes when it comes to a complete stop due to being slammed into the track ends."
+	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	
 	input Lock(void) : "Lock the turntable, preventing it from moving this should be required before moving a train on or off!"
 	input Unlock(void) : "Unlock the turntable, allowing it to move again."
@@ -271,6 +279,8 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	
 	input Lock(void) : "Lock the bridge, preventing it from moving. This should be required before moving a train on or off!"
 	input Unlock(void) : "Unlock the bridge, allowing it to move again."
@@ -383,6 +393,8 @@
 	
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
 	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
+	
 	input SetManual(string) : "Forces a signal to display the given aspect name (if given) and stops all automatic behavior."
 	input SetAutomatic(void) : "Forces the signal to resume responding to the signaling system normally."
 	
@@ -422,6 +434,8 @@
 	]
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger" : "Disables the toolgun on this entity except for the tools listed here."
 	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
+	
 	input SetBodygroups(string) : "Force the signal to display these bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	input SetSkin(integer) : "Force the signal to display this skin."
 	input SetCycle(float) : "Force the signal to go to this point in its animation cycle."
@@ -429,7 +443,7 @@
 ]
 
 //Path Loader
-@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_path_loader.vmt") line(targetname, targetname, targetname, target) = tp3_path_loader : "An entity that modifies a signal (or two). Can be used to monitor switch stands and give different indications for diverging routes, or to modify a single signal path. Additional stand_x and state_x keyvalues can be added by disabling SmartEdit. NOTE: all stand_x and state_x keyvalues must have only one character after the underscore. Use a-z if you need more than 10."
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_path_loader.vmt") line(targetname, targetname, targetname, target) = tp3_path_loader : "OBSOLETE! Use the Path Configurator Tool in-game instead! An entity that modifies a signal (or two). Can be used to monitor switch stands and give different indications for diverging routes, or to modify a single signal path. Additional stand_x and state_x keyvalues can be added by disabling SmartEdit. NOTE: all stand_x and state_x keyvalues must have only one character after the underscore. Use a-z if you need more than 10."
 [
 	//Forward
 	target(target_destination) : "Signal to Modify" : : "The signal this path applies to."
@@ -663,6 +677,8 @@
 	
 	warning(float) : "Warning Delay" : "4.0" : "After the lights/bell come on, the gate will wait this many seconds before closing."
 	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
+	
 	output OnLightsOn(void) : "Fired when the lights turn on."
 	output OnGateClose(void) : "Fired when the gate starts closing."
 	output OnLightsOff(void) : "Fired when the lights turn off."
@@ -744,6 +760,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 ]
 
 //Custom Sign, Prop (Multi/Auto)
@@ -761,6 +778,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 ]
 
 //Custom Sign, World

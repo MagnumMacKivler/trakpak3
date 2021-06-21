@@ -3087,7 +3087,14 @@ function Dispatch.OpenDispatcher()
 	bottombar:Dock(BOTTOM)
 	
 	--Page Controls
-	Dispatch.page = Dispatch.page or 0
+
+	if not Dispatch.didfirstopen then --Open Page 1 if first time
+		Dispatch.didfirstopen = true
+		Dispatch.page = math.min(Dispatch.page, 1) --Unless there are 0 pages, that is.
+	else
+		Dispatch.page = Dispatch.page or 0
+	end
+
 	
 	--Prev Page Button
 	local button = vgui.Create("DImageButton",bottombar)

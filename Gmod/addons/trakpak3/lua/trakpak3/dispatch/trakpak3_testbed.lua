@@ -188,44 +188,52 @@
 				"icon1": "generic_unlocked.png",
 				"icon2": "generic_2.png",
 				"y": 14.0,
+				"color9": "255 255 255",
 				"color4": "255 255 255",
 				"icon5": "generic_5.png",
 				"icon6": "generic_6.png",
 				"color5": "255 255 255",
 				"color0": "0 255 0",
 				"icon0": "generic_locked.png",
+				"icon9": "generic_9.png",
+				"icon8": "generic_8.png",
 				"color1": "255 0 0",
 				"icon3": "generic_3.png",
 				"icon4": "generic_4.png",
+				"proxy": "bridge_ds_lock",
 				"color3": "255 255 255",
 				"color2": "255 255 255",
 				"color6": "255 255 255",
 				"type": "proxy",
 				"icon7": "generic_7.png",
-				"proxy": "bridge_ds_lock",
-				"color7": "255 255 255"
+				"color7": "255 255 255",
+				"color8": "255 255 255"
 			},
 			{
 				"x": 5.0,
 				"icon1": "generic_o.png",
 				"icon2": "generic_minus.png",
 				"y": 16.0,
+				"color9": "255 255 255",
 				"color4": "255 255 255",
 				"icon5": "generic_5.png",
 				"icon6": "generic_6.png",
 				"color5": "255 255 255",
 				"color0": "0 255 0",
 				"icon0": "generic_c.png",
+				"icon9": "generic_9.png",
+				"icon8": "generic_8.png",
 				"color1": "255 0 0",
 				"icon3": "generic_3.png",
 				"icon4": "generic_4.png",
+				"proxy": "bridge_ds_control",
 				"color3": "255 255 255",
 				"color2": "255 255 0",
 				"color6": "255 255 255",
 				"type": "proxy",
 				"icon7": "generic_7.png",
-				"proxy": "bridge_ds_control",
-				"color7": "255 255 255"
+				"color7": "255 255 255",
+				"color8": "255 255 255"
 			},
 			{
 				"y1": 17.0,
@@ -334,5 +342,127 @@
 		],
 		"x_res": "64",
 		"name": "Test Interlocking"
+	},
+	{
+		"y_res": "48",
+		"color": "0",
+		"elements": [
+			{
+				"y1": 9.0,
+				"x1": 4.0,
+				"color": "255",
+				"type": "line",
+				"y2": 9.0,
+				"x2": 57.0,
+				"weight": 3.0
+			},
+			{
+				"y1": 14.0,
+				"x1": 4.0,
+				"color": "255",
+				"type": "line",
+				"y2": 14.0,
+				"x2": 57.0,
+				"weight": 3.0
+			},
+			{
+				"y1": 9.0,
+				"x1": 23.0,
+				"color": "255",
+				"type": "line",
+				"y2": 19.0,
+				"x2": 14.0,
+				"weight": 2.0
+			},
+			{
+				"y1": 19.0,
+				"x1": 14.0,
+				"color": "255",
+				"type": "line",
+				"y2": 19.0,
+				"x2": 4.0,
+				"weight": 3.0
+			},
+			{
+				"y1": 24.0,
+				"x1": 4.0,
+				"color": "255",
+				"type": "line",
+				"y2": 24.0,
+				"x2": 14.0,
+				"weight": 3.0
+			},
+			{
+				"y1": 24.0,
+				"x1": 14.0,
+				"color": "255",
+				"type": "line",
+				"y2": 14.0,
+				"x2": 23.0,
+				"weight": 2.0
+			},
+			{
+				"y1": 14.0,
+				"x1": 33.0,
+				"color": "255",
+				"type": "line",
+				"y2": 24.0,
+				"x2": 40.0,
+				"weight": 2.0
+			},
+			{
+				"y1": 24.0,
+				"x1": 40.0,
+				"color": "255",
+				"type": "line",
+				"y2": 24.0,
+				"x2": 57.0,
+				"weight": 3.0
+			},
+			{
+				"y1": 9.0,
+				"x1": 33.0,
+				"color": "255",
+				"type": "line",
+				"y2": 19.0,
+				"x2": 40.0,
+				"weight": 2.0
+			},
+			{
+				"y1": 19.0,
+				"x1": 40.0,
+				"color": "255",
+				"type": "line",
+				"y2": 19.0,
+				"x2": 57.0,
+				"weight": 3.0
+			},
+			{
+				"type": "switch",
+				"x": 23.0,
+				"y": 9.0,
+				"switch": "dj_2"
+			},
+			{
+				"type": "switch",
+				"x": 23.0,
+				"y": 14.0,
+				"switch": "dj_1"
+			},
+			{
+				"type": "switch",
+				"x": 33.0,
+				"y": 14.0,
+				"switch": "dj_3"
+			},
+			{
+				"type": "switch",
+				"x": 33.0,
+				"y": 9.0,
+				"switch": "dj_4"
+			}
+		],
+		"x_res": "64",
+		"name": "Double JCT"
 	}
 ]

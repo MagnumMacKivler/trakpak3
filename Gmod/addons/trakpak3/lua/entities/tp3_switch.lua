@@ -67,6 +67,7 @@ if SERVER then
 	--Set local parameters
 	function ENT:SwitchSetup(behavior)
 		self.behavior = behavior
+		if self.behavior==-1 then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
 	end
 	
@@ -515,7 +516,17 @@ if SERVER then
 	--Find all the switches initially
 	hook.Add("InitPostEntity","Trakpak3_InitFindSwitches",function()
 		if Trakpak3 then
-			Trakpak3.Switches = ents.FindByClass("tp3_switch")
+			local allswitches = ents.FindByClass("tp3_switch")
+			
+			--Filter OUT all dumb switches
+			Trakpak3.Switches = {}
+			for n=1,#allswitches do
+				local sw = allswitches[n]
+				if sw.behavior > -1 then
+					table.insert(Trakpak3.Switches,sw)
+				end
+			end
+			
 			Trakpak3.SwitchMaxIndex = #Trakpak3.Switches
 			if Trakpak3.SwitchMaxIndex > 0 then
 				Trakpak3.SwitchScanIndex = 1
@@ -660,6 +671,7 @@ if CLIENT then
 				local color = Color(0,255,0)
 				
 				if self:GetNWBool("occupied",false) then color = Color(255,0,0) end
+				if self:GetNWBool("dumb",false) then color = Color(143,143,143) end
 				
 				render.DrawWireframeBox(center, Angle(), center - mins, center - maxs, color, true)
 				--render.DrawLine(mins, maxs)
@@ -672,13 +684,14 @@ if CLIENT then
 		
 		--Clientside Frog Sounds
 		
-		local occupied = self:GetNWBool("occupied",false)
+		--local occupied = self:GetNWBool("occupied",false)
 		local frogpoint = self:GetNWVector("frogpoint",nil)
 		local pdist
 		
 		if frogpoint then pdist = LocalPlayer():GetPos():DistToSqr(self:GetPos()) end
 		
-		if occupied and frogpoint and pdist and (pdist < 2048*2048) then
+		--if occupied and frogpoint and pdist and (pdist < 2048*2048) then
+		if frogpoint and pdist and (pdist < 2048*2048) then
 			
 			local trace = {
 				start = frogpoint,
@@ -702,6 +715,7 @@ if CLIENT then
 			return true
 			
 		else
+			self.froccupied = false
 			self:NextThink(CurTime() + 0.5)
 			return true
 		end

@@ -62,8 +62,9 @@
 		1 : "Diverging/Reverse"
 	]
 	
-	behavior(choices) : "Trailing Switch Behavior" : 1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
+	behavior(choices) : "Trailing Switch Behavior" : -1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Dumb: Disables all trailing switch and occupancy behavior (lag reduction feature). Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
 	[
+		-1 : "Dumb"
 		0 : "Manual, Derail"
 		1 : "Manual, Break"
 		2 : "Safety Throw"

@@ -401,27 +401,29 @@ if SERVER then
 	--Update path state
 	function ENT:SetPathState(pathname,active)
 		--print("SetPathState",self:GetName(),pathname,active)
-		self.paths[pathname]["active"] = active
-		if active then --This path is the new active one
-			local pdata = self.paths[pathname]
-			self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal)
-		else --It may be a different one
-			local invalid = true
-			for pname, pdata in pairs(self.paths) do
-				if pdata.active then --It was another path after all
-					invalid = false
-					self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal)
+		if(self.paths) then
+			self.paths[pathname]["active"] = active
+
+			if active then --This path is the new active one
+				local pdata = self.paths[pathname]
+				self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal)
+			else --It may be a different one
+				local invalid = true
+				for pname, pdata in pairs(self.paths) do
+					if pdata.active then --It was another path after all
+						invalid = false
+						self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal)
+					end
+					--print(pdata.active)
 				end
-				--print(pdata.active)
-			end
-			if invalid then --If no other path claims validity, revert to default
-				--print("Yo this should be doing something")
-				self:ChangePathInfo(false,Trakpak3.DANGER,nil,nil)
-				--print(self:GetName().." Setting to aspect:")
-				--PrintTable(self.system.aspects[self.defaultaspect])
+				if invalid then --If no other path claims validity, revert to default
+					--print("Yo this should be doing something")
+					self:ChangePathInfo(false,Trakpak3.DANGER,nil,nil)
+					--print(self:GetName().." Setting to aspect:")
+					--PrintTable(self.system.aspects[self.defaultaspect])
+				end
 			end
 		end
-		
 	end
 	
 	--Hammer Input Handler

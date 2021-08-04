@@ -6,12 +6,10 @@ ENT.Purpose = "Multi Track Drifting"
 ENT.Instructions = "Place in Hammer"
 --ENT.AutomaticFrameAdvance = true --Not needed for manual animation sync
 
-
-
 if SERVER then
-	
+
 	--print("AAAAAAAAAAAA")
-	
+
 	ENT.KeyValueMap = {
 		model = "string",
 		model_div = "string",
@@ -24,12 +22,11 @@ if SERVER then
 		collision_dv = "boolean",
 		derail = "boolean"
 		--usetrigger = "boolean"
-		
 	}
-	
+
 	function ENT:Initialize()
 		self:ValidateNumerics()
-		
+
 		--Auto-calculate DV if needed
 		local invalid = false
 		if not self.model_div or (self.model_div=="") then
@@ -42,48 +39,73 @@ if SERVER then
 				invalid = true
 			end
 		end
-		
+
 		--Prop Init Stuff
 		self:Switch(false,true)
 		--self:SetTrigger(true)
 		self.trigger_ents = {}
-		
-		
-		
+
 		if invalid then self:SetColor(Color(255,0,0)) end --color it red if no valid DV is found
-		
+
 		self:RegisterEntity("lever",self.lever) --self.lever_valid & self.lever_ent
-		
+
 		if self.lever_valid then
 			self.lever_ent:StandSetup(self)
 			self:SetNWEntity("lever",self.lever_ent)
 		end
-		
+
 		self.behavior = self.behavior or 0 --Will be set later by switch stand
 	end
-	
+
 	--Functions called by switch stand
-	
+
 	--Set local parameters
 	function ENT:SwitchSetup(behavior)
 		self.behavior = behavior
 		if self.behavior==-1 then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
 	end
-	
+
 	--Instruct the switch to throw
 	function ENT:SwitchThrow(state)
 		if self.animated then --Smoothly animate; otherwise, do nothing and wait for the switch stand to finish
 			self:BeginSwitching(state)
 		end
 	end
-	
+
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
-	
+
+	--DIY Triggering based on AABB
+	function ENT:ScanTrigger(prop, idx, pos, unfrozen)
+		local mins = self.abmins
+		local maxs = self.abmaxs
+		
+		if (not mins) or (not maxs) then return end
+		
+		--print("Scanning ",mins,maxs)
+		
+		--local idx = prop:EntIndex()
+		--local phys = prop:GetPhysicsObject()
+		--local unfrozen = phys:IsMotionEnabled()
+		
+		if pos:WithinAABox(mins, maxs) and unfrozen then
+			if not self.trigger_ents[idx] then
+				self.trigger_ents[idx] = true
+				self:StartTouch(prop)
+			end
+		else
+			if self.trigger_ents[idx] then
+				self.trigger_ents[idx] = nil
+				self:EndTouch(prop)
+			end
+		end
+		
+	end
+
 	--Scan for auto-switching and frogs
 	function ENT:Think()
-		
+
 		--Trigger
 		--[[
 		if not self.next_trigger then self.next_trigger = CurTime() + 0.5 end
@@ -92,10 +114,10 @@ if SERVER then
 			self:ScanTrigger()
 		end
 		]]--
-		
+
 		--Detect approach of incoming trailing props
 		if self.softoccupied and (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
-			
+
 			local trace = {
 				start = self.autopoint,
 				endpos = self.autopoint + Vector(0,0,64),
@@ -105,7 +127,7 @@ if SERVER then
 				maxs = Vector(4,4,8)
 			}
 			local tr = util.TraceHull(trace)
-			
+
 			--Auto Throw
 			if tr.Hit then
 				self.clicker = tr.Entity
@@ -124,11 +146,11 @@ if SERVER then
 				end
 			end
 		end
-		
+
 		--Frog Sounds (Moved to Client)
 		--[[
 		if self.softoccupied and self.frogpoint then
-			
+
 			local trace = {
 				start = self.frogpoint,
 				endpos = self.frogpoint + Vector(0,0,8),
@@ -136,7 +158,7 @@ if SERVER then
 				ignoreworld = true
 			}
 			local tr = util.TraceLine(trace)
-			
+
 			--Clickety Clack
 			if tr.Hit and not self.froccupied then
 				self.froccupied = true
@@ -148,9 +170,9 @@ if SERVER then
 			end
 		end
 		]]--
-		
+
 		local turbothink = false
-		
+
 		--Better Occupancy Detection
 		--rangerpoint1 = blade or origin
 		--rangerpoint2 = frog
@@ -163,7 +185,7 @@ if SERVER then
 				mins = Vector(-48,-48,-8),
 				maxs = Vector(48,48,2)
 			}
-			
+
 			local tr = util.TraceHull(trace)
 			if tr.Hit then self.clicker = tr.Entity end
 			--print(tr.Hit)
@@ -175,27 +197,27 @@ if SERVER then
 				self.hardoccupied = false
 				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 			end
-			
+
 			if self.trailing then
-			
+
 				if self.behavior==1 and self.against then --Breakable: throw, but fuck the switch stand for a little bit.
-					
+
 					local dist2 = 16384
-					
+
 					if self.clicker:IsValid() then
 						dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
 					end
-					
+
 					if dist2>(self.measuredistance) then --backed out the way it came
-					
+
 						self:Switch(self.switchstate, true)
 						--print("Trailing Canceled")
 						--self:EmitSound("buttons/blip1.wav")
-						
+
 					elseif tr.Hit and (tr.Fraction<0.25) then --complete the throw
-					
+
 						self.against = false
-						
+
 						if self.animated then --Play and Terminate the animation
 							self:SetAutomaticFrameAdvance(true)
 
@@ -203,27 +225,27 @@ if SERVER then
 							self:Switch(not self.switchstate)
 						end
 						local vel = 0
-						
+
 						if tr.Entity:IsValid() then vel = tr.Entity:GetVelocity():Length() end
 						if self.lever_valid then self.lever_ent:StandBreak(not self.switchstate, vel) end
-						
+
 					end
 				elseif self.behavior==2 and self.against then --Safety Throw: throw when something approaches the blades
 					local dist2 = 16384
 					if self.clicker:IsValid() then
 						dist2 = self.bladepoint:DistToSqr(self.clicker:GetPos())
 					end
-					
+
 					if dist2>(self.measuredistance) then --backed out the way it came
-					
+
 						self:Switch(self.switchstate, true)
 						--print("Trailing Canceled")
 						--self:EmitSound("buttons/blip1.wav")
-						
+
 					elseif tr.Hit and (tr.Fraction<0.25) then --complete the throw
-					
+
 						self.against = false
-						
+
 						if self.animated then --Play and Terminate the animation
 							self:SetAutomaticFrameAdvance(true)
 							if self.lever_valid then self.lever_ent:StandThrowTo(not self.switchstate) end
@@ -234,7 +256,7 @@ if SERVER then
 							self:Switch(not self.switchstate)
 						end
 					end
-					
+
 				elseif self.behavior==3 then --Spring Switch: throw partially and then reset
 					local cycle = 0
 					local facing_axis = self.frogpoint - self.bladepoint
@@ -258,7 +280,7 @@ if SERVER then
 									self.springpos = self.springpos - 2*engine.TickInterval()
 									if self.springpos<0 then self.springpos = 0 end
 								end
-								
+
 							elseif (not self.springpos) or (self.springpos < springpos) then
 								self.springpos = springpos
 							end
@@ -320,22 +342,22 @@ if SERVER then
 				end
 			end
 			if lastpoint<1 then lastpoint = 1 end
-			
+
 			--interpolate
 			local t1 = plot[lastpoint][1]
 			local t2 = plot[lastpoint+1][1]
 			local c1 = plot[lastpoint][2]
 			local c2 = plot[lastpoint+1][2]
-			
+
 			local prog = (frame - t1) / (t2 - t1)
 			local cycle = c1 + prog*(c2 - c1)
-			
+
 			--Set cycle
 			self:SetCycle(cycle)
-		
+
 			turbothink = true
 		end
-		
+
 		if turbothink then
 			self:NextThink(CurTime())
 			return true
@@ -343,27 +365,27 @@ if SERVER then
 			self:NextThink(CurTime() + 0.1)
 			return true
 		end
-		
+
 	end
-	
+
 	--Start Animation
 	function ENT:BeginSwitching(state, trailing)
 		--set the new physics instantly
 		if state then self:QuickPhys(self.model_div) else self:QuickPhys(self.model) end
 		timer.Simple(0,function()
-			
+
 			--Begin Animation
 			self.animating = true
 			self:ResetSequence("throw")
-			
+
 			--Set flags
 			self.trailing = trailing
 			self.against = trailing
-			
+
 			--print("AA")
 		end)
 	end
-	
+
 	--Instantly set new physics mesh (for trailing switches)
 	function ENT:QuickPhys(model)
 		local oldmodel = self:GetModel()
@@ -371,22 +393,22 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		self:SetModel(oldmodel)
 	end
-	
+
 	--[[
 	concommand.Add("tp3_switch",function(ply, cmd, args)
 		local id = tonumber(args[1])
 		local state = args[2]
-		
+
 		if id and state then
 			Entity(id):Switch(state=="1")
 		end
 	end)
-	
+
 	hook.Add("tp3_switch","Trakpak3_OhGodHelp",function(ent,state)
 		ent:Switch(state)
 	end)
 	]]--
-	
+
 	--Change Switch Full (Model and Physics, Reset all state data)
 	function ENT:Switch(state, force)
 		if state and (not self.switchstate or force) then --Throw DV
@@ -411,18 +433,18 @@ if SERVER then
 		self.abmaxs = self.abmaxs + Vector(64,64,40)
 		self:FindAttachments()
 	end
-	
+
 	--Get attachment points for frog/autothrow
 	function ENT:FindAttachments()
-		
+
 		local ap_idx = self:LookupAttachment("autopoint1")
 		local fp_idx = self:LookupAttachment("frog1")
 		local bp_idx = self:LookupAttachment("bladecenter1")
-		
+
 		if ap_idx>0 then self.autopoint = self:GetAttachment(ap_idx).Pos else self.autopoint = nil end
 		if fp_idx>0 then self.frogpoint = self:GetAttachment(fp_idx).Pos else self.frogpoint = nil end
 		if bp_idx>0 then self.bladepoint = self:GetAttachment(bp_idx).Pos else self.bladepoint = nil end
-		
+
 		--Attachment Points for Better Occupancy Detection
 		if self.frogpoint then
 			self.rangerpoint2 = self.frogpoint
@@ -436,7 +458,7 @@ if SERVER then
 			--print("No Better Points")
 		end
 	end
-	
+
 	--Trigger Functions
 	--By the way, an interesting quirk about how prop triggers work - apparently it works great with trains because in addition to sitting on top of the rails, the flanges go down into the switch model's space a bit. With props that just sit on top of a surface, it doesn't work as well.
 	function ENT:StartTouch(ent)
@@ -444,7 +466,7 @@ if SERVER then
 			self.touchents = {}
 			self.hastouchers = false
 		end
-		
+
 		if ent:IsValid() and ent:GetClass()=="prop_physics" then
 			self.touchents[ent:EntIndex()] = true
 			if not self.hastouchers then
@@ -453,7 +475,7 @@ if SERVER then
 			end
 		end
 	end
-	
+
 	function ENT:EndTouch(ent)
 		if ent:IsValid() and ent:GetClass()=="prop_physics" then
 			if self.touchents[ent:EntIndex()] then
@@ -465,7 +487,7 @@ if SERVER then
 					if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
 				end
 			end
-			
+
 			local stillhas = false
 			for index, touching in pairs(self.touchents) do
 				if Entity(index):IsValid() and touching then
@@ -479,9 +501,9 @@ if SERVER then
 				self:EndTouchAll()
 			end
 		end
-		
+
 	end
-	
+
 	function ENT:StartTouchAll()
 		self.softoccupied = true
 		self:SetNWBool("occupied",true)
@@ -491,18 +513,18 @@ if SERVER then
 	function ENT:EndTouchAll()
 		self.softoccupied = false
 		self:SetNWBool("occupied",false)
-		
+
 		if self.trailing then
 			self:Switch(self.switchstate, true)
 		end
-		
+
 		if self.hardoccupied then
 			self.hardoccupied = false
 			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 		end
 		--self:SetColor(Color(255,255,255))
 	end
-	
+
 	--DIY Triggering Take #3
 	CreateConVar("tp3_switch_scanrate", 5, FCVAR_NONE, "The max number of switches that will be tested for occupancy per tick.", 1, 20)
 	cvars.AddChangeCallback("tp3_switch_scanrate", function(cname, old, new)
@@ -512,12 +534,12 @@ if SERVER then
 			print("\nSwitch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
 		end
 	end)
-	
+
 	--Find all the switches initially
 	hook.Add("InitPostEntity","Trakpak3_InitFindSwitches",function()
 		if Trakpak3 then
 			local allswitches = ents.FindByClass("tp3_switch")
-			
+
 			--Filter OUT all dumb switches
 			Trakpak3.Switches = {}
 			for n=1,#allswitches do
@@ -526,11 +548,11 @@ if SERVER then
 					table.insert(Trakpak3.Switches,sw)
 				end
 			end
-			
+
 			Trakpak3.SwitchMaxIndex = #Trakpak3.Switches
 			if Trakpak3.SwitchMaxIndex > 0 then
 				Trakpak3.SwitchScanIndex = 1
-				
+
 				local convar = GetConVar("tp3_switch_scanrate")
 				local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/(convar:GetInt() or 5))*engine.TickInterval(),2)
 				print("\nSwitch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
@@ -539,16 +561,16 @@ if SERVER then
 			end
 		end
 	end)
-	
+
 	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
 		if Trakpak3 and Trakpak3.SwitchScanIndex and Trakpak3.SwitchMaxIndex then
-				
+
 			local convar = GetConVar("tp3_switch_scanrate")
 			local rate = 5
 			if convar then
 				rate = convar:GetInt() or 5
 			end
-			
+
 			local sw_start = Trakpak3.SwitchScanIndex
 			local sw_end = Trakpak3.SwitchScanIndex + rate
 			local reset = false
@@ -556,60 +578,33 @@ if SERVER then
 				sw_end = Trakpak3.SwitchMaxIndex
 				reset = true
 			end
-			
+
 			for k, prop in pairs(ents.FindByClass("prop_physics")) do
 				local idx = prop:EntIndex()
 				local phys = prop:GetPhysicsObject()
 				local pos = prop:GetPos()
 				local unfrozen = false
-				
+
 				if phys:IsValid() then unfrozen = phys:IsMotionEnabled() end
-				
+
 				for n=sw_start, sw_end do
 					local switch = Trakpak3.Switches[n]
 					switch:ScanTrigger(prop, idx, pos, unfrozen)
 				end
-				
+
 			end
-			
+
 			if reset then
 				Trakpak3.SwitchScanIndex = 1
 			else
 				Trakpak3.SwitchScanIndex = sw_end + 1
 			end
 
-				
-			
+
+
 		end
 	end)
-	
-	--DIY Triggering based on AABB
-	function ENT:ScanTrigger(prop, idx, pos, unfrozen)
-		local mins = self.abmins
-		local maxs = self.abmaxs
-		
-		if (not mins) or (not maxs) then return end
-		
-		--print("Scanning ",mins,maxs)
-		
-		--local idx = prop:EntIndex()
-		--local phys = prop:GetPhysicsObject()
-		--local unfrozen = phys:IsMotionEnabled()
-		
-		if pos:WithinAABox(mins, maxs) and unfrozen then
-			if not self.trigger_ents[idx] then
-				self.trigger_ents[idx] = true
-				self:StartTouch(prop)
-			end
-		else
-			if self.trigger_ents[idx] then
-				self.trigger_ents[idx] = nil
-				self:EndTouch(prop)
-			end
-		end
-		
-	end
-	
+
 	--[[
 	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
 		if Trakpak3 then
@@ -617,29 +612,29 @@ if SERVER then
 				Trakpak3.NextSwitchTrigger = CurTime() + 0.5
 			elseif CurTime() > Trakpak3.NextSwitchTrigger then
 				Trakpak3.NextSwitchTrigger = Trakpak3.NextSwitchTrigger + 0.5
-				
+
 				local switches = ents.FindByClass("tp3_switch")
-				
+
 				if #switches > 0 then
-				
+
 					for k, prop in pairs(ents.FindByClass("prop_physics")) do
 						local idx = prop:EntIndex()
 						local phys = prop:GetPhysicsObject()
 						local pos = prop:GetPos()
 						local unfrozen = false
-						
+
 						if phys:IsValid() then unfrozen = phys:IsMotionEnabled() end
-						
+
 						for m, switch in pairs(switches) do
 							switch:ScanTrigger(prop, idx, pos, unfrozen)
 						end
-						
+
 					end
-				
+
 				end
-				
+
 			end
-			
+
 		end
 	end)
 	]]--
@@ -657,9 +652,9 @@ if SERVER then
 end
 
 if CLIENT then
-	
+
 	--Draw trigger wireframe boxes around all the switches. tp3_switch_debug is in the switch lever anim file.
-	
+
 	hook.Add("PostDrawTranslucentRenderables","Trakpak3_SwitchAABB",function()
 		if Trakpak3.SwitchDebug==2 then
 			for k, self in pairs(ents.FindByClass("tp3_switch")) do
@@ -667,32 +662,32 @@ if CLIENT then
 				mins = mins + Vector(-64,-64,0)
 				maxs = maxs + Vector(64,64,40)
 				local center = maxs/2 + mins/2
-				
+
 				local color = Color(0,255,0)
-				
+
 				if self:GetNWBool("occupied",false) then color = Color(255,0,0) end
 				if self:GetNWBool("dumb",false) then color = Color(143,143,143) end
-				
+
 				render.DrawWireframeBox(center, Angle(), center - mins, center - maxs, color, true)
 				--render.DrawLine(mins, maxs)
 			end
 		end
 	end)
-	
-	
+
+
 	function ENT:Think()
-		
+
 		--Clientside Frog Sounds
-		
+
 		--local occupied = self:GetNWBool("occupied",false)
 		local frogpoint = self:GetNWVector("frogpoint",nil)
 		local pdist
-		
+
 		if frogpoint then pdist = LocalPlayer():GetPos():DistToSqr(self:GetPos()) end
-		
+
 		--if occupied and frogpoint and pdist and (pdist < 2048*2048) then
 		if frogpoint and pdist and (pdist < 2048*2048) then
-			
+
 			local trace = {
 				start = frogpoint,
 				endpos = frogpoint + Vector(0,0,8),
@@ -700,7 +695,7 @@ if CLIENT then
 				ignoreworld = true
 			}
 			local tr = util.TraceLine(trace)
-			
+
 			--Clickety Clack
 			if tr.Hit and not self.froccupied then
 				self.froccupied = true
@@ -710,15 +705,15 @@ if CLIENT then
 				self.froccupied = false
 				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
 			end
-			
+
 			self:NextThink(CurTime() + 0.1)
 			return true
-			
+
 		else
 			self.froccupied = false
 			self:NextThink(CurTime() + 0.5)
 			return true
 		end
-		
+
 	end
 end

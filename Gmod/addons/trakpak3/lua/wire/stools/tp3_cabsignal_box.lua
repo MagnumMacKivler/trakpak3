@@ -71,7 +71,7 @@ function TOOL.BuildCPanel(panel)
 	label:SetText("(Signal Passed At Danger)")
 	label:SetContentAlignment(5)
 	label:SetTextColor(Color(0,0,0))
-	panel:AddPanel(slider)
+	panel:AddPanel(label)
 	
 	--SPAR Speed Selector
 	--[[

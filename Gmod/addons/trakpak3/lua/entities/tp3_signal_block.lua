@@ -35,7 +35,6 @@ if SERVER then
 		self.occupied = (self.blockmode==1)
 		self.scanid = 1
 		self.run = false --will wait until a node chain is provided
-		
 	end
 	--[[
 	hook.Add("InitPostEntity",function()
@@ -76,9 +75,37 @@ if SERVER then
 		net.Broadcast()
 	end
 	
+	--[[
+	Trakpak3.TrainTagList = {} --List of blocks and speeds associated with each train tag
+	Trakpak3.NextTrainTagBroadcastTime = 0
+	util.AddNetworkString("Trakpak3_UpdateTrainTags")
+	--Broadcast all Tag Data
+	function Trakpak3.BroadcastTrainTagData()
+		Trakpak3.NextTrainTagBroadcastTime = CurTime() + 5
+		net.Start("Trakpak3_UpdateTrainTags")
+		net.WriteTable(Trakpak3.TrainTagList)
+		net.Broadcast()
+	end
+	--Every 5 seconds
+	hook.Add("Think","Trakpak3_TrainTagBroadcastTimer",function()
+		if CurTime() > Trakpak3.NextTrainTagBroadcastTime then
+			Trakpak3.BroadcastTrainTagData()
+		end
+	end)
+	]]--
+	--Handle New State
 	function ENT:HandleNewState(state, natural, ent)
 		if state and not self.occupied then --Block is now occupied
 			self.occupied = true
+			
+			--Train Tag
+			self.traintag, self.trainspeed = self:ReadTrainTag(ent)
+			if self.traintag then
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "traintag", self.traintag, "string")
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", self.trainspeed)
+				self.nextspeedtime = CurTime() + 5
+			end
+			
 			--Hammer Outputs
 			if natural then self:TriggerOutput("OnOccupiedNatural",self) end
 			self:TriggerOutput("OnOccupied",self)
@@ -89,6 +116,11 @@ if SERVER then
 			self:UpdateNodeList(true)
 		elseif not state and self.occupied then --Block is no longer occupied
 			self.occupied = false
+			
+			--Train Tag
+			self.traintag = nil
+			self.nextspeedtime = nil
+			
 			--Hammer Outputs
 			if natural then self:TriggerOutput("OnClearNatural",self) end
 			self:TriggerOutput("OnClear",self)
@@ -97,8 +129,81 @@ if SERVER then
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"occupied",0)
 			--Update Wireframe
 			self:UpdateNodeList(false)
+		elseif state then --No state change, but you still hit something
+			
+			--Train Tag
+			local tag, speed = self:ReadTrainTag(ent)
+			
+			if tag and tag!=self.traintag then --Different Train Tag
+				self.traintag = tag
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "traintag", self.traintag, "string")
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", speed)
+				self.nextspeedtime = CurTime() + 5
+			elseif tag and self.nextspeedtime and (CurTime() > self.nextspeedtime) then --Same train tag, re-measure speed
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", speed)
+				self.nextspeedtime = CurTime() + 5
+			elseif not tag and self.traintag then --No train tag!
+				self.traintag = nil
+				self.nextspeedtime = nil
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "traintag", nil, "nil")
+				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", nil, "nil")
+			end
+			
 		end
+		
 	end
+	
+	function ENT:ReadTrainTag(ent) --Return Tag and Speed if applicable
+		local tag
+		local speed
+		if ent and ent:IsValid() then
+			tag = ent.Trakpak3_TrainTag
+			if tag then
+				local phys = ent:GetPhysicsObject()
+				speed = math.floor(phys:GetVelocity():Length())
+			end
+		end
+		--print(tag, speed)
+		return tag, speed
+	end
+	
+	--[[
+	function ENT:CheckAndUpdateTag(ent)
+		local newtag
+		if ent and ent:IsValid() then
+			newtag = ent.Trakpak3_TrainTag
+		elseif not ent then --Block is empty, delete all tags that say they are in here (edge case to protect against multi-train cleanups)
+			for tag, data in pairs(Trakpak3.TrainTagList) do
+				if data.block==self:GetName() then
+					Trakpak3.TrainTagList[tag] = nil
+				end
+			end
+		end
+		if newtag then --The hit entity is valid and has a train tag
+			local phys = ent:GetPhysicsObject()
+			local speed = math.floor(phys:GetVelocity():Length())
+			if newtag != self.traintag then --New or Changed Tag
+				
+				
+				if self.traintag and Trakpak3.TrainTagList[self.traintag] and (Trakpak3.TrainTagList[self.traintag].block==self:GetName()) then --The stored tag is associated with this block, so clear it
+					Trakpak3.TrainTagList[self.traintag] = nil
+				end
+				
+				
+				self.traintag = newtag
+				Trakpak3.TrainTagList[newtag] = {block = self:GetName(), speed = speed} --Create/Overwrite this tag, associate with this block
+			elseif Trakpak3.TrainTagList[newtag] and (Trakpak3.TrainTagList[newtag].block==self:GetName()) then --Still the same tag, you are the "master" block
+				Trakpak3.TrainTagList[newtag].speed = speed --Update speed only
+			end
+		elseif self.traintag then --The hit entity has no train tag, but you had one stored
+			if Trakpak3.TrainTagList[self.traintag] and (Trakpak3.TrainTagList[self.traintag].block==self:GetName()) then --The stored tag is associated with this block, so clear it
+				Trakpak3.TrainTagList[self.traintag] = nil
+			end
+			self.traintag = nil
+		end
+		
+	end
+	]]--
 	
 	function ENT:InitialBroadcast() --Fired Externally by startup script (signalsetup)
 		hook.Run("TP3_BlockUpdate",self:GetName(),self.occupied,true)

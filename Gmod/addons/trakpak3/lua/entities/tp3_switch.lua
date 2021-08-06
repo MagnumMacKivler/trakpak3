@@ -60,9 +60,10 @@ if SERVER then
 	--Functions called by switch stand
 
 	--Set local parameters
-	function ENT:SwitchSetup(behavior)
+	function ENT:SwitchSetup(behavior, autoscan)
 		self.behavior = behavior
-		if self.behavior==-1 then self:SetNWBool("dumb",true) end
+		self.autoscan = autoscan
+		if (self.behavior==-1) or not self.autoscan then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
 	end
 
@@ -72,7 +73,28 @@ if SERVER then
 			self:BeginSwitching(state)
 		end
 	end
+	
+	--Hammer Trigger Occupancy from Switch Stand
+	function ENT:SwitchSetOccupied(occ)
+		if occ and not self.forceoccupied then
+			self.forceoccupied = true
+			self:SetNWBool("occupied",true)
+		elseif not occ and self.forceoccupied then
+			self.forceoccupied = false
+			self:SetNWBool("occupied",false)
+			
+			if self.trailing then
+				self:Switch(self.switchstate, true)
+			end
 
+			if self.hardoccupied then
+				self.hardoccupied = false
+				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+			end
+			
+		end
+	end
+	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
 
@@ -116,7 +138,7 @@ if SERVER then
 		]]--
 
 		--Detect approach of incoming trailing props
-		if self.softoccupied and (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
+		if (self.softoccupied or self.forceoccupied) and (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
 
 			local trace = {
 				start = self.autopoint,
@@ -176,7 +198,7 @@ if SERVER then
 		--Better Occupancy Detection
 		--rangerpoint1 = blade or origin
 		--rangerpoint2 = frog
-		if self.softoccupied and self.rangerpoint1 and self.rangerpoint2 then
+		if (self.softoccupied or self.forceoccupied) and self.rangerpoint1 and self.rangerpoint2 then
 			local trace = {
 				start = self.rangerpoint1,
 				endpos = self.rangerpoint2,
@@ -544,7 +566,7 @@ if SERVER then
 			Trakpak3.Switches = {}
 			for n=1,#allswitches do
 				local sw = allswitches[n]
-				if sw.behavior > -1 then
+				if (sw.behavior > -1) and sw.autoscan then
 					table.insert(Trakpak3.Switches,sw)
 				end
 			end

@@ -609,6 +609,8 @@ function Dispatch.OpenEditor()
 				
 				"block_clear",
 				"block_occupied",
+				"block_moving",
+				"block_stopped",
 				
 				"switch_n_unlit",
 				"switch_n_lit",
@@ -1435,6 +1437,15 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 					elseif state==3 then --Force
 						button:SetImage("trakpak3_common/icons/signal_lun_"..dir..alt..".png")
 					end
+					
+					--Teleport to object on right click
+					function button:DoRightClick()
+						local pos = sig.pos
+						if pos then
+							Dispatch.Teleport(pos)
+						end
+					end
+					
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Signal name '"..self.signal.."' does not match an existing entity.")
 				end
@@ -1596,6 +1607,14 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 						button:SetImage("trakpak3_common/icons/switch_r_lit.png")
 					elseif (state==2) then --Moving
 						button:SetImage("trakpak3_common/icons/switch_hourglass_lit.png")
+					end
+					
+					--Teleport to object on right click
+					function button:DoRightClick()
+						local pos = sig.pos
+						if pos then
+							Dispatch.Teleport(pos)
+						end
 					end
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Switch name '"..self.switch.."' does not match an existing entity.")
@@ -1768,11 +1787,57 @@ function Dispatch.AddBlock(ent, x, y, block)
 			if self.block and (self.block!="") then
 				local block = Dispatch.RealData[self.block]
 				if block then
-					if (block.occupied==1) then 
+					self.occupied = block.occupied==1
+					self.tag = block.traintag
+					local cvar = GetConVar("tp3_dispatch_usemetric")
+					local metric = cvar:GetBool()
+					if block.trainspeed then
+						if metric then self.speed = math.floor(block.trainspeed / 10.936) else self.speed = math.floor(block.trainspeed / 17.6) end
+					else
+						self.speed = nil
+					end
+					
+					--[[
+					button.oldpaint = button.Paint
+					local e = self
+					function button:Paint(w,h)
+						self:oldpaint(w,h)
+						if e.tag and e.speed then
+							draw.SimpleTextOutlined(e.tag, "tp3_dispatch_1", w/2, -h/2 - 2, Color(255,255,255),TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0))
+						end
+					end
+					]]--
+					local e = self
+					button:NoClipping(true)
+					function button:PaintOver(w, h)
+						if e.occupied and e.tag and e.speed then
+							local cvar = GetConVar("tp3_dispatch_usemetric")
+							local metric = cvar:GetBool()
+							local units = " MPH"
+							if metric then units = " km/h" end
+							draw.SimpleTextOutlined(e.tag..", "..e.speed..units, "tp3_dispatch_1", w/2, -h/2, Color(255,255,255),TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0))
+							--draw.SimpleTextOutlined(e.tag, "tp3_dispatch_1", 16,16, Color(255,255,255),TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0))
+						end
+					end
+					
+					if self.occupied and self.tag and (self.speed!=0) then
+						button:SetImage("trakpak3_common/icons/block_moving.png")
+					elseif self.occupied and self.tag and (self.speed==0) then
+						button:SetImage("trakpak3_common/icons/block_stopped.png")
+					elseif self.occupied then
 						button:SetImage("trakpak3_common/icons/block_occupied.png")
 					else
 						button:SetImage("trakpak3_common/icons/block_clear.png")
 					end
+					
+					--Teleport to object on right click
+					function button:DoRightClick()
+						local pos = block.pos
+						if pos then
+							Dispatch.Teleport(pos)
+						end
+					end
+					
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Block name '"..self.block.."' does not match an existing entity.")
 				end
@@ -1805,22 +1870,80 @@ function Dispatch.AddBlock(ent, x, y, block)
 		--Update Pos
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
 		local size = Dispatch.elementsize
-		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+		if self.button and self.button:IsValid() then
+			self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) --Set Position
+			
+		end
 		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
 			surface.SetDrawColor(color_sel)
 			surface.DrawOutlinedRect(px - size/2 - 2, py - size/2 - 2, size + 4, size + 4, 2)
 		end
+		
+		
 	end
 	
-	--Receive Info from World (Occupancy)
+	--Receive Info from World (Occupancy, Train Tag, and Speed)
+
 	function element:UpdateValue(name, parm, value)
-		if (name==self.block) and (parm=="occupied") then
+		if (name==self.block) then
+			
+			
+			if parm=="occupied" then
+				self.occupied = value==1
+				if not self.occupied then
+					self.tag = nil
+					self.speed = nil
+				end
+			elseif parm=="traintag" then
+				self.tag = value
+			elseif parm=="trainspeed" then
+				local cvar = GetConVar("tp3_dispatch_usemetric")
+				local metric = cvar:GetBool()
+				if value then
+					if metric then self.speed = math.floor(value / 10.936) else self.speed = math.floor(value / 17.6) end
+				else
+					self.speed = nil
+				end
+				--print(self.speed)
+			end
+			
+			--print(self.block, self.occupied, self.speed)
+			
 			local button = self.button
 			if button and button:IsValid() then
-				if value==1 then
+				
+				--button:SetTooltip(self.tag or false)
+				
+				if self.occupied and self.tag and (self.speed!=0) then
+					button:SetImage("trakpak3_common/icons/block_moving.png")
+				elseif self.occupied and self.tag and (self.speed==0) then
+					button:SetImage("trakpak3_common/icons/block_stopped.png")
+				elseif self.occupied then
 					button:SetImage("trakpak3_common/icons/block_occupied.png")
 				else
 					button:SetImage("trakpak3_common/icons/block_clear.png")
+				end
+				
+			end
+		elseif parm=="traintag" then --A different block just received a train tag
+			if self.tag and (self.tag==value) then --it's your tag.
+				self.tag = nil
+				self.speed = nil
+				
+				local block = Dispatch.RealData[self.block]
+				if block then
+					block.traintag = nil
+					block.trainspeed = nil
+				end
+				
+				local button = self.button
+				if button and button:IsValid() then
+					if self.occupied then
+						button:SetImage("trakpak3_common/icons/block_occupied.png")
+					else
+						button:SetImage("trakpak3_common/icons/block_clear.png")
+					end
+					
 				end
 			end
 		end
@@ -1976,6 +2099,14 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 						Dispatch.SendCommand(e.proxy, "fire", e.state)
 					end
 					
+					--Teleport to object on right click
+					function button:DoRightClick()
+						local pos = proxy.pos
+						if pos then
+							Dispatch.Teleport(pos)
+						end
+					end
+					
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Proxy name '"..self.proxy.."' does not match an existing entity.")
 				end
@@ -2015,7 +2146,7 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 		end
 	end
 	
-	--Receive Info from World (Occupancy)
+	--Receive Info from World (Proxy State)
 	function element:UpdateValue(name, parm, value)
 		--print(e.proxy, name, parm, value)
 		if (name==self.proxy) and (parm=="setstate") then
@@ -3034,10 +3165,17 @@ end
 net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	local entname = net.ReadString()
 	local parm = net.ReadString()
-	local value = net.ReadUInt(3)
+	local dtype = net.ReadString()
+	local value
+	if dtype=="int" then
+		value = net.ReadUInt(16)
+	elseif dtype=="string" then
+		value = net.ReadString()
+	end
 	--print("Dispatch Update: ", entname, parm, value)
 	if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
 	Dispatch.RealData[entname][parm] = value
+	
 	for page, board in pairs(Dispatch.Boards) do
 		for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
 	end
@@ -3047,6 +3185,23 @@ net.Receive("tp3_dispatch_comm", function(mlen, ply)
 		end
 	end
 end)
+
+
+--Teleport Player to Position
+function Dispatch.Teleport(pos)
+	if LocalPlayer():InVehicle() then
+		chat.AddText("[Trakpak3 Dispatch Board] Cannot teleport you becuase you are in a vehicle!")
+		LocalPlayer():EmitSound("buttons/combine_button_locked.wav")
+	else
+		net.Start("tp3_dispatch_teleport")
+		net.WriteVector(pos)
+		net.SendToServer()
+		local disp = Dispatch.Panels.dispatcher
+		if disp and disp:IsValid() then disp:Close() end
+		LocalPlayer():EmitSound("garrysmod/balloon_pop_cute.wav")
+	end
+end
+							
 
 --Create Dispatch Board VGUI (not editor)
 function Dispatch.OpenDispatcher()
@@ -3211,5 +3366,53 @@ end
 --Console Commands
 concommand.Add("tp3_dispatch_editor",Dispatch.OpenEditor)
 concommand.Add("tp3_dispatch",Dispatch.OpenDispatcher)
+
+CreateClientConVar("tp3_dispatch_usemetric", "0", true, false, "0 for MPH, 1 for KPH", 0, 1)
+
+--Get Tag List from Server
+--[[
+Dispatch.BlockTagMap = {}
+net.Receive("Trakpak3_UpdateTrainTags", function()
+	local TagList = net.ReadTable()
+	
+	--Translate from a tag list to a block list
+	Dispatch.BlockTagMap = {}
+	
+	for tag, data in pairs(TagList) do
+		Dispatch.BlockTagMap[data.block] = {tag = tag, speed = data.speed}
+	end
+	
+	for page, board in pairs(Dispatch.Boards) do
+		for index, element in pairs(board.elements) do
+			if element.type=="block" then
+				local name = element.block
+				local btd = Dispatch.BlockTagMap[name]
+				local speed
+				if btd and btd.speed then speed = math.floor(btd.speed / 17.6) end
+				local tag
+				if btd and btd.tag then tag = btd.tag end
+				element:UpdateValue(name, "tag", tag)
+				element:UpdateValue(name, "speed", speed)
+			end
+		end
+	end
+	for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
+		for page, board in pairs(ent.Boards) do
+			for index, element in pairs(board.elements) do
+				if element.type=="block" then
+					local name = element.block
+					local btd = Dispatch.BlockTagMap[name]
+					local speed
+					if btd and btd.speed then speed = math.floor(btd.speed / 17.6) end
+					local tag
+					if btd and btd.tag then tag = btd.tag end
+					element:UpdateValue(name, "tag", tag)
+					element:UpdateValue(name, "speed", speed)
+				end
+			end
+		end
+	end
+end)
+]]--
 
 --hook.Add("KeyPress", "Trakpak3_Test_Shit", function(ply, key) if key==IN_USE then print("E") end end)

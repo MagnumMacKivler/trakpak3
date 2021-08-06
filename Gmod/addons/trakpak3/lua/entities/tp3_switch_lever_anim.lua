@@ -16,6 +16,8 @@ if SERVER then
 		seq_throw_close = "string",
 		seq_throw_open = "string",
 		behavior = "number",
+		autoscan = "boolean",
+		mytrigger = "entity",
 		autoreset = "boolean",
 		targetstate = "boolean",
 		
@@ -75,6 +77,8 @@ if SERVER then
 		--Link Stands
 		self:RegisterEntity("linked_stand",self.linked_stand)
 		
+		--Auto Setup Hammer Outputs to Trigger
+		self:RegisterEntity("mytrigger",self.mytrigger)
 		
 		
 		--Wire I/O
@@ -151,7 +155,7 @@ if SERVER then
 		table.insert(self.switches,ent)
 		if #self.switches==1 then --First Switch
 			self.switch = ent
-			ent:SwitchSetup(self.behavior or 1)
+			ent:SwitchSetup(self.behavior or 1, self.autoscan)
 		else --Second or More Switch
 			if not self.overflow then
 				self.overflow = true
@@ -378,6 +382,20 @@ if SERVER then
 	
 	function ENT:Think()
 		if Trakpak3.InitPostEntity then
+			
+			--Try to set up trigger outputs
+			if not self.tryoutput then
+				self.tryoutput = true
+				--print(self.mytrigger, self.mytrigger_valid, self:GetName())
+				if self.mytrigger_valid and self:GetName() and (self:GetName()!="") then
+					--print("Yeah we trying to set this shit up!")
+					self.mytrigger_ent:Fire("AddOutput", "OnStartTouchAll "..self:GetName()..":SetOccupancy:1:0:-1",0,self,self)
+					self.mytrigger_ent:Fire("AddOutput", "OnEndTouchAll "..self:GetName()..":SetOccupancy:0:0:-1",0,self,self)
+				else
+					--print("Definitely not working.")
+				end
+			end
+			
 			--Begin actuation if current state does not match target state
 			if not self.animating and not self.occupied and (self.state != self.targetstate) then
 				if self.switch then self.switch:SwitchThrow(self.targetstate) end
@@ -404,6 +422,8 @@ if SERVER then
 			self.locked = false
 			self:SetNWBool("locked",false)
 			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",0) end
+		elseif inputname=="SetOccupancy" and self.switch then
+			self.switch:SwitchSetOccupied(data=="1")
 		end
 	end
 	

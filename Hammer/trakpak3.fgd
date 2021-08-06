@@ -45,7 +45,7 @@
 ]
 
 //Switch Lever
-@PointClass base(Targetname, Parentname, Angles) studioprop() line(0 255 0, targetname, targetname, targetname, linked_stand) = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
+@PointClass base(Targetname, Parentname, Angles) studioprop() line(0 255 0, targetname, targetname, targetname, linked_stand) line(0 255 255, targetname, targetname, targetname, mytrigger) = tp3_switch_lever_anim : "An animated or bodygrouped lever to control switches."
 [
 	model(studio) : "Model" : "" : "The model path for the switch lever."
 	bodygroups(string) : "Bodygroups" : "" : "The switch stand's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
@@ -62,14 +62,21 @@
 		1 : "Diverging/Reverse"
 	]
 	
-	behavior(choices) : "Trailing Switch Behavior" : -1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Dumb: Disables all trailing switch and occupancy behavior (lag reduction feature). Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
+	behavior(choices) : "Trailing Switch Behavior" : -1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
 	[
-		-1 : "Dumb"
+		//-1 : "Dumb"
 		0 : "Manual, Derail"
 		1 : "Manual, Break"
 		2 : "Safety Throw"
 		3 : "Spring Switch"
 	]
+	
+	autoscan(choices) : "Switch Auto-Scan" : 0 : "If No, switch occupancy must be provided by an external trigger. If Yes, switch occupancy will be automatically calculated (may cause lag when used a lot)." =
+	[
+		0 : "No (Manual)"
+		1 : "Yes (Automatic)"
+	]
+	mytrigger(target_destination) : "Manual Scan Trigger" : : "(Optional) Point this to a trigger_multiple and it will wire the Hammer I/O for you. Not needed if the switch is 'dumb' or if you're using Automatic Scanning. THE TRIGGER MUST USE A filter_activator_class SET TO ALLOW prop_physics AND BE SET TO DETECT PHYSICS OBJECTS FOR IT TO WORK PROPERLY."
 	
 	autoreset(choices) : "Auto-Reset?" : 0 : "Should this switch automatically reset back to Main/Normal position after the train has passed over it? Great for heavily-trafficked, mainline switches." =
 	[
@@ -124,6 +131,8 @@
 	
 	input SetAutoOnly(void) : "Set this switch stand to disallow manual operation (by pressing +Use). The switch stand can still be controlled from dispatch boards, Wiremod, or Hammer I/O."
 	input SetAllowManual(void) : "Set this switch stand to allow manual operation."
+	
+	input SetOccupancy(integer) : "Set Switch Occupancy (Manual). 0 for clear, 1 for occupied."
 	
 	output OnThrownMain(void) : "Fires when the switch is thrown Main/Normal."
 	output OnThrownDiverging(void) : "Fires when the switch is thrown Diverging/Reverse."

@@ -19,34 +19,34 @@ hook.Add("InitPostEntity","TP3_DispLoad",function()
 			
 			for id, ent in pairs(ents.FindByClass("tp3_signal_master")) do
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[name] = { ctc_state = ent.ctc_state } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[name] = { ctc_state = ent.ctc_state, pos = ent:GetPos() } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
 				local st
 				if ent.state then st = 1 else st = 0 end
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { state = st, broken = 0, blocked = 0 } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { state = st, broken = 0, blocked = 0, pos = ent:GetPos() } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_signal_block")) do
 				local occ
 				if ent.occupied then occ = 1 else occ = 0 end
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ, pos = ent:GetPos() } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_logic_gate")) do
 				local occ
 				if ent.occupied then occ = 1 else occ = 0 end
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { occupied = occ, pos = ent:GetPos() } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_dispatch_proxy")) do
 				local state = ent.state or 0
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { setstate = state } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { setstate = state, pos = ent:GetPos() } end
 			end
 			
 			Trakpak3.Dispatch.Loaded = true
@@ -92,18 +92,23 @@ end
 
 util.AddNetworkString("tp3_dispatch_comm")
 --Send Parameter to Clients
-function Trakpak3.Dispatch.SendInfo(entname, parm, value)
+function Trakpak3.Dispatch.SendInfo(entname, parm, value, dtype)
 	if Trakpak3.Dispatch.Loaded and entname and (entname!="") then
-		--if Trakpak3.Dispatch then print("Dispatch") end
-		--if Trakpak3.Dispatch.InitData then print("InitData") end
-		--if Trakpak3.Dispatch.InitData[entname] then print("Entname") end
+		
+		if not dtype then dtype = "int" end
+		
 		Trakpak3.Dispatch.InitData[entname][parm] = value
-		--print("Sending to Client: ",entname, parm, value)
 		net.Start("tp3_dispatch_comm")
 			net.WriteString(entname)
 			net.WriteString(parm)
-			net.WriteUInt(value,3)
+			net.WriteString(dtype)
+			if dtype=="int" then
+				net.WriteUInt(value,16)
+			elseif dtype=="string" then
+				net.WriteString(value)
+			end
 		net.Broadcast()
+		--print(entname, parm, value)
 	end
 end
 
@@ -123,6 +128,17 @@ net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	table.insert(Trakpak3.Dispatch.CommandLog, "[" .. tt.h .. "h:" .. tt.m .."m:" .. tt.s .. "s] " .. ply:GetName() .. " ENT " .. entname .. " CMD " .. cmd .. " ARG " .. arg)
 	
 	hook.Run("TP3_Dispatch_Command", entname, cmd, arg)
+end)
+
+--Teleport Player to Element
+util.AddNetworkString("tp3_dispatch_teleport")
+net.Receive("tp3_dispatch_teleport",function(length,ply)
+	local pos = net.ReadVector()
+	ply:SetPos(pos + Vector(0,0,64))
+	if ply:GetMoveType()==MOVETYPE_WALK then
+		--ply:ConCommand("noclip")
+		ply:SetMoveType(MOVETYPE_NOCLIP)
+	end
 end)
 
 concommand.Add("tp3_dispatch_printlog", function(ply, cmd, args)

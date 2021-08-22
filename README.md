@@ -4,6 +4,11 @@ Trakpak 3.0 Release Version, Copyright 2019-2021 by Magnum MacKivler
 
 Trakpak3 is officially released! If you're trying to install it just to use it in-game, please use the [Workshop Addon](https://steamcommunity.com/sharedfiles/filedetails/?id=2379202601) instead. The files on this Github are intended for mappers and developers.
 
+## Trakpak3 Development Discord
+
+A Discord server has been created for contributors and mappers to communicate, get help, or show off their work! If you want to join, use this link:
+https://discord.gg/hv6vMbuqXY
+
 ## Instructions for Installation (For Mappers)
 
 1. Download the [Latest Release](https://github.com/MagnumMacKivler/trakpak3/releases)'s Source Code zip file and navigate into the `trakpak3-master` folder.

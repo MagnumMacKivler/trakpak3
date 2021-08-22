@@ -9,6 +9,8 @@ Trakpak3 is officially released! If you're trying to install it just to use it i
 A Discord server has been created for contributors and mappers to communicate, get help, or show off their work! If you want to join, use this link:
 https://discord.gg/hv6vMbuqXY
 
+![Imgur](https://i.imgur.com/4HSuL5K.png)
+
 ## Instructions for Installation (For Mappers)
 
 1. Download the [Latest Release](https://github.com/MagnumMacKivler/trakpak3/releases)'s Source Code zip file and navigate into the `trakpak3-master` folder.

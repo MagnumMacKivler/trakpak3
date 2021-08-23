@@ -2166,6 +2166,81 @@ function array array:buildGenericRailBrush(Verts:array,Textures:table,TextureBac
     
     return This
 }
+function array array:buildGenericPhysBrush(Verts:array,Textures:table){
+    validate()
+    local M2 = Verts[1,vector2]
+    local K2 = Verts[2,vector2]
+    local K1 = Verts[3,vector2]
+    local M1 = Verts[4,vector2]
+
+    local Mat_Phys = "TOOLS/TOOLSCLIP"
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    local GX = vec(ax2(K1,K2))
+    local GY = vec(ax2((M1+M2)/2,(K1+K2)/2))
+    local GZ = vec(0,0,-1)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local KF = vec(K2,-OriginHeight+RailTopHeight) + vec(0,0,-128)
+    local MF = vec(M2,-OriginHeight+RailTopHeight) + vec(0,0,-128)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    
+    local KN = vec(K1,-OriginHeight+RailTopHeight) + vec(0,0,-128)
+    local MN = vec(M1,-OriginHeight+RailTopHeight) + vec(0,0,-128)
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    
+    local Debug = 0
+    if(Debug){
+        debugHoloBW(MF)
+        debugHoloBW(KF)
+        debugHoloBW(KN)
+        debugHoloBW(MN)
+        
+        debugHoloBW(IF)
+        debugHoloBW(GF)
+        debugHoloBW(GN)
+        debugHoloBW(IN)
+    }
+    
+    local Sides = ""
+    
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    Sides += side(SideID,MN,MF,KF,Mat_Phys,GX, GY, 0, 0, 0.25,0) #Top
+    SideID++
+    Sides += side(SideID,IF,MF,MN,Mat_Phys,GX, GZ, 0, 0, 0.25,0) #Inner
+    SideID++
+    Sides += side(SideID,GN,KN,KF,Mat_Phys,GX, GZ, 0, 0, 0.25,0) #Outer
+    SideID++
+    Sides += side(SideID,IN,MN,KN,Mat_Phys,GY, GZ, 0, 0, 0.25,0) #Back
+    SideID++
+    Sides += side(SideID,GF,KF,MF,Mat_Phys,GY, GZ, 0, 0, 0.25,0) #Back
+    SideID++
+    Sides += side(SideID,IN,GN,GF,Mat_Phys,GX, GY, 0, 0, 0.25,0) #Bottom
+    SideID++
+    
+    This[BrushID,string] = solid(BrushID,Sides)
+    BrushID++
+    
+    return This
+}
 function array array:buildOverrideRailBrush(Verts:array,Textures:table,SegmentCenter:vector,SegmentAngle:angle,TextureBack,TextureFront,RustyTop,HalfThickness,AddBallast){
     validate()
     local M2 = Verts[1,vector2]

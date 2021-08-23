@@ -1057,6 +1057,59 @@ function buildGenericRailMesh(Verts:array,WF,WN,Textures:table,TextureBack,Textu
     
 }
 
+function buildGenericPhysMesh(Verts:array,Textures:table){
+    #Order is: MF,KF,KN,MN
+    local M2 = Verts[1,vector2]
+    local K2 = Verts[2,vector2]
+    local K1 = Verts[3,vector2]
+    local M1 = Verts[4,vector2]
+
+    local Mat_Phys = "phys"
+    local OriginHeight = Textures["OriginHeight",number]
+    local BallastHeight = Textures["BallastHeight",number]
+    local RailTopHeight = Textures["RailTopHeight",number]
+    local RailBottomHeight = Textures["RailBottomHeight",number]
+    local RailHeight = RailTopHeight - RailBottomHeight
+    
+    local GX = vec(ax2(K1,K2))
+    local GY = vec(ax2((M1+M2)/2,(K1+K2)/2))
+    local GZ = vec(0,0,-1)
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local KF = vec(K2,-OriginHeight+RailTopHeight)
+    local MF = vec(M2,-OriginHeight+RailTopHeight)
+    local GF = KF+vec(0,0,-RailHeight)
+    local IF = MF+vec(0,0,-RailHeight)
+    
+    local KN = vec(K1,-OriginHeight+RailTopHeight)
+    local MN = vec(M1,-OriginHeight+RailTopHeight)
+    local GN = KN+vec(0,0,-RailHeight)
+    local IN = MN+vec(0,0,-RailHeight)
+    
+    
+    #          K M      N L
+    #          G I      J H
+    #       E----------------F
+    #   /   |                |   \
+    # A-----C----------------D-----B
+    
+    local GName = "phys_convex_"+ConvexID
+    new_convquad(Mat_Phys,KF,KN,MN,MF,array(512,512,GX,GY,0,0,0.25),GName) #Top
+    new_convquad(Mat_Phys,IF,IN,GN,GF,array(512,512,GX,GY,0,0,0.25),GName) #Bottom
+    new_convquad(Mat_Phys,GF,GN,KN,KF,array(512,512,GX,GY,0,0,0.25),GName) #Left
+    new_convquad(Mat_Phys,MF,MN,IN,IF,array(512,512,GX,GY,0,0,0.25),GName) #Right
+    new_convquad(Mat_Phys,IN,MN,KN,GN,array(512,512,GY,GZ,0,0,0.25),GName) #Front
+    new_convquad(Mat_Phys,GF,KF,MF,IF,array(512,512,GY,GZ,0,0,0.25),GName) #Back
+    
+    ConvexID++
+    
+}
+
 function buildOverrideRailMesh(Verts:array,Textures:table,SegmentCenter:vector,SegmentAngle:angle,TextureBack,TextureFront,RustyTop,HalfThickness,AddBallast){
     local M2 = Verts[1,vector2]
     local K2 = Verts[2,vector2]

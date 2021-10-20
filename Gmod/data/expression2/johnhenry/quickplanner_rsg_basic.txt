@@ -1,4 +1,4 @@
-@name johnhenry/quickplanner rsg basic
+@name johnhenry/quickplanner
 @inputs 
 @outputs SlopeIndex DirIndex PieceCount
 @persist [StraightLengths ArcRadii SegLimits ArcStartDirs ArcEndDirs TurnoutStartDirs TurnoutEndDirs WyeDirs BendLengths Slopes]:array #Piece Specs
@@ -13,6 +13,8 @@
 @trigger 
 
 if(first()){
+	#Version 1.1 - Anything without this version line is Version 1.0
+	
     #RSG Basic is the docket list used to make bridge tracks and guard rails - it doesn't need to encompass the full spectrum of pieces.
     
     Subfolder = "rsg_basic" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
@@ -44,10 +46,10 @@ if(first()){
     RailThickness = 4
     
     #Piece Type Enable/Disable
-    MakeStraights = 1 
-    MakeArcs = 1
+    MakeStraights = 0 
+    MakeArcs = 0
     MakeBends = 0
-    MakeTurnouts = 0
+    MakeTurnouts = 1
     MakeWyes = 0
     MakeSidings = 0
     MakeCrossovers = 0
@@ -827,8 +829,11 @@ if(first()){
             }
         }
         
+        #Find distance from ArcStart to Frog
+        local FrogDist = sqrt( (Radius + TrackGauge/2)^2 - (Radius - TrackGauge/2)^2 )
+        
         #Find Minimum Straight Length (to start of arc) snapped to grid
-        MinLen = 4*ArcStartW:length()/(StartDirU:length())
+        MinLen = FrogDist + ArcStartW:length()/(StartDirU:length()) + 64 #64 is safety factor
     
         LengthIndex = 1
         for(N=1,StraightLengths:count()){
@@ -866,8 +871,11 @@ if(first()){
         local ArcStartW = Isect + ArcStart
         local ArcEndW = Isect + ArcEnd
         
+        #Find distance from ArcStart to Frog
+        local FrogDist = sqrt( (Radius + TrackGauge/2)^2 - (Radius - TrackGauge/2)^2 )
+        
         #Find Minimum Straight Length (to start of arc) snapped to grid
-        MinLen = 4*ArcStartW:length()/(StartDirU:length())
+        MinLen = FrogDist + ArcStartW:length()/(StartDirU:length()) + 64 #64 is safety factor
     
         LengthIndex = 1
         for(N=1,StraightLengths:count()){

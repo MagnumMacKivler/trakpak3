@@ -13,20 +13,22 @@
 @trigger 
 
 if(first()){
+	#Version 1.1 - Anything without this version line is Version 1.0
+	
     #<Description line (optional)>
     
-    Subfolder = "rsg" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
+    Subfolder = "rsg_test" #subfolder (relative to johnhenry_saves/dockets) to place dockets into.
     #If you simply want to compile straight to the johnhenry_saves/dockets/ folder, leave this empty.
     
     #Piece Specs
     StraightLengths = array(32,48,64,96,128,192,256,384,512,768,1024,1536,2048,3072,4096,6144,8192) #The straights that will be made; also switches will borrow from this list for their straight portions.
-    ArcRadii = array(2048,3072,4096,6144,8192) #The principal (non-double tracked) curve radii.
+    ArcRadii = array(2048) #array(2048,3072,4096,6144,8192) #The principal (non-double tracked) curve radii.
     SegLimits = array(32,40,48,56,64) #The Max number of segments for a 90 degree curve for each principal radius.
     ArcStartDirs =  array(0,0,0,0) #Starting direction for arc curves. Lines up with ArcEndDirs. All curves will be mirrored (negative numbers).
     ArcEndDirs =    array(1,2,4,8) #Ending direction for arc curves. Lines up with ArcStartDirs. All curves will be mirrored (negative numbers).
     BendLengths = array(1536,2048) #Lengths of bends, sidings and crossovers.
-    TurnoutStartDirs =  array(0,0,0,1,2,4) #Starting direction for turnouts. Lines up with TurnoutEndDirs. All switches will be mirrored (negative numbers).
-    TurnoutEndDirs =    array(1,2,4,0,0,0) #Ending direction for turnouts. Lines up with TurnoutStartDirs. All switches will be mirrored (negative numbers).
+    TurnoutStartDirs =  array(1) #array(0,0,0,1,2,4) #Starting direction for turnouts. Lines up with TurnoutEndDirs. All switches will be mirrored (negative numbers).
+    TurnoutEndDirs =    array(2) #array(1,2,4,0,0,0) #Ending direction for turnouts. Lines up with TurnoutStartDirs. All switches will be mirrored (negative numbers).
     WyeDirs = array(1,2,4) #Ending Direction for Wyes.
     Slopes = array(0,2/128,3/128,4/128) #List of Slopes (Rise/Run) for straights and curves. Negatives will also be made (except for 0 of course).
     
@@ -44,10 +46,10 @@ if(first()){
     RailThickness = 4
     
     #Piece Type Enable/Disable
-    MakeStraights = 1 
+    MakeStraights = 0 
     MakeArcs = 0
     MakeBends = 0
-    MakeTurnouts = 0
+    MakeTurnouts = 1
     MakeWyes = 0
     MakeSidings = 0
     MakeCrossovers = 0
@@ -827,8 +829,11 @@ if(first()){
             }
         }
         
+        #Find distance from ArcStart to Frog
+        local FrogDist = sqrt( (Radius + TrackGauge/2)^2 - (Radius - TrackGauge/2)^2 )
+        
         #Find Minimum Straight Length (to start of arc) snapped to grid
-        MinLen = 4*ArcStartW:length()/(StartDirU:length())
+        MinLen = FrogDist + ArcStartW:length()/(StartDirU:length()) + 64 #64 is safety factor
     
         LengthIndex = 1
         for(N=1,StraightLengths:count()){
@@ -866,8 +871,11 @@ if(first()){
         local ArcStartW = Isect + ArcStart
         local ArcEndW = Isect + ArcEnd
         
+        #Find distance from ArcStart to Frog
+        local FrogDist = sqrt( (Radius + TrackGauge/2)^2 - (Radius - TrackGauge/2)^2 )
+        
         #Find Minimum Straight Length (to start of arc) snapped to grid
-        MinLen = 4*ArcStartW:length()/(StartDirU:length())
+        MinLen = FrogDist + ArcStartW:length()/(StartDirU:length()) + 64 #64 is safety factor
     
         LengthIndex = 1
         for(N=1,StraightLengths:count()){

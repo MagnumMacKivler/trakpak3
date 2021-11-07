@@ -109,6 +109,8 @@ if SERVER then
 			end
 			
 			if tr1.Hit or tr2.Hit then
+				if tr1.Hit then print(tr1.Entity, tr1.Entity:GetModel()) end
+				if tr2.Hit then print(tr2.Entity, tr2.Entity:GetModel()) end
 				if not self.cooldown then self:Switch() end
 			else
 				self.cooldown = false

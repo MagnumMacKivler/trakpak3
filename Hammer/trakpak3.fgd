@@ -852,3 +852,52 @@
 	output OnFire8(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
 	output OnFire9(void) : "Fired when the current state is 7 and the player presses the linked button on a dispatch board."
 ]
+
+//Equipment Defect Detector
+@PointClass base(Targetname) iconsprite("trakpak3_common/hammer/tp3_defect_detector.vmt") = tp3_defect_detector :
+"An entity that scans for defects (derailed props) as a train passes over them, then broadcasts an appropriate message to all Trakpak3 Cab Signal Boxes. This entity has two axes that you must position. See Help for details."
+[
+	boxsize(float) : "Scan Box Size" : "64.0" : "A square, axis-aligned box will be swept along the Scan Lines 1 and 2 to check for dragging equipment."
+	boxdepth(float) : "Scan Box Depth" : "4.0" : "The depth or height of the scan box. The top of the box will be in line with the Scan Lines."
+	
+	line1(axis) : "Scan Line 1" : : "First Scan Line. This point should be positioned about 2 units below the top of the railhead on one side of the tracks. An axis-aligned square box the size of 'Scan Box Size' will be swept from start to end along this line to check for dragging equipment. This box will hit everything except world geometry and static props. Longer lines allow faster trains."
+	line2(axis) : "Scan Line 2" : : "Second Scan Line. This point should be positioned about 2 units below the top of the railhead on the other side of the tracks. An axis-aligned square box the size of 'Scan Box Size' will be swept from start to end along this line to check for dragging equipment. This box will hit everything except world geometry and static props. Longer lines allow faster trains."
+	
+	trigger(target_destination) : "Trigger" : : "A trigger_multiple to use as an axle counter. The detector will not work unless this is present. The trigger should be set to detect Physics Objects only and should be at or below the railhead."
+	
+	minspeed(float) : "Minimum Detection Speed" : "176" : "Minimum speed (units per second) for the detector to actually 'see' a prop. 10 Player Scale MPH = 176 units/sec."
+	
+	mintemp(float) : "Ambient Temperature (Min)" : "65" : "The defect detector will report a random ambient temperature between the minimum and maximum. These values are unitless."
+	maxtemp(float) : "Ambient Temperature (Max)" : "72" : "The defect detector will report a random ambient temperature between the minimum and maximum. These values are unitless."
+	
+	soundfont(string) : "Sound Font Name" : "GE" : "The name of the sound font to use. Case-insensitive. See the Trakpak3 Wiki for more details on sound fonts."
+	
+	
+	speakintro(choices) : "Speak Intro Initially?" : 1 : "Should the detector play the Sentence (Intro) when a train first rolls over it?" =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
+	instantreport(choices) : "Report Defects Instantly?" : 1 : "Should the detector alert the engineer to a defect immediately, or wait until the train has passed?" =
+	[
+		0 : "No (Wait)"
+		1 : "Yes (Instantly)"
+	]
+	
+	s_intro(string) : "Sentence (Intro)" : "T P 3 equipment defect detector milepost 0 point 0 track 1" : "Sentence to begin a transmission (case-insensitive). Typically this part identifies the railroad, milepost, and track. This sentence is inserted into the other sentences using the %intro variable."
+
+	s_nodefects(string) : "Sentence (No Defects)" : "%intro no_defects repeat no_defects" : "Sentence to speak after a train passes the detector completely, with no defects (case-insensitive). Additionally, you can insert the following variables: %intro."
+	
+	s_dragging_equipment(string) : "Sentence (Dragging Equipment)" : "%intro beep you_have_a_defect dragging_equipment near axle %def_axle a_ground_inspection_is_required" : "Sentence to speak when a train has dragging equipment (case-insensitive). Additionally, you can insert the following variables: %intro, %def_axle, %def_car."
+	
+	s_hotbox(string) : "Sentence (Hot Box)" : "%intro beep you_have_a_defect hot_box near axle %def_axle a_ground_inspection_is_required" : "Sentence to speak when a train has an overheated axle bearing (case-insensitive). Additionally, you can insert the following variables: %intro, %def_axle, %def_car."
+	
+	s_outro(string) : "Sentence (Outro)" : "total_axle count %axles train_speed %mph temperature %temp degrees detector out" : "Sentence to end a transmission (case-insensitive). Typically this provides status info like train length, axles, or cars, as well as temperature. Additionally, you can insert the following variables: %axles, %cars, %feet, %meters, %mph, %kph, %temp."
+	
+	s_generic1(string) : "Sentence (Generic 1)" : : "Generic sentence, can be inserted into other sentences using the %generic1 variable. Additionally, you can use any variables that the 'host' sentence has access to."
+	s_generic2(string) : "Sentence (Generic 2)" : : "Generic sentence, can be inserted into other sentences using the %generic2 variable. Additionally, you can use any variables that the 'host' sentence has access to."
+	s_generic3(string) : "Sentence (Generic 3)" : : "Generic sentence, can be inserted into other sentences using the %generic3 variable. Additionally, you can use any variables that the 'host' sentence has access to."
+	s_generic4(string) : "Sentence (Generic 4)" : : "Generic sentence, can be inserted into other sentences using the %generic4 variable. Additionally, you can use any variables that the 'host' sentence has access to."
+	//input AddProp(void) : "Auto-Wired in-game. Do not wire this input."
+	//input RemoveProp(void) : "Auto-Wired in-game. Do not wire this input."
+]

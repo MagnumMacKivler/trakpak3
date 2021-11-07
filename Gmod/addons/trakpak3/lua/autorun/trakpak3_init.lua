@@ -27,6 +27,7 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_mapseats.lua")
 	AddCSLuaFile("trakpak3/cl_remoteswitcher.lua")
 	AddCSLuaFile("trakpak3/cl_pathconfig.lua")
+	AddCSLuaFile("trakpak3/cl_defect_detector.lua")
 	AddCSLuaFile("trakpak3/shared.lua")
 	
 	--Macro for E2 limits for JH
@@ -55,6 +56,7 @@ if CLIENT then
 	include("trakpak3/cl_mapseats.lua")
 	include("trakpak3/cl_remoteswitcher.lua")
 	include("trakpak3/cl_pathconfig.lua")
+	include("trakpak3/cl_defect_detector.lua")
 	include("trakpak3/shared.lua")
 	
 	--[[

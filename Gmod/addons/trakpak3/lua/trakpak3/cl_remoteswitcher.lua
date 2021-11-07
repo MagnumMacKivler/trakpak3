@@ -139,12 +139,19 @@ function RemoteSwitcher.drawStandBox(ent, distance, addtext, alpha)
 	local color = RemoteSwitcher.Colors.deselected
 	
 	if addtext then
-	
+		
+		if levertype==0 then
+			toptext = "Switch Stand"
+		elseif (levertype==1) or (levertype==2) then
+			toptext = "Derail"
+		else
+			toptext = "Lever"
+		end
+		
 		if broken then --Broken 
 			color = RemoteSwitcher.Colors.broken
 			bottomtext = "Broken"
 		elseif isderail then --Derail (All 3 States)
-			toptext = "Derail"
 			if state==2 then
 				color = RemoteSwitcher.Colors.moving
 				bottomtext = "Moving"

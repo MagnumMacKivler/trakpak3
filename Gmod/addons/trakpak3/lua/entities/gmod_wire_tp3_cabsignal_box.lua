@@ -105,6 +105,7 @@ if SERVER then
 		self.nextsignal = nil
 		self.nextsignal_ent = NULL
 		self.enabled = false
+		self:SetNWBool("enabled",false)
 	end
 	
 	--Trakpak3.TestLog = {}
@@ -188,8 +189,10 @@ if SERVER then
 		if iname=="Enable" then
 			if value>0 then
 				self.enabled = true
+				self:SetNWBool("enabled",true)
 			else
 				self.enabled = false
+				self:SetNWBool("enabled",false)
 			end
 			--print("Enabled: ",self.enabled)
 		elseif iname=="Reset" then
@@ -403,9 +406,12 @@ if SERVER then
 		]]--
 		
 	end
+	
+	
 end
 
 if CLIENT then
+	--User pressed E to enter a Train Tag
 	net.Receive("Trakpak3_TrainTagDialog",function(length, ply)
 		
 		local id = net.ReadUInt(16)
@@ -484,4 +490,114 @@ if CLIENT then
 			LocalPlayer():EmitSound("ambient/machines/keyboard7_clicks_enter.wav")
 		end
 	end)
+	
+	--Defect Detector Queue
+	function ENT:DetectorQueue(font,sentence)
+		if self:GetNWBool("enabled") then
+			--Add to Queue
+			if not self.edd_queue then self.edd_queue = {} end
+			table.insert(self.edd_queue,{font, sentence})
+			--PrintTable(self.edd_queue)
+			if not self.speaking then self:DetectorSpeak() end
+		end
+	end
+	
+	--Defect Detector Start Playback
+	function ENT:DetectorSpeak()
+		local q_item = self.edd_queue[1]
+		local font = q_item[1]
+		local sentence = q_item[2]
+		
+		table.remove(self.edd_queue,1)
+		
+		self.speaking = true
+		self.edd_schedule = {}
+		local soundfont = Trakpak3.EDD.SoundFonts[font]
+		if soundfont then
+			local staticloop = soundfont.staticloop or "trakpak3/defect_detectors/static.wav"
+			local delay = soundfont.delay or 0.25
+			local words = string.Explode(" ",sentence)
+			local t = CurTime() + 0.5
+			
+			--Initialize Static Sound (if not already playing)
+			if not self.edd_static then
+				self.edd_static = CreateSound(self, staticloop)
+			end
+			
+			
+			for n=1, #words do
+				local wdata = soundfont[words[n]]
+				if wdata then --Word exists in soundfont
+					table.insert(self.edd_schedule, {t,wdata[1]} )
+					t = t + wdata[2] + delay
+				end
+			end
+			table.insert(self.edd_schedule, {t,nil} ) --Add final event for end time
+			
+			
+			if #self.edd_schedule > 0 then --Sounds actually made it in
+				self.edd_static:Play()
+			else --No valid words
+				self.speaking = false
+				self.edd_schedule = nil
+			end
+		else --SoundFont doesn't exist
+			self.speaking = false
+			self.edd_schedule = nil
+		end
+	end
+	
+	
+	
+	function ENT:Think()
+		
+		--Play Defect Detector Sounds
+		if self:GetNWBool("enabled") then
+			if self.speaking and self.edd_schedule then
+				local nextevent = self.edd_schedule[1][1]
+				local nextsound = self.edd_schedule[1][2]
+				
+				if CurTime() > nextevent then
+					if nextsound then --Play the sound
+						self:EmitSound(nextsound)
+						table.remove(self.edd_schedule,1)
+					else --End of Sentence
+						self.edd_schedule = nil
+						if self.edd_queue and self.edd_queue[1] then --Prepare to speak the next sentence in the queue
+							timer.Simple(1.0,function()
+								self:DetectorSpeak()
+							end)
+						else --Detector is done speaking
+							self.speaking = false
+							if self.edd_static then
+								self.edd_static:Stop()
+								self.edd_static = nil
+							end
+						end
+					end
+				end
+			end
+		else --Disabled
+			if self.speaking then --Cancel Speech
+				self.speaking = false
+				self.edd_schedule = nil
+				if self.edd_static then
+					self.edd_static:Stop()
+					self.edd_static = nil
+				end
+			end
+		end
+		
+		self:NextThink(CurTime())
+		return true
+	end
+	
+	
+	function ENT:OnRemove()
+		if self.edd_static then
+			self.edd_static:Stop()
+			self.edd_static = nil
+		end
+	end
+	
 end

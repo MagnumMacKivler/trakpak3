@@ -84,7 +84,7 @@
 
 if(first()){
     #Version Info - Don't Change This!
-    Version = "1.2"
+    Version = "1.3"
     
     #What track gauge are you developing for?
     #include "johnhenry/gauges/standard"
@@ -102,7 +102,7 @@ if(first()){
     #include "johnhenry/library/consolescreen"
     
     AutoVis = 0
-    AutoDraw = 0
+    AutoDraw = 1
     AutoName = 1
     AutoVMFName = 1
     SuppressOutput = 0
@@ -2857,7 +2857,7 @@ if(clk("makebrush")){
         local NumTies = floor(ZRange/TieSeparation)
         #print(ZRange, TieSeparation, NumTies)
         if(NumTies<=0){ #Skip Single Tie Gen
-            if(StMaxZ > TieSeparation){ #There should be at only one tie
+            if((StMaxZ > TieSeparation) & (StStartSeg==1)){ #There should be only one tie
                 timer("plotsingleties_one",100)
             }else{
                 timer("plotsingleties_finish",100)
@@ -2923,7 +2923,7 @@ if(clk("makebrush")){
         
         SingleTieHeights[STC,number] = (Near + DistIn*ax(Near,Far)):z()
         
-        #print(SType, STC)
+        #print(Point)
         #debugHolo(vec2(Point),vec(255,0,0),1)
         
         SingleTieZ += StStep #TieSeparation
@@ -2956,7 +2956,7 @@ if(clk("makebrush")){
     SingleTieAngles[STC,angle] = StA[OnSeg-1,angle]
     
     SingleTieHeights[STC,number] = (0.5*Near + 0.5*Far):z()
-    #print("Plotted Single Tie, ",STC)
+    #print("Plotted Single Tie, ",Point)
     timer("plotsingleties_finish",100)
 }elseif(clk("plotsingleties_finish")){
     if(SwitchCompileStep==0){

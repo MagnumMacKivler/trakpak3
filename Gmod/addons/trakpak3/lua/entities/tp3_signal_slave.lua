@@ -24,6 +24,7 @@ if SERVER then
 		--Prop Init Stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BSP)
 		
 		if self.skin then self:SetSkin(self.skin) end
 		if self.bodygroups then

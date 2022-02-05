@@ -44,6 +44,7 @@ if SERVER then
 		--Model/Physics Init
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BSP)
 		self:SetSkin(self.skin)
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.collision_mn then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end

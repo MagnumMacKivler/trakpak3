@@ -447,6 +447,7 @@ if SERVER then
 		self.against = false
 		self:SetAutomaticFrameAdvance(false)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BSP)
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.skin then self:SetSkin(self.skin) end
 		--print("Switch ",state)
@@ -719,7 +720,7 @@ if CLIENT then
 			local tr = util.TraceLine(trace)
 
 			--Clickety Clack
-			if tr.Hit and not self.froccupied then
+			if tr.Hit and tr.Entity:GetClass()=="prop_physics" and not self.froccupied then
 				self.froccupied = true
 				self.clicker = tr.Entity
 				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end

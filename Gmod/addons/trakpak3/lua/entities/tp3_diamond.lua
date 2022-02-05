@@ -20,6 +20,7 @@ if SERVER then
 		--Prop Init Stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BSP)
 		self:SetTrigger(true)
 		
 		if string.find(self.model,"_alt.mdl") then --Model already has '_alt' for some reason
@@ -60,6 +61,7 @@ if SERVER then
 			
 			self:SetModel(self.model)
 			self:PhysicsInitStatic(SOLID_VPHYSICS)
+			self:SetSolid(SOLID_BSP)
 			self:FindAttachments()
 			self.cooldown = true
 		else --Throw diverging
@@ -67,6 +69,7 @@ if SERVER then
 			
 			self:SetModel(self.model_alt)
 			self:PhysicsInitStatic(SOLID_VPHYSICS)
+			self:SetSolid(SOLID_BSP)
 			self:FindAttachments()
 			self.cooldown = true
 		end

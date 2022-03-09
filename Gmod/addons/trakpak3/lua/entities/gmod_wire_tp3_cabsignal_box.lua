@@ -81,16 +81,45 @@ if SERVER then
 		self:SetUseType(SIMPLE_USE)
 		
 		--Wire Input Creation
+		--[[
 		local names = {"Enable","Reset","BasePropOverride","TrainTag","ApplyTag"}
 		local types = {"NORMAL","NORMAL","ENTITY","STRING","NORMAL"}
 		local descs = {"Required","","","",""}
 		WireLib.CreateSpecialInputs(self, names, types, descs)
 		
 		--Wire Output Creation
-		local names = {"LastSignalAspect",	"LastSignalSpeed",	"LastSignalSpeedNum",	"LastSignalDescription",	"NextSignalAspect",	"NextSignalSpeed",	"NextSignalSpeedNum",	"NextSignalDescription",	"EmBrake"}
+		
+		local names = {"LastSignalAspect",	"LastSignalSpeed",	"LastSignalSpeedNum",	"LastSignalDescription",	"NextSignalAspect",	"NextSignalSpeed",	"NextSignalSpeedNum",	"NextSignalDescription",	"EmBrake",	"TrainTag"}
 		local types = {"STRING",			"STRING",			"NORMAL",				"STRING",					"STRING",			"STRING",			"NORMAL",				"STRING",					"NORMAL"}
 		local descs = {}
 		WireLib.CreateSpecialOutputs(self, names, types, descs)
+		]]--
+		
+		local inputs = {
+			"Enable",
+			"Reset",
+			"BasePropOverride [ENTITY]",
+			"TrainTag [STRING]",
+			"ApplyTag"
+		}
+		
+		local outputs = {
+			"LastSignalAspect [STRING]",
+			"LastSignalSpeed [STRING]",
+			"LastSignalSpeedNum",
+			"LastSignalDescription [STRING]",
+			"NextSignalAspect [STRING]",
+			"NextSignalSpeed [STRING]",
+			"NextSignalSpeedNum",
+			"NextSignalDescription [STRING]",
+			"EmBrake",
+			"TrainTag [STRING]"
+		}
+		
+		WireLib.CreateInputs(self, inputs)
+		WireLib.CreateOutputs(self, outputs)
+			
+		
 		WireLib.TriggerOutput(self,"LastSignalAspect","None")
 		WireLib.TriggerOutput(self,"LastSignalSpeed","FULL")
 		WireLib.TriggerOutput(self,"LastSignalSpeedNum",Trakpak3.FULL)
@@ -118,6 +147,9 @@ if SERVER then
 			if not entlog[id] then --New Entity
 				entlog[id] = true
 				ent.Trakpak3_TrainTag = tag --Apply Tag
+				if ent:GetClass()=="gmod_wire_tp3_cabsignal_box" then
+					WireLib.TriggerOutput(ent, "TrainTag", tag or "")
+				end
 				
 				--Constrained Entities
 				if ent:IsConstrained() then

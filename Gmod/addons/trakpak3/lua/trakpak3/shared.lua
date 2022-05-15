@@ -52,6 +52,22 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
+	name="Trakpak3.switchstand.bethlehem_latch_lift",
+	sound = "trakpak3/switchstands/manual/bethlehem_latch_lift.wav",
+	channel = CHAN_AUTO,
+	volume = 1,
+	level = 60,
+	pitch = 100
+})
+sound.Add({
+	name="Trakpak3.switchstand.bethlehem_latch_drop",
+	sound = "trakpak3/switchstands/manual/bethlehem_latch_drop.wav",
+	channel = CHAN_AUTO,
+	volume = 1,
+	level = 60,
+	pitch = 100
+})
+sound.Add({
 	name="Trakpak3.switchstand.latch_contact",
 	sound = "trakpak3/switchstands/manual/latch_contact.wav",
 	channel = CHAN_AUTO,
@@ -84,7 +100,7 @@ sound.Add({
 	level = 60,
 	pitch = 100
 })
-
+--[[
 sound.Add({
 	name="Trakpak3.switchstand.blades_close_a",
 	sound = {
@@ -120,7 +136,7 @@ sound.Add({
 	level = 70,
 	pitch = 100
 })
-
+]]--
 sound.Add({
 	name = "Trakpak3.switchstand.machine_lv",
 	sound = "trakpak3/switchstands/switchmachine/throw_lv.wav",

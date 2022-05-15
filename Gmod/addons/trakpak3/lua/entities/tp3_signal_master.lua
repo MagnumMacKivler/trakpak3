@@ -69,6 +69,7 @@ if SERVER then
 		self.my_occupied = false
 		self.my_nextaspect = "none"
 		self.my_nextspeed = Trakpak3.FULL
+		self.my_nextdiv = false
 		self.my_diverging = false
 		self.my_speed = Trakpak3.FULL
 		
@@ -290,11 +291,14 @@ if SERVER then
 	end
 	
 	--Returns aspect and appearance tables, or nil
-	function ENT:CalculateAspect(occupied, diverging, speed, nextrule, nextspeed, tags, ctc)
+	function ENT:CalculateAspect(occupied, diverging, speed, nextrule, nextspeed, tags, ctc, nextdiv)
 		if self.system and self.signaltype then
-			local aspname = self.system.logic(occupied, diverging, speed or Trakpak3.FULL, nextrule, nextspeed or Trakpak3.FULL, tags, self.ctc_dict[ctc] or "ALLOW") --aspect to request
+			local aspname = self.system.logic(occupied, diverging, speed or Trakpak3.FULL, nextrule, nextspeed or Trakpak3.FULL, tags, self.ctc_dict[ctc] or "ALLOW", nextdiv) --aspect to request
 			if self.system.rules[aspname] then --if rule exists in rulebook
-				return aspname
+				local data = self.system.sigtypes[self.sigtype][aspname]
+				if data then --This aspect is defined for this sigtype
+					return data.override or aspname
+				else return end
 			else return end
 		else return end
 	end
@@ -315,7 +319,7 @@ if SERVER then
 				
 				
 				if signal.automatic then
-					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state) --occupied, diverging, speed, nextrule, nextspeed, tags
+					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv) --occupied, diverging, speed, nextrule, nextspeed, tags, nextdiv
 					if newaspect then signal:HandleNewAspect(newaspect,force) end
 				end
 			end
@@ -329,9 +333,10 @@ if SERVER then
 				--Update next signal's aspect name and speed
 				signal.my_nextaspect = aspect
 				signal.my_nextspeed = signal.system.rules[aspect].speed
+				signal.my_nextdiv = signal.nextsignal_ent.my_diverging
 				
 				if signal.automatic then
-					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state) --occupied, diverging, speed, nextrule, nextspeed, tags
+					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv) --occupied, diverging, speed, nextrule, nextspeed, tags, nextdiv
 					if newaspect then
 						--print(signal, newaspect)
 						signal:HandleNewAspect(newaspect)
@@ -370,17 +375,19 @@ if SERVER then
 		if self.nextsignal_valid and self.nextsignal_ent.system then
 			self.my_nextaspect = self.nextsignal_ent.aspect
 			self.my_nextspeed = self.nextsignal_ent.system.rules[self.my_nextaspect].speed
+			self.my_nextdiv = self.nextsignal_ent.my_diverging
 		else
 			self.my_nextaspect = nil
 			self.my_nextspeed = nil
+			self.my_nextdiv = nil
 		end
 		
 		if self.automatic then
 			if self.block_valid or self.nextsignal_valid then --Signal has something to read
-				local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
+				local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 				if newaspect then self:HandleNewAspect(newaspect) end
 			else --Signal has nothing to read - go to default
-				local newaspect = self:CalculateAspect(false, self.my_diverging, self.my_speed, nil, nil, self.tags, self.ctc_state)
+				local newaspect = self:CalculateAspect(false, self.my_diverging, self.my_speed, nil, nil, self.tags, self.ctc_state, nil)
 				if newaspect then self:HandleNewAspect(newaspect) end
 			end
 		end
@@ -434,26 +441,26 @@ if SERVER then
 			if data and data!="" then self:HandleNewAspect(data) end
 		elseif iname=="SetAutomatic" then
 			self.automatic = true
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
+			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 		elseif iname=="SetCTC_Hold" then
 			self.ctc_state = 0
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",0)
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
+			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 		elseif iname=="SetCTC_Once" then
 			self.ctc_state = 1
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
+			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",1)
 		elseif iname=="SetCTC_Allow" then
 			self.ctc_state = 2
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
+			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",2)
 		elseif iname=="SetCTC_Force" then
 			self.ctc_state = 3
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state)
+			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",3)
 		end
@@ -564,7 +571,7 @@ if SERVER then
 			if (name==signal:GetName()) and (cmd=="set_ctc") then
 				if val<=3 then
 					signal.ctc_state = val
-					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state)
+					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv)
 					if newaspect then signal:HandleNewAspect(newaspect) end
 					Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",val)
 				end

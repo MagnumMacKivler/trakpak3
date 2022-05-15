@@ -837,6 +837,23 @@ function Trakpak3.OpenSigEdit(page)
 			Trakpak3.SigEdit.IntPasteData()
 		end
 		
+		--Rule Override
+		local label = vgui.Create("DLabel",bpanel)
+		label:SetText("Rule Override: if this signal type can't display the rule chosen in the 'Rule Name' box, select a rule it can (and should) display instead in the box below. The signal will use the selected Skins / Bodygroups / Anim Cycle from the override rule.")
+		label:SetWrap(true)
+		label:SetSize(1,128)
+		label:Dock(TOP)
+		label:SetContentAlignment(8)
+		label:DockMargin(8,8,8,8)
+		label:SetTextColor(Color(63,63,63))
+		
+		local cbox = vgui.Create("DComboBox", bpanel)
+		Trakpak3.SigEdit.panels.robox = cbox
+		cbox:SetSize(1,24)
+		cbox:Dock(TOP)
+		cbox:SetSortItems(false)
+		
+		--Description of Page
 		local label = vgui.Create("DLabel",page3)
 		label:SetText("This is where you configure how each Signal Type adjusts its skins, bodygroups, or animation cycle for each Rule. Not every Signal Type needs to be able to display every Rule; you can use the Logic Function, Tags, and decisions from the mapper to make sure signals only show what they can.\n\nMultiple Signal Types can be selected at once.\n\nSkin is an integer starting from 0 (max of 31).\n\nBodygroups is a list of integers starting from 0. A single number affects only the first bodygroup. Mutiple numbers affect multiple bodygroups in order; for example, '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1.\n\nAnimation Cycle is the normalized fraction (decimal from 0 to 1) along the model's animation. For example, '0' is at the start, '0.5' is halfway through, and '1' is at the end. The animation sequence used must be named 'range'.\n\nLeaving any parameter box blank will tell the signal system not to change the associated skin/bodygroups/cycle.")
 		label:SetWrap(true)
@@ -1145,7 +1162,7 @@ function Trakpak3.OpenSigEdit(page)
 					comp_name = "\""..comp_name.."\""
 					--print("Aspect : "..comp_name.."\n")
 					Trakpak3.SigEdit.AddCText("( "..parm_name.." "..op_name.." "..comp_name.." )")
-				elseif (parm_name=="OCCUPIED") or (parm_name=="DIVERGING") then
+				elseif (parm_name=="OCCUPIED") or (parm_name=="DIVERGING") or (parm_name=="NEXTDIV") then
 					if (comp_name=="Clear") or (comp_name=="Main") then
 						op_name = "not "
 					else
@@ -1188,6 +1205,7 @@ function Trakpak3.OpenSigEdit(page)
 		parm_conditions:AddLine("Route Speed")
 		parm_conditions:AddLine("Next Signal Rule")
 		parm_conditions:AddLine("Next Signal Speed")
+		parm_conditions:AddLine("Next Signal Diverging")
 		parm_conditions:AddLine("CTC State")
 		
 		Trakpak3.SigEdit.panels.parmlist = parm_conditions
@@ -1203,14 +1221,14 @@ function Trakpak3.OpenSigEdit(page)
 				compbox:AddChoice("Occupied")
 				compbox:AddChoice("Clear")
 				compbox:SetValue("Occupied")
-			elseif text=="Route Diverging" then
+			elseif (text=="Route Diverging") or (text=="Next Signal Diverging") then
 				opbox:AddChoice("Is")
 				opbox:SetValue("Is")
 				
 				compbox:AddChoice("Diverging")
 				compbox:AddChoice("Main")
 				compbox:SetValue("Diverging")
-			elseif text=="Route Speed" or text=="Next Signal Speed" then
+			elseif (text=="Route Speed") or (text=="Next Signal Speed") then
 				opbox:AddChoice("Equals")
 				opbox:AddChoice("Does Not Equal")
 				opbox:AddChoice("Is Less Than")
@@ -1397,7 +1415,7 @@ function Trakpak3.OpenSigEdit(page)
 		
 		local list = vgui.Create("DListView",panel)
 		list:SetSize(1,128)
-		list:Dock(FILL)
+		list:Dock(TOP)
 		list:AddColumn("Rule Name")
 		list:SetMultiSelect(false)
 		list:SetSortable(false)
@@ -1406,6 +1424,33 @@ function Trakpak3.OpenSigEdit(page)
 			Trakpak3.SigEdit.sim_next_rule = Trakpak3.SigEdit.rules[index]
 			Trakpak3.SigEdit.SimNextSignal()
 		end
+		
+		local cb = vgui.Create("DCheckBoxLabel",panel)
+		cb:SetSize(1,24)
+		cb:Dock(BOTTOM)
+		cb:DockMargin(0,0,0,16)
+		cb:SetText("Main")
+		cb:SetTextColor(Color(63,63,63))
+		function cb:OnChange(value)
+			Trakpak3.SigEdit.sim_next_diverging = value
+			if value then self:SetText("Diverging") else self:SetText("Main") end
+			Trakpak3.SigEdit.SimNextSignal()
+		end
+		
+		local label = vgui.Create("DLabel",panel)
+		label:SetSize(1,32)
+		label:Dock(BOTTOM)
+		label:SetText("NEXT Signal Path")
+		label:SetContentAlignment(5)
+		label:SetTextColor(Color(63,63,63))
+		
+		local obox = vgui.Create("DTextEntry",panel)
+		obox:SetSize(1,24)
+		obox:Dock(BOTTOM)
+		obox:SetEnabled(false)
+		Trakpak3.SigEdit.panels.sim_obox = obox
+		
+		list:Dock(FILL)
 		
 		--Local Signal Megapanel
 		local lpanel = vgui.Create("DPanel",page5)
@@ -1739,7 +1784,7 @@ end
 --New/Edit Rule
 function Trakpak3.SigEdit.AddRule(name, speed, description, color, order)
 	order = order or (#Trakpak3.SigEdit.rules + 1)
-	print(name, speed, description, color, order)
+	--print(name, speed, description, color, order)
 	Trakpak3.SigEdit.rules[order] = {name = name, speed = speed or "FULL", description = description or "No Description", color = color or "White"}
 end
 
@@ -1778,12 +1823,14 @@ Trakpak3.SigEdit.AddRule("289 Approach","FULL","Proceed prepared to stop at next
 Trakpak3.SigEdit.AddRule("288 Clear","FULL","Proceed.")
 ]]--
 
---Populate/Refresh Rules List
+--Populate/Refresh Rules Lists
 function Trakpak3.SigEdit.PopulateRules()
+	local rules = Trakpak3.SigEdit.rules
+	--DListViews
 	for _, list in pairs(Trakpak3.SigEdit.panels.rules) do
 		if list then
 			list:Clear()
-			local rules = Trakpak3.SigEdit.rules
+			
 			if rules and not table.IsEmpty(rules) then
 				for n = 1, #rules do
 					local rule = rules[n]
@@ -1792,6 +1839,22 @@ function Trakpak3.SigEdit.PopulateRules()
 			end
 		end
 	end
+	
+	--Rule Override Combo Box
+	local cbox = Trakpak3.SigEdit.panels.robox
+	
+	if cbox then
+		cbox:Clear()
+		cbox:AddChoice("None",false,true)
+		cbox:AddSpacer()
+		if rules and not table.IsEmpty(rules) then
+			for n = 1, #rules do
+				local rule = rules[n]
+				cbox:AddChoice(rule.name)
+			end
+		end
+	end
+	
 end
 
 --New Tag
@@ -1927,7 +1990,9 @@ function Trakpak3.SigEdit.UpdateModel(ent, index)
 	end
 end
 
+--Set the info for the Interpretation/Next signal using the data table
 function Trakpak3.SigEdit.SetModelInfo(data)
+	if not data then return end
 	Trakpak3.SigEdit.intskins[1] = data.skin1
 	Trakpak3.SigEdit.intbodygroups[1] = string.Explode(" ",data.bg1) or {}
 	Trakpak3.SigEdit.intcycles[1] = data.cycle1
@@ -1950,26 +2015,73 @@ function Trakpak3.SigEdit.IntFillBoxes()
 	--print(aspect, sigtype)
 	if aspect and sigtype and Trakpak3.SigEdit.sigtypes then
 		local data = Trakpak3.SigEdit.sigtypes[sigtype][aspect]
-
+		
+		local cfg = Trakpak3.SigEdit.panels.cfg
+		
 		if data then
-			--print("Filling In Data:")
-			--PrintTable(data)
-			Trakpak3.SigEdit.panels.cfg.skinbox1:SetValue(data.skin1 or "")
-			Trakpak3.SigEdit.panels.cfg.bgbox1:SetValue(data.bg1 or "")
-			Trakpak3.SigEdit.panels.cfg.cyclebox1:SetValue(data.cycle1 or "")
 			
-			Trakpak3.SigEdit.panels.cfg.skinbox2:SetValue(data.skin2 or "")
-			Trakpak3.SigEdit.panels.cfg.bgbox2:SetValue(data.bg2 or "")
-			Trakpak3.SigEdit.panels.cfg.cyclebox2:SetValue(data.cycle2 or "")
+			cfg.skinbox1:SetValue(data.skin1 or "")
+			cfg.bgbox1:SetValue(data.bg1 or "")
+			cfg.cyclebox1:SetValue(data.cycle1 or "")
 			
-			Trakpak3.SigEdit.panels.cfg.skinbox3:SetValue(data.skin3 or "")
-			Trakpak3.SigEdit.panels.cfg.bgbox3:SetValue(data.bg3 or "")
-			Trakpak3.SigEdit.panels.cfg.cyclebox3:SetValue(data.cycle3 or "")
+			cfg.skinbox2:SetValue(data.skin2 or "")
+			cfg.bgbox2:SetValue(data.bg2 or "")
+			cfg.cyclebox2:SetValue(data.cycle2 or "")
+			
+			cfg.skinbox3:SetValue(data.skin3 or "")
+			cfg.bgbox3:SetValue(data.bg3 or "")
+			cfg.cyclebox3:SetValue(data.cycle3 or "")
+			
+			local id = 1
+			if data.override then
+				for n=1, #Trakpak3.SigEdit.rules do
+					if data.override==Trakpak3.SigEdit.rules[n].name then
+						id = n+1
+						break
+					end
+				end 
+			end
+			Trakpak3.SigEdit.panels.robox:ChooseOptionID(id)
+			
+			--Gray out the other boxes if the rules is overrided
+			local canedit = not data.override
+			
+			cfg.skinbox1:SetEnabled(canedit)
+			cfg.bgbox1:SetEnabled(canedit)
+			cfg.cyclebox1:SetEnabled(canedit)
+			
+			cfg.skinbox2:SetEnabled(canedit)
+			cfg.bgbox2:SetEnabled(canedit)
+			cfg.cyclebox2:SetEnabled(canedit)
+			
+			cfg.skinbox3:SetEnabled(canedit)
+			cfg.bgbox3:SetEnabled(canedit)
+			cfg.cyclebox3:SetEnabled(canedit)
+			
+			local override = data.override
+			if override then
+				--print("Override:", override)
+				data = Trakpak3.SigEdit.sigtypes[sigtype][override]
+			end
 			
 			Trakpak3.SigEdit.SetModelInfo(data)
 		else
 			--print("No data found for "..sigtype.." aspect "..aspect)
-			for _, box in pairs(Trakpak3.SigEdit.panels.cfg) do box:SetValue("") end
+			for _, box in pairs(cfg) do box:SetValue("") end
+			
+			Trakpak3.SigEdit.panels.robox:ChooseOptionID(1)
+			
+			cfg.skinbox1:SetEnabled(true)
+			cfg.bgbox1:SetEnabled(true)
+			cfg.cyclebox1:SetEnabled(true)
+			
+			cfg.skinbox2:SetEnabled(true)
+			cfg.bgbox2:SetEnabled(true)
+			cfg.cyclebox2:SetEnabled(true)
+			
+			cfg.skinbox3:SetEnabled(true)
+			cfg.bgbox3:SetEnabled(true)
+			cfg.cyclebox3:SetEnabled(true)
 			--Trakpak3.SigEdit.SetModelInfo()
 		end
 	else
@@ -1981,20 +2093,39 @@ function Trakpak3.SigEdit.IntAssignData()
 	local aspect = Trakpak3.SigEdit.int_aspect
 	local sigtypes = Trakpak3.SigEdit.panels.types[2]:GetSelected()
 	local data = {}
+	local cfg = Trakpak3.SigEdit.panels.cfg
 	
-	data.skin1 = Trakpak3.SigEdit.panels.cfg.skinbox1:GetValue()
-	data.bg1 = Trakpak3.SigEdit.panels.cfg.bgbox1:GetValue()
-	data.cycle1 = Trakpak3.SigEdit.panels.cfg.cyclebox1:GetValue()
+	data.skin1 = cfg.skinbox1:GetValue()
+	data.bg1 = cfg.bgbox1:GetValue()
+	data.cycle1 = cfg.cyclebox1:GetValue()
 	
-	data.skin2 = Trakpak3.SigEdit.panels.cfg.skinbox2:GetValue()
-	data.bg2 = Trakpak3.SigEdit.panels.cfg.bgbox2:GetValue()
-	data.cycle2 = Trakpak3.SigEdit.panels.cfg.cyclebox2:GetValue()
+	data.skin2 = cfg.skinbox2:GetValue()
+	data.bg2 = cfg.bgbox2:GetValue()
+	data.cycle2 = cfg.cyclebox2:GetValue()
 	
-	data.skin3 = Trakpak3.SigEdit.panels.cfg.skinbox3:GetValue()
-	data.bg3 = Trakpak3.SigEdit.panels.cfg.bgbox3:GetValue()
-	data.cycle3 = Trakpak3.SigEdit.panels.cfg.cyclebox3:GetValue()
+	data.skin3 = cfg.skinbox3:GetValue()
+	data.bg3 = cfg.bgbox3:GetValue()
+	data.cycle3 = cfg.cyclebox3:GetValue()
 	
-	--print(data.cycle1, data.cycle2, data.cycle3)
+	local override = Trakpak3.SigEdit.panels.robox:GetSelected()
+	if override!="None" then
+		data.override = override
+	end
+	
+	--Gray out the other boxes if the rules is overrided
+	local canedit = not data.override
+	
+	cfg.skinbox1:SetEnabled(canedit)
+	cfg.bgbox1:SetEnabled(canedit)
+	cfg.cyclebox1:SetEnabled(canedit)
+	
+	cfg.skinbox2:SetEnabled(canedit)
+	cfg.bgbox2:SetEnabled(canedit)
+	cfg.cyclebox2:SetEnabled(canedit)
+	
+	cfg.skinbox3:SetEnabled(canedit)
+	cfg.bgbox3:SetEnabled(canedit)
+	cfg.cyclebox3:SetEnabled(canedit)
 	
 	if aspect and sigtypes and data then
 		
@@ -2003,8 +2134,7 @@ function Trakpak3.SigEdit.IntAssignData()
 			Trakpak3.SigEdit.sigtypes[sigtype][aspect] = data
 		end
 		
-		
-		Trakpak3.SigEdit.SetModelInfo(data)
+		--Trakpak3.SigEdit.SetModelInfo(data)
 		Trakpak3.SigEdit.IntFillBoxes()
 	end
 end
@@ -2024,6 +2154,9 @@ function Trakpak3.SigEdit.IntCopyData()
 	data.bg3 = Trakpak3.SigEdit.panels.cfg.bgbox3:GetValue()
 	data.cycle3 = Trakpak3.SigEdit.panels.cfg.cyclebox3:GetValue()
 	
+	local override = Trakpak3.SigEdit.panels.robox:GetSelected()
+	if override!="None" then data.override = override end
+	
 	Trakpak3.SigEdit.clipboard = data
 end
 
@@ -2040,7 +2173,7 @@ function Trakpak3.SigEdit.IntPasteData()
 		end
 		
 		
-		Trakpak3.SigEdit.SetModelInfo(data)
+		--Trakpak3.SigEdit.SetModelInfo(data)
 		Trakpak3.SigEdit.IntFillBoxes()
 	end
 end
@@ -2069,6 +2202,7 @@ Trakpak3.SigEdit.dictionary = {
 	["Route Speed"] = "SPEED",
 	["Next Signal Rule"] = "NEXTASPECT",
 	["Next Signal Speed"] = "NEXTSPEED",
+	["Next Signal Diverging"] = "NEXTDIV",
 	["CTC State"] = "CTC"
 }
 
@@ -2151,7 +2285,7 @@ function Trakpak3.SigEdit.AddConditional(node)
 	
 	cond_if:ExpandTo(true)
 
-	print("Conditional: Assigning node "..nt_if.parent.." nextnode "..id_if)
+	--print("Conditional: Assigning node "..nt_if.parent.." nextnode "..id_if)
 	Trakpak3.SigEdit.panels.nodes[nt_if.parent].nextnode = id_if
 	return id_if, id_then, id_else
 end
@@ -2264,7 +2398,7 @@ end
 
 function Trakpak3.SigEdit.WriteLogicFunction()
 	local nodes = Trakpak3.SigEdit.panels.nodes
-	local func_text = "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC)\n"
+	local func_text = "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC, NEXTDIV)\n"
 	local func_body = Trakpak3.SigEdit.ExploreNode(nodes[2],1)
 	if func_body then --function wrote successfully
 		func_text = func_text..func_body.."\nend"
@@ -2281,9 +2415,9 @@ end
 
 function Trakpak3.SigEdit.RebuildKids(node, old_list, old_id)
 	local ntable = old_list[old_id]
-	print("Old node ",old_id)
-	PrintTable(ntable)
-	print("\n")
+	--print("Old node ",old_id)
+	--PrintTable(ntable)
+	--print("\n")
 	if ntable.nextnode then --Node had an attachment
 		local ctable = old_list[ntable.nextnode]
 		
@@ -2304,7 +2438,7 @@ function Trakpak3.SigEdit.RebuildKids(node, old_list, old_id)
 			local aspect = ctable.aspect
 			Trakpak3.SigEdit.AddReturn(node,aspect)
 		end
-	else print("Node had no attachments") end
+	end
 end
 
 function Trakpak3.SigEdit.ConstructFromData()
@@ -2325,7 +2459,14 @@ function Trakpak3.SigEdit.SimNextSignal()
 	
 	if sigtype and aspect and (sigtype!="") and(aspect!="") then
 		local data = Trakpak3.SigEdit.sigtypes[sigtype][aspect]
-		Trakpak3.SigEdit.SetModelInfo(data)
+		local override = data.override
+		if override then
+			data = Trakpak3.SigEdit.sigtypes[sigtype][override]
+			Trakpak3.SigEdit.panels.sim_obox:SetValue(override)
+		else
+			Trakpak3.SigEdit.panels.sim_obox:SetValue("")
+		end
+		Trakpak3.SigEdit.SetModelInfo(data) 
 		Trakpak3.SigEdit.SimLocalSignal()
 	end
 end
@@ -2351,14 +2492,19 @@ function Trakpak3.SigEdit.SimLocalSignal()
 		local tags = Trakpak3.SigEdit.sim_local_tags
 		local nrule = Trakpak3.SigEdit.sim_next_rule
 		local ctc = Trakpak3.SigEdit.sim_ctc
+		local ndiv = Trakpak3.SigEdit.sim_next_diverging
 		if nrule then
 			local nextaspect = nrule.name
 			local nextspeed = speed_dict[nrule.speed]
 			
-			local aspect = Trakpak3.SigEdit.LogicFunction(occupied, diverging, speed, nextaspect, nextspeed, tags, ctc)
+			local aspect = Trakpak3.SigEdit.LogicFunction(occupied, diverging, speed, nextaspect, nextspeed, tags, ctc, ndiv)
 			--print("Simulating Local Signal: ",sigtype, aspect)
 			if aspect then --Set Model Info
 				local data = Trakpak3.SigEdit.sigtypes[sigtype][aspect]
+				local override = data.override
+				if override then
+					data = Trakpak3.SigEdit.sigtypes[sigtype][override]
+				end
 				if data then
 					Trakpak3.SigEdit.intskins[4] = data.skin1
 					Trakpak3.SigEdit.intbodygroups[4] = string.Explode(" ",data.bg1) or {}
@@ -2384,7 +2530,7 @@ function Trakpak3.SigEdit.SimLocalSignal()
 					Trakpak3.SigEdit.intbodygroups[6] = {}
 					Trakpak3.SigEdit.intcycles[6] = 0
 				end
-				Trakpak3.SigEdit.panels.sim_abox:SetValue(aspect)
+				Trakpak3.SigEdit.panels.sim_abox:SetValue(override or aspect)
 			end
 		end
 	end

@@ -460,6 +460,14 @@
 				"x": 33.0,
 				"y": 9.0,
 				"switch": "dj_4"
+			},
+			{
+				"x": 14.0,
+				"orientation": 3.0,
+				"type": "signal",
+				"signal": "route_signal_1a",
+				"style": true,
+				"y": 15.0
 			}
 		],
 		"x_res": "64",

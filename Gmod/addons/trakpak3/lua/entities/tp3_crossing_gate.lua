@@ -30,6 +30,9 @@ if SERVER then
 	
 	ENT.AutomaticFrameAdvance = true
 	
+	--Disable Physgun
+	function ENT:PhysgunPickup() return false end
+	
 	function ENT:Initialize()
 		self:ValidateNumerics()
 		self:RegisterEntity("xing",self.xing)

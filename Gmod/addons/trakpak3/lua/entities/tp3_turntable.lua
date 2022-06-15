@@ -37,7 +37,7 @@ if SERVER then
 		self:SetLocalAngularVelocity(Angle(0,0,0))
 	end
 	
-	util.AddNetworkString("TP3_TurnTable_ControlInfo")
+	--util.AddNetworkString("TP3_TurnTable_ControlInfo")
 	
 	function ENT:Initialize()
 		self:ValidateNumerics()
@@ -211,7 +211,9 @@ if SERVER then
 			self.driver = self:TT_Driver()
 			if self.driver and not self.active then
 				self.active = true
-				net.Start("TP3_TurnTable_ControlInfo")
+				--net.Start("TP3_TurnTable_ControlInfo")
+				net.Start("trakpak3")
+					net.WriteString("tp3_turntable_controlinfo")
 					net.WriteTable({
 						ccw = self.key_ccw,
 						cw = self.key_cw,
@@ -401,7 +403,7 @@ if SERVER then
 end
 
 if CLIENT then
-	
+	--[[
 	net.Receive("TP3_TurnTable_ControlInfo",function()
 		local binds = net.ReadTable()
 		
@@ -413,4 +415,16 @@ if CLIENT then
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end)
+	]]--
+	Trakpak3.Net.tp3_turntable_controlinfo = function(len,ply)
+		local binds = net.ReadTable()
+		
+		local ccw = string.upper(input.LookupBinding(binds.ccw))
+		local cw = string.upper(input.LookupBinding(binds.cw))
+		local stop = string.upper(input.LookupBinding(binds.stop))
+		
+		local message = "Turntable Controls:\n"..ccw.." - Move Counterclockwise\n"..cw.." - Move Clockwise\n"..stop.." - Manual Stop"
+		
+		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
+	end
 end

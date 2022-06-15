@@ -3129,18 +3129,27 @@ end
 
 --Request DS board from server
 hook.Add("InitPostEntity", "Trakpak3_Request_Dispatch", function()
-	net.Start("tp3_transmit_ds")
+	--net.Start("tp3_transmit_ds")
+	net.Start("trakpak3")
+	net.WriteString("tp3_transmit_ds")
 	net.SendToServer()
 end)
 
 --Receive DS data from server
+--[[
 net.Receive("tp3_transmit_dsdata",function(mlen, ply)
 	local JSON = net.ReadData(mlen)
 	JSON = util.Decompress(JSON)
 	Dispatch.RealData = util.JSONToTable(JSON)
 	--PrintTable(Dispatch.RealData)
 end)
+]]--
+Trakpak3.Net.tp3_transmit_dsdata = function(len,ply)
+	Dispatch.RealData = net.ReadTable()
+end
+
 --Receive DS board from server
+--[[
 net.Receive("tp3_transmit_ds",function(mlen, ply)
 	print("[Trakpak3] Dispatch Board Received.")
 	local JSON = net.ReadData(mlen)
@@ -3150,10 +3159,19 @@ net.Receive("tp3_transmit_ds",function(mlen, ply)
 	Dispatch.canload = true
 	--PrintTable(Dispatch.MapBoards)
 end)
+]]--
+Trakpak3.Net.tp3_transmit_ds = function(len,ply)
+	print("[Trakpak3] Dispatch Board Received.")
+	Dispatch.MapBoards = net.ReadTable()
+	Dispatch.LoadBoards(false)
+	Dispatch.canload = true
+end
 
 --Send Command to Entity
 function Dispatch.SendCommand(target, cmd, arg)
-	net.Start("tp3_dispatch_comm")
+	--net.Start("tp3_dispatch_comm")
+	net.Start("trakpak3")
+		net.WriteString("tp3_dispatch_comm")
 		net.WriteString(target)
 		net.WriteString(cmd)
 		net.WriteUInt(arg,3)
@@ -3162,6 +3180,7 @@ function Dispatch.SendCommand(target, cmd, arg)
 end
 
 --Receive Status from Entity
+--[[
 net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	local entname = net.ReadString()
 	local parm = net.ReadString()
@@ -3185,6 +3204,30 @@ net.Receive("tp3_dispatch_comm", function(mlen, ply)
 		end
 	end
 end)
+]]--
+Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
+	local entname = net.ReadString()
+	local parm = net.ReadString()
+	local dtype = net.ReadString()
+	local value
+	if dtype=="int" then
+		value = net.ReadUInt(16)
+	elseif dtype=="string" then
+		value = net.ReadString()
+	end
+	--print("Dispatch Update: ", entname, parm, value)
+	if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
+	Dispatch.RealData[entname][parm] = value
+	
+	for page, board in pairs(Dispatch.Boards) do
+		for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+	end
+	for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
+		for page, board in pairs(ent.Boards) do
+			for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+		end
+	end
+end
 
 
 --Teleport Player to Position
@@ -3193,7 +3236,9 @@ function Dispatch.Teleport(pos)
 		chat.AddText("[Trakpak3 Dispatch Board] Cannot teleport you becuase you are in a vehicle!")
 		LocalPlayer():EmitSound("buttons/combine_button_locked.wav")
 	else
-		net.Start("tp3_dispatch_teleport")
+		--net.Start("tp3_dispatch_teleport")
+		net.Start("trakpak3")
+		net.WriteString("tp3_dispatch_teleport")
 		net.WriteVector(pos)
 		net.SendToServer()
 		local disp = Dispatch.Panels.dispatcher
@@ -3357,7 +3402,9 @@ function Dispatch.OpenDispatcher()
 		if #Dispatch.Boards > 0 then --Normal Load
 			Dispatch.PopulatePage(canvas)
 		else --File was reloaded, repopulate
-			net.Start("tp3_transmit_ds")
+			--net.Start("tp3_transmit_ds")
+			net.Start("trakpak3")
+			net.WriteString("tp3_transmit_ds")
 			net.SendToServer()
 		end
 	end)

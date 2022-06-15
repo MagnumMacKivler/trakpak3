@@ -181,12 +181,14 @@ if SERVER then
 	end
 	
 	--Train Tag Dialog Net Traffic
-	util.AddNetworkString("Trakpak3_TrainTagDialog")
+	--util.AddNetworkString("Trakpak3_TrainTagDialog")
 	--Player pressed E on it
 	function ENT:Use(ply)
 		if ply:IsPlayer() then
 			local mytag = self.Trakpak3_TrainTag or ""
-			net.Start("Trakpak3_TrainTagDialog")
+			--net.Start("Trakpak3_TrainTagDialog")
+			net.Start("trakpak3")
+				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(self:EntIndex(),16)
 				net.WriteString(mytag)
 			net.Send(ply)
@@ -194,6 +196,7 @@ if SERVER then
 	end
 	
 	--Player Entered a New Train Tag
+	--[[
 	net.Receive("Trakpak3_TrainTagDialog",function(length, ply)
 		local id = net.ReadUInt(16)
 		local ent = Entity(id)
@@ -206,8 +209,21 @@ if SERVER then
 			Trakpak3.ApplyTrainTag(ent, newtag, entlog)
 			ent:SetupOverlay()
 		end
-		
 	end)
+	]]--
+	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
+		local id = net.ReadUInt(16)
+		local ent = Entity(id)
+		local newtag = net.ReadString()
+		
+		if newtag=="" then newtag = nil end
+		
+		if ent and ent:IsValid() and (ent:GetClass()=="gmod_wire_tp3_cabsignal_box") then
+			local entlog = {}
+			Trakpak3.ApplyTrainTag(ent, newtag, entlog)
+			ent:SetupOverlay()
+		end
+	end
 	
 	--Hook into signaling system to receive live updates
 	hook.Add("TP3_SignalUpdate","Trakpak3_UpdateCabSignals",function(signalname, aspect)
@@ -444,7 +460,8 @@ end
 
 if CLIENT then
 	--User pressed E to enter a Train Tag
-	net.Receive("Trakpak3_TrainTagDialog",function(length, ply)
+	--net.Receive("Trakpak3_TrainTagDialog",function(length, ply)
+	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
 		
 		local id = net.ReadUInt(16)
 		local mytag = net.ReadString()
@@ -469,7 +486,9 @@ if CLIENT then
 		text:SetValue(mytag or "")
 		text:Dock(TOP)
 		function text:OnEnter(value)
-			net.Start("Trakpak3_TrainTagDialog")
+			--net.Start("Trakpak3_TrainTagDialog")
+			net.Start("trakpak3")
+				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(id,16)
 				local newtag = value or ""
 				net.WriteString(newtag)
@@ -491,7 +510,9 @@ if CLIENT then
 		button:DockMargin(24,2,2,2)
 		button:SetText("Apply")
 		function button:DoClick()
-			net.Start("Trakpak3_TrainTagDialog")
+			--net.Start("Trakpak3_TrainTagDialog")
+			net.Start("trakpak3")
+				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(id,16)
 				local newtag = text:GetValue() or ""
 				net.WriteString(newtag)
@@ -513,7 +534,9 @@ if CLIENT then
 		button:DockMargin(2,2,24,2)
 		button:SetText("Clear")
 		function button:DoClick()
-			net.Start("Trakpak3_TrainTagDialog")
+			--net.Start("Trakpak3_TrainTagDialog")
+			net.Start("trakpak3")
+				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(id,16)
 				net.WriteString("")
 			net.SendToServer()
@@ -521,7 +544,8 @@ if CLIENT then
 			chat.AddText("[Trakpak3 Cab Signal Box] Cleared Train Tag.")
 			LocalPlayer():EmitSound("ambient/machines/keyboard7_clicks_enter.wav")
 		end
-	end)
+	--end)
+	end
 	
 	--Defect Detector Queue
 	function ENT:DetectorQueue(font,sentence)

@@ -4,31 +4,33 @@ if SERVER then
 	Trakpak3.SwitchStandPlots = {}
 	Trakpak3.SignalPlots = {}
 	Trakpak3.Magenta = Color(255,0,255)
+	Trakpak3.Net = {}
 	
-	include("trakpak3/tp3lib.lua")
-	include("trakpak3/nodesetup.lua")
-	include("trakpak3/signalsetup.lua")
-	include("trakpak3/switchstandplots.lua")
-	include("trakpak3/signalplots.lua")
-	include("trakpak3/signtext.lua")
-	include("trakpak3/dispatch.lua")
-	include("trakpak3/mapseats.lua")
-	include("trakpak3/remoteswitcher.lua")
-	include("trakpak3/pathconfig.lua")
-	include("trakpak3/shared.lua")
 	
-	AddCSLuaFile("trakpak3/cl_nodesetup.lua")
-	AddCSLuaFile("trakpak3/cl_sigedit.lua")
-	AddCSLuaFile("trakpak3/cl_signalvision.lua")
-	AddCSLuaFile("trakpak3/cl_signtext.lua")
-	AddCSLuaFile("trakpak3/cl_dispatch.lua")
-	AddCSLuaFile("trakpak3/3d2dvgui.lua")
-	AddCSLuaFile("trakpak3/cl_makespawnlist.lua")
-	AddCSLuaFile("trakpak3/cl_mapseats.lua")
-	AddCSLuaFile("trakpak3/cl_remoteswitcher.lua")
-	AddCSLuaFile("trakpak3/cl_pathconfig.lua")
-	AddCSLuaFile("trakpak3/cl_defect_detector.lua")
-	AddCSLuaFile("trakpak3/shared.lua")
+	include("trakpak3/tp3lib.lua") --
+	include("trakpak3/nodesetup.lua") --
+	include("trakpak3/signalsetup.lua") --
+	include("trakpak3/switchstandplots.lua") --
+	include("trakpak3/signalplots.lua") --
+	include("trakpak3/signtext.lua") --
+	include("trakpak3/dispatch.lua") --
+	include("trakpak3/mapseats.lua") --
+	include("trakpak3/remoteswitcher.lua") --
+	include("trakpak3/pathconfig.lua") --
+	include("trakpak3/shared.lua") --
+	
+	AddCSLuaFile("trakpak3/cl_nodesetup.lua") --
+	AddCSLuaFile("trakpak3/cl_sigedit.lua") --
+	AddCSLuaFile("trakpak3/cl_signalvision.lua") --
+	AddCSLuaFile("trakpak3/cl_signtext.lua") --
+	AddCSLuaFile("trakpak3/cl_dispatch.lua") --
+	AddCSLuaFile("trakpak3/3d2dvgui.lua") --
+	AddCSLuaFile("trakpak3/cl_makespawnlist.lua") --
+	AddCSLuaFile("trakpak3/cl_mapseats.lua") --
+	AddCSLuaFile("trakpak3/cl_remoteswitcher.lua") --
+	AddCSLuaFile("trakpak3/cl_pathconfig.lua") --
+	AddCSLuaFile("trakpak3/cl_defect_detector.lua") --
+	AddCSLuaFile("trakpak3/shared.lua") --
 	
 	--Macro for E2 limits for JH
 	concommand.Add("tp3_jh_prep", function()
@@ -43,9 +45,19 @@ if SERVER then
 		end
 	end)
 	
+	util.AddNetworkString("trakpak3")
+	
+	--Net Message Handlers
+	net.Receive("trakpak3",function(len,ply)
+		local cmd = net.ReadString()
+		local func = Trakpak3.Net[cmd]
+		if func then func(len,ply) end
+	end)
+	
 end
 if CLIENT then
 	Trakpak3 = {}
+	Trakpak3.Net = {}
 	include("trakpak3/cl_nodesetup.lua")
 	include("trakpak3/cl_sigedit.lua")
 	include("trakpak3/cl_signalvision.lua")
@@ -58,6 +70,13 @@ if CLIENT then
 	include("trakpak3/cl_pathconfig.lua")
 	include("trakpak3/cl_defect_detector.lua")
 	include("trakpak3/shared.lua")
+	
+	--Net Message Handler
+	net.Receive("trakpak3",function(len,ply)
+		local cmd = net.ReadString()
+		local func = Trakpak3.Net[cmd]
+		if func then func(len,ply) end
+	end)
 	
 	--[[
 	concommand.Add("+tp3_test", function()

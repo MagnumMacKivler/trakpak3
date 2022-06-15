@@ -47,13 +47,16 @@ end
 
 --Request sign data from server
 hook.Add("InitPostEntity","Trakpak3_RequestSignData",function()
-	net.Start("tp3_register_sign")
+	--net.Start("tp3_register_sign")
+	net.Start("trakpak3")
+	net.WriteString("tp3_register_sign")
 	net.SendToServer()
 	print("[Trakpak3] Requesting Sign Data...")
 end)
 
 --Net message triggered by each sign entity to register their info on client.
-net.Receive("tp3_register_sign",function(mlen, ply)
+--net.Receive("tp3_register_sign",function(mlen, ply)
+Trakpak3.Net.tp3_register_sign = function(len,ply)
 	
 	local ent = net.ReadEntity()
 	local JSON = net.ReadString()
@@ -130,7 +133,8 @@ net.Receive("tp3_register_sign",function(mlen, ply)
 	--print("[Trakpak3] Received Sign:")
 	--PrintTable(data)
 	
-end)
+--end)
+end
 
 function SignText.DrawSign(ent,index)
 	local signtable = SignText.Signs[ent:EntIndex()]

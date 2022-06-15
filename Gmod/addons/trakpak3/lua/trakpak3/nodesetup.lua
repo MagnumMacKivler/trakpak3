@@ -33,11 +33,12 @@ hook.Add("InitPostEntity","TP3_NodeLoad",function()
 	end
 end)
 
-util.AddNetworkString("tp3_request_blockpack")
+--util.AddNetworkString("tp3_request_blockpack")
 
 --Send all the block entity info to the client so they can actually bind the blocks - should only be useful in singleplayer. Also does signal Cabsignal Points.
 --Also does Signals and Switches for DS boards
-net.Receive("tp3_request_blockpack", function(length, ply)
+--net.Receive("tp3_request_blockpack", function(length, ply)
+Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 	
 	print("[Trakpak3] Received Blockpack Request from player.")
 	
@@ -73,11 +74,17 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		print("[Trakpak3] There are no Trakpak3 signal blocks on this map to send to client.")
 	else
 		--print("The table is NOT empty.")
+		--[[
 		local JSON = util.TableToJSON(blockpack)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_blockpack")
 		net.Start("tp3_blockpack")
 		net.WriteData(JSON,#JSON)
+		net.Send(ply)
+		]]--
+		net.Start("trakpak3")
+			net.WriteString("tp3_blockpack")
+			net.WriteTable(blockpack)
 		net.Send(ply)
 	end
 	
@@ -97,19 +104,31 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		end
 		
 		--CS Pos
+		--[[
 		local JSON = util.TableToJSON(positions)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_cabsignal_pospack")
 		net.Start("tp3_cabsignal_pospack")
 		net.WriteData(JSON,#JSON)
 		net.Send(ply)
+		]]--
+		net.Start("trakpak3")
+			net.WriteString("tp3_cabsignal_pospack")
+			net.WriteTable(positions)
+		net.Send(ply)
 		
 		--Signal Pos
+		--[[
 		local JSON = util.TableToJSON(signals)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_signalpack")
 		net.Start("tp3_signalpack")
 		net.WriteData(JSON,#JSON)
+		net.Send(ply)
+		]]--
+		net.Start("trakpak3")
+			net.WriteString("tp3_signalpack")
+			net.WriteTable(signals)
 		net.Send(ply)
 	end
 	
@@ -125,11 +144,17 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		end
 		
 		--Switch Pos
+		--[[
 		local JSON = util.TableToJSON(switches)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_switchpack")
 		net.Start("tp3_switchpack")
 		net.WriteData(JSON,#JSON)
+		net.Send(ply)
+		]]--
+		net.Start("trakpak3")
+			net.WriteString("tp3_switchpack")
+			net.WriteTable(switches)
 		net.Send(ply)
 		
 	end
@@ -146,11 +171,17 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 		end
 		
 		--Gate Pos & Occupancy
+		--[[
 		local JSON = util.TableToJSON(gates)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_gatepack")
 		net.Start("tp3_gatepack")
 		net.WriteData(JSON, #JSON)
+		net.Send(ply)
+		]]--
+		net.Start("trakpak3")
+			net.WriteString("tp3_gatepack")
+			net.WriteTable(gates)
 		net.Send(ply)
 	end
 	
@@ -162,14 +193,21 @@ net.Receive("tp3_request_blockpack", function(length, ply)
 			if valid then psignals[signame] = paths end
 		end
 		
+		--[[
 		local JSON = util.TableToJSON(psignals)
 		JSON = util.Compress(JSON)
 		util.AddNetworkString("tp3_pathpack")
 		net.Start("tp3_pathpack")
 		net.WriteData(JSON,#JSON)
 		net.Send(ply)
+		]]--
+		net.Start("trakpak3")
+			net.WriteString("tp3_pathpack")
+			net.WriteTable(psignals)
+		net.Send(ply)
 	end
-end)
+--end)
+end
 
 --Clipboard
 --[[

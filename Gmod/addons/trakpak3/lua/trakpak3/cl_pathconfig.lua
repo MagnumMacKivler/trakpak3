@@ -414,47 +414,11 @@ function PathConfig.Draw()
 		--Switches
 		
 		local sl = pc.switchlist
-		for name, pos in pairs(Trakpak3.Switches) do 
-			--local name = stand:GetName()
-			if sl[name]==false then --Main
-				--local pos = stand:GetPos()
-				local data = pos:ToScreen()
-				local cx = data.x
-				local cy = data.y
-				
-				surface.SetDrawColor(color_black)
-				surface.DrawRect(cx - elementsize/2, cy - elementsize/2, elementsize, elementsize)
-				
-				surface.SetDrawColor(color_n)
-				surface.DrawOutlinedRect(cx - elementsize/2 + 2, cy - elementsize/2 + 2, elementsize-4, elementsize-4, 2)
-				
-				draw.SimpleText("SWITCH","tp3_dispatch_1",cx,cy-12,color_n, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-				draw.SimpleText("N","tp3_dispatch_3",cx,cy+12,color_n, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-			elseif sl[name] then --Diverging
-				--local pos = stand:GetPos()
-				local data = pos:ToScreen()
-				local cx = data.x
-				local cy = data.y
-				
-				surface.SetDrawColor(color_black)
-				surface.DrawRect(cx - elementsize/2, cy - elementsize/2, elementsize, elementsize)
-				
-				surface.SetDrawColor(color_r)
-				surface.DrawOutlinedRect(cx - elementsize/2 + 2, cy - elementsize/2 + 2, elementsize-4, elementsize-4, 2)
-				
-				draw.SimpleText("SWITCH","tp3_dispatch_1",cx,cy-12,color_r, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-				draw.SimpleText("R","tp3_dispatch_3",cx,cy+12,color_r, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-			end
-		end
-		
-		--Nextsignal
-		
-		local ns = pc.nextsignal
-		if ns then
-			for name, pos in pairs(Trakpak3.Signals) do
-				--local name = signal:GetName()
-				if ns==name then
-					--local pos = signal:GetPos()
+		if Trakpak3.Switches then
+			for name, pos in pairs(Trakpak3.Switches) do 
+				--local name = stand:GetName()
+				if sl[name]==false then --Main
+					--local pos = stand:GetPos()
 					local data = pos:ToScreen()
 					local cx = data.x
 					local cy = data.y
@@ -462,36 +426,76 @@ function PathConfig.Draw()
 					surface.SetDrawColor(color_black)
 					surface.DrawRect(cx - elementsize/2, cy - elementsize/2, elementsize, elementsize)
 					
-					surface.SetDrawColor(color_nextsignal)
+					surface.SetDrawColor(color_n)
 					surface.DrawOutlinedRect(cx - elementsize/2 + 2, cy - elementsize/2 + 2, elementsize-4, elementsize-4, 2)
 					
-					draw.SimpleText("NEXT","tp3_dispatch_1",cx,cy-6,color_nextsignal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-					draw.SimpleText("SIGNAL","tp3_dispatch_1",cx,cy+6,color_nextsignal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					draw.SimpleText("SWITCH","tp3_dispatch_1",cx,cy-12,color_n, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					draw.SimpleText("N","tp3_dispatch_3",cx,cy+12,color_n, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				elseif sl[name] then --Diverging
+					--local pos = stand:GetPos()
+					local data = pos:ToScreen()
+					local cx = data.x
+					local cy = data.y
 					
-					--Arrow from one to the other; cool concept, not really useful
-					--[[
-					if homesigpos and homesigpos.visible and data.visible then
-						local sx = homesigpos.x
-						local sy = homesigpos.y
+					surface.SetDrawColor(color_black)
+					surface.DrawRect(cx - elementsize/2, cy - elementsize/2, elementsize, elementsize)
+					
+					surface.SetDrawColor(color_r)
+					surface.DrawOutlinedRect(cx - elementsize/2 + 2, cy - elementsize/2 + 2, elementsize-4, elementsize-4, 2)
+					
+					draw.SimpleText("SWITCH","tp3_dispatch_1",cx,cy-12,color_r, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+					draw.SimpleText("R","tp3_dispatch_3",cx,cy+12,color_r, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+				end
+			end
+		end
+		
+		--Nextsignal
+		
+		local ns = pc.nextsignal
+		if ns then
+			if Trakpak3.Signals then
+				for name, pos in pairs(Trakpak3.Signals) do
+					--local name = signal:GetName()
+					if ns==name then
+						--local pos = signal:GetPos()
+						local data = pos:ToScreen()
+						local cx = data.x
+						local cy = data.y
 						
-						local dx = cx-sx
-						local dy = cy-sy
+						surface.SetDrawColor(color_black)
+						surface.DrawRect(cx - elementsize/2, cy - elementsize/2, elementsize, elementsize)
 						
-						local length = math.sqrt(dx*dx + dy*dy)
-						if length > (elementsize*1.5) then
-							local nx = dx/length
-							local ny = dy/length
+						surface.SetDrawColor(color_nextsignal)
+						surface.DrawOutlinedRect(cx - elementsize/2 + 2, cy - elementsize/2 + 2, elementsize-4, elementsize-4, 2)
+						
+						draw.SimpleText("NEXT","tp3_dispatch_1",cx,cy-6,color_nextsignal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+						draw.SimpleText("SIGNAL","tp3_dispatch_1",cx,cy+6,color_nextsignal, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+						
+						--Arrow from one to the other; cool concept, not really useful
+						--[[
+						if homesigpos and homesigpos.visible and data.visible then
+							local sx = homesigpos.x
+							local sy = homesigpos.y
 							
-							surface.SetDrawColor(color_signal)
+							local dx = cx-sx
+							local dy = cy-sy
 							
-							surface.DrawLine(sx + nx*elementsize*0.75, sy + ny*elementsize*0.75, cx - nx*elementsize*0.75, cy - ny*elementsize*0.75)
+							local length = math.sqrt(dx*dx + dy*dy)
+							if length > (elementsize*1.5) then
+								local nx = dx/length
+								local ny = dy/length
+								
+								surface.SetDrawColor(color_signal)
+								
+								surface.DrawLine(sx + nx*elementsize*0.75, sy + ny*elementsize*0.75, cx - nx*elementsize*0.75, cy - ny*elementsize*0.75)
+								
+							end
 							
 						end
+						]]--
 						
+						break
 					end
-					]]--
-					
-					break
 				end
 			end
 		end
@@ -661,6 +665,7 @@ function PathConfig.Clear()
 	PathConfig.selected_path = nil
 end
 --Receive From Server
+--[[
 net.Receive("tp3_pathpack", function(mlen)
 	print("[Trakpak3] Path Pack Received.")
 	local JSON = net.ReadData(mlen)
@@ -669,3 +674,11 @@ net.Receive("tp3_pathpack", function(mlen)
 	
 	PathConfig.LoadFromServer(false)
 end)
+]]--
+Trakpak3.Net.tp3_pathpack = function(len,ply)
+	print("[Trakpak3] Path Pack Received.")
+
+	PathConfig.MapSignals = net.ReadTable()
+	
+	PathConfig.LoadFromServer(false)
+end

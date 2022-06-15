@@ -66,10 +66,12 @@ if SERVER then
 	end
 	
 	--Update occupancy state of all nodes in my block
-	util.AddNetworkString("tp3_block_hull_update")
+	--util.AddNetworkString("tp3_block_hull_update")
 	
 	function ENT:UpdateNodeList(occupancy)
-		net.Start("tp3_block_hull_update")
+		--net.Start("tp3_block_hull_update")
+		net.Start("trakpak3")
+		net.WriteString("tp3_block_hull_update")
 		net.WriteString(self:GetName())
 		net.WriteBool(occupancy or false)
 		net.Broadcast()

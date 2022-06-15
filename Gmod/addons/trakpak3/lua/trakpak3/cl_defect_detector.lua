@@ -454,6 +454,7 @@ end)
 
 
 --Receive EDD Broadcast from Server
+--[[
 net.Receive("tp3_edd_broadcast", function(length, ply)
 	local font = net.ReadString()
 	local sentence = net.ReadString()
@@ -461,6 +462,13 @@ net.Receive("tp3_edd_broadcast", function(length, ply)
 	Trakpak3.EDD.BroadcastNear(font, sentence)
 	
 end)
+]]--
+Trakpak3.Net.tp3_edd_broadcast = function(len,ply)
+	local font = net.ReadString()
+	local sentence = net.ReadString()
+	
+	Trakpak3.EDD.BroadcastNear(font, sentence)
+end
 
 concommand.Add("tp3_defect_detector_test", function(ply, cmd, args, argStr)
 	local font = args[1]

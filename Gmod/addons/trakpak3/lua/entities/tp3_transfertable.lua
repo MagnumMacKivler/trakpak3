@@ -38,7 +38,7 @@ if SERVER then
 		self:SetLocalVelocity(Vector(0,0,0))
 	end
 	
-	util.AddNetworkString("TP3_TransTable_ControlInfo")
+	--util.AddNetworkString("TP3_TransTable_ControlInfo")
 	
 	function ENT:Initialize()
 		self:ValidateNumerics()
@@ -194,7 +194,9 @@ if SERVER then
 			self.driver = self:TT_Driver()
 			if self.driver and not self.active then
 				self.active = true
-				net.Start("TP3_TransTable_ControlInfo")
+				--net.Start("TP3_TransTable_ControlInfo")
+				net.Start("trakpak3")
+					net.WriteString("tp3_transtable_controlinfo")
 					net.WriteTable({
 						fwd = self.key_fwd,
 						rev = self.key_rev,
@@ -375,6 +377,7 @@ if CLIENT then
 		end
 	end
 	
+	--[[
 	net.Receive("TP3_TransTable_ControlInfo",function()
 		local binds = net.ReadTable()
 		
@@ -389,4 +392,19 @@ if CLIENT then
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end)
+	]]--
+	Trakpak3.Net.tp3_transtable_controlinfo = function(len,ply)
+		local binds = net.ReadTable()
+		
+		local df = getKeyDirection(binds.fwd)
+		local dr = getKeyDirection(binds.rev)
+		
+		local fwd = string.upper(input.LookupBinding(binds.fwd))
+		local rev = string.upper(input.LookupBinding(binds.rev))
+		local stop = string.upper(input.LookupBinding(binds.stop))
+		
+		local message = "Transfer Table Controls:\n"..fwd.." - Move "..df.."\n"..rev.." - Move "..dr.."\n"..stop.." - Manual Stop"
+		
+		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
+	end
 end

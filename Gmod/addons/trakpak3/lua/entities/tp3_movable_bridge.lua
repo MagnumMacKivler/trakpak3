@@ -224,7 +224,9 @@ if SERVER then
 			self.driver = self:TT_Driver()
 			if self.driver and not self.active then
 				self.active = true
-				net.Start("TP3_MoveBridge_ControlInfo")
+				--net.Start("TP3_MoveBridge_ControlInfo")
+				net.Start("trakpak3")
+					net.WriteString("tp3_movebridge_controlinfo")
 					net.WriteTable({
 						open = self.key_open,
 						close = self.key_close,
@@ -580,6 +582,7 @@ if SERVER then
 end
 
 if CLIENT then
+	--[[
 	net.Receive("TP3_MoveBridge_ControlInfo",function()
 		local binds = net.ReadTable()
 		
@@ -590,6 +593,17 @@ if CLIENT then
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end)
+	]]--
+	Trakpak3.Net.tp3_movebridge_controlinfo = function(len,ply)
+		local binds = net.ReadTable()
+		
+		local open = string.upper(input.LookupBinding(binds.open))
+		local close = string.upper(input.LookupBinding(binds.close))
+		
+		local message = "Movable Bridge Controls:\n"..open.." - Open Bridge\n"..close.." - Close Bridge"
+		
+		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
+	end
 	
 	function ENT:Draw(flags)
 		self:DrawModel(flags)

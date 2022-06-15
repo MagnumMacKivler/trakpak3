@@ -30,10 +30,12 @@ hook.Add("InitPostEntity","Trakpak3_MapVehicleAnims",function()
 end)
 
 --Set the local animation function for the player who gets in to the map vehicle
-util.AddNetworkString("Trakpak3_SetMapSeat")
+--util.AddNetworkString("Trakpak3_SetMapSeat")
 hook.Add("PlayerEnteredVehicle","Trakpak3_PlayerInVehicle",function(ply, veh)
 	if veh:CreatedByMap() and Trakpak3.MapVehicleScripts[veh:EntIndex()] then
-		net.Start("Trakpak3_SetMapSeat")
+		--net.Start("Trakpak3_SetMapSeat")
+		net.Start("trakpak3")
+			net.WriteString("trakpak3_setmapseat")
 			net.WriteEntity(veh)
 			net.WriteString(Trakpak3.MapVehicleScripts[veh:EntIndex()])
 		net.Send(ply)

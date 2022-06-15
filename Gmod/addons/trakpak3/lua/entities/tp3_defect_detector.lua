@@ -35,7 +35,7 @@ if SERVER then
 		s_generic4 = "string"
 	}
 	
-	util.AddNetworkString("tp3_edd_broadcast") --Received in cl_defect_detector
+	--util.AddNetworkString("tp3_edd_broadcast") --Received in cl_defect_detector
 	
 	local function StringToAxis(axis)
 		local nums = string.Explode(" ",axis)
@@ -143,7 +143,9 @@ if SERVER then
 						--print("DEFECT")
 						
 						--Broadcast Sentence
-						net.Start("tp3_edd_broadcast")
+						--net.Start("tp3_edd_broadcast")
+						net.Start("trakpak3")
+							net.WriteString("tp3_edd_broadcast")
 							net.WriteString(self.soundfont)
 							net.WriteString(sentence)
 						net.Broadcast()
@@ -168,7 +170,9 @@ if SERVER then
 				sentence = self:SubstituteVars(sentence)
 				
 				--Broadcast Sentence
-				net.Start("tp3_edd_broadcast")
+				--net.Start("tp3_edd_broadcast")
+				net.Start("trakpak3")
+					net.WriteString("tp3_edd_broadcast")
 					net.WriteString(self.soundfont)
 					net.WriteString(sentence)
 				net.Broadcast()
@@ -232,7 +236,9 @@ if SERVER then
 					
 					--Broadcast intro when train first drives over
 					if self.speakintro then
-						net.Start("tp3_edd_broadcast")
+						--net.Start("tp3_edd_broadcast")
+						net.Start("trakpak3")
+							net.WriteString("tp3_edd_broadcast")
 							net.WriteString(self.soundfont)
 							net.WriteString(self.s_intro)
 							net.WriteBool(false)
@@ -303,7 +309,9 @@ if SERVER then
 						--print("DEFECT")
 						
 						--Broadcast Sentence
-						net.Start("tp3_edd_broadcast")
+						--net.Start("tp3_edd_broadcast")
+						net.Start("trakpak3")
+							net.WriteString("tp3_edd_broadcast")
 							net.WriteString(self.soundfont)
 							net.WriteString(sentence)
 						net.Broadcast()

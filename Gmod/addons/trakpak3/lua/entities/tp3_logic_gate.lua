@@ -97,10 +97,12 @@ if SERVER then
 	end
 	
 	--Update occupancy state of this gate's wireframe
-	util.AddNetworkString("tp3_logic_gate_update")
+	--util.AddNetworkString("tp3_logic_gate_update")
 	
 	function ENT:UpdateWireframe(occupancy)
-		net.Start("tp3_logic_gate_update")
+		--net.Start("tp3_logic_gate_update")
+		net.Start("trakpak3")
+		net.WriteString("tp3_logic_gate_update")
 		net.WriteString(self:GetName())
 		net.WriteBool(occupancy or false)
 		net.Broadcast()

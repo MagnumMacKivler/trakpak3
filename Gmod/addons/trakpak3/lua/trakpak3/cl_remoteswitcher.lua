@@ -29,7 +29,9 @@ function RemoteSwitcher.Switch(stand)
 			else
 				LocalPlayer():EmitSound("buttons/button17.wav",nil,nil,0.5)
 			end
-			net.Start("tp3_remoteswitcher")
+			--net.Start("tp3_remoteswitcher")
+			net.Start("trakpak3")
+				net.WriteString("tp3_remoteswitcher")
 				net.WriteEntity(stand)
 			net.SendToServer()
 			

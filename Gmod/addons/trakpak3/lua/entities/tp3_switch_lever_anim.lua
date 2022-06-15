@@ -129,9 +129,10 @@ if SERVER then
 		end
 	end
 	
-	util.AddNetworkString("tp3_request_polyswitches")
+	--util.AddNetworkString("tp3_request_polyswitches")
 	
 	--Receive request for switch assignments from player
+	--[[
 	net.Receive("tp3_request_polyswitches",function(length, ply)
 		local standtable = {}
 		for k, stand in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
@@ -147,6 +148,24 @@ if SERVER then
 		net.WriteTable(standtable)
 		net.Send(ply)
 	end)
+	]]--
+	Trakpak3.Net.tp3_request_polyswitches = function(len,ply)
+		local standtable = {}
+		for k, stand in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
+			if stand.switches and (#stand.switches > 0) then
+				local lintable = {}
+				for l, switch in pairs(stand.switches) do
+					table.insert(lintable, {stand:GetPos(), switch:GetPos()})
+				end
+				standtable[stand:EntIndex()] = lintable
+			end
+		end
+		--net.Start("tp3_request_polyswitches")
+		net.Start("trakpak3")
+		net.WriteString("tp3_request_polyswitches")
+		net.WriteTable(standtable)
+		net.Send(ply)
+	end
 	
 	--Functions called by the switch
 	
@@ -358,7 +377,7 @@ if SERVER then
 		if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
 	end
 	
-	util.AddNetworkString("tp3_switchblocked_notify")
+	--util.AddNetworkString("tp3_switchblocked_notify")
 
 	
 	--On +Use
@@ -372,7 +391,9 @@ if SERVER then
 					data.ent = tostring(self.switch.blocking_ent)
 					data.model = self.switch.blocking_ent:GetModel()
 				end
-				net.Start("tp3_switchblocked_notify")
+				--net.Start("tp3_switchblocked_notify")
+				net.Start("trakpak3")
+				net.WriteString("tp3_switchblocked_notify")
 					net.WriteTable(data)
 				net.Send(ply)
 			elseif not self.animating then
@@ -517,6 +538,7 @@ if SERVER then
 end
 
 if CLIENT then
+	--[[
 	net.Receive("tp3_switchblocked_notify", function()
 		local data = net.ReadTable()
 		if data.ent and data.model then
@@ -525,6 +547,15 @@ if CLIENT then
 			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
 		end
 	end)
+	]]--
+	Trakpak3.Net.tp3_switchblocked_notify = function(len,ply)
+		local data = net.ReadTable()
+		if data.ent and data.model then
+			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked by "..data.ent.." ("..data.model..").")
+		else
+			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
+		end
+	end
 	
 	concommand.Add("tp3_switch_debug",function(ply, cmd, args)
 		--Trakpak3.SwitchDebug = not Trakpak3.SwitchDebug
@@ -544,16 +575,23 @@ if CLIENT then
 			end
 		end
 		if Trakpak3.SwitchDebug then
-			net.Start("tp3_request_polyswitches")
+			--net.Start("tp3_request_polyswitches")
+			net.Start("trakpak3")
+			net.WriteString("tp3_request_polyswitches")
 			net.SendToServer()
 			local regcolor = Color(0,127,255)
 			MsgC(regcolor,"[Trakpak3] Switch Debug Enabled. ",Color(0,255,0),"Green Lines ",regcolor,"indicate monogamous switches (set up correctly). ",Color(255,0,0),"Red Lines ",regcolor,"indicate polygamous switches (will not work, causes the error).")
 		end
 	end)
 	
+	--[[
 	net.Receive("tp3_request_polyswitches",function()
 		Trakpak3.PolySwitchStands = net.ReadTable()
 	end)
+	]]--
+	Trakpak3.Net.tp3_request_polyswitches = function()
+		Trakpak3.PolySwitchStands = net.ReadTable()
+	end
 	
 	hook.Add("PostDrawTranslucentRenderables","Trakpak3_RenderSwitchLinks",function()
 		if Trakpak3.SwitchDebug and Trakpak3.PolySwitchStands then

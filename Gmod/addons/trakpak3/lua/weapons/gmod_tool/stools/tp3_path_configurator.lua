@@ -81,6 +81,7 @@ if CLIENT then
 	--local PathConfig = Trakpak3.PathConfig
 	
 	--Left Click
+	--[[
 	net.Receive("tp3_pc_leftclick", function()
 		local id = net.ReadUInt(32)
 		local use = net.ReadBool()
@@ -114,16 +115,60 @@ if CLIENT then
 			end
 		end
 	end)
+	]]--
+	Trakpak3.Net.tp3_pc_leftclick = function(len,ply)
+		local id = net.ReadUInt(32)
+		local use = net.ReadBool()
+		--print(id)
+		if id!=0 then
+			local ent = Entity(id)
+
+			if ent and ent:IsValid() then
+				if Trakpak3.PathConfig.selected then
+					if use and Trakpak3.PathConfig.selected_path then --Scan for a Block/Gate
+						Trakpak3.PathConfig.SelectBlock()
+					else --Click a physical object
+						if ent:GetClass()=="tp3_signal_master" then --A signal, may or may not be editing a path
+							Trakpak3.PathConfig.SelectSignal(ent)
+							--print(Trakpak3.PathConfig.selected)
+						elseif Trakpak3.PathConfig.selected_path then --Not a signal, but you are editing a path
+							Trakpak3.PathConfig.CycleSwitch(ent)
+						end
+					end
+					
+				else --Nothing is selected, attempt to select a signal
+					Trakpak3.PathConfig.SelectSignal(ent)
+				end
+			end
+		else --Hit World; Search for Blocks in area or Deselect
+			--Trakpak3.PathConfig.DeselectSignal()
+			if Trakpak3.PathConfig.selected and Trakpak3.PathConfig.selected_path then
+				Trakpak3.PathConfig.SelectBlock()
+			elseif Trakpak3.PathConfig.selected then
+				Trakpak3.PathConfig.DeselectSignal()
+			end
+		end
+	end
 	
 	--Right Click
+	--[[
 	net.Receive("tp3_pc_rightclick", function()
 		if Trakpak3.PathConfig.selected then Trakpak3.PathConfig.OpenMenu() end 
 	end)
+	]]--
+	Trakpak3.Net.tp3_pc_rightclick = function(len,ply)
+		if Trakpak3.PathConfig.selected then Trakpak3.PathConfig.OpenMenu() end 
+	end
 	
 	--Reload
+	--[[
 	net.Receive("tp3_pc_reload", function()
 		if Trakpak3.PathConfig.selected then Trakpak3.PathConfig.DeselectSignal() end
 	end)
+	]]--
+	Trakpak3.Net.tp3_pc_reload = function(len,ply)
+		if Trakpak3.PathConfig.selected then Trakpak3.PathConfig.DeselectSignal() end
+	end
 	
 	--Draw HUD Elements
 	function TOOL:DrawHUD()
@@ -279,9 +324,9 @@ end
 
 --Fake hook calling on client since these hooks are predicted
 if SERVER then
-	util.AddNetworkString("tp3_pc_leftclick")
-	util.AddNetworkString("tp3_pc_rightclick")
-	util.AddNetworkString("tp3_pc_reload")
+	--util.AddNetworkString("tp3_pc_leftclick")
+	--util.AddNetworkString("tp3_pc_rightclick")
+	--util.AddNetworkString("tp3_pc_reload")
 	
 	local SP = game.SinglePlayer()
 	
@@ -294,7 +339,9 @@ if SERVER then
 			
 			local k_use = self:GetOwner():KeyDown(IN_USE)
 			
-			net.Start("tp3_pc_leftclick")
+			--net.Start("tp3_pc_leftclick")
+			net.Start("trakpak3")
+			net.WriteString("tp3_pc_leftclick")
 			--net.WriteString(json)
 				net.WriteUInt(id,32)
 				net.WriteBool(k_use)
@@ -308,7 +355,9 @@ if SERVER then
 		if SP then
 			local ply = self:GetOwner()
 			--local json = util.TableToJSON(tr)
-			net.Start("tp3_pc_rightclick")
+			--net.Start("tp3_pc_rightclick")
+			net.Start("trakpak3")
+			net.WriteString("tp3_pc_rightclick")
 			--net.WriteString(json)
 			net.Send(ply)
 			return true
@@ -319,9 +368,11 @@ if SERVER then
 	function TOOL:Reload(tr)
 		if SP then
 			local ply = self:GetOwner()
-			local json = util.TableToJSON(tr)
-			net.Start("tp3_pc_reload")
-			net.WriteString(json)
+			--local json = util.TableToJSON(tr)
+			--net.Start("tp3_pc_reload")
+			--net.WriteString(json)
+			net.Start("trakpak3")
+			net.WriteString("tp3_pc_reload")
 			net.Send(ply)
 			return true
 		else

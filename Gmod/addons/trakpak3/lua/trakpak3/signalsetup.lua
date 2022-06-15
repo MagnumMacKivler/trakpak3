@@ -71,6 +71,7 @@ hook.Add("InitPostEntity","Trakpak3_SystemSetup",function()
 end)
 
 --Signal System Packing
+--[[
 util.AddNetworkString("Trakpak3_GetSignalSystems")
 net.Receive("Trakpak3_GetSignalSystems",function(length, ply) --Received from cl_signalvision.lua
 	--print("Received Request for Signal Systems")
@@ -84,3 +85,13 @@ net.Receive("Trakpak3_GetSignalSystems",function(length, ply) --Received from cl
 		end
 	end
 end)
+]]--
+Trakpak3.Net.trakpak3_getsignalsystems = function(len,ply) --Received from cl_signalvision.lua
+	if TP3Signals and TP3Signals.systems then
+		net.Start("trakpak3")
+			net.WriteString("trakpak3_getsignalsystems")
+			local json = util.TableToJSON(TP3Signals.systems)
+			net.WriteString(json)
+		net.Send(ply)
+	end
+end

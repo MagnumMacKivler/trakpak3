@@ -62,26 +62,37 @@ end)
 
 --Receive DS Board request from client
 --Send Dispatch Board data to Client
-util.AddNetworkString("tp3_transmit_ds")
-util.AddNetworkString("tp3_transmit_dsdata")
-
+--util.AddNetworkString("tp3_transmit_ds")
+--util.AddNetworkString("tp3_transmit_dsdata")
+--[[
 net.Receive("tp3_transmit_ds",function(len, ply)
 	print("[Trakpak3] Received dispatch board data request.")
 	Trakpak3.Dispatch.SendDSData(ply)
 end)
+]]--
+Trakpak3.Net.tp3_transmit_ds = function(len,ply)
+	print("[Trakpak3] Received dispatch board data request.")
+	Trakpak3.Dispatch.SendDSData(ply)
+end
 
 function Trakpak3.Dispatch.SendDSData(ply)
 	if Trakpak3.Dispatch.Loaded then
-		local JSON = util.TableToJSON(Trakpak3.Dispatch.InitData)
-		JSON = util.Compress(JSON)
-		net.Start("tp3_transmit_dsdata")
-		net.WriteData(JSON,#JSON)
+		--local JSON = util.TableToJSON(Trakpak3.Dispatch.InitData)
+		--JSON = util.Compress(JSON)
+		--net.Start("tp3_transmit_dsdata")
+		net.Start("trakpak3")
+		net.WriteString("tp3_transmit_dsdata")
+		--net.WriteData(JSON,#JSON)
+		net.WriteTable(Trakpak3.Dispatch.InitData)
 		net.Send(ply)
 		
-		local JSON = util.TableToJSON(Trakpak3.Dispatch.MapBoards)
-		JSON = util.Compress(JSON)
-		net.Start("tp3_transmit_ds")
-		net.WriteData(JSON,#JSON)
+		--local JSON = util.TableToJSON(Trakpak3.Dispatch.MapBoards)
+		--JSON = util.Compress(JSON)
+		--net.Start("tp3_transmit_ds")
+		net.Start("trakpak3")
+		--net.WriteData(JSON,#JSON)
+		net.WriteString("tp3_transmit_ds")
+		net.WriteTable(Trakpak3.Dispatch.MapBoards)
 		net.Send(ply)
 	elseif not Trakpak3.Dispatch.Attempted then --Didn't succeed or fail yet, wait 1 second and try again
 		timer.Simple(1,function() Trakpak3.Dispatch.SendDSData(ply) end)
@@ -90,7 +101,7 @@ end
 
 
 
-util.AddNetworkString("tp3_dispatch_comm")
+--util.AddNetworkString("tp3_dispatch_comm")
 --Send Parameter to Clients
 function Trakpak3.Dispatch.SendInfo(entname, parm, value, dtype)
 	if Trakpak3.Dispatch.Loaded and entname and (entname!="") then
@@ -98,7 +109,9 @@ function Trakpak3.Dispatch.SendInfo(entname, parm, value, dtype)
 		if not dtype then dtype = "int" end
 		
 		Trakpak3.Dispatch.InitData[entname][parm] = value
-		net.Start("tp3_dispatch_comm")
+		--net.Start("tp3_dispatch_comm")
+		net.Start("trakpak3")
+			net.WriteString("tp3_dispatch_comm")
 			net.WriteString(entname)
 			net.WriteString(parm)
 			net.WriteString(dtype)
@@ -115,6 +128,7 @@ end
 Trakpak3.Dispatch.CommandLog = {}
 
 --Receive Command from a DS board
+--[[
 net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	
 	local entname = net.ReadString()
@@ -129,9 +143,19 @@ net.Receive("tp3_dispatch_comm", function(mlen, ply)
 	
 	hook.Run("TP3_Dispatch_Command", entname, cmd, arg)
 end)
+]]--
+Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
+	local entname = net.ReadString()
+	local cmd = net.ReadString()
+	local arg = net.ReadUInt(3)
+	local tt = string.FormattedTime(CurTime()) --time table
+	table.insert(Trakpak3.Dispatch.CommandLog, "[" .. tt.h .. "h:" .. tt.m .."m:" .. tt.s .. "s] " .. ply:GetName() .. " ENT " .. entname .. " CMD " .. cmd .. " ARG " .. arg)
+	hook.Run("TP3_Dispatch_Command", entname, cmd, arg)
+end
 
 --Teleport Player to Element
-util.AddNetworkString("tp3_dispatch_teleport")
+--util.AddNetworkString("tp3_dispatch_teleport")
+--[[
 net.Receive("tp3_dispatch_teleport",function(length,ply)
 	local pos = net.ReadVector()
 	ply:SetPos(pos + Vector(0,0,64))
@@ -140,6 +164,15 @@ net.Receive("tp3_dispatch_teleport",function(length,ply)
 		ply:SetMoveType(MOVETYPE_NOCLIP)
 	end
 end)
+]]--
+Trakpak3.Net.tp3_dispatch_teleport = function(len,ply)
+	local pos = net.ReadVector()
+	ply:SetPos(pos + Vector(0,0,64))
+	if ply:GetMoveType()==MOVETYPE_WALK then
+		--ply:ConCommand("noclip")
+		ply:SetMoveType(MOVETYPE_NOCLIP)
+	end
+end
 
 concommand.Add("tp3_dispatch_printlog", function(ply, cmd, args)
 

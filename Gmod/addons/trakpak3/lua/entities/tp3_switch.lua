@@ -554,7 +554,7 @@ if SERVER then
 		if Trakpak3.SwitchMaxIndex then
 			local val = tonumber(new)
 			local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/val)*engine.TickInterval(),2)
-			print("\nSwitch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
+			print("\n[Trakpak3] Switch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
 		end
 	end)
 
@@ -578,9 +578,9 @@ if SERVER then
 
 				local convar = GetConVar("tp3_switch_scanrate")
 				local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/(convar:GetInt() or 5))*engine.TickInterval(),2)
-				print("\nSwitch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." switches.\n")
+				print("\n[Trakpak3] Switch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." non-dumb switches.\n")
 			else
-				print("\nMap has no switches.\n")
+				print("\n[Trakpak3] Map has no non-dumb switches.\n")
 			end
 		end
 	end)

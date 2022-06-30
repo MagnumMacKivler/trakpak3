@@ -78,6 +78,13 @@ if CLIENT then
 		if func then func(len,ply) end
 	end)
 	
+	--Fix EyePos, EyeAngles, and EyeVector functions
+	hook.Add("PreDrawTranslucentRenderables", "Trakpak3_FixEyeFunctions", function()
+		EyePos()
+		EyeVector()
+		EyeAngles()
+	end)
+	
 	--[[
 	concommand.Add("+tp3_test", function()
 		print("Button Down!")

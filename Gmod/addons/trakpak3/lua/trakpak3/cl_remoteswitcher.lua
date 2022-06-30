@@ -43,6 +43,7 @@ CreateClientConVar("tp3_remote_switcher_angle", "5", true, false, "Search Cone A
 
 --Enable/Disable Functions
 function RemoteSwitcher.Enable(forcenumber)
+	--print("Remote Switcher Enable")
 	RemoteSwitcher.Active = true
 	RemoteSwitcher.fadetime = nil
 	if LocalPlayer():KeyDown(IN_SPEED) or forcenumber then --Setup numbers mode if player is holding shift, or if they do a "1" in the console command
@@ -80,6 +81,7 @@ function RemoteSwitcher.Enable(forcenumber)
 	else
 		RemoteSwitcher.Stands = ents.FindByClass("tp3_switch_lever_anim")
 		RemoteSwitcher.NumberMode = false
+		--print("Switches: "..#RemoteSwitcher.Stands)
 	end
 	
 	
@@ -212,9 +214,7 @@ end
 --Rendering Code
 
 hook.Add("DrawOverlay","Trakpak3_RemoteSwitcher",function()
-	
 	if RemoteSwitcher.Active and RemoteSwitcher.Stands and not table.IsEmpty(RemoteSwitcher.Stands) then
-		
 		RemoteSwitcher.selected = nil
 		local others = {} --actually used for all stands
 		local distances = {}
@@ -240,7 +240,7 @@ hook.Add("DrawOverlay","Trakpak3_RemoteSwitcher",function()
 				table.insert(indices,k)
 			end
 		end
-		
+		--print(RemoteSwitcher.selected)
 		
 		if not RemoteSwitcher.NumberMode then --"SIGNALVISION" MODE
 			--Draw all the stands

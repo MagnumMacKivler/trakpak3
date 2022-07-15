@@ -2351,7 +2351,10 @@ Trakpak3.SigEdit.dictionary2 = {
 	
 	["FORCE"] = "2",
 	["ALLOW"] = "1",
-	["HOLD"] = "0"
+	["HOLD"] = "0",
+	
+	["=/="] = "!=",
+	["or"] = ") or ("
 }
 
 function Trakpak3.SigEdit.WriteConditionText(ntable)
@@ -2361,9 +2364,9 @@ function Trakpak3.SigEdit.WriteConditionText(ntable)
 	
 	for n=1,#cond_ary do
 		local term = cond_ary[n]
-		if term=="or" then
-			term = ") or ("
-		end
+		--if term=="or" then
+		--	term = ") or ("
+		--end
 		local term = Trakpak3.SigEdit.dictionary2[term] or term
 		
 		out = out.." "..term

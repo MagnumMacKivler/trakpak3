@@ -20,6 +20,9 @@ if SERVER then
 		maxspeed = "number",
 		acceleration = "number",
 		
+		["deck_*"] = "entity",
+		["cosmetic_*"] = "entity",
+		
 		deck1 = "entity",
 		deck2 = "entity",
 		deck3 = "entity",
@@ -108,8 +111,30 @@ if SERVER then
 			self.enumc = IN_MOVERIGHT
 		end
 		
-		--Deck
+		--Register the Static Decks
+		if self.pkvs then
+			
+			self.sdeck_ents = {}
+			self.cosmetics = {}
+			for key, targetname in pairs(self.pkvs) do
+				
+				if string.Left(key,9)=="cosmetic_" then --It's a cosmetic prop (can be anything)
+					table.insert(self.cosmetics, targetname) --note: stores a list of targetnames, not entities.
+				elseif string.Left(key,5)=="deck_" then --It's a deck prop (must be prop_dynamic)
+				
+					local ent, valid = Trakpak3.FindByTargetname(targetname)
+					if valid and (ent:GetClass()=="prop_dynamic") then
+						table.insert(self.sdeck_ents, ent)
+					end
+				end
+			end
+		end
 		
+		--Store Attachment Data for Leaf
+		
+		self.leafid = self:LookupAttachment("leaf1")
+		
+		--[[
 		for n=1,4 do
 			local dkey = "deck"..n
 			self:RegisterEntity(dkey,self[dkey])
@@ -136,6 +161,7 @@ if SERVER then
 				ErrorNoHalt("[Trakpak3] Movable Bridge "..self.model.." with invalid attachment name (needs 'leaf1', 'leaf2', 'leaf3', or 'leaf4')!")
 			end
 		end
+		]]--
 		
 		--Wire I/O
 		if WireLib then
@@ -189,11 +215,13 @@ if SERVER then
 		end
 	end
 	
-	--Control solidity of track
+	--Control solidity of static tracks
 	function ENT:SetTrackPhysics(solid)
 		self:SetNotSolid(not solid)
-		for n=1,4 do
-			if self["deck"..n.."_valid"] then self["deck"..n.."_ent"]:SetNotSolid(not solid) end
+		if self.sdeck_ents then
+			for k, sdeck in ipairs(self.sdeck_ents) do
+				sdeck:SetNotSolid(not solid)
+			end
 		end
 	end
 	
@@ -214,6 +242,60 @@ if SERVER then
 	
 	--Handle Throttle, acceleration, movement
 	function ENT:Think()
+		
+		--InitPostEntity
+		if not self.initfired and Trakpak3.InitPostEntity then
+			--Fire Initialization Hammer Output
+			self.initfired = true
+			self:TriggerOutput("OnInitialize",self)
+			
+			--Spawn Dynamic (visible) Decks. Bridge creates the illusion of moving deck props by hiding the originals in place (for seamless physics) and creating nonphysical duplicates which are parented to attachment point 'leaf1'.
+			if self.sdeck_ents and self.leafid then
+				for k, sdeck in ipairs(self.sdeck_ents) do
+					sdeck:SetNoDraw(true) --Make the static model invisible
+					local model = sdeck:GetModel()
+					if model and model != "" then --Check just in case the mapper forgot to set one
+						local pos = sdeck:GetPos()
+						local ang = sdeck:GetAngles()
+						local skin = sdeck:GetSkin()
+						
+						local ddeck = ents.Create("prop_dynamic")
+						--print("\nBridge Created entity:",ddeck)
+						ddeck:SetModel(model)
+						ddeck:SetPos(pos)
+						ddeck:SetAngles(ang)
+						ddeck:SetSkin(skin)
+						ddeck:Spawn()
+						ddeck:PhysicsInit(SOLID_NONE)
+						ddeck:SetKeyValue("gmod_allowphysgun", "0")
+						
+						--Hammer-based Parenting
+						ddeck:Fire("SetParent", "!activator", 0, self, self)
+						ddeck:Fire("SetParentAttachmentMaintainOffset", "leaf1", 0.5, self, self)
+						
+						
+					end
+				end
+
+			end
+			
+			--Configure & Parent cosmetic props. These are like the nonphysical duplicate deck models but using existing prop_dynamics.
+			if self.cosmetics and self.leafid then
+				for k, targetname in ipairs(self.cosmetics) do
+					for _, cosmetic in ipairs(ents.FindByName(targetname)) do
+						if cosmetic:IsValid() then
+							cosmetic:PhysicsInit(SOLID_NONE)
+							cosmetic:SetKeyValue("gmod_allowphysgun", "0")
+							
+							--Hammer-based Parenting
+							cosmetic:Fire("SetParent", "!activator", 0, self, self)
+							cosmetic:Fire("SetParentAttachmentMaintainOffset", "leaf1", 0.5, self, self)
+						end
+					end					
+				end
+			end
+			
+		end
 		
 		local ct = CurTime()
 		if (not self.synctime) or (self.synctime and (ct>self.synctime)) then
@@ -276,7 +358,7 @@ if SERVER then
 							end
 						end
 					else
-						--Play a locked sound if you try to drive the turntable while it's locked
+						--Play a locked sound if you try to drive the bridge while it's locked
 						
 						if (move_fwd or move_rev) and not self.lockq then
 							self.lockq = true
@@ -493,12 +575,6 @@ if SERVER then
 			end
 		end
 		
-		--Fire Init thing
-		if not self.initfired and Trakpak3.InitPostEntity then
-			self.initfired = true
-			self:TriggerOutput("OnInitialize",self)
-		end
-		
 		--do the gofast
 		self:NextThink(CurTime())
 		return true
@@ -605,6 +681,7 @@ if CLIENT then
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end
 	
+	--[[
 	function ENT:Draw(flags)
 		self:DrawModel(flags)
 		for n=1,4 do
@@ -650,6 +727,7 @@ if CLIENT then
 			end
 		end
 	end
+	]]--
 	
 	--[[
 	concommand.Add("printang",function()

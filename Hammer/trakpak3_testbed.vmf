@@ -1,8 +1,8 @@
 versioninfo
 {
 	"editorversion" "400"
-	"editorbuild" "9169"
-	"mapversion" "357"
+	"editorbuild" "9349"
+	"mapversion" "362"
 	"formatversion" "100"
 	"prefab" "0"
 }
@@ -32,6 +32,12 @@ visgroups
 		"visgroupid" "15"
 		"color" "92 189 130"
 	}
+	visgroup
+	{
+		"name" "Diagonal Test Bascule"
+		"visgroupid" "18"
+		"color" "82 107 104"
+	}
 }
 viewsettings
 {
@@ -44,7 +50,7 @@ viewsettings
 world
 {
 	"id" "1"
-	"mapversion" "357"
+	"mapversion" "362"
 	"classname" "worldspawn"
 	"detailmaterial" "detail/detailsprites"
 	"detailvbsp" "detail.vbsp"
@@ -13603,7 +13609,7 @@ entity
 	"acceleration" "0.025"
 	"angles" "0 90 0"
 	"bodygroups" "2"
-	"deck1" "bridge_deck"
+	"deck_1" "bridge_deck"
 	"exitpoint" "-1536 1024 384"
 	"key_close" "+back"
 	"key_open" "+forward"
@@ -17571,7 +17577,7 @@ entity
 	"acceleration" "0.025"
 	"angles" "0 90 0"
 	"bodygroups" "1"
-	"deck1" "strauss_bridge_deck"
+	"deck_1" "strauss_bridge_deck"
 	"exitpoint" "-1480 -3928 806"
 	"key_close" "+back"
 	"key_open" "+forward"
@@ -20117,6 +20123,259 @@ entity
 		"visgroupshown" "1"
 		"visgroupautoshown" "1"
 		"logicalpos" "[0 1000]"
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34180"
+		"classname" "tp3_movable_bridge"
+		"acceleration" "0.025"
+		"angles" "0 225 0"
+		"bodygroups" "2"
+		"cosmetic_1" "bridge_deck_2_guards"
+		"cosmetic_2" "bridge_2_signal"
+		"deck_1" "bridge_deck_2"
+		"exitpoint" "4484.51 78.5 440"
+		"key_close" "+back"
+		"key_open" "+forward"
+		"maxcycle" "0.5"
+		"maxspeed" "0.025"
+		"model" "models/trakpak3_rsg/spl/bridges/rolling/bascule_rolling_single_leaf.mdl"
+		"nowire" "0"
+		"phystoggle" "1"
+		"pod" "bridge_seat_2"
+		"skin" "2"
+		"sound_crank_start" "buttons/lever1.wav"
+		"sound_crank_stop" "doors/handle_pushbar_locked1.wav"
+		"sound_start" "vehicles/crane/crane_extend_loop1.wav"
+		"sound_stop" "vehicles/crane/crane_extend_stop.wav"
+		"targetname" "bridge_2"
+		connections
+		{
+			"OnFullyClosed" "bridge_2_signal,SetBodygroups,0 6,0,-1"
+			"OnBridgeStarted" "bridge_2_signal,SetBodygroups,1 0,0,-1"
+		}
+		"origin" "4549.57 13.4434 384"
+		editor
+		{
+			"color" "220 30 220"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 1000]"
+		}
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34183"
+		"classname" "prop_static"
+		"angles" "0 225 0"
+		"disableselfshadowing" "0"
+		"disableshadows" "1"
+		"disablevertexlighting" "0"
+		"fademaxdist" "0"
+		"fademindist" "-1"
+		"fadescale" "1"
+		"ignorenormals" "0"
+		"maxdxlevel" "0"
+		"mindxlevel" "0"
+		"model" "models/trakpak3_rsg/spl/bridges/rolling/bascule_rolling_single_base.mdl"
+		"screenspacefade" "0"
+		"skin" "2"
+		"solid" "6"
+		"origin" "4549.57 13.4434 384"
+		editor
+		{
+			"color" "255 255 0"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 1000]"
+		}
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34214"
+		"classname" "prop_vehicle_prisoner_pod"
+		"actionScale" "1"
+		"angles" "0 342 0"
+		"fademindist" "-1"
+		"fadescale" "1"
+		"gmod_allowphysgun" "1"
+		"model" "models/nova/airboat_seat.mdl"
+		"origin" "5080 160 576"
+		"parentname" "bridge_static"
+		"skin" "0"
+		"solid" "6"
+		"targetname" "bridge_seat_2"
+		"VehicleLocked" "0"
+		"vehiclescript" "scripts/vehicles/prisoner_pod.txt"
+		editor
+		{
+			"color" "220 30 220"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 6000]"
+		}
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34241"
+		"classname" "prop_dynamic"
+		"angles" "0 225 0"
+		"DisableBoneFollowers" "0"
+		"disablereceiveshadows" "0"
+		"disableshadows" "1"
+		"ExplodeDamage" "0"
+		"ExplodeRadius" "0"
+		"fademaxdist" "0"
+		"fademindist" "-1"
+		"fadescale" "1"
+		"gmod_allowphysgun" "1"
+		"HoldAnimation" "0"
+		"MaxAnimTime" "10"
+		"maxdxlevel" "0"
+		"MinAnimTime" "5"
+		"mindxlevel" "0"
+		"model" "models/trakpak3_rsg_bridge/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
+		"modelscale" "1.0"
+		"PerformanceMode" "0"
+		"pressuredelay" "0"
+		"RandomAnimation" "0"
+		"renderamt" "255"
+		"rendercolor" "255 255 255"
+		"renderfx" "0"
+		"rendermode" "0"
+		"SetBodyGroup" "0"
+		"skin" "2"
+		"solid" "6"
+		"spawnflags" "0"
+		"StartDisabled" "0"
+		"targetname" "bridge_deck_2"
+		"origin" "4905.95 369.825 384"
+		editor
+		{
+			"color" "220 30 220"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 1000]"
+		}
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34249"
+		"classname" "prop_static"
+		"angles" "0 225 0"
+		"disableselfshadowing" "0"
+		"disableshadows" "1"
+		"disablevertexlighting" "0"
+		"fademaxdist" "0"
+		"fademindist" "-1"
+		"fadescale" "1"
+		"ignorenormals" "0"
+		"maxdxlevel" "0"
+		"mindxlevel" "0"
+		"model" "models/trakpak3_rsg_bridge/straights/s2048_0fw_0pg_+2048x00000x0000.mdl"
+		"screenspacefade" "0"
+		"skin" "2"
+		"solid" "6"
+		"origin" "3457.8 -1078.33 384"
+		editor
+		{
+			"color" "255 255 0"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 1000]"
+		}
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34285"
+		"classname" "prop_dynamic"
+		"angles" "0 225 0"
+		"DisableBoneFollowers" "0"
+		"disablereceiveshadows" "0"
+		"disableshadows" "1"
+		"ExplodeDamage" "0"
+		"ExplodeRadius" "0"
+		"fademaxdist" "0"
+		"fademindist" "-1"
+		"fadescale" "1"
+		"gmod_allowphysgun" "1"
+		"HoldAnimation" "0"
+		"MaxAnimTime" "10"
+		"maxdxlevel" "0"
+		"MinAnimTime" "5"
+		"mindxlevel" "0"
+		"model" "models/trakpak3_rsg_guard/straights/s1024_0fw_0pg_+1024x00000x0000.mdl"
+		"modelscale" "1.0"
+		"PerformanceMode" "0"
+		"pressuredelay" "0"
+		"RandomAnimation" "0"
+		"renderamt" "255"
+		"rendercolor" "255 255 255"
+		"renderfx" "0"
+		"rendermode" "0"
+		"SetBodyGroup" "0"
+		"skin" "0"
+		"solid" "6"
+		"spawnflags" "0"
+		"StartDisabled" "0"
+		"targetname" "bridge_deck_2_guards"
+		"origin" "4905.95 369.825 384"
+		editor
+		{
+			"color" "220 30 220"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 1000]"
+		}
+	}
+}
+hidden
+{
+	entity
+	{
+		"id" "34930"
+		"classname" "tp3_signal_slave"
+		"angles" "0 225 0"
+		"bodygroups" "1 0"
+		"dn_powered" "2"
+		"gmod_allowtools" "wire_adv wire_debugger"
+		"model" "models/trakpak3_us/signals/colorlight/dwarf_rx.mdl"
+		"skin" "0"
+		"targetname" "bridge_2_signal"
+		"up_powered" "0"
+		"origin" "5672 1008 448"
+		editor
+		{
+			"color" "220 30 220"
+			"visgroupid" "18"
+			"visgroupshown" "0"
+			"visgroupautoshown" "1"
+			"logicalpos" "[0 0]"
+		}
 	}
 }
 cameras

@@ -192,8 +192,8 @@
 	input Lock(void) : "Lock the turntable, preventing it from moving this should be required before moving a train on or off!"
 	input Unlock(void) : "Unlock the turntable, allowing it to move again."
 	
-	input AddPusher(void) : "Add the !activator to the table's pusher list."
-	input RemovePusher(void) : "Remove the !activator from the table's pusher list."
+	input AddPusher(void) : "Add the !activator to the table's pusher list. This input should be fired by a trigger_multiple OnStartTouch."
+	input RemovePusher(void) : "Remove the !activator from the table's pusher list. This input should be fired by a trigger_multiple OnEndTouch."
 	
 ]
 
@@ -240,7 +240,7 @@
 ]
 
 //Movable Bridge
-@PointClass base(Targetname, Angles) studioprop() = tp3_movable_bridge : "A movable bridge (bascule, swing, lift, etc.) that uses a model's animations, rather than a func_door_rotating or something to that effect."
+@PointClass base(Targetname, Angles) studioprop() = tp3_movable_bridge : "A movable bridge (bascule, swing, lift, etc.) that uses a model's animations, rather than a func_door_rotating or something to that effect. Supports powered and hand-cranked operation. In order to work, the model must be animated and it must have an attachment point 'leaf1' on the moving part of the bridge."
 [
 	model(studio) : "Model" : "" : "The model path for the animated part of the bridge."
 	skin(integer) : "Skin" : 0 : "The skin for the bridge model."
@@ -249,14 +249,19 @@
 	pod(target_destination) : "Control Seat" : : "A prop_vehicle_prisoner_pod used for controlling the bridge."
 	exitpoint(origin) : "Seat Exit Point" : : "Teleport the player here when they get out of the seat."
 	
-	deck1(target_destination) : "Deck Rails (1/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
-	deck2(target_destination) : "Deck Rails (2/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
-	deck3(target_destination) : "Deck Rails (3/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
-	deck4(target_destination) : "Deck Rails (4/4)" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (via the attachment point 'leaf')."
+	deck_1(target_destination) : "Deck Rails 1" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics matters when the bridge is closed. Extra keyvalues can be added as 'deck_5', 'deck_6' etc."
+	deck_2(target_destination) : "Deck Rails 2" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics matters when the bridge is closed. Extra keyvalues can be added as 'deck_5', 'deck_6' etc."
+	deck_3(target_destination) : "Deck Rails 3" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics matters when the bridge is closed. Extra keyvalues can be added as 'deck_5', 'deck_6' etc."
+	deck_4(target_destination) : "Deck Rails 4" : : "A prop_dynamic piece of track that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics matters when the bridge is closed. Extra keyvalues can be added as 'deck_5', 'deck_6' etc."
+	
+	cosmetic_1(target_destination) : "Cosmetic Prop 1" : : "An entity (can be anything) that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics DOES NOT matter. Extra keyvalues can be added as 'cosmetic_5', 'cosmetic_6' etc. NOTE: this CAN target multiple entities with the same name."
+	cosmetic_2(target_destination) : "Cosmetic Prop 2" : : "An entity (can be anything) that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics DOES NOT matter. Extra keyvalues can be added as 'cosmetic_5', 'cosmetic_6' etc. NOTE: this CAN target multiple entities with the same name."
+	cosmetic_3(target_destination) : "Cosmetic Prop 3" : : "An entity (can be anything) that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics DOES NOT matter. Extra keyvalues can be added as 'cosmetic_5', 'cosmetic_6' etc. NOTE: this CAN target multiple entities with the same name."
+	cosmetic_4(target_destination) : "Cosmetic Prop 4" : : "An entity (can be anything) that will be automatically parented to the bridge's leaf (attachment 'leaf1'). Use this for props where the physics DOES NOT matter. Extra keyvalues can be added as 'cosmetic_5', 'cosmetic_6' etc. NOTE: this CAN target multiple entities with the same name."
 	
 	maxcycle(float) : "Max Animation Cycle" : "1.0" : "The highest point in the model's animation cycle (for the sequence named 'range'). This is a decimal between 0 and 1 that represents the progress along the animation path; '0' means the start, '1' means the end, '0.5' is halfway through, etc. The minimum cycle is always 0."
-	maxspeed(float) : "Max Speed" : "0.1" : "Max animation speed, in animation cycle per second."
-	acceleration(float) : "Acceleration Factor" : "0.25" : "Acceleration/Deceleration rate in cycle per second per second. You probably don't need to change this."
+	maxspeed(float) : "Max Speed" : "0.025" : "Max animation speed, in animation cycle per second."
+	acceleration(float) : "Acceleration Factor" : "0.025" : "Acceleration/Deceleration rate in cycle per second per second. You probably don't need to change this."
 	
 	key_open(choices) : "Open Bridge Key" : "+forward" : "Key that the operator should press to move the bridge open. Respects local keybinds - WASD given for refence only." =
 	[
@@ -275,8 +280,8 @@
 	
 	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the bridge makes when it starts to move under power."
 	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the bridge makes when it comes to a complete stop under power."
-	sound_crank_start(sound) : "Start Crank Sound" : : "The sound the bridge makes when it starts to move from cranking."
-	sound_crank_stop(sound) : "Stop Crank Sound" : : "The sound the bridge makes when it comes to a complete stop from cranking."
+	sound_crank_start(sound) : "Start Crank Sound" : "buttons/lever1.wav" : "The sound the bridge makes when it starts to move from cranking."
+	sound_crank_stop(sound) : "Stop Crank Sound" : "buttons/lever1.wav" : "The sound the bridge makes when it comes to a complete stop from cranking."
 	
 	phystoggle(choices) : "Disable Physics when Unlocked/Open" : 1 : "Make this bridge non-solid when the bridge is open or unlocked, allowing trains to fall through if the proper precautions are not taken." =
 	[
@@ -300,8 +305,8 @@
 	input Open(float) : "Make the bridge move automatically to the fully open position (max animation cycle)."
 	input Close(float) : "Make the bridge move automatically to the fully closed position (min animation cycle)."
 	
-	input AddPusher(void) : "Add the !activator to the bridge's pusher list."
-	input RemovePusher(void) : "Remove the !activator from the bridge's pusher list."
+	input AddPusher(void) : "Add the !activator to the table's pusher list. This input should be fired by a trigger_multiple OnStartTouch."
+	input RemovePusher(void) : "Remove the !activator from the table's pusher list. This input should be fired by a trigger_multiple OnEndTouch."
 	
 	output OnFullyClosed(void) : "Fired when the bridge reaches minimum animation cycle (fully closed)."
 	output OnFullyOpen(void) : "Fired when the bridge reaches maximum animation cycle (fully open)."
@@ -311,7 +316,7 @@
 	output OnBecomeSafe(void) : "Fired when the bridge becomes safe for trains (locked and fully closed)."
 	output OnBecomeUnsafe(void) : "Fired when the bridge becomes unsafe for trains (unlocked or open)."
 	
-	output OnInitialize(void) : "Fired when the map finishes loading. Useful for parenting things to the bascule bridge leaf via SetParentAttachmentMaintainOffset."
+	output OnInitialize(void) : "Fired when the map finishes loading. Useful for parenting things to the bascule bridge leaf via SetParent followed by SetParentAttachmentMaintainOffset (Note: the 'Cosmetic Prop' keyvalues can be used to automate this!)."
 ]
 
 //Signal Block
@@ -672,10 +677,10 @@
 	skin2(integer) : "Skin (Closed)" : 1 : "The gate model's skin when the lights are on."
 	bodygroups(string) : "Bodygroups (Open)" : "" : "The gate model's bodygroups when the gate is open. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	bodygroups2(string) : "Bodygroups (Closed)" : "" : "The gate model's bodygroups when the gate is closed. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1. If blank, bodygroups will not be changed."
-	anim_trans(string) : "Transition Anim (Open)" : "up" : "The gate's transition-to-open animation (sequence). If blank, model will not be animated."
-	anim_trans2(string) : "Transition Anim (Closed)" : "down" : "The gate's transition-to-closed animation (sequence). If blank, model will not be animated."
-	anim_idle(string) : "Idle Anim (Open)" : "idle_up" : "The gate's default animation (sequence) when open. If blank, model will not be animated."
-	anim_idle2(string) : "Idle Anim (Closed)" : "idle_down" : "The gate's default animation (sequence) when down. If blank, model will not be animated."
+	anim_trans(string) : "Transition Anim (Open)" : "open" : "The gate's transition-to-open animation (sequence). If blank, model will not be animated."
+	anim_trans2(string) : "Transition Anim (Closed)" : "close" : "The gate's transition-to-closed animation (sequence). If blank, model will not be animated."
+	anim_idle(string) : "Idle Anim (Open)" : "idle_open" : "The gate's default animation (sequence) when open. If blank, model will not be animated."
+	anim_idle2(string) : "Idle Anim (Closed)" : "idle_close" : "The gate's default animation (sequence) when down. If blank, model will not be animated."
 	
 	bellsound(sound) : "Bell Sound" : "" : "The sound to play and loop when the gates start to close."
 	bellmode(choices) : "Bell Mode" : 2 : "When should the bell stop ringing?" =

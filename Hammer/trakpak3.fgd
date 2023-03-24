@@ -62,7 +62,7 @@
 		1 : "Diverging/Reverse"
 	]
 	
-	behavior(choices) : "Trailing Switch Behavior" : -1 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
+	behavior(choices) : "Trailing Switch Behavior" : 0 : "How should the switch stand behave when a train tries to trail (run against) it? Your choices are: Manual, Derail: Does nothing as a train attempts to trail it, thus derailing the train. Manual, Break: The blades (points) will be forced into the correct position by the train, but the switch stand will break and be unusable for a brief period of time. Safety Throw: The switch will throw completely when trailed. Spring Switch: The switch will throw partially when trailed, then reset into the position it was in before the train trailed it." =
 	[
 		//-1 : "Dumb"
 		0 : "Manual, Derail"
@@ -71,7 +71,7 @@
 		3 : "Spring Switch"
 	]
 	
-	autoscan(choices) : "Switch Auto-Scan" : 0 : "If No, switch occupancy must be provided by an external trigger. If Yes, switch occupancy will be automatically calculated (may cause lag when used a lot)." =
+	autoscan(choices) : "Switch Auto-Scan" : 0 : "If No, switch occupancy must be provided by an external trigger; if no trigger is supplied, the switch is 'dumb'. If Yes, switch occupancy will be automatically calculated (may cause lag when used a lot)." =
 	[
 		0 : "No (Manual)"
 		1 : "Yes (Automatic)"

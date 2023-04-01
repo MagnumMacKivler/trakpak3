@@ -25,8 +25,6 @@ if SERVER then
 		OnTestedOccupied = "output",
 		OnTestedClear = "output"
 	}
-
-	util.AddNetworkString("tp3_showhulls")
 	
 	function ENT:Initialize()
 		

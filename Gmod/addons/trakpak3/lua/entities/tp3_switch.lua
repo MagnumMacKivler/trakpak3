@@ -26,18 +26,84 @@ if SERVER then
 
 	function ENT:Initialize()
 		self:ValidateNumerics()
-
-		--Auto-calculate DV if needed
 		local invalid = false
-		if not self.model_div or (self.model_div=="") then
-			if string.find(self.model,"_mn.mdl") then
-				self.model_div = string.Replace(self.model,"_mn.mdl","_dv.mdl")
-			elseif string.find(self.model,"_dv.mdl") then
-				self.model_div = string.Replace(self.model,"_dv.mdl","_mn.mdl")
+		
+		--Figure out if it's a slip
+		if string.find(self.model, "slips") then
+			self.slip = true
+			
+			--Simplify the model in case they picked one of the specialized ones, and store the four model options
+			--Assume the paired switch is the same model for goodness' sake
+			if string.find(self.model, "_mn.mdl") then
+				self.model = string.Replace(self.model, "_mn_mn.mdl", "_mn.mdl")
+				self.model = string.Replace(self.model, "_dv_mn.mdl", "_mn.mdl")
+				
+				local basemodel = string.Replace(self.model, "_mn.mdl", "*")
+				
+				self.model_mn_mn = string.Replace(basemodel, "*", "_mn_mn.mdl")
+				self.model_dv_mn = string.Replace(basemodel, "*", "_dv_mn.mdl")
+				self.model_mn_dv = string.Replace(basemodel, "*", "_mn_dv.mdl")
+				self.model_dv_dv = string.Replace(basemodel, "*", "_dv_dv.mdl")
+				
+				--Set default models
+				self.model = self.model_mn_mn
+				self.model_div = self.model_mn_dv
+				--print(self, self.model, self.model_div)
+				self.inverted = false
+			elseif string.find(self.model, "_dv.mdl") then
+				self.model = string.Replace(self.model, "_mn_dv.mdl", "_dv.mdl")
+				self.model = string.Replace(self.model, "_dv_dv.mdl", "_dv.mdl")
+				
+				local basemodel = string.Replace(self.model, "_dv.mdl", "*")
+				
+				self.model_mn_mn = string.Replace(basemodel, "*", "_dv_dv.mdl")
+				self.model_dv_mn = string.Replace(basemodel, "*", "_mn_dv.mdl")
+				self.model_mn_dv = string.Replace(basemodel, "*", "_dv_mn.mdl")
+				self.model_dv_dv = string.Replace(basemodel, "*", "_mn_mn.mdl")
+				
+				--Set default models
+				self.model = self.model_mn_mn
+				self.model_div = self.model_mn_dv
+				--print(self, self.model, self.model_div)
+				self.inverted = true
 			else
 				ErrorNoHalt("Switch "..self:EntIndex().." without valid Diverging model!")
 				invalid = true
 			end
+			
+			--Find the paired slip switch
+			local paired_inverted
+			for k, ent in pairs(ents.FindInBox(self:GetPos() + Vector(-1,-1,-1), self:GetPos() + Vector(1,1,1))) do
+				if (ent != self) and (ent:GetClass()=="tp3_switch") and string.find(ent.model, "slips") then
+					self.paired_slip = ent
+					if string.find(self.paired_slip.model, "_dv.mdl") then paired_inverted = true else paired_inverted = false end
+
+					if paired_inverted != self.inverted then
+						invalid = true
+						ErrorNoHalt("Slip Switches "..self:EntIndex().." / "..ent:EntIndex().." have mismatched MN or DV states, or one of them is invalid or isn't a slip!")
+					end
+					
+					break
+				end
+			end
+			self.paired_state = false
+			
+			
+		else --It's a regular switch
+		
+			--Auto-calculate DV if needed
+			--local invalid = false
+			if not self.model_div or (self.model_div=="") then
+				if string.find(self.model,"_mn.mdl") then
+					self.model_div = string.Replace(self.model,"_mn.mdl","_dv.mdl")
+				elseif string.find(self.model,"_dv.mdl") then
+					self.model_div = string.Replace(self.model,"_dv.mdl","_mn.mdl")
+				else
+					ErrorNoHalt("Switch "..self:EntIndex().." without valid Diverging model!")
+					invalid = true
+				end
+			end
+			
 		end
 
 		--Prop Init Stuff
@@ -62,6 +128,7 @@ if SERVER then
 	--Set local parameters
 	function ENT:SwitchSetup(behavior, autoscan)
 		self.behavior = behavior
+		if self.slip then self.behavior = 0 end --Force slip switches to be dumb due to the complexity
 		self.autoscan = autoscan
 		if (self.behavior==-1) or not self.autoscan then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
@@ -93,6 +160,27 @@ if SERVER then
 			end
 			
 		end
+	end
+	
+	--Do a one-time scan when a switch stand is attempting to throw this switch; block it if there's something on it. True for Occupied, False for Empty.
+	function ENT:QuickOccupancyCheck()
+		if not self.rangerpoint1 and self.rangerpoint2 then return false end
+		
+		local trace = {
+			start = self.rangerpoint1,
+			endpos = self.rangerpoint2,
+			filter = Trakpak3.GetBlacklist(),
+			ignoreworld = true,
+			mins = Vector(-48,-48,-8),
+			maxs = Vector(48,48,2)
+		}
+
+		local tr = util.TraceHull(trace)
+		local ent
+		if tr.Hit then ent = tr.Entity end
+		
+		return tr.Hit, ent
+		
 	end
 	
 	--Disable Physgun
@@ -394,6 +482,7 @@ if SERVER then
 	function ENT:BeginSwitching(state, trailing)
 		--set the new physics instantly
 		if state then self:QuickPhys(self.model_div) else self:QuickPhys(self.model) end
+		if self.slip and self.paired_slip then self.paired_slip:UpdatePairedSlipState(state) end
 		timer.Simple(0,function()
 
 			--Begin Animation
@@ -415,39 +504,48 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		self:SetModel(oldmodel)
 	end
-
-	--[[
-	concommand.Add("tp3_switch",function(ply, cmd, args)
-		local id = tonumber(args[1])
-		local state = args[2]
-
-		if id and state then
-			Entity(id):Switch(state=="1")
+	
+	
+	
+	
+	--Function called by the paired slip switch model
+	function ENT:UpdatePairedSlipState(state)
+		if not self.slip then return end
+		
+		if state != self.paired_state then
+			self.paired_state = state
+			if state then --Paired Switch is DV
+				self.model = self.model_dv_mn
+				self.model_div = self.model_dv_dv
+			else --Paired Switch is MN
+				self.model = self.model_mn_mn
+				self.model_div = self.model_mn_dv
+			end
+			
+			if not self.animating then self:Switch(self.switchstate, true) end
 		end
-	end)
-
-	hook.Add("tp3_switch","Trakpak3_OhGodHelp",function(ent,state)
-		ent:Switch(state)
-	end)
-	]]--
-
+	end
+	
+	
 	--Change Switch Full (Model and Physics, Reset all state data)
 	function ENT:Switch(state, force)
 		if state and (not self.switchstate or force) then --Throw DV
 			self.switchstate = true
 			self:SetModel(self.model_div)
 			if self.collision_dv then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
+			if self.slip and self.paired_slip then self.paired_slip:UpdatePairedSlipState(true) end
 		elseif not state and (self.switchstate or force) then --Throw MN
 			self.switchstate = false
 			self:SetModel(self.model)
 			if self.collision_mn then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
+			if self.slip and self.paired_slip then self.paired_slip:UpdatePairedSlipState(false) end
 		end
 		self.animating = false
 		self.trailing = false
 		self.against = false
 		self:SetAutomaticFrameAdvance(false)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_BSP)
+		--self:SetSolid(SOLID_BSP)
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.skin then self:SetSkin(self.skin) end
 		--print("Switch ",state)
@@ -709,7 +807,7 @@ if CLIENT then
 		if frogpoint then pdist = LocalPlayer():GetPos():DistToSqr(self:GetPos()) end
 
 		--if occupied and frogpoint and pdist and (pdist < 2048*2048) then
-		if frogpoint and pdist and (pdist < 2048*2048) then
+		if frogpoint and pdist and (pdist < 3072*3072) then
 
 			local trace = {
 				start = frogpoint,

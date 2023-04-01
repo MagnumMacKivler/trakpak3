@@ -25,6 +25,7 @@ if SERVER then
 		up_powered = "number",
 		dn_powered = "number",
 		ctc_state = "number",
+		interlock = "boolean",
 		cs_pos = "vector",
 		OnChangedColor = "output",
 		OnChangedAspect = "output"
@@ -303,14 +304,51 @@ if SERVER then
 		else return end
 	end
 	
+	--Set CTC State, Handle Interlocks
+	function ENT:SetCTCState(state)
+		if state then
+			self.ctc_state = state
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",state)
+		else --No parameter provided
+			state = self.ctc_state
+		end
+		
+		--Handle Interlocks
+		if self.interlock and self.paths then
+			if self.pathname then --There is a valid path lined up
+				local path = self.paths[self.pathname]
+				local switchlist = path.switchlist
+				--print("Path: ",self.pathname)
+				--PrintTable(switchlist)
+				for name, req in pairs(switchlist) do
+					local stand = Trakpak3.FindByTargetname(name)
+					if (state==0) or (state==3) then --Hold or Force
+						stand:ReleaseInterlock(self)
+					elseif (state==1) or (state==2) then --Once or Allow
+						stand:ApplyInterlock(self)
+					end
+					stand:EvaluateInterlock()
+				end
+			else --There is no valid path lined up
+				if (state==1) or (state==2) then --Default any Allows/Onces to Hold. Force will still be allowed in this state however.
+					self.ctc_state = 0
+					Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",0)
+				end 
+			end
+		end
+		
+		
+	end
+	
 	--Update when block occupancy changes
 	hook.Add("TP3_BlockUpdate","Trakpak3_BlockUpdateMasters",function(blockname,occupied,force)
 		for k, signal in pairs(ents.FindByClass("tp3_signal_master")) do
 			if signal.block_valid and signal.block==blockname then
 				--CTC Trip
 				if (signal.ctc_state==1) and occupied and (not signal.my_occupied) then
-					signal.ctc_state = 0
-					Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",0)
+					--signal.ctc_state = 0
+					signal:SetCTCState(0)
+					--Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",0)
 				end
 				
 				--Update Block Occupancy
@@ -347,7 +385,7 @@ if SERVER then
 	end)
 	
 	--Update when path changes
-	function ENT:ChangePathInfo(diverging, speed, block, nextsignal)
+	function ENT:ChangePathInfo(diverging, speed, block, nextsignal, pathname)
 		--print("Yo we got a signal update up in this bitch")
 		--if script then self:SetScript(script) end
 		if diverging==true or diverging==false then self.my_diverging = diverging end
@@ -391,22 +429,44 @@ if SERVER then
 				if newaspect then self:HandleNewAspect(newaspect) end
 			end
 		end
+		
+		--If for some reason the switch state changes when it's supposed to be interlocked, refresh the interlock status. This can happen if an interlocked switch stand has its initial state set to DV.
+		if (pathname != self.pathname) and self.interlock and self.paths and ((self.ctc_state==1) or (self.ctc_state==2)) then
+			--print("Path Changed when it should be Interlocked")
+			if self.pathname then --Release the old ones
+				local switchlist = self.paths[self.pathname].switchlist
+				for name, req in pairs(switchlist) do
+					local stand, valid = Trakpak3.FindByTargetname(name)
+					if valid then
+						stand:ReleaseInterlock(self)
+						stand:EvaluateInterlock()
+					end
+				end
+			end
+			self.pathname = pathname
+			self:SetCTCState() --To reapply the new ones or revert to Hold if it's invalid
+			
+		else
+			self.pathname = pathname --Needs to be set anyway
+		end
+		
 	end
 	
 	--Register/Update alternate path
-	function ENT:AddPath(pathname, diverging, speed, block, nextsignal, active)
+	function ENT:AddPath(pathname, diverging, speed, block, nextsignal, active, switchlist)
 		if not self.paths then self.paths = {} end
 		self.paths[pathname] = {
 			active = active,
 			diverging = diverging,
 			speed = speed,
 			block = block,
-			nextsignal = nextsignal
+			nextsignal = nextsignal,
+			switchlist = switchlist
 		}
 		
 	end
 	
-	--Update path state
+	--Update path state. Every time a switch changes, this gets run on each signal once for each path.
 	function ENT:SetPathState(pathname,active)
 		--print("SetPathState",self:GetName(),pathname,active)
 		if(self.paths) then
@@ -414,19 +474,19 @@ if SERVER then
 
 			if active then --This path is the new active one
 				local pdata = self.paths[pathname]
-				self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal)
+				self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal, pathname)
 			else --It may be a different one
 				local invalid = true
 				for pname, pdata in pairs(self.paths) do
 					if pdata.active then --It was another path after all
 						invalid = false
-						self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal)
+						--self:ChangePathInfo(pdata.diverging, pdata.speed, pdata.block, pdata.nextsignal, pathname)
 					end
 					--print(pdata.active)
 				end
 				if invalid then --If no other path claims validity, revert to default
 					--print("Yo this should be doing something")
-					self:ChangePathInfo(false,Trakpak3.DANGER,nil,nil)
+					self:ChangePathInfo(false,Trakpak3.DANGER,nil,nil,nil)
 					--print(self:GetName().." Setting to aspect:")
 					--PrintTable(self.system.aspects[self.defaultaspect])
 				end
@@ -444,25 +504,29 @@ if SERVER then
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 		elseif iname=="SetCTC_Hold" then
-			self.ctc_state = 0
-			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",0)
+			--self.ctc_state = 0
+			self:SetCTCState(0)
+			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",0)
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
 		elseif iname=="SetCTC_Once" then
-			self.ctc_state = 1
+			--self.ctc_state = 1
+			self:SetCTCState(1)
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
-			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",1)
+			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",1)
 		elseif iname=="SetCTC_Allow" then
-			self.ctc_state = 2
+			--self.ctc_state = 2
+			self:SetCTCState(2)
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
-			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",2)
+			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",2)
 		elseif iname=="SetCTC_Force" then
-			self.ctc_state = 3
+			--self.ctc_state = 3
+			self:SetCTCState(3)
 			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
 			if newaspect then self:HandleNewAspect(newaspect) end
-			Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",3)
+			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",3)
 		end
 	end
 	
@@ -570,10 +634,11 @@ if SERVER then
 		for _, signal in pairs(ents.FindByClass("tp3_signal_master")) do --For Each Signal,
 			if (name==signal:GetName()) and (cmd=="set_ctc") then
 				if val<=3 then
-					signal.ctc_state = val
+					--signal.ctc_state = val
+					signal:SetCTCState(val)
 					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv)
 					if newaspect then signal:HandleNewAspect(newaspect) end
-					Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",val)
+					--Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",val)
 				end
 			end
 		end

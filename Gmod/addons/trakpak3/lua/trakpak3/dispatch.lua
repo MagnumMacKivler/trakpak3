@@ -26,7 +26,7 @@ hook.Add("InitPostEntity","TP3_DispLoad",function()
 				local st
 				if ent.state then st = 1 else st = 0 end
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { state = st, broken = 0, blocked = 0, pos = ent:GetPos() } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { state = st, broken = 0, blocked = 0, interlocked = 0, pos = ent:GetPos() } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_signal_block")) do

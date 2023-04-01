@@ -54,6 +54,13 @@ if SERVER then
 		if func then func(len,ply) end
 	end)
 	
+	--Usage: function Trakpak3.Net.<identifier> = function(len, ply) <function text> end
+	--To create a net message that calls it:
+	--net.Start("trakpak3")
+	--net.WriteString(<identifier>)
+	--<net message text>
+	--net.Send()
+	
 end
 if CLIENT then
 	Trakpak3 = {}

@@ -1590,7 +1590,7 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 				local sig = Dispatch.RealData[self.switch]
 				if sig then
 					state = sig["state"]
-					blocked = sig["blocked"]
+					blocked = bit.bor(sig["blocked"], sig["interlocked"]) --Must use bitwise because these are numbers, not booleans
 					broken = sig["broken"]
 					
 					if (broken==1) and (blocked==1) then --Broken Blocked
@@ -1628,7 +1628,7 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 		function button:DoClick()
 			if e.switch and (e.switch!="") then
 				local state = Dispatch.RealData[e.switch]["state"]
-				local blocked = Dispatch.RealData[e.switch]["blocked"]
+				local blocked = bit.bor(Dispatch.RealData[e.switch]["blocked"], Dispatch.RealData[e.switch]["interlocked"])
 				local broken = Dispatch.RealData[e.switch]["broken"]
 				
 				if (blocked==0) and (broken==0) then
@@ -1678,30 +1678,39 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 			if button and button:IsValid() then
 				local state
 				local blocked
+				local interlocked
 				local broken
 				if parm=="state" then
 					state = value
 					blocked = Dispatch.RealData[name]["blocked"] or 0
+					interlocked = Dispatch.RealData[name]["interlocked"] or 0
 					broken = Dispatch.RealData[name]["broken"] or 0
 				elseif parm=="blocked" then
 					state = Dispatch.RealData[name]["state"] or 0
 					blocked = value
+					interlocked = Dispatch.RealData[name]["interlocked"] or 0
+					broken = Dispatch.RealData[name]["broken"] or 0
+				elseif parm=="interlocked" then
+					state = Dispatch.RealData[name]["state"] or 0
+					blocked = Dispatch.RealData[name]["blocked"] or 0
+					interlocked = value
 					broken = Dispatch.RealData[name]["broken"] or 0
 				elseif parm=="broken" then
 					state = Dispatch.RealData[name]["state"] or 0
 					blocked = Dispatch.RealData[name]["blocked"] or 0
+					interlocked = Dispatch.RealData[name]["interlocked"] or 0
 					broken = value
 				end
 				
-				if (broken==1) and (blocked==1) then --Broken Blocked
+				if (broken==1) and ((blocked==1) or (interlocked==1)) then --Broken Blocked
 					button:SetImage("trakpak3_common/icons/switch_x_unlit.png")
 				elseif (broken==1) then --Broken Clear
 					button:SetImage("trakpak3_common/icons/switch_x_lit.png")
-				elseif (state==0) and (blocked==1) then --MN Blocked
+				elseif (state==0) and ((blocked==1) or (interlocked==1)) then --MN Blocked
 					button:SetImage("trakpak3_common/icons/switch_n_unlit.png")
 				elseif (state==0) then --MN Clear
 					button:SetImage("trakpak3_common/icons/switch_n_lit.png")
-				elseif (state==1) and (blocked==1) then --DV Blocked
+				elseif (state==1) and ((blocked==1) or (interlocked==1)) then --DV Blocked
 					button:SetImage("trakpak3_common/icons/switch_r_unlit.png")
 				elseif (state==1) then --DV Clear
 					button:SetImage("trakpak3_common/icons/switch_r_lit.png")

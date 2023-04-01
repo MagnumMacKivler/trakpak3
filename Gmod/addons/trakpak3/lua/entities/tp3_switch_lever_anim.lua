@@ -71,6 +71,9 @@ if SERVER then
 			self:SetTrigger(true)
 		end
 		
+		--Interlocks Table
+		self.interlocks = {}
+		
 		--Store old pos and ang
 		self.originalpos = self:GetPos()
 		self.originalang = self:GetAngles()
@@ -227,6 +230,7 @@ if SERVER then
 		self.broken = false
 		self:SetCollisionGroup(COLLISION_GROUP_NONE)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BSP)
 		self:SetPos(self.originalpos)
 		self:SetAngles(self.originalang)
 		
@@ -270,6 +274,67 @@ if SERVER then
 		self:SetNWBool("blocked",self.occupied)
 	end
 	
+	--Functions called by Signals
+	
+	--A signal forces this switch stand to be interlocked.
+	function ENT:ApplyInterlock(signal)
+		
+		if signal and signal:IsValid() then
+			self.interlocks[signal:EntIndex()] = true
+			if self.linked_stand_valid then self.linked_stand_ent.interlocks[signal:EntIndex()] = true end
+		end
+	end
+	
+	--A signal releases this switch from interlock.
+	function ENT:ReleaseInterlock(signal)
+		
+		if signal and signal:IsValid() then
+			self.interlocks[signal:EntIndex()] = false
+			if self.linked_stand_valid then self.linked_stand_ent.interlocks[signal:EntIndex()] = false end
+		end
+		
+	end
+	
+	--All applications/releases are done, now re-evaluate the interlock state.
+	function ENT:EvaluateInterlock()
+		local ilocked = false
+		for k, v in pairs(self.interlocks) do
+			if v then
+				ilocked = true
+				break
+			end
+		end
+		
+		if ilocked and not self.interlocked then
+			self.interlocked = true
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"interlocked",1)
+			self:SetNWBool("interlocked",true)
+		elseif not ilocked and self.interlocked then
+			self.interlocked = false
+			Trakpak3.Dispatch.SendInfo(self:GetName(),"interlocked",0)
+			self:SetNWBool("interlocked",false)
+		end
+		
+		if self.linked_stand_valid then --Repeat the process for linked stands
+			local ilocked = false
+			for k, v in pairs(self.linked_stand_ent.interlocks) do
+				if v then
+					ilocked = true
+					break
+				end
+			end
+			
+			if ilocked and not self.linked_stand_ent.interlocked then
+				self.linked_stand_ent.interlocked = true
+				Trakpak3.Dispatch.SendInfo(self.linked_stand_ent:GetName(),"interlocked",1)
+				self.linked_stand_ent:SetNWBool("interlocked",true)
+			elseif not ilocked and self.linked_stand_ent.interlocked then
+				self.linked_stand_ent.interlocked = false
+				Trakpak3.Dispatch.SendInfo(self.linked_stand_ent:GetName(),"interlocked",0)
+				self.linked_stand_ent:SetNWBool("interlocked",false)
+			end
+		end
+	end
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
@@ -371,10 +436,34 @@ if SERVER then
 		end
 	end
 	
-	--Set your (and your linked switch's) target state to prevent race conditions
-	function ENT:SetTargetState(state)
-		self.targetstate = state
-		if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
+	--Set your (and your linked stand's) target state to prevent race conditions. This is the primary control step that throws the switch. Player arg is optional for sending "this switch is blocked!" notification.
+	function ENT:SetTargetState(state, ply)
+		--Check occupancy/interlock on the local and linked switches before changing anything
+		if self.interlocked then return end
+		if self.linked_stand_valid and self.linked_stand_ent.interlocked then return end
+		
+		local me_occupied
+		local linked_occupied
+		local me_blocker
+		local linked_blocker
+		
+		if self.switch then me_occupied, me_blocker = self.switch:QuickOccupancyCheck() end
+		if self.linked_stand_valid and self.linked_stand_ent.switch then linked_occupied, linked_blocker = self.linked_stand_ent.switch:QuickOccupancyCheck() end
+		
+		if not me_occupied and not linked_occupied then
+			self.targetstate = state
+			if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
+		elseif me_blocker or linked_blocker then --Notify player of the blocking entity
+			local b = me_blocker or linked_blocker
+			local data = {
+				ent = tostring(b)
+			}
+			if b:IsValid() then data.model = b:GetModel() end
+			net.Start("trakpak3")
+			net.WriteString("tp3_switchblocked_notify")
+				net.WriteTable(data)
+			net.Send(ply)
+		end
 	end
 	
 	--util.AddNetworkString("tp3_switchblocked_notify")

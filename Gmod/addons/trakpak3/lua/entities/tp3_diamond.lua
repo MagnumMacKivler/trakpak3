@@ -20,7 +20,7 @@ if SERVER then
 		--Prop Init Stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_BSP)
+		--self:SetSolid(SOLID_BSP)
 		self:SetTrigger(true)
 		
 		if string.find(self.model,"_alt.mdl") then --Model already has '_alt' for some reason
@@ -37,13 +37,13 @@ if SERVER then
 	function ENT:FindAttachments()
 		
 		local frog1 = self:LookupAttachment("frog1")
-		if frog1 > 0 then self.frog1 = self:GetAttachment(frog1)["Pos"] else self.frog1 = nil end
+		if frog1 > 0 then self:SetNWVector("frog1", self:GetAttachment(frog1)["Pos"]) else self:SetNWVector("frog1", Vector(0,0,0)) end
 		local frog2 = self:LookupAttachment("frog2")
-		if frog2 > 0 then self.frog2 = self:GetAttachment(frog2)["Pos"] else self.frog2 = nil end
+		if frog2 > 0 then self:SetNWVector("frog2", self:GetAttachment(frog2)["Pos"]) else self:SetNWVector("frog2", Vector(0,0,0)) end
 		local frog3 = self:LookupAttachment("frog3")
-		if frog3 > 0 then self.frog3 = self:GetAttachment(frog3)["Pos"] else self.frog3 = nil end
+		if frog3 > 0 then self:SetNWVector("frog3", self:GetAttachment(frog3)["Pos"]) else self:SetNWVector("frog3", Vector(0,0,0)) end
 		local frog4 = self:LookupAttachment("frog4")
-		if frog4 > 0 then self.frog4 = self:GetAttachment(frog4)["Pos"] else self.frog4 = nil end
+		if frog4 > 0 then self:SetNWVector("frog4", self:GetAttachment(frog4)["Pos"]) else self:SetNWVector("frog4", Vector(0,0,0)) end
 		
 		local autopoint1 = self:LookupAttachment("autopoint1")
 		if autopoint1 > 0 then self.autopoint1 = self:GetAttachment(autopoint1)["Pos"] else self.autopoint1 = nil end
@@ -61,7 +61,7 @@ if SERVER then
 			
 			self:SetModel(self.model)
 			self:PhysicsInitStatic(SOLID_VPHYSICS)
-			self:SetSolid(SOLID_BSP)
+			--self:SetSolid(SOLID_BSP)
 			self:FindAttachments()
 			self.cooldown = true
 		else --Throw diverging
@@ -69,7 +69,7 @@ if SERVER then
 			
 			self:SetModel(self.model_alt)
 			self:PhysicsInitStatic(SOLID_VPHYSICS)
-			self:SetSolid(SOLID_BSP)
+			--self:SetSolid(SOLID_BSP)
 			self:FindAttachments()
 			self.cooldown = true
 		end
@@ -123,7 +123,8 @@ if SERVER then
 			
 		end
 		
-		--Frog Noises
+		--Frog Noises (Moved to Client)
+		--[[
 		if self.scanning then
 			
 			for n = 1, 4 do
@@ -149,7 +150,7 @@ if SERVER then
 			end
 			fast = true
 		end
-		
+		]]--
 		if fast then
 			self:NextThink(CurTime()+0.1)
 			return true
@@ -201,5 +202,43 @@ if SERVER then
 	function ENT:EndTouchAll()
 		self.scanning = false
 		for n = 1,4 do self["clicker"..n] = nil end
+	end
+end
+
+if CLIENT then
+	
+	function ENT:Think()
+		local pdist = LocalPlayer():GetPos():DistToSqr(self:GetPos())
+		if pdist < (3072*3072) then
+			--Frog Noises
+			for n = 1, 4 do
+				local pos = self:GetNWVector("frog"..n)
+				
+				if pos and (pos != Vector(0,0,0)) then
+					local tr = {
+						start = pos,
+						endpos = pos + Vector(0,0,8),
+						filter = self,
+						ignoreworld = true
+					}
+					local trace = util.TraceLine(tr)
+					local ent = trace.Entity
+					--Seems to exceed the upper limit for sounds playing on a specific entity... need shorter sound?
+					if (ent and ent:IsValid()) and (ent != self["clicker"..n]) then
+						--print("play "..n)
+						self["clicker"..n] = ent
+						ent:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105))
+					elseif not ent:IsValid() and self["clicker"..n] then
+						--if self["clicker"..n] then self["clicker"..n]:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
+						self["clicker"..n] = nil
+					end
+				end
+			end
+			self:NextThink(CurTime() + 0.1)
+			return true
+		else
+			self:NextThink(CurTime() + 0.5)
+			return true
+		end
 	end
 end

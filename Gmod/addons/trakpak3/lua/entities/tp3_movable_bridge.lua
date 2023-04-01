@@ -51,7 +51,7 @@ if SERVER then
 		OnInitialize = "output"
 	}
 	
-	util.AddNetworkString("TP3_MoveBridge_ControlInfo")
+	--util.AddNetworkString("TP3_MoveBridge_ControlInfo")
 	
 	function ENT:Initialize()
 		self:ValidateNumerics()

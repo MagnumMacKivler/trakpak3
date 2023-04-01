@@ -41,9 +41,11 @@ function PathConfig.ProcessLogic(signame) --Set Up Signal with Path Info
 	--ENT:AddPath(pathname, diverging, speed, block, nextsignal, active)
 	for pindex, path in pairs(paths) do --For each path in the signal:
 		--if signal.AddPath then print("Signal ",signal," AddPath OK") else print("Signal ",signal," AddPath Failed") end
-		signal:AddPath(pindex, path.divergence, path.speed, path.block, path.nextsignal, false) --Add path
+		signal:AddPath(pindex, path.divergence, path.speed, path.block, path.nextsignal, false, path.switchlist) --Add path
 		
 	end
+	
+	signal:SetCTCState() --Force the signal to apply interlocks if applicable
 end
 
 function PathConfig.EvaluateLogic(signame) --Evaluate the path state for a specific signal

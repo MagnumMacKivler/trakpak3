@@ -2362,13 +2362,20 @@ function Trakpak3.SigEdit.WriteConditionText(ntable)
 	
 	local out = "("
 	
+	local translate = true --To prevent translating aspect names (such as when NEXTASPECT is used) into numbers (such as '1286 MEDIUM APPROACH' into '1286 3 APPROACH'), this variable will be turned on and off by the presence of the " character.
+	
 	for n=1,#cond_ary do
 		local term = cond_ary[n]
-		--if term=="or" then
-		--	term = ") or ("
-		--end
-		local term = Trakpak3.SigEdit.dictionary2[term] or term
+		local hasquote = string.find(term,"\"")
 		
+		if hasquote and translate then --Word has quote, first occurrence; don't translate, disable translation
+			translate = false
+		elseif hasquote and not translate then --Word has quote, second occurrence; don't translate, enable translation
+			translate = true
+		elseif not hasquote and translate then --Word does not have quote, translation active; translate
+			term = Trakpak3.SigEdit.dictionary2[term] or term
+		end --not hasquote and not translate; do nothing
+
 		out = out.." "..term
 	end
 	
@@ -2412,6 +2419,7 @@ function Trakpak3.SigEdit.WriteLogicFunction()
 	else
 		Trakpak3.SigEdit.LogicFunction = function() return false end
 		Trakpak3.SigEdit.func_text = nil
+		ErrorNoHalt("For some reason, the logic function could not write properly! This could be due to an invalid node.")
 	end
 	Trakpak3.SigEdit.UpdateLogLabel(Trakpak3.SigEdit.panels.sim_loglabel)
 end

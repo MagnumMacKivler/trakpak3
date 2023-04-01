@@ -25,7 +25,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
-	derail(choices) : "Switch Type" : 0 : "Should this switch behave like a switch or a derail? If a derail, props that touch it will have their momentum arrested." =
+	derail(choices) : "Switch Type" : 0 : "Should this switch behave like a switch or a derail? If a derail, props that touch it will have their momentum arrested. This only works if the Stand's 'Switch Auto-Scan' keyvalue is set." =
 	[
 		0 : "Switch/Other"
 		1 : "Derail"
@@ -403,6 +403,11 @@
 		0 : "Hold"
 		2 : "Allow"
 	]
+	interlock(choices) : "Interlock Path Switches" : 0 : "If set, this signal will interlock with any switches it governs. If the CTC State is Allow or Once, you won't be able to throw any of the switches in the current route; you must set the signal to Hold or Force to unlock them. This only applies to switches at junctions/interlockings, which will have Paths assigned using the Path Configurator tool. This is a safety feature to prevent people from throwing switches in front of trains, and can work with both automatic and manual switch stands." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 	cs_pos(vector) : "Cab Signal Pos" : : "When a tp3_cabsignal_box passes over this point (moving in the correct direction), it will register as having passed this signal. Place it roughly level with the railheads, in the center of the two rails, and at least one locomotive length before the signal."
 	nickname(string) : "Nickname" : "" : "(Optional) The signal's nickname, used in-game to describe what it does. Unlike the targetname, this doesn't have to be unique."
 	
@@ -410,10 +415,11 @@
 	
 	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	
+	//Inputs and Outputs
+	
 	input SetManual(string) : "Forces a signal to display the given aspect name (if given) and stops all automatic behavior."
 	input SetAutomatic(void) : "Forces the signal to resume responding to the signaling system normally."
 	
-	//Inputs and Outputs
 	input SetCTC_Hold(void) : "Set the signal's CTC state to Hold. The signal will not let trains pass in this state."
 	input SetCTC_Once(void) : "Set the signal's CTC state to Once. The signal will allow one train to pass (depending on track conditions) and then revert to Hold."
 	input SetCTC_Allow(void) : "Set the signal's CTC state to Allow. The signal will allow all trains (depending on track conditions)."

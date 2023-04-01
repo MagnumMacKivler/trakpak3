@@ -82,6 +82,7 @@ if SERVER then
 		--Set the prop stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetSolid(SOLID_BSP)
 		if self.skin then self:SetSkin(self.skin) end
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 	end

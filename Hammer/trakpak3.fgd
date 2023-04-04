@@ -581,8 +581,8 @@
 	
 	input Enable(void) : "Turn this entity on and allow it to monitor blocks normally."
 	input Disable(void) : "Turn this entity off, forcing the signals to rely on their normal ABS logic."
-	output OnBottomOccupied(void) : "Fires when a train enters from the bottom (the lowest block number in the chain). This output will not fire again until the whole chain is clear."
-	output OnTopOccupied(void) : "Fires when a train enters from the top (the highest block number in the chain). This output will not fire again until the whole chain is clear."
+	output OnBottomOccupied(void) : "Fires when a train enters from the bottom (the smallest numbered block in the chain, Block 1). This output will not fire again until the whole chain is clear."
+	output OnTopOccupied(void) : "Fires when a train enters from the top (the largest numbered block in the chain, for example Block 8 if you have 8 blocks in the chain). This output will not fire again until the whole chain is clear."
 	output OnMiddleOccupied(void) : "Fires when a train enters one of the intermediate blocks. This output will not fire again until the whole chain is clear."
 	output OnChainClear(void) : "Fires when all the blocks become cleared."
 ]

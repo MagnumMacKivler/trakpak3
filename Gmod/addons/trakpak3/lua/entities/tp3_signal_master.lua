@@ -42,7 +42,7 @@ if SERVER then
 		--Prop Init Stuff
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_BSP)
+		--self:SetSolid(SOLID_BSP)
 		
 		if self.skin then self:SetSkin(self.skin) end
 		if self.bodygroups then for n, p in pairs(string.Explode(" ",self.bodygroups)) do self:SetBodygroup(n,tonumber(p)) end end

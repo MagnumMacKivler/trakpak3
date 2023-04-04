@@ -28,7 +28,7 @@ list.Set( "Vehicles", "tp3_footprints", V )
 
 --Sound Scripts
 sound.Add({
-	name="Trakpak3.derail.clang",
+	name = "Trakpak3.derail.clang",
 	sound = "trakpak3/switchstands/manual/derail_clang.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -36,7 +36,7 @@ sound.Add({
 	pitch = {95, 105}
 })
 sound.Add({
-	name="Trakpak3.switchstand.latch_lift",
+	name = "Trakpak3.switchstand.latch_lift",
 	sound = "trakpak3/switchstands/manual/latch_lift.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -44,7 +44,7 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
-	name="Trakpak3.switchstand.latch_drop",
+	name = "Trakpak3.switchstand.latch_drop",
 	sound = "trakpak3/switchstands/manual/latch_drop.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -52,7 +52,7 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
-	name="Trakpak3.switchstand.bethlehem_latch_lift",
+	name = "Trakpak3.switchstand.bethlehem_latch_lift",
 	sound = "trakpak3/switchstands/manual/bethlehem_latch_lift.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -60,7 +60,7 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
-	name="Trakpak3.switchstand.bethlehem_latch_drop",
+	name = "Trakpak3.switchstand.bethlehem_latch_drop",
 	sound = "trakpak3/switchstands/manual/bethlehem_latch_drop.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -68,7 +68,7 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
-	name="Trakpak3.switchstand.latch_contact",
+	name = "Trakpak3.switchstand.latch_contact",
 	sound = "trakpak3/switchstands/manual/latch_contact.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -76,7 +76,7 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
-	name="Trakpak3.switchstand.latch_close",
+	name = "Trakpak3.switchstand.latch_close",
 	sound = "trakpak3/switchstands/manual/latch_close.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -85,7 +85,7 @@ sound.Add({
 })
 
 sound.Add({
-	name="Trakpak3.switchstand.lever_hittop",
+	name = "Trakpak3.switchstand.lever_hittop",
 	sound = "trakpak3/switchstands/manual/latch_close.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
@@ -93,11 +93,28 @@ sound.Add({
 	pitch = 100
 })
 sound.Add({
-	name="Trakpak3.switchstand.lever_hitbottom",
+	name = "Trakpak3.switchstand.lever_hitbottom",
 	sound = "trakpak3/switchstands/manual/latch_lift.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
 	level = 60,
+	pitch = 100
+})
+
+sound.Add({
+	name = "Trakpak3.tracksounds.frog1",
+	sound = {
+		"trakpak3/tracksounds/clanc_1.wav",
+		"trakpak3/tracksounds/clanc_2.wav",
+		"trakpak3/tracksounds/clanc_3.wav",
+		"trakpak3/tracksounds/clanc_4.wav",
+		"trakpak3/tracksounds/clanc_5.wav",
+		"trakpak3/tracksounds/clanc_6.wav",
+		"trakpak3/tracksounds/clanc_7.wav",
+		"trakpak3/tracksounds/clanc_8.wav",
+	},
+	level = 75,
+	volume = 1,
 	pitch = 100
 })
 --[[

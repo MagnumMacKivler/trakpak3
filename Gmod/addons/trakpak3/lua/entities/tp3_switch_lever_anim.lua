@@ -44,7 +44,7 @@ if SERVER then
 		--Model/Physics Init
 		self:SetModel(self.model)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_BSP)
+		--self:SetSolid(SOLID_BSP)
 		self:SetSkin(self.skin)
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.collision_mn then self:SetCollisionGroup(COLLISION_GROUP_NONE) else self:SetCollisionGroup(COLLISION_GROUP_WORLD) end
@@ -453,7 +453,7 @@ if SERVER then
 		if not me_occupied and not linked_occupied then
 			self.targetstate = state
 			if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
-		elseif me_blocker or linked_blocker then --Notify player of the blocking entity
+		elseif ply and (me_blocker or linked_blocker) then --Notify player of the blocking entity
 			local b = me_blocker or linked_blocker
 			local data = {
 				ent = tostring(b)
@@ -474,7 +474,7 @@ if SERVER then
 		if self.broken then
 			self:StandFix()
 		elseif not self.locked then
-			if not self.animating and self.occupied then
+			if ply and not self.animating and self.occupied then --Transmit blocking message
 				local data = {}
 				if self.switch and self.switch.blocking_ent then
 					data.ent = tostring(self.switch.blocking_ent)
@@ -485,7 +485,7 @@ if SERVER then
 				net.WriteString("tp3_switchblocked_notify")
 					net.WriteTable(data)
 				net.Send(ply)
-			elseif not self.animating then
+			elseif not self.animating and not self.occupied then --Throw it normally
 				self:SetTargetState(not self.targetstate)
 			end
 		end

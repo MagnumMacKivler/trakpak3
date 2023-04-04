@@ -59,7 +59,7 @@ function PathConfig.CycleSwitch(ent)
 			stand = ent:GetNWEntity("lever",nil)
 		end
 		
-		if stand then
+		if stand and stand:IsValid() then
 			local signal = PathConfig.selected_ent
 			local pc = PathConfig.Signals[PathConfig.selected][PathConfig.selected_path]
 			local sl = pc.switchlist
@@ -74,6 +74,8 @@ function PathConfig.CycleSwitch(ent)
 				sl[name] = nil
 			end
 			
+		else
+			chat.AddText("The switch stand you are targeting is invalid or doesn't exist.")
 		end
 		
 	end

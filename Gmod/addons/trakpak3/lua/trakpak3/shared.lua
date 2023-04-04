@@ -7,6 +7,23 @@ local function HandleStandingAnimation( vehicle, player )
 	return player:SelectWeightedSequence( ACT_HL2MP_IDLE ) 
 end
 
+--List of sounds used by the frogs
+Trakpak3.FrogSounds = {
+	"trakpak3/frog/clanc_1",
+	"trakpak3/frog/clanc_2",
+	"trakpak3/frog/clanc_3",
+	"trakpak3/frog/clanc_4",
+	"trakpak3/frog/clanc_5",
+	"trakpak3/frog/clanc_6",
+	"trakpak3/frog/clanc_7",
+	"trakpak3/frog/clanc_8"
+}
+
+--Function to play a random clank sound
+function Trakpak3.FrogClank(ent)
+	ent:EmitSound(Trakpak3.FrogSounds[math.random(1,#Trakpak3.FrogSounds)],75,math.random(95,105))
+end
+
 local V = {
 	Name = "Trakpak3 Footprints",
 	Model = "models/trakpak3_common/vehicles/footprints.mdl",

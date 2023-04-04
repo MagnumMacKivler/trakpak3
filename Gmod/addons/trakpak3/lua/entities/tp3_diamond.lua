@@ -227,7 +227,7 @@ if CLIENT then
 					if (ent and ent:IsValid()) and (ent != self["clicker"..n]) then
 						--print("play "..n)
 						self["clicker"..n] = ent
-						ent:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105))
+						Trakpak3.FrogClank(self.clicker)
 					elseif not ent:IsValid() and self["clicker"..n] then
 						--if self["clicker"..n] then self["clicker"..n]:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
 						self["clicker"..n] = nil

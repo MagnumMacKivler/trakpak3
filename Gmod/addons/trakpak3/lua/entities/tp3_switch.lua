@@ -821,10 +821,10 @@ if CLIENT then
 			if tr.Hit and tr.Entity:GetClass()=="prop_physics" and not self.froccupied then
 				self.froccupied = true
 				self.clicker = tr.Entity
-				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
+				if self.clicker:IsValid() then Trakpak3.FrogClank(self.clicker) end
 			elseif not tr.Hit and self.froccupied then
 				self.froccupied = false
-				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
+				if self.clicker:IsValid() then Trakpak3.FrogClank(self.clicker) end
 			end
 
 			self:NextThink(CurTime() + 0.1)

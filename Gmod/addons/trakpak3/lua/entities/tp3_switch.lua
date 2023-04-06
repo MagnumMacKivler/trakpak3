@@ -29,65 +29,110 @@ if SERVER then
 		local invalid = false
 		
 		--Figure out if it's a slip
-		if string.find(self.model, "slips") then
+		if string.find(self.model, "slip") then
 			self.slip = true
 			
-			--Simplify the model in case they picked one of the specialized ones, and store the four model options
-			--Assume the paired switch is the same model for goodness' sake
-			if string.find(self.model, "_mn.mdl") then
-				self.model = string.Replace(self.model, "_mn_mn.mdl", "_mn.mdl")
-				self.model = string.Replace(self.model, "_dv_mn.mdl", "_mn.mdl")
-				
-				local basemodel = string.Replace(self.model, "_mn.mdl", "*")
-				
-				self.model_mn_mn = string.Replace(basemodel, "*", "_mn_mn.mdl")
-				self.model_dv_mn = string.Replace(basemodel, "*", "_dv_mn.mdl")
-				self.model_mn_dv = string.Replace(basemodel, "*", "_mn_dv.mdl")
-				self.model_dv_dv = string.Replace(basemodel, "*", "_dv_dv.mdl")
-				
-				--Set default models
-				self.model = self.model_mn_mn
-				self.model_div = self.model_mn_dv
-				--print(self, self.model, self.model_div)
-				self.inverted = false
-			elseif string.find(self.model, "_dv.mdl") then
-				self.model = string.Replace(self.model, "_mn_dv.mdl", "_dv.mdl")
-				self.model = string.Replace(self.model, "_dv_dv.mdl", "_dv.mdl")
-				
-				local basemodel = string.Replace(self.model, "_dv.mdl", "*")
-				
-				self.model_mn_mn = string.Replace(basemodel, "*", "_dv_dv.mdl")
-				self.model_dv_mn = string.Replace(basemodel, "*", "_mn_dv.mdl")
-				self.model_mn_dv = string.Replace(basemodel, "*", "_dv_mn.mdl")
-				self.model_dv_dv = string.Replace(basemodel, "*", "_mn_mn.mdl")
-				
-				--Set default models
-				self.model = self.model_mn_mn
-				self.model_div = self.model_mn_dv
-				--print(self, self.model, self.model_div)
-				self.inverted = true
-			else
-				ErrorNoHalt("Switch "..self:EntIndex().." without valid Diverging model!")
-				invalid = true
-			end
-			
 			--Find the paired slip switch
-			local paired_inverted
 			for k, ent in pairs(ents.FindInBox(self:GetPos() + Vector(-1,-1,-1), self:GetPos() + Vector(1,1,1))) do
-				if (ent != self) and (ent:GetClass()=="tp3_switch") and string.find(ent.model, "slips") then
+				if (ent != self) and (ent:GetClass()=="tp3_switch") and string.find(ent.model, "slip") then
 					self.paired_slip = ent
-					if string.find(self.paired_slip.model, "_dv.mdl") then paired_inverted = true else paired_inverted = false end
-
-					if paired_inverted != self.inverted then
-						invalid = true
-						ErrorNoHalt("Slip Switches "..self:EntIndex().." / "..ent:EntIndex().." have mismatched MN or DV states, or one of them is invalid or isn't a slip!")
-					end
+					--if string.find(self.paired_slip.model, "_dv.mdl") then paired_inverted = true else paired_inverted = false end
 					
 					break
 				end
 			end
-			self.paired_state = false
 			
+			if not self.paired_slip then
+				invalid = true
+				ErrorNoHalt("Slip Switch "..self:EntIndex().." without paired slip switch model!")
+			else
+			
+				--Simplify the model in case they picked one of the specialized ones, and store the four model options
+				
+				local self_dv
+				if string.find(self.model, "_mn.mdl") then
+					self_dv = false
+				elseif string.find(self.model, "_dv.mdl") then
+					self_dv = true
+				end
+				
+				local paired_dv
+				if string.find(self.paired_slip.model, "_mn.mdl") then
+					paired_dv = false
+				elseif string.find(self.paired_slip.model, "_dv.mdl") then
+					paired_dv = true
+				end
+				
+				
+				if (self_dv==false) and (paired_dv==false) then --Both MN
+					self.model = string.Replace(self.model, "_mn_mn.mdl", "_mn.mdl")
+					self.model = string.Replace(self.model, "_dv_mn.mdl", "_mn.mdl")
+					
+					local basemodel = string.Replace(self.model, "_mn.mdl", "*")
+					
+					self.model_mn_mn = string.Replace(basemodel, "*", "_mn_mn.mdl")
+					self.model_dv_mn = string.Replace(basemodel, "*", "_dv_mn.mdl")
+					self.model_mn_dv = string.Replace(basemodel, "*", "_mn_dv.mdl")
+					self.model_dv_dv = string.Replace(basemodel, "*", "_dv_dv.mdl")
+					
+					--Set default models
+					self.model = self.model_mn_mn
+					self.model_div = self.model_mn_dv
+					--print(self, self.model, self.model_div)
+				elseif (self_dv==true) and (paired_dv==true) then --Both DV
+					self.model = string.Replace(self.model, "_mn_dv.mdl", "_dv.mdl")
+					self.model = string.Replace(self.model, "_dv_dv.mdl", "_dv.mdl")
+					
+					local basemodel = string.Replace(self.model, "_dv.mdl", "*")
+					
+					self.model_mn_mn = string.Replace(basemodel, "*", "_dv_dv.mdl")
+					self.model_dv_mn = string.Replace(basemodel, "*", "_mn_dv.mdl")
+					self.model_mn_dv = string.Replace(basemodel, "*", "_dv_mn.mdl")
+					self.model_dv_dv = string.Replace(basemodel, "*", "_mn_mn.mdl")
+					
+					--Set default models
+					self.model = self.model_mn_mn
+					self.model_div = self.model_mn_dv
+					--print(self, self.model, self.model_div)
+				elseif (self_dv==false) and (paired_dv==true) then --You are MN, other is DV
+					self.model = string.Replace(self.model, "_mn_mn.mdl", "_mn.mdl")
+					self.model = string.Replace(self.model, "_dv_mn.mdl", "_mn.mdl")
+					
+					local basemodel = string.Replace(self.model, "_mn.mdl", "*")
+					
+					self.model_mn_mn = string.Replace(basemodel, "*", "_dv_mn.mdl")
+					self.model_dv_mn = string.Replace(basemodel, "*", "_mn_mn.mdl")
+					self.model_mn_dv = string.Replace(basemodel, "*", "_dv_dv.mdl")
+					self.model_dv_dv = string.Replace(basemodel, "*", "_mn_dv.mdl")
+					
+					--Set default models
+					self.model = self.model_mn_mn
+					self.model_div = self.model_mn_dv
+					--print(self, self.model, self.model_div)
+				elseif (self_dv==true) and (paired_dv==false) then --You are DV, other is MN
+					self.model = string.Replace(self.model, "_mn_dv.mdl", "_dv.mdl")
+					self.model = string.Replace(self.model, "_dv_dv.mdl", "_dv.mdl")
+					
+					local basemodel = string.Replace(self.model, "_dv.mdl", "*")
+					
+					self.model_mn_mn = string.Replace(basemodel, "*", "_mn_dv.mdl")
+					self.model_dv_mn = string.Replace(basemodel, "*", "_dv_dv.mdl")
+					self.model_mn_dv = string.Replace(basemodel, "*", "_mn_mn.mdl")
+					self.model_dv_dv = string.Replace(basemodel, "*", "_dv_mn.mdl")
+					
+					--Set default models
+					self.model = self.model_mn_mn
+					self.model_div = self.model_mn_dv
+					--print(self, self.model, self.model_div)
+				else
+					ErrorNoHalt("Slip Switch "..self:EntIndex().." or "..self.paired_slip:EntIndex().." does not have a valid model!")
+					invalid = true
+				end
+				
+				
+				self.paired_state = false
+			
+			end
 			
 		else --It's a regular switch
 		
@@ -511,6 +556,8 @@ if SERVER then
 	--Function called by the paired slip switch model
 	function ENT:UpdatePairedSlipState(state)
 		if not self.slip then return end
+		
+		--if self.inverted then state = not state end
 		
 		if state != self.paired_state then
 			self.paired_state = state

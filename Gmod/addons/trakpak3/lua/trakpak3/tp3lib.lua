@@ -235,22 +235,36 @@ function Trakpak3.FindNodeChain(startname, endname)
 end
 ]]--
 
---Ranger Class Blacklisting: Use this function to add NPC classes you don't want to trigger block detection, auto switches, or frogs!
-function Trakpak3.BlacklistClass(class,removeit)
+--Ranger Class Blacklisting: Use this function to add NPC classes you don't want to trigger block detection, auto switches, or frogs! Can use the '*' wildcard.
+function Trakpak3.BlacklistClass(class)
 	if not Trakpak3.Blacklist then Trakpak3.Blacklist = {} end
-	if removeit then
-		Trakpak3.Blacklist[class] = nil
-	else
-		Trakpak3.Blacklist[class] = true
-	end
+	Trakpak3.Blacklist[class] = true
 	
 end
+--Blacklist Class (Static). Use this for entities that exist on map start and won't increase or decrease--more efficient than finding them every call. Can use the '*' wildcard.
+function Trakpak3.BlacklistClassStatic(class)
+	if not Trakpak3.BlacklistStatic then Trakpak3.BlacklistStatic = {} end
+	Trakpak3.BlacklistStatic[class] = true
+end
+
+--On map start, put all the static blacklisted entities into a table.
+hook.Add("InitPostEntity","TP3_BlacklistStatic", function()
+	Trakpak3.BlacklistMaster = {} --The static table to stick your static entities into
+	if Trakpak3.BlacklistStatic then
+		for class, v in pairs(Trakpak3.BlacklistStatic) do
+			for k, ent in pairs(ents.FindByClass(class)) do
+				table.insert(Trakpak3.BlacklistMaster, ent)
+			end
+		end
+	end
+end)
 
 --This function retrieves the list of all blacklisted entities
 function Trakpak3.GetBlacklist()
-	local tbl = player.GetAll()
+	local tbl = player.GetAll() --Start with all the players because rangers should never hit them
+	if Trakpak3.BlacklistMaster then table.Add(tbl, Trakpak3.BlacklistMaster) end --Add the static blacklisted entities
 	if Trakpak3.Blacklist then
-		for class, blacked in pairs(Trakpak3.Blacklist) do
+		for class, blacked in pairs(Trakpak3.Blacklist) do --Mix in the live-blacklisted entities and bake on high for 20 minutes
 			if blacked then
 				table.Add(tbl, ents.FindByClass(class))
 			end
@@ -263,6 +277,15 @@ end
 Trakpak3.BlacklistClass("npc_*") --includes thrown grenades
 Trakpak3.BlacklistClass("prop_combine_ball")
 
---Blacklist the goddamn switches
-Trakpak3.BlacklistClass("tp3_switch")
-Trakpak3.BlacklistClass("tp3_diamond")
+--Blacklist all Trakpak3 entities that could possibly cause a problem with signals
+Trakpak3.BlacklistClassStatic("tp3_switch")
+Trakpak3.BlacklistClassStatic("tp3_diamond")
+Trakpak3.BlacklistClassStatic("tp3_switch_lever_anim")
+Trakpak3.BlacklistClassStatic("tp3_signal_master")
+Trakpak3.BlacklistClassStatic("tp3_signal_slave")
+Trakpak3.BlacklistClassStatic("tp3_moveable_bridge")
+Trakpak3.BlacklistClassStatic("tp3_turntable")
+Trakpak3.BlacklistClassStatic("tp3_transfertable")
+Trakpak3.BlacklistClassStatic("tp3_crossing_gate")
+Trakpak3.BlacklistClassStatic("tp3_sign_prop")
+Trakpak3.BlacklistClassStatic("tp3_sign_auto")

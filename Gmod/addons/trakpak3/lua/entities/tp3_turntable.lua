@@ -11,6 +11,7 @@ if SERVER then
 		model = "string",
 		angles = "angle",
 		skin = "number",
+		bodygroups = "string",
 		
 		pod = "entity",
 		exitpoint = "vector",
@@ -44,6 +45,7 @@ if SERVER then
 		
 		self:SetModel(self.model)
 		self:SetSkin(self.skin or 0)
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
 		--Make me a mover, like func_tracktrain or func_movelinear
 		self:PhysicsInit(SOLID_VPHYSICS)

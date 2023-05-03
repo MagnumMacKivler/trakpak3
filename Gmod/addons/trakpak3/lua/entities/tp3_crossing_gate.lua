@@ -43,7 +43,7 @@ if SERVER then
 		--self:SetSolid(SOLID_BSP)
 		
 		if self.skin then self:SetSkin(self.skin) end
-		if self.bodygroups then Trakpak3.SetBodygroups(self, bodygroups) end
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
 		if self.anim_idle then self:ResetSequence(self.anim_idle) end
 		

@@ -219,7 +219,11 @@ end)
 ]]--
 Trakpak3.Net.tp3_blockpack = function(len,ply)
 	print("[Trakpak3] Block Pack Received.")
-	local alldata = net.ReadTable()
+	local data = net.ReadData(len/8)
+	local JSON = util.Decompress(data)
+	local alldata = util.JSONToTable(JSON)
+	
+	--local alldata = net.ReadTable()
 	Trakpak3.Blocks = alldata.BlockData
 	Trakpak3.BlockDims = {}
 	Trakpak3.NodeList = alldata.NodeList
@@ -309,7 +313,8 @@ Trakpak3.Net.tp3_block_hull_update = function(len,ply)
 		end
 	else
 		print("[Trakpak3] Got a block update but blockpack does not exist, requesting a new one...")
-		net.Start("tp3_request_blockpack")
+		net.Start("trakpak3")
+		net.WriteString("tp3_request_blockpack")
 		net.SendToServer()
 	end
 end
@@ -341,7 +346,8 @@ Trakpak3.Net.tp3_logic_gate_update = function(len,ply)
 		end
 	else
 		print("[Trakpak3] Got a logic gate update but logic gate info does not exist, requesting a new one...")
-		net.Start("tp3_request_blockpack")
+		net.Start("trakpak3")
+		net.WriteString("tp3_request_blockpack")
 		net.SendToServer()
 	end
 end

@@ -74,18 +74,20 @@ Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 		print("[Trakpak3] There are no Trakpak3 signal blocks on this map to send to client.")
 	else
 		--print("The table is NOT empty.")
-		--[[
+		
 		local JSON = util.TableToJSON(blockpack)
 		JSON = util.Compress(JSON)
-		util.AddNetworkString("tp3_blockpack")
-		net.Start("tp3_blockpack")
-		net.WriteData(JSON,#JSON)
+		net.Start("trakpak3")
+			net.WriteString("tp3_blockpack")
+			net.WriteData(JSON)
 		net.Send(ply)
-		]]--
+		
+		--[[
 		net.Start("trakpak3")
 			net.WriteString("tp3_blockpack")
 			net.WriteTable(blockpack)
 		net.Send(ply)
+		]]--
 	end
 	
 	--Signals and Cab Signal Positions

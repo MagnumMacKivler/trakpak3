@@ -3228,12 +3228,20 @@ Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 	if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
 	Dispatch.RealData[entname][parm] = value
 	
-	for page, board in pairs(Dispatch.Boards) do
-		for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+	if Dispatch.Boards then
+		for page, board in pairs(Dispatch.Boards) do
+			for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+		end
+	else
+		print("[Trakpak3] Attempted to update UI dispatch boards that didn't exist yet, somehow. This should be fixed the next time the player opens their dispatch board.")
 	end
 	for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
-		for page, board in pairs(ent.Boards) do
-			for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+		if ent.Boards then
+			for page, board in pairs(ent.Boards) do
+				for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+			end
+		else
+			print("[Trakpak3] Attempted to update physical dispatch boards that didn't exist yet, somehow. This should be fixed once they initialize.")
 		end
 	end
 end

@@ -45,7 +45,7 @@ if SERVER then
 		--self:SetSolid(SOLID_BSP)
 		
 		if self.skin then self:SetSkin(self.skin) end
-		if self.bodygroups then for n, p in pairs(string.Explode(" ",self.bodygroups)) do self:SetBodygroup(n,tonumber(p)) end end
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
 		--Keyvalue Validation
 		self:ValidateNumerics()
@@ -111,12 +111,12 @@ if SERVER then
 				--end
 				self.signaltype = sigtype
 			elseif sysname then
-				print("[Trakpak3] Cannot find signal system '"..sysname.."'!")
+				ErrorNoHalt("[Trakpak3] Signal ",self,"has an invalid signal system name '"..sysname.."'! This may cause problems until fixed in the map!")
 			else
-				print("Signal ",self," has no signal system!")
+				ErrorNoHalt("[Trakpak3] Signal ",self," has no signal system set! This may cause problems until fixed in the map!")
 			end
 		else
-			print("[Trakpak3] Signal Table does not exist!")
+			ErrorNoHalt("[Trakpak3] Signal ",self," tried to initialize, but the TP3Signals table does not exist!")
 		end
 	end
 	

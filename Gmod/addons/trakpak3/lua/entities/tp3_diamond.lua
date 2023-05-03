@@ -224,7 +224,7 @@ if CLIENT then
 					local trace = util.TraceLine(tr)
 					local ent = trace.Entity
 					--Seems to exceed the upper limit for sounds playing on a specific entity... need shorter sound?
-					if (ent and ent:IsValid()) and (ent != self["clicker"..n]) then
+					if (ent and ent:IsValid()) and not Trakpak3.IsBlacklisted(ent) and (ent != self["clicker"..n]) then
 						--print("play "..n)
 						self["clicker"..n] = ent
 						ent:EmitSound("Trakpak3.tracksounds.frog1")

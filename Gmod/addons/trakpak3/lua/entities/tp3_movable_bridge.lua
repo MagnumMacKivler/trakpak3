@@ -58,7 +58,7 @@ if SERVER then
 		
 		self:SetModel(self.model)
 		self:SetSkin(self.skin or 0)
-		self:SetBodygroups(self.bodygroups)
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		

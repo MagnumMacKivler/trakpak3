@@ -865,7 +865,7 @@ if CLIENT then
 			local tr = util.TraceLine(trace)
 
 			--Clickety Clack
-			if tr.Hit and tr.Entity:GetClass()=="prop_physics" and not self.froccupied then
+			if tr.Hit and not Trakpak3.IsBlacklisted(tr.Entity) and not self.froccupied then
 				self.froccupied = true
 				self.clicker = tr.Entity
 				if self.clicker:IsValid() then self.clicker:EmitSound("Trakpak3.tracksounds.frog1") end

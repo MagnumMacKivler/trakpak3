@@ -41,7 +41,7 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		--self:SetSolid(SOLID_BSP)
 		if self.skin then self:SetSkin(self.skin) end
-		if self.bodygroups then for n, p in pairs(string.Explode(" ",self.bodygroups)) do self:SetBodygroup(n,tonumber(p)) end end
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
 		--Text alignment
 		local h_align = TEXT_ALIGN_CENTER

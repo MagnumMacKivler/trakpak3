@@ -27,10 +27,7 @@ if SERVER then
 		--self:SetSolid(SOLID_BSP)
 		
 		if self.skin then self:SetSkin(self.skin) end
-		if self.bodygroups then
-			local bga = string.Explode(" ",self.bodygroups)
-			for n, p in pairs(bga) do self:SetBodygroup(n,tonumber(p)) end
-		end
+		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
 		if not self.up_powered then self.up_powered = 0 end
 		if not self.dn_powered then self.dn_powered = 0 end

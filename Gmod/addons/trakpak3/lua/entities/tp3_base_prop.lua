@@ -92,7 +92,7 @@ if SERVER then
 		end
 		
 		if type(bgs)=="table" then
-			for bg, part in pairs(bgs) do self:SetBodygroup(bg, tonumber(part)) end
+			for bg, part in ipairs(bgs) do self:SetBodygroup(bg, tonumber(part)) end
 		end
 	end
 	

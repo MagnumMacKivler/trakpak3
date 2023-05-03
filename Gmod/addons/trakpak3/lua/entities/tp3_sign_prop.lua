@@ -84,7 +84,7 @@ if SERVER then
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		--self:SetSolid(SOLID_BSP)
 		if self.skin then self:SetSkin(self.skin) end
-		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
+		if self.bodygroups then Trakpak3.SetBodygroups(self, self.bodygroups) end
 	end
 	
 	--Disable Physgun

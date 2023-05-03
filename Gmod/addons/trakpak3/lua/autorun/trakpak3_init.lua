@@ -82,7 +82,8 @@ if CLIENT then
 	net.Receive("trakpak3",function(len,ply)
 		local cmd = net.ReadString()
 		local func = Trakpak3.Net[cmd]
-		if func then func(len,ply) end
+		local subtract = 8*(#cmd + 1)--Number of bits to subtract from the message length
+		if func then func(len - subtract,ply) end
 	end)
 	
 	--Fix EyePos, EyeAngles, and EyeVector functions

@@ -27,7 +27,6 @@ if SERVER then
 	function ENT:Initialize()
 		self:ValidateNumerics()
 		local invalid = false
-		
 		--Figure out if it's a slip
 		if string.find(self.model, "slip") then
 			self.slip = true
@@ -151,9 +150,17 @@ if SERVER then
 			
 		end
 
+
+		self.CollisionFeeder = ents.Create("tp3_collision_feeder") 
+		self.CollisionFeeder:SetPos(self:GetPos())
+		self.CollisionFeeder:SetAngles(self:GetAngles())
+		self.CollisionFeeder:Spawn()
+		self.CollisionFeeder.TouchRedirector = self 
+		self.CollisionFeeder:SetParent(self) 
+
+		
 		--Prop Init Stuff
 		self:Switch(false,true)
-		--self:SetTrigger(true)
 		self.trigger_ents = {}
 
 		if invalid then self:SetColor(Color(255,0,0)) end --color it red if no valid DV is found
@@ -231,44 +238,9 @@ if SERVER then
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
 
-	--DIY Triggering based on AABB
-	function ENT:ScanTrigger(prop, idx, pos, unfrozen)
-		local mins = self.abmins
-		local maxs = self.abmaxs
-		
-		if (not mins) or (not maxs) then return end
-		
-		--print("Scanning ",mins,maxs)
-		
-		--local idx = prop:EntIndex()
-		--local phys = prop:GetPhysicsObject()
-		--local unfrozen = phys:IsMotionEnabled()
-		
-		if pos:WithinAABox(mins, maxs) and unfrozen then
-			if not self.trigger_ents[idx] then
-				self.trigger_ents[idx] = true
-				self:StartTouch(prop)
-			end
-		else
-			if self.trigger_ents[idx] then
-				self.trigger_ents[idx] = nil
-				self:EndTouch(prop)
-			end
-		end
-		
-	end
 
 	--Scan for auto-switching and frogs
 	function ENT:Think()
-
-		--Trigger
-		--[[
-		if not self.next_trigger then self.next_trigger = CurTime() + 0.5 end
-		if CurTime() > self.next_trigger then
-			self.next_trigger = CurTime() + 0.5
-			self:ScanTrigger()
-		end
-		]]--
 
 		--Detect approach of incoming trailing props
 		if (self.softoccupied or self.forceoccupied) and (self.behavior>0) and not self.animating and self.autopoint and self.frogpoint and self.bladepoint then
@@ -592,6 +564,7 @@ if SERVER then
 		self.against = false
 		self:SetAutomaticFrameAdvance(false)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		
 		--self:SetSolid(SOLID_BSP)
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		if self.skin then self:SetSkin(self.skin) end
@@ -599,6 +572,9 @@ if SERVER then
 		self.abmins, self.abmaxs = self:WorldSpaceAABB()
 		self.abmins = self.abmins + Vector(-64,-64,0)
 		self.abmaxs = self.abmaxs + Vector(64,64,40)
+
+		self.CollisionFeeder:PlaceCollision(self.abmins,self.abmaxs)
+		
 		self:FindAttachments()
 	end
 
@@ -634,6 +610,9 @@ if SERVER then
 			self.touchents = {}
 			self.hastouchers = false
 		end
+		if (IsValid(ent)) then 
+			self.trigger_ents[ent:EntIndex()] = true
+		end
 
 		if ent:IsValid() and ent:GetClass()=="prop_physics" then
 			self.touchents[ent:EntIndex()] = true
@@ -645,6 +624,10 @@ if SERVER then
 	end
 
 	function ENT:EndTouch(ent)
+		if (IsValid(ent)) then 
+			self.trigger_ents[ent:EntIndex()] = nil
+		end
+	
 		if ent:IsValid() and ent:GetClass()=="prop_physics" then
 			if self.touchents[ent:EntIndex()] then
 				self.touchents[ent:EntIndex()] = nil
@@ -655,6 +638,9 @@ if SERVER then
 					if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
 				end
 			end
+			
+	
+
 
 			local stillhas = false
 			for index, touching in pairs(self.touchents) do
@@ -730,82 +716,6 @@ if SERVER then
 		end
 	end)
 
-	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
-		if Trakpak3 and Trakpak3.SwitchScanIndex and Trakpak3.SwitchMaxIndex then
-
-			local convar = GetConVar("tp3_switch_scanrate")
-			local rate = 5
-			if convar then
-				rate = convar:GetInt() or 5
-			end
-
-			local sw_start = Trakpak3.SwitchScanIndex
-			local sw_end = Trakpak3.SwitchScanIndex + rate
-			local reset = false
-			if sw_end >= Trakpak3.SwitchMaxIndex then
-				sw_end = Trakpak3.SwitchMaxIndex
-				reset = true
-			end
-
-			for k, prop in pairs(ents.FindByClass("prop_physics")) do
-				local idx = prop:EntIndex()
-				local phys = prop:GetPhysicsObject()
-				local pos = prop:GetPos()
-				local unfrozen = false
-
-				if phys:IsValid() then unfrozen = phys:IsMotionEnabled() end
-
-				for n=sw_start, sw_end do
-					local switch = Trakpak3.Switches[n]
-					switch:ScanTrigger(prop, idx, pos, unfrozen)
-				end
-
-			end
-
-			if reset then
-				Trakpak3.SwitchScanIndex = 1
-			else
-				Trakpak3.SwitchScanIndex = sw_end + 1
-			end
-
-
-
-		end
-	end)
-
-	--[[
-	hook.Add("Think","Trakpak3_SwitchTriggerScan",function()
-		if Trakpak3 then
-			if not Trakpak3.NextSwitchTrigger then
-				Trakpak3.NextSwitchTrigger = CurTime() + 0.5
-			elseif CurTime() > Trakpak3.NextSwitchTrigger then
-				Trakpak3.NextSwitchTrigger = Trakpak3.NextSwitchTrigger + 0.5
-
-				local switches = ents.FindByClass("tp3_switch")
-
-				if #switches > 0 then
-
-					for k, prop in pairs(ents.FindByClass("prop_physics")) do
-						local idx = prop:EntIndex()
-						local phys = prop:GetPhysicsObject()
-						local pos = prop:GetPos()
-						local unfrozen = false
-
-						if phys:IsValid() then unfrozen = phys:IsMotionEnabled() end
-
-						for m, switch in pairs(switches) do
-							switch:ScanTrigger(prop, idx, pos, unfrozen)
-						end
-
-					end
-
-				end
-
-			end
-
-		end
-	end)
-	]]--
 	hook.Add("EntityRemoved","Trakpak3_SwitchTriggerDeleteProp",function(ent)
 		if ent:GetClass()=="prop_physics" then
 			local idx = ent:EntIndex()
@@ -837,7 +747,6 @@ if CLIENT then
 				if self:GetNWBool("dumb",false) then color = Color(143,143,143) end
 
 				render.DrawWireframeBox(center, Angle(), center - mins, center - maxs, color, true)
-				--render.DrawLine(mins, maxs)
 			end
 		end
 	end)

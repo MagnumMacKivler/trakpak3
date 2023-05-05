@@ -6,7 +6,7 @@ Trakpak3.Dispatch.MapBoards = {}
 Trakpak3.Dispatch.Loaded = false
 Trakpak3.Dispatch.Attempted = false
 
-hook.Add("InitPostEntity","TP3_DispLoad",function()
+local function tryDispatch()
 	--MsgC(Trakpak3.Magenta,"InitPostEntity! Looking for file trakpak3/dispatch/"..game.GetMap()..".lua")
 	local json = file.Read("trakpak3/dispatch/"..game.GetMap()..".lua","LUA")
 
@@ -58,7 +58,10 @@ hook.Add("InitPostEntity","TP3_DispLoad",function()
 		print("[Trakpak3] Could not locate a suitable Dispatch Board file (trakpak3/dispatch/"..game.GetMap()..".lua).")
 	end
 	Trakpak3.Dispatch.Attempted = true
-end)
+end
+
+hook.Add("InitPostEntity","TP3_DispLoad", tryDispatch)
+hook.Add("PostCleanUpMap","TP3_DispLoad", tryDispatch)
 
 --Receive DS Board request from client
 --Send Dispatch Board data to Client

@@ -12,11 +12,10 @@ local PathConfig = Trakpak3.PathConfig
 				--stand1
 			
 
-hook.Add("InitPostEntity","TP3_PathLoad",function()
+
+local function load_path_configs()
 	local filepath = "trakpak3/pathconfig/"..game.GetMap()..".lua"
 	local json = file.Read(filepath,"LUA")
-
-	
 	if json then --found a file!
 		local ftable = util.JSONToTable(json)
 		if ftable then
@@ -29,8 +28,10 @@ hook.Add("InitPostEntity","TP3_PathLoad",function()
 			
 		end
 	end
-	
-end)
+end 
+
+hook.Add("InitPostEntity","TP3_PathLoad",load_path_configs) 
+hook.Add("PostCleanupMap","TP3_PathLoad", load_path_configs)
 
 function PathConfig.ProcessLogic(signame) --Set Up Signal with Path Info
 	local paths = PathConfig.Signals[signame]

@@ -1,7 +1,7 @@
 --Set up all the signal blocks
 --MsgC(Trakpak3.Magenta,"Running Node Setup\n")
 
-hook.Add("InitPostEntity","TP3_NodeLoad",function()
+local function load_nodes()
 	
 	--print("\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA")
 
@@ -31,7 +31,12 @@ hook.Add("InitPostEntity","TP3_NodeLoad",function()
 	else
 		print("[Trakpak3] Could not locate a suitable node file (trakpak3/nodes/"..game.GetMap()..".lua), the signals are probably not going to work!")
 	end
-end)
+end
+
+
+hook.Add("InitPostEntity","TP3_NodeLoad",load_nodes) 
+hook.Add("PostCleanupMap","TP3_NodeLoad", load_nodes)
+
 
 --util.AddNetworkString("tp3_request_blockpack")
 

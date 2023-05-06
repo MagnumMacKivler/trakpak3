@@ -60,7 +60,7 @@ end
 --Total System Setup in order and shit
 
 
-local function 
+local function SETUP_SIGNALS()
 	for _, block in pairs(ents.FindByClass("tp3_signal_block")) do
 		block:InitialBroadcast()
 	end

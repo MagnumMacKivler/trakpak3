@@ -151,14 +151,7 @@ if SERVER then
 		end
 
 
-		self.CollisionFeeder = ents.Create("tp3_collision_feeder") 
-		self.CollisionFeeder:SetPos(self:GetPos())
-		self.CollisionFeeder:SetAngles(self:GetAngles())
-		self.CollisionFeeder:Spawn()
-		self.CollisionFeeder.TouchRedirector = self 
-		self.CollisionFeeder:SetParent(self) 
 
-		
 		--Prop Init Stuff
 		self:Switch(false,true)
 		self.trigger_ents = {}
@@ -182,6 +175,14 @@ if SERVER then
 		self.behavior = behavior
 		if self.slip then self.behavior = 0 end --Force slip switches to be dumb due to the complexity
 		self.autoscan = autoscan
+		if (self.autoscan) then 		
+			self.CollisionFeeder = ents.Create("tp3_collision_feeder") 
+			self.CollisionFeeder:SetPos(self:GetPos())
+			self.CollisionFeeder:SetAngles(self:GetAngles())
+			self.CollisionFeeder:Spawn()
+			self.CollisionFeeder.TouchRedirector = self 
+			self.CollisionFeeder:SetParent(self) 
+		end 
 		if (self.behavior==-1) or not self.autoscan then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
 	end
@@ -572,8 +573,10 @@ if SERVER then
 		self.abmins, self.abmaxs = self:WorldSpaceAABB()
 		self.abmins = self.abmins + Vector(-64,-64,0)
 		self.abmaxs = self.abmaxs + Vector(64,64,40)
-
-		self.CollisionFeeder:PlaceCollision(self.abmins,self.abmaxs)
+		
+		if (self.CollisionFeeder) then  // No need to check if is valid, created by us. 
+			self.CollisionFeeder:PlaceCollision(self.abmins,self.abmaxs)
+		end 
 		
 		self:FindAttachments()
 	end

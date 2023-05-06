@@ -58,17 +58,20 @@ for k, filename in pairs(file.Find("trakpak3/signalsystems/"..map.."/*.lua","LUA
 end
 
 --Total System Setup in order and shit
-hook.Add("InitPostEntity","Trakpak3_SystemSetup",function()
-	
-	--Get Signal Block states out there
+
+
+local function SETUP_SIGNALS()
 	for _, block in pairs(ents.FindByClass("tp3_signal_block")) do
 		block:InitialBroadcast()
 	end
 	for _, gate in pairs(ents.FindByClass("tp3_logic_gate")) do
 		gate:InitialBroadcast()
-	end
-	
-end)
+	end	
+end 
+
+
+hook.Add("InitPostEntity","Trakpak3_SystemSetup",SETUP_SIGNALS)
+hook.Add("PostCleanUpMap","Trakpak3_ReSystemSetup",SETUP_SIGNALS)
 
 --Signal System Packing
 --[[

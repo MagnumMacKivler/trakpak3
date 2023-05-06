@@ -184,7 +184,7 @@ function Trakpak3.BlacklistClassStatic(class)
 end
 
 --On map start, put all the static blacklisted entities into a table.
-hook.Add("InitPostEntity","TP3_BlacklistStatic", function()
+local function blacklist_post_entities()
 	Trakpak3.BlacklistMaster = {} --The static table to stick your static entities into
 	if Trakpak3.BlacklistStatic then
 		for class, v in pairs(Trakpak3.BlacklistStatic) do
@@ -193,7 +193,12 @@ hook.Add("InitPostEntity","TP3_BlacklistStatic", function()
 			end
 		end
 	end
-end)
+end
+
+hook.Add("InitPostEntity","TP3_BlacklistStatic",blacklist_post_entities)
+hook.Add("PostCleanupMap","TP3_BlacklistStatic",blacklist_post_entities)
+
+
 
 --This function retrieves the list of all blacklisted entities
 function Trakpak3.GetBlacklist()

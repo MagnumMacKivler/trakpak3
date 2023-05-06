@@ -3307,7 +3307,7 @@ function Dispatch.OpenDispatcher()
 
 	if not Dispatch.didfirstopen then --Open Page 1 if first time
 		Dispatch.didfirstopen = true
-		Dispatch.page = math.min(Dispatch.page, 1) --Unless there are 0 pages, that is.
+		Dispatch.page = math.min(Dispatch.page or 0, 1) --Unless there are 0 pages, that is.
 	else
 		Dispatch.page = Dispatch.page or 0
 	end
@@ -3346,7 +3346,7 @@ function Dispatch.OpenDispatcher()
 		if Dispatch.page < #Dispatch.Boards then
 			Dispatch.PopulatePage(Dispatch.Panels.canvas, Dispatch.page + 1)
 		else
-			Dispatch.PopulatePage(Dispatch.Panels.canvas, 1)
+			Dispatch.PopulatePage(Dispatch.Panels.canvas, math.min(1, #Dispatch.Boards))
 		end
 	end
 	

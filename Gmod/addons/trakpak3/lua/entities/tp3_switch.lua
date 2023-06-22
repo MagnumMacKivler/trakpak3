@@ -781,6 +781,13 @@ if CLIENT then
 				self.froccupied = true
 				self.clicker = tr.Entity
 				if self.clicker:IsValid() then self.clicker:EmitSound("Trakpak3.tracksounds.frog1") end
+			elseif tr.Hit and not Trakpak3.IsBlacklisted(tr.Entity) and not self.froccupied and tr.Entity.CustomFrogSound then
+				self.froccupied = true
+				self.clicker = tr.Entity
+				if self.clicker:IsValid() then self.clicker:EmitSound(tr.Entity.CustomFrogSound,tr.Entity:GetPos(),tr.Entity:EntIndex(),CHAN_AUTO,1,100,0,1) end
+			elseif not tr.Hit and self.froccupied and tr.Entity.CustomFrogSound then
+				self.froccupied = false
+				if self.clicker:IsValid() then self.clicker:EmitSound(tr.Entity.CustomFrogSound,tr.Entity:GetPos(),tr.Entity:EntIndex(),CHAN_AUTO,1,100,0,1) end
 			elseif not tr.Hit and self.froccupied then
 				self.froccupied = false
 				if self.clicker:IsValid() then self.clicker:EmitSound("Trakpak3.tracksounds.frog1") end

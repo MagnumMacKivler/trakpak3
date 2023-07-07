@@ -80,19 +80,21 @@ hook.Add("DrawOverlay","Trakpak3_SignalVision",function()
 		local ev = EyeVector()
 		--find which signal you're looking at
 		for k, signal in pairs(SignalVision.signals) do
-			local disp = (signal:GetPos() - ep)
-			local dist = math.max(disp:Length(),1)
-			local lvec = disp:GetNormalized()
-			local viewdot = ev:Dot(lvec)
-			if viewdot>0.95 then
-				
-				if (viewdot > maxdot) then
-					maxdot = viewdot
-					SignalVision.selected = signal
+			if signal and signal:IsValid() then
+				local disp = (signal:GetPos() - ep)
+				local dist = math.max(disp:Length(),1)
+				local lvec = disp:GetNormalized()
+				local viewdot = ev:Dot(lvec)
+				if viewdot>0.95 then
+					
+					if (viewdot > maxdot) then
+						maxdot = viewdot
+						SignalVision.selected = signal
+					end
+					
+					table.insert(others,signal)
+					table.insert(distances,math.Clamp(dist,0,16384))
 				end
-				
-				table.insert(others,signal)
-				table.insert(distances,math.Clamp(dist,0,16384))
 			end
 		end
 		
@@ -170,7 +172,7 @@ net.Receive("Trakpak3_GetSignalSystems",function(length, ply)
 end)
 ]]--
 Trakpak3.Net.trakpak3_getsignalsystems = function(len,ply)
-	Trakpak3.UsedSignalSystems = util.TableToJSON(net.ReadString())
+	Trakpak3.UsedSignalSystems = util.JSONToTable(net.ReadString())
 end
 
 local colortable = { --Shamelessly copy-pasted from cl_sigedit.lua

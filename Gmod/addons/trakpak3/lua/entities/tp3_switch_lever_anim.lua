@@ -38,6 +38,25 @@ if SERVER then
 		OnThrownDiverging = "output"
 	}
 	
+	local function NotifySwitchBlocked(condition, ply, blocker) --All in one for sending chat messages to client trying to throw a switch.
+		if not condition or not ply then return end
+		--Valid conditions are "blocked" "interlocked" or "locked". Try saying that three times fast...
+		
+		local ent = "Null Entity"
+		local model = "No Model"
+		if blocker and blocker:IsValid() then
+			ent = tostring(blocker)
+			model = blocker:GetModel()
+		end
+		
+		net.Start("trakpak3")
+		net.WriteString("tp3_switchblocked_notify")
+			net.WriteString(condition)
+			net.WriteString(ent)
+			net.WriteString(model)
+		net.Send(ply)
+	end
+	
 	function ENT:Initialize()
 		self:ValidateNumerics()
 		
@@ -187,15 +206,18 @@ if SERVER then
 		end
 	end
 	
-	--Force the switch stand to throw to the specified state (a result of trailing)
+	--Force the switch stand to throw to the specified state (only via trailing a Safety Throw switch)
 	function ENT:StandThrowTo(state)
+		self.targetstate = state
 		self:Actuate(state)
 	end
 	
 	--Break the switch stand temporarily (a result of trailing)
 	function ENT:StandBreak(state, vel)
-		self:SetTargetState(state)
-		self.state = state
+		--self:SetTargetState(state)
+		self.targetstate = state --Calling this instead of self:SetTargetState to prevent the stand from going through its throw cycle.
+		if state then self:CompleteThrowDV() else self:CompleteThrowMN() end
+		--self.state = state
 		self.broken = true
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
@@ -230,7 +252,7 @@ if SERVER then
 		self.broken = false
 		self:SetCollisionGroup(COLLISION_GROUP_NONE)
 		self:PhysicsInitStatic(SOLID_VPHYSICS)
-		self:SetSolid(SOLID_BSP)
+		--self:SetSolid(SOLID_BSP)
 		self:SetPos(self.originalpos)
 		self:SetAngles(self.originalang)
 		
@@ -382,9 +404,9 @@ if SERVER then
 		self:SetNWInt("state",1)
 	end
 	
-	--Animate Yourself - should be called after all other state-dependent logic is done!
+	--Begin animations. This function is called on the switch's Think cycle when current state =/= target state.
 	function ENT:Actuate(state)
-		self:SetTargetState(state)
+		--self:SetTargetState(state)
 		if state then --throw it open
 			self.state = true
 			if self.animate then
@@ -450,44 +472,35 @@ if SERVER then
 		if self.switch then me_occupied, me_blocker = self.switch:QuickOccupancyCheck() end
 		if self.linked_stand_valid and self.linked_stand_ent.switch then linked_occupied, linked_blocker = self.linked_stand_ent.switch:QuickOccupancyCheck() end
 		
+		local b = me_blocker or linked_blocker
+		
 		if not me_occupied and not linked_occupied then
 			self.targetstate = state
 			if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
-		elseif ply and (me_blocker or linked_blocker) then --Notify player of the blocking entity
-			local b = me_blocker or linked_blocker
-			local data = {
-				ent = tostring(b)
-			}
-			if b:IsValid() then data.model = b:GetModel() end
-			net.Start("trakpak3")
-			net.WriteString("tp3_switchblocked_notify")
-				net.WriteTable(data)
-			net.Send(ply)
+		elseif ply and b then --Notify player of the blocking entity
+			NotifySwitchBlocked("blocked", ply, b)
+			
 		end
 	end
-	
-	--util.AddNetworkString("tp3_switchblocked_notify")
-
 	
 	--On +Use
 	function ENT:Use(ply)
 		if self.broken then
 			self:StandFix()
-		elseif not self.locked then
-			if ply and not self.animating and self.occupied then --Transmit blocking message
-				local data = {}
-				if self.switch and self.switch.blocking_ent then
-					data.ent = tostring(self.switch.blocking_ent)
-					data.model = self.switch.blocking_ent:GetModel()
-				end
-				--net.Start("tp3_switchblocked_notify")
-				net.Start("trakpak3")
-				net.WriteString("tp3_switchblocked_notify")
-					net.WriteTable(data)
-				net.Send(ply)
-			elseif not self.animating and not self.occupied then --Throw it normally
-				self:SetTargetState(not self.targetstate)
+		elseif self.locked and ply then --Switch is Locked, notify player.
+			NotifySwitchBlocked("locked", ply)
+		elseif self.interlocked and ply then --Switch is Interlocked, notify player.
+			NotifySwitchBlocked("interlocked", ply)
+		elseif self.occupied and ply then --Switch is blocked, notify player
+				
+			if self.switch and self.switch.blocking_ent then
+				NotifySwitchBlocked("blocked", ply, self.switch.blocking_ent)
+			else
+				NotifySwitchBlocked("blocked", ply) --This indicates a bug
 			end
+				
+		elseif not self.animating then --Switch is clear, unlocked, and not interlocked, throw it normally!
+			self:SetTargetState(not self.targetstate)
 		end
 	end
 	
@@ -627,22 +640,26 @@ if SERVER then
 end
 
 if CLIENT then
-	--[[
-	net.Receive("tp3_switchblocked_notify", function()
-		local data = net.ReadTable()
-		if data.ent and data.model then
-			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked by "..data.ent.." ("..data.model..").")
-		else
-			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
-		end
-	end)
-	]]--
+	local chatBasic = Color(191,223,255)
+	local chatEmphasis = Color(255,255,127)
+	
 	Trakpak3.Net.tp3_switchblocked_notify = function(len,ply)
-		local data = net.ReadTable()
-		if data.ent and data.model then
-			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked by "..data.ent.." ("..data.model..").")
-		else
-			chat.AddText("[Trakpak3] The switch you are attempting to throw is blocked.")
+		local condition = net.ReadString()
+		local ent = net.ReadString()
+		local model = net.ReadString()
+		if condition=="blocked" then
+			if ent and model then
+				chat.AddText(chatBasic, "[Trakpak3] The switch you are attempting to throw is blocked by "..ent, chatEmphasis, " ("..model..").")
+			else
+				chat.AddText(chatBasic, "[Trakpak3] The switch you are attempting to throw is blocked by something unknown. ", chatEmphasis, "This is probably a bug!")
+			end
+		LocalPlayer():EmitSound("buttons/button16.wav")
+		elseif condition=="locked" then
+			chat.AddText(chatBasic, "[Trakpak3] The switch you are attempting to throw is locked, and cannot be thrown by hand. ", chatEmphasis, "Try the dispatch board instead!")
+			LocalPlayer():EmitSound("buttons/button16.wav")
+		elseif condition=="interlocked" then
+			chat.AddText(chatBasic, "[Trakpak3] The switch you are attempting to throw is interlocked by one or more signals. ", chatEmphasis, "Drop the signals in the dispatch board first!")
+			LocalPlayer():EmitSound("buttons/button16.wav")
 		end
 	end
 	

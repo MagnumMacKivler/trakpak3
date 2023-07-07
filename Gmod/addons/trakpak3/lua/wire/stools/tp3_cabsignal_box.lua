@@ -34,28 +34,56 @@ function TOOL.BuildCPanel(panel)
 	
 	--Model Selector
 	local standardmodels = {
-		"models/gsgtrainprops/parts/cabsignals/cab_signal_box.mdl",
-		"models/gsgtrainprops/parts/antennae/sinclair.mdl",
-		"models/gsgtrainprops/parts/antennae/firecracker.mdl",
+		--HL2
 		"models/props_lab/harddrive02.mdl",
 		"models/props_lab/reciever01a.mdl",
 		"models/props_lab/reciever01b.mdl",
 		"models/props_lab/reciever01d.mdl",
+		
+		--Wire/PHX
 		"models/beer/wiremod/gps.mdl",
 		"models/beer/wiremod/targetfinder.mdl",
 		"models/jaanus/wiretool/wiretool_controlchip.mdl",
-		"models/hunter/plates/plate025x025.mdl"
+		"models/hunter/plates/plate025x025.mdl",
+		
+		--GSG Train Props
+		"models/gsgtrainprops/parts/cabsignals/cab_signal_box.mdl",
+		"models/gsgtrainprops/parts/antennae/sinclair.mdl",
+		"models/gsgtrainprops/parts/antennae/firecracker.mdl",
+		
+		--Linnie
+		"models/parts/radio.mdl",
+		"models/parts/radio_msa.mdl",
+		--WestAusMan
+		"models/wam98_trainparts/radios/radio_double_din_headunit.mdl",
+		--Titus
+		"models/titus's_propper_model_pack_2.4/propper/cabradios/cabradionew.mdl",
+		--Goomz
+		"models/goomzmodels/details/radiorack.mdl"
 	}
+	
 	
 	local models = {}
 	
 	for k, modelname in pairs(standardmodels) do
-		models[modelname] = {["wire_tp3_cabsignal_box_model"] = modelname}
+		--models[modelname] = {["wire_tp3_cabsignal_box_model"] = modelname}
+		models[modelname] = {}
 	end
-	local msel = vgui.Create("DModelSelect", panel)
-	msel:SetModelList( models, "", false, false)
-	panel:AddPanel(msel)
+	--local msel = vgui.Create("DModelSelect", panel)
+	--msel:SetModelList( models, "", false, false)
+	--panel:AddPanel(msel)
+
+	WireDermaExts.ModelSelect(panel,"wire_tp3_cabsignal_box_model", models, 4, true)
 	
+	local black = Color(0,0,0)
+	
+	local label = vgui.Create("DLabel",panel)
+	label:SetText("Tip: you can set custom models for your cab signal box using the console command 'wire_tp3_cabsignal_box_model'!")
+	--label:SetContentAlignment(5)
+	label:SetSize(1,32)
+	label:SetTextColor(black)
+	label:SetWrap(true)
+	panel:AddPanel(label)
 	
 	--SPAD Speed Selector
 	local slider = vgui.Create("DNumSlider",panel)
@@ -70,7 +98,7 @@ function TOOL.BuildCPanel(panel)
 	local label = vgui.Create("DLabel",panel)
 	label:SetText("(Signal Passed At Danger)")
 	label:SetContentAlignment(5)
-	label:SetTextColor(Color(0,0,0))
+	label:SetTextColor(black)
 	panel:AddPanel(label)
 	
 	--SPAR Speed Selector
@@ -116,7 +144,7 @@ function TOOL.BuildCPanel(panel)
 	
 	local label = vgui.Create("DLabel",panel)
 	label:SetText("By default, the cab signal box will check for signals on the leading edge of the 'root' entity (the topmost parent). If you parent the box to the locomotive body or to something parented to the locomotive body, it will work correctly. If for some reason you CAN'T parent it to the locomotive body, wire the BasePropOverride [ENTITY] input to the locomotive's base prop.")
-	label:SetTextColor(Color(63,63,63))
+	label:SetTextColor(black)
 	label:SetSize(1,128)
 	label:SetWrap(true)
 	panel:AddPanel(label)

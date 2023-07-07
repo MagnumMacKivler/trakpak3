@@ -172,6 +172,7 @@ if SERVER then
 
 	--Set local parameters
 	function ENT:SwitchSetup(behavior, autoscan)
+		print(self, " Performing Switch Setup!")
 		self.behavior = behavior
 		if self.slip then self.behavior = 0 end --Force slip switches to be dumb due to the complexity
 		self.autoscan = autoscan
@@ -182,6 +183,11 @@ if SERVER then
 			self.CollisionFeeder:Spawn()
 			self.CollisionFeeder.TouchRedirector = self 
 			self.CollisionFeeder:SetParent(self) 
+			
+			self.abmins, self.abmaxs = self:WorldSpaceAABB()
+			self.abmins = self.abmins + Vector(-64,-64,0)
+			self.abmaxs = self.abmaxs + Vector(64,64,40)
+			self.CollisionFeeder:PlaceCollision(self.abmins,self.abmaxs)
 		end 
 		if (self.behavior==-1) or not self.autoscan then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
@@ -274,30 +280,6 @@ if SERVER then
 				end
 			end
 		end
-
-		--Frog Sounds (Moved to Client)
-		--[[
-		if self.softoccupied and self.frogpoint then
-
-			local trace = {
-				start = self.frogpoint,
-				endpos = self.frogpoint + Vector(0,0,8),
-				filter = Trakpak3.GetBlacklist(),
-				ignoreworld = true
-			}
-			local tr = util.TraceLine(trace)
-
-			--Clickety Clack
-			if tr.Hit and not self.froccupied then
-				self.froccupied = true
-				self.clicker = tr.Entity
-				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
-			elseif not tr.Hit and self.froccupied then
-				self.froccupied = false
-				if self.clicker:IsValid() then self.clicker:EmitSound("gsgtrainsounds/wheels/wheels_random4.wav",75,math.random(95,105)) end
-			end
-		end
-		]]--
 
 		local turbothink = false
 
@@ -607,58 +589,44 @@ if SERVER then
 	end
 
 	--Trigger Functions
+	
+	--These are meant for "Soft" Occupancy, and use the switch's AABB for detection. Soft occupancy merely makes the switch run the "expensive" ranger code to check for actual occupancy.
+	
 	--By the way, an interesting quirk about how prop triggers work - apparently it works great with trains because in addition to sitting on top of the rails, the flanges go down into the switch model's space a bit. With props that just sit on top of a surface, it doesn't work as well.
-	function ENT:StartTouch(ent)
-		if not self.touchents then
-			self.touchents = {}
+	
+	--The above note is no longer applicable to these switches since they use tp3_collision_feeders now.
+	
+	function ENT:StartTouch(ent, caller)
+		if not self.trigger_ents then --Initialize the list if it for some reason didn't initialize before
+			self.trigger_ents = {}
 			self.hastouchers = false
 		end
-		if (IsValid(ent)) then 
-			self.trigger_ents[ent:EntIndex()] = true
-		end
-
-		if ent:IsValid() and ent:GetClass()=="prop_physics" then
-			self.touchents[ent:EntIndex()] = true
-			if not self.hastouchers then
+		if ent and ent:IsValid() and not Trakpak3.IsBlacklisted(ent) then --This is an entity the switch cares about
+			self.trigger_ents[ent] = true
+			if not self.hastouchers then --Call StartTouchAll if this is the first entity
 				self:StartTouchAll()
 				self.hastouchers = true
 			end
-		end
+		end		
 	end
 
-	function ENT:EndTouch(ent)
-		if (IsValid(ent)) then 
-			self.trigger_ents[ent:EntIndex()] = nil
-		end
-	
-		if ent:IsValid() and ent:GetClass()=="prop_physics" then
-			if self.touchents[ent:EntIndex()] then
-				self.touchents[ent:EntIndex()] = nil
-				if self.derail and not self.switchstate then
-					--Apply a surface prop to slow the train down
-					local physobj = ent:GetPhysicsObject()
-					local physprop = {GravityToggle = true, Material = "metal"}
-					if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
-				end
-			end
-			
-	
+	function ENT:EndTouch(ent, caller)
 
-
-			local stillhas = false
-			for index, touching in pairs(self.touchents) do
-				if Entity(index):IsValid() and touching then
-					stillhas = true
-				else
-					self.touchents[index] = nil
-				end
-			end
-			if not stillhas then
-				self.hastouchers = false
-				self:EndTouchAll()
+		if ent and ent:IsValid() and self.trigger_ents[ent] then --The entity is valid and is registered as a touching entity
+			self.trigger_ents[ent] = nil
+			if self.derail and not self.switchstate then --If the switch is a derail in the derailing position (normal),
+				--Apply a surface prop to slow the train down
+				local physobj = ent:GetPhysicsObject()
+				local physprop = {GravityToggle = true, Material = "metal"}
+				if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
 			end
 		end
-
+		
+		if table.IsEmpty(self.trigger_ents) then --Call EndTouchAll if the entity has no touching ents left
+			self.hastouchers = false
+			self:EndTouchAll()
+		end
+		
 	end
 
 	function ENT:StartTouchAll()
@@ -775,15 +743,24 @@ if CLIENT then
 				ignoreworld = true
 			}
 			local tr = util.TraceLine(trace)
-
+			
+			--Check validity and calculate the frog sound
+			local function PlayFrogSound(ent)
+				if not ent then return end
+				if not ent:IsValid() then return end
+				
+				local snd = ent.CustomFrogSound or "Trakpak3.tracksounds.frog1" --If the entity has self.CustomFrogSound defined on client, it will play that; otherwise, it will default to Trakpak3's frog sound.
+				ent:EmitSound(snd)
+			end
+			
 			--Clickety Clack
 			if tr.Hit and not Trakpak3.IsBlacklisted(tr.Entity) and not self.froccupied then
 				self.froccupied = true
 				self.clicker = tr.Entity
-				if self.clicker:IsValid() then self.clicker:EmitSound("Trakpak3.tracksounds.frog1") end
+				PlayFrogSound(self.clicker)
 			elseif not tr.Hit and self.froccupied then
 				self.froccupied = false
-				if self.clicker:IsValid() then self.clicker:EmitSound("Trakpak3.tracksounds.frog1") end
+				PlayFrogSound(self.clicker)
 			end
 
 			self:NextThink(CurTime() + 0.1)

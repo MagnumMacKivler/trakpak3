@@ -216,6 +216,7 @@ end
 
 function Trakpak3.IsBlacklisted(ent) --Check if a specific entity would be blacklisted.
 	if not ent:IsValid() then return true end
+	if ent:IsPlayer() then return true end --Automatically fail all players
 	local class = ent:GetClass()
 	
 	

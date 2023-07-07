@@ -841,10 +841,10 @@ function Trakpak3.OpenSigEdit(page)
 		local label = vgui.Create("DLabel",bpanel)
 		label:SetText("Rule Override: if this signal type can't display the rule chosen in the 'Rule Name' box, select a rule it can (and should) display instead in the box below. The signal will use the selected Skins / Bodygroups / Anim Cycle from the override rule.")
 		label:SetWrap(true)
-		label:SetSize(1,128)
+		label:SetSize(1,96)
 		label:Dock(TOP)
 		label:SetContentAlignment(8)
-		label:DockMargin(8,8,8,8)
+		label:DockMargin(8,32,8,8)
 		label:SetTextColor(Color(63,63,63))
 		
 		local cbox = vgui.Create("DComboBox", bpanel)
@@ -970,7 +970,7 @@ function Trakpak3.OpenSigEdit(page)
 		button:Dock(BOTTOM)
 		button:SetText("Write Logic Function")
 		button.DoClick = function()
-			Trakpak3.SigEdit.WriteLogicFunction()
+			Trakpak3.SigEdit.WriteLogicFunction(true)
 		end
 		
 		local panel = vgui.Create("DPanel",conpanel)
@@ -2385,7 +2385,9 @@ end
 function Trakpak3.SigEdit.ExploreNode(ntable,ilevel)
 	local nodes = Trakpak3.SigEdit.panels.nodes
 	local indent = string.rep("\t", ilevel)
+	--print("Exploring Node: ",ntable)
 	if not ntable then
+		--print("[Trakpak3] The logic function has no initial node!")
 		return false
 	elseif ntable.aspect then --Node is a return
 		return indent.."return \""..(ntable.aspect).."\""
@@ -2401,15 +2403,23 @@ function Trakpak3.SigEdit.ExploreNode(ntable,ilevel)
 			if nextresult then
 				out = out..nextresult.."\n"..indent.."end"
 				return out
-			else return false end
-		else return false end
+			else
+				print("[Trakpak3] The logic function has an unterminated 'Else'!") 
+				return false
+			end
+		else
+			print("[Trakpak3] The logic function has an unterminated 'Then'!")
+			return false
+		end
 	end
 end
 
-function Trakpak3.SigEdit.WriteLogicFunction()
+function Trakpak3.SigEdit.WriteLogicFunction(bitch)
+	print("Writing Logic Function...")
 	local nodes = Trakpak3.SigEdit.panels.nodes
 	local func_text = "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC, NEXTDIV)\n"
 	local func_body = Trakpak3.SigEdit.ExploreNode(nodes[2],1)
+	print(func_body)
 	if func_body then --function wrote successfully
 		func_text = func_text..func_body.."\nend"
 		RunString("Trakpak3.SigEdit.LogicFunction = "..func_text)
@@ -2419,7 +2429,7 @@ function Trakpak3.SigEdit.WriteLogicFunction()
 	else
 		Trakpak3.SigEdit.LogicFunction = function() return false end
 		Trakpak3.SigEdit.func_text = nil
-		ErrorNoHalt("For some reason, the logic function could not write properly! This could be due to an invalid node.")
+		if bitch then ErrorNoHalt("[Trakpak3] For some reason, the logic function could not write properly! This could be due to an invalid node.") end
 	end
 	Trakpak3.SigEdit.UpdateLogLabel(Trakpak3.SigEdit.panels.sim_loglabel)
 end
@@ -2566,7 +2576,7 @@ end
 
 --Save/Load
 function Trakpak3.SigEdit.SaveSigEdit(sysname)
-	Trakpak3.SigEdit.WriteLogicFunction()
+	Trakpak3.SigEdit.WriteLogicFunction(false)
 	local ftable = {}
 	ftable.sysname = sysname
 	ftable.rules = Trakpak3.SigEdit.rules
@@ -2580,8 +2590,8 @@ function Trakpak3.SigEdit.SaveSigEdit(sysname)
 	file.CreateDir("trakpak3/signalsystems")
 	file.Write("trakpak3/signalsystems/"..sysname..".txt", json)
 	local gray = Color(127,255,255)
-	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/signalsystems/"..sysname..".txt! To include it with this map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/signalsystems/",Color(255,255,0),game.GetMap().."/!")
-end
+	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/signalsystems/"..sysname..".txt! To include it with this map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/signalsystems/",Color(255,255,0),"<your map>/!")
+end 
 
 function Trakpak3.SigEdit.LoadSigEdit(sysname)
 	local json = file.Read("trakpak3/signalsystems/"..sysname..".txt", "DATA")

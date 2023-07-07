@@ -108,10 +108,12 @@ if SERVER then
 			"LastSignalSpeed [STRING]",
 			"LastSignalSpeedNum",
 			"LastSignalDescription [STRING]",
+			"LastSignal [ENTITY]",
 			"NextSignalAspect [STRING]",
 			"NextSignalSpeed [STRING]",
 			"NextSignalSpeedNum",
 			"NextSignalDescription [STRING]",
+			"NextSignal [ENTITY]",
 			"EmBrake",
 			"TrainTag [STRING]"
 		}
@@ -124,11 +126,13 @@ if SERVER then
 		WireLib.TriggerOutput(self,"LastSignalSpeed","FULL")
 		WireLib.TriggerOutput(self,"LastSignalSpeedNum",Trakpak3.FULL)
 		WireLib.TriggerOutput(self,"LastSignalDescription","No Description")
+		WireLib.TriggerOutput(self,"LastSignal",NULL)
 		
 		WireLib.TriggerOutput(self,"NextSignalAspect","None")
 		WireLib.TriggerOutput(self,"NextSignalSpeed","FULL")
 		WireLib.TriggerOutput(self,"NextSignalSpeedNum",Trakpak3.FULL)
 		WireLib.TriggerOutput(self,"NextSignalDescription","No Description")
+		WireLib.TriggerOutput(self,"NextSignal",NULL)
 		
 		--Variable Init
 		self.nextsignal = nil
@@ -252,11 +256,13 @@ if SERVER then
 				WireLib.TriggerOutput(self,"LastSignalSpeed","FULL")
 				WireLib.TriggerOutput(self,"LastSignalSpeedNum",Trakpak3.FULL)
 				WireLib.TriggerOutput(self,"LastSignalDescription","No Description")
+				WireLib.TriggerOutput(self,"LastSignal",NULL)
 				
 				WireLib.TriggerOutput(self,"NextSignalAspect","None")
 				WireLib.TriggerOutput(self,"NextSignalSpeed","FULL")
 				WireLib.TriggerOutput(self,"NextSignalSpeedNum",Trakpak3.FULL)
 				WireLib.TriggerOutput(self,"NextSignalDescription","No Description")
+				WireLib.TriggerOutput(self,"NextSignal",NULL)
 				
 				WireLib.TriggerOutput(self,"EmBrake",0)
 			end
@@ -293,6 +299,7 @@ if SERVER then
 					WireLib.TriggerOutput(self,"NextSignalSpeed",speedname or "FULL")
 					WireLib.TriggerOutput(self,"NextSignalSpeedNum",speedcode or Trakpak3.FULL)
 					WireLib.TriggerOutput(self,"NextSignalDescription",desc or "No Description")
+					WireLib.TriggerOutput(self,"NextSignal",nextsig or NULL)
 				end
 			end
 		end
@@ -357,7 +364,7 @@ if SERVER then
 		return true
 	end
 
-	
+	--Function called when the train passes a new signal
 	function ENT:PassSignal(home_signal, next_signal)
 		--Get the signal entity we just passed
 		local homesig, homevalid = Trakpak3.FindByTargetname(home_signal)
@@ -378,6 +385,7 @@ if SERVER then
 				WireLib.TriggerOutput(self,"LastSignalSpeed",speedname or "FULL")
 				WireLib.TriggerOutput(self,"LastSignalSpeedNum",speedcode or Trakpak3.FULL)
 				WireLib.TriggerOutput(self,"LastSignalDescription",desc or "No Description")
+				WireLib.TriggerOutput(self,"LastSignal",homesig or NULL)
 			else
 				clear = true
 			end
@@ -390,6 +398,7 @@ if SERVER then
 			WireLib.TriggerOutput(self,"LastSignalSpeed","FULL")
 			WireLib.TriggerOutput(self,"LastSignalSpeedNum",Trakpak3.FULL)
 			WireLib.TriggerOutput(self,"LastSignalDescription","No Description")
+			WireLib.TriggerOutput(self,"LastSignal",NULL)
 		end
 		
 		--Get Next signal
@@ -412,6 +421,7 @@ if SERVER then
 				WireLib.TriggerOutput(self,"NextSignalSpeed",speedname or "FULL")
 				WireLib.TriggerOutput(self,"NextSignalSpeedNum",n_speedcode or Trakpak3.FULL)
 				WireLib.TriggerOutput(self,"NextSignalDescription",desc or "No Description")
+				WireLib.TriggerOutput(self,"NextSignal",nextsig or NULL)
 			else
 				clear = true
 			end
@@ -425,6 +435,7 @@ if SERVER then
 			WireLib.TriggerOutput(self,"NextSignalSpeed","FULL")
 			WireLib.TriggerOutput(self,"NextSignalSpeedNum",Trakpak3.FULL)
 			WireLib.TriggerOutput(self,"NextSignalDescription","No Description")
+			WireLib.TriggerOutput(self,"NextSignal",NULL)
 		end
 		
 		--Test overspeed trips

@@ -61,12 +61,12 @@ Trakpak3.Net.tp3_register_sign = function(len,ply)
 	local ent = net.ReadEntity()
 	local JSON = net.ReadString()
 	local data = util.JSONToTable(JSON)
-	local index = net.ReadUInt(8)
+	local index = net.ReadUInt(16)
 	
 	--On-Delivery Processing
 	
 	--Font
-	local font = SignText.GetFont(data.text_font, data.text_res, data.text_weight, data.text_it, data.text_un, data.text_st, data.text_sh)
+	local font = SignText.GetFont(data.text_font, data.text_res, data.text_weight, data.text_it, data.text_un, false, false)
 	
 	--Map Lighting
 	

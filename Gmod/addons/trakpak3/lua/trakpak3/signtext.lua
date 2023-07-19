@@ -35,7 +35,7 @@ function Trakpak3.SignText.SyncSign(ent, data, index, ply)
 		net.WriteEntity(ent)
 		local json = util.TableToJSON(data)
 		net.WriteString(json)
-		net.WriteUInt(index,8)
+		net.WriteUInt(index,16)
 	if ply then net.Send(ply) else net.Broadcast() end
 end
 

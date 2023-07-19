@@ -408,7 +408,7 @@
 		0 : "No"
 		1 : "Yes"
 	]
-	cs_pos(vector) : "Cab Signal Pos" : : "When a tp3_cabsignal_box passes over this point (moving in the correct direction), it will register as having passed this signal. Place it roughly level with the railheads, in the center of the two rails, and at least one locomotive length before the signal."
+	cs_pos(vector) : "Cab Signal Pos" : : "When a tp3_cabsignal_box passes over this point (moving in the correct direction), it will register as having passed this signal. Place it roughly level with the railheads, in the center of the two rails, and about 128-256 units before the signal."
 	nickname(string) : "Nickname" : "" : "(Optional) The signal's nickname, used in-game to describe what it does. Unlike the targetname, this doesn't have to be unique."
 	
 	gmod_allowtools(string) readonly : "Allow Tools" : "wire_adv wire_debugger tp3_path_configurator" : "Disables the toolgun on this entity except for the tools listed here."
@@ -757,7 +757,9 @@
 		2 : "Underline" : 0
 		4 : "Outline" : 0
 		8 : "Glow-In-The-Dark" : 0
-		16 : "Ignore Max Draw Radius (Good for Skyboxes)" : 0
+		//16 : "Ignore Max Draw Radius (Good for Skyboxes)" : 0 //There is no max draw radius.
+		//32 : "Strikethrough" : 0 //Does not appear to work at all
+		//64 : "Shadow" : 0 //Only shows 1 pixel shadow, making it useless for map signs
 	]
 	
 	

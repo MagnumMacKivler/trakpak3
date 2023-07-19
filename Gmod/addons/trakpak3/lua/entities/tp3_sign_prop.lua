@@ -46,9 +46,11 @@ if SERVER then
 		--Spawn Flags
 		local italic = self.spawnflags[1]
 		local underline = self.spawnflags[2]
-		local strike = self.spawnflags[3]
+		local outline = self.spawnflags[3]
 		local glow = self.spawnflags[4]
-		--local nocull = self.spawnflags[5]
+		--local nocull = self.spawnflags[5] --Deprecated
+		--local strike = self.spawnflags[6] --Doesn't work at all
+		--local shadow = self.spawnflags[7] --Only shows 1 pixel, useless for map signs
 		
 		self.text_data_1 = {
 			id = self:EntIndex(),
@@ -64,8 +66,8 @@ if SERVER then
 			text_weight = self.text_weight,
 			text_it = italic,
 			text_un = underline,
-			text_st = strike,
-			text_sh = shadow,
+			--text_st = strike,
+			--text_sh = shadow,
 			h_align = h_align,
 			v_align = v_align,
 			color = self.text_color,

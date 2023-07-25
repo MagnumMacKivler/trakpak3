@@ -60,42 +60,6 @@ if CLIENT then
 	end
 	
 	--Left Click
-	--[[
-	net.Receive("tp3_nc_leftclick", function()
-	
-		if Trakpak3.inserting then return end
-		
-		local tr = net.ReadString()
-		if not tr then return end
-		tr = util.JSONToTable(tr)
-		if not tr then return end
-		
-		local use = net.ReadBool()
-		
-		if use then --Toggle Skip for node
-			if Trakpak3.SelectedNodeChain then
-				local node_id = Trakpak3.FindNode(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
-				local valid, seq = Trakpak3.IsNodeInChain(node_id, Trakpak3.SelectedNodeChain)
-				if valid then Trakpak3.SetNodeSkip(Trakpak3.SelectedNodeChain, node_id, not Trakpak3.NodeChainList[Trakpak3.SelectedNodeChain].Skips[seq]) end
-			end
-		else --Select/deselect chain; add node
-			local node_id = Trakpak3.FindNode(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
-			if node_id then --add node
-				if Trakpak3.SelectedNodeChain then Trakpak3.AddNodeToChain(Trakpak3.SelectedNodeChain, node_id, false) end
-			else --find a block
-				local block_name = Trakpak3.FindNodeChainHandle(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
-				if block_name then --select block
-					Trakpak3.SelectedNodeChain = block_name
-					print("[Trakpak3] Selected Block "..block_name..". Node Chain:")
-					PrintTable(Trakpak3.NodeChainList[block_name].Nodes)
-				else --deselect block
-					Trakpak3.SelectedNodeChain = nil
-				end
-			end
-		end
-		
-	end)
-	]]--
 	Trakpak3.Net.tp3_nc_leftclick = function(len,ply)
 		if Trakpak3.inserting then return end
 		
@@ -107,12 +71,16 @@ if CLIENT then
 			if Trakpak3.SelectedNodeChain then
 				local node_id = Trakpak3.FindNode(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
 				local valid, seq = Trakpak3.IsNodeInChain(node_id, Trakpak3.SelectedNodeChain)
-				if valid then Trakpak3.SetNodeSkip(Trakpak3.SelectedNodeChain, node_id, not Trakpak3.NodeChainList[Trakpak3.SelectedNodeChain].Skips[seq]) end
+				if valid then
+					Trakpak3.SetNodeSkip(Trakpak3.SelectedNodeChain, node_id, not Trakpak3.NodeChainList[Trakpak3.SelectedNodeChain].Skips[seq])
+				end
 			end
 		else --Select/deselect chain; add node
 			local node_id = Trakpak3.FindNode(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
 			if node_id then --add node
-				if Trakpak3.SelectedNodeChain then Trakpak3.AddNodeToChain(Trakpak3.SelectedNodeChain, node_id, false) end
+				if Trakpak3.SelectedNodeChain then
+					Trakpak3.AddNodeToChain(Trakpak3.SelectedNodeChain, node_id, false)
+				end
 			else --find a block
 				local block_name = Trakpak3.FindNodeChainHandle(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
 				if block_name then --select block
@@ -127,29 +95,6 @@ if CLIENT then
 	end
 	
 	--Right Click
-	--[[
-	net.Receive("tp3_nc_rightclick", function()
-		local tr = net.ReadString()
-		if not tr then return end
-		tr = util.JSONToTable(tr)
-		if not tr then return end
-		
-		local node_id = Trakpak3.FindNode(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
-		
-		if node_id and Trakpak3.SelectedNodeChain then
-			if not Trakpak3.inserting then --select node to insert
-				Trakpak3.inserting = true
-				Trakpak3.SelectedNode = node_id
-				
-			else --insert
-				Trakpak3.AddNodeToChain(Trakpak3.SelectedNodeChain, Trakpak3.SelectedNode, false, node_id)
-				Trakpak3.inserting = false
-				Trakpak3.SelectedNode = nil
-				
-			end
-		end
-	end)
-	]]--
 	Trakpak3.Net.tp3_nc_rightclick = function(len,ply)
 		tr = net.ReadTable()
 		
@@ -164,36 +109,11 @@ if CLIENT then
 				Trakpak3.AddNodeToChain(Trakpak3.SelectedNodeChain, Trakpak3.SelectedNode, false, node_id)
 				Trakpak3.inserting = false
 				Trakpak3.SelectedNode = nil
-				
 			end
 		end
 	end
 	
 	--Reload
-	--[[
-	net.Receive("tp3_nc_reload", function()
-		local tr = net.ReadString()
-		if not tr then return end
-		tr = util.JSONToTable(tr)
-		if not tr then return end
-		
-		if Trakpak3.inserting then --cancel insert
-			Trakpak3.inserting = false
-			Trakpak3.SelectedNode = nil
-		else --remove node or clear chain
-			local node_id = Trakpak3.FindNode(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
-			if node_id and Trakpak3.SelectedNodeChain then --remove node from chain
-				Trakpak3.RemoveNodeFromChain(Trakpak3.SelectedNodeChain,node_id)
-			else --find node chain to clear
-				local block_name = Trakpak3.FindNodeChainHandle(tr.HitPos,GetConVar("tp3_node_editor_radius"):GetFloat() or 64)
-				if block_name then --clear block
-					Trakpak3.NodeChainList[block_name].Nodes = {}
-					Trakpak3.NodeChainList[block_name].Skips = {}
-				end
-			end
-		end
-	end)
-	]]--
 	Trakpak3.Net.tp3_nc_reload = function(len,ply)
 		
 		tr = net.ReadTable()
@@ -210,6 +130,7 @@ if CLIENT then
 				if block_name then --clear block
 					Trakpak3.NodeChainList[block_name].Nodes = {}
 					Trakpak3.NodeChainList[block_name].Skips = {}
+					Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave. This is the one situation that isn't called by a function in cl_nodesetup.lua
 				end
 			end
 		end

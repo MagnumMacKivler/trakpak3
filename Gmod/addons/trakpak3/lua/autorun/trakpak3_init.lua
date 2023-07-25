@@ -19,6 +19,7 @@ if SERVER then
 	include("trakpak3/pathconfig.lua") --
 	include("trakpak3/shared.lua") --
 	
+	AddCSLuaFile("trakpak3/cl_autosave.lua") --
 	AddCSLuaFile("trakpak3/cl_nodesetup.lua") --
 	AddCSLuaFile("trakpak3/cl_sigedit.lua") --
 	AddCSLuaFile("trakpak3/cl_signalvision.lua") --
@@ -65,6 +66,7 @@ end
 if CLIENT then
 	Trakpak3 = {}
 	Trakpak3.Net = {}
+	include("trakpak3/cl_autosave.lua")
 	include("trakpak3/cl_nodesetup.lua")
 	include("trakpak3/cl_sigedit.lua")
 	include("trakpak3/cl_signalvision.lua")

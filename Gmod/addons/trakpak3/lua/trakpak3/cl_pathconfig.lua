@@ -18,9 +18,11 @@ function PathConfig.SelectSignal(ent)
 					if pc.nextsignal==name then
 						pc.nextsignal = nil
 						chat.AddText("Cleared NextSignal from path.")
+						Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 					else
 						pc.nextsignal = name
 						chat.AddText("Selected NextSignal '"..name.."' for path.")
+						Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 					end
 				else
 					chat.AddText("NextSignal cannot be the same as the home Signal.")
@@ -73,7 +75,7 @@ function PathConfig.CycleSwitch(ent)
 			elseif sl[name]==true then --Set to Nil
 				sl[name] = nil
 			end
-			
+			Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 		else
 			chat.AddText("The switch stand you are targeting is invalid or doesn't exist.")
 		end
@@ -108,7 +110,7 @@ function PathConfig.SelectBlock()
 				pc.block = name
 				chat.AddText("Selected Block '"..name.."' for path.")
 			end
-			
+			Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 			break
 		end
 	end
@@ -132,7 +134,7 @@ function PathConfig.SelectBlock()
 					pc.block = name
 					chat.AddText("Selected Logic Gate '"..name.."' for path.")
 				end
-				
+				Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 				break
 			end
 		end
@@ -257,6 +259,7 @@ function PathConfig.OpenMenu()
 		
 		table.insert(PathConfig.Signals[PathConfig.selected],{speed = 5, divergence = (count > 0), switchlist = {}, block = nil, nextsignal = nil})
 		pathlist:Repopulate()
+		Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 	end
 	--Remove
 	local button = vgui.Create("DButton",panel)
@@ -273,6 +276,7 @@ function PathConfig.OpenMenu()
 		table.remove(PathConfig.Signals[PathConfig.selected],index)
 		PathConfig.selected_path = nil
 		pathlist:Repopulate()
+		Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 	end
 	--Clear
 	local button = vgui.Create("DButton",panel)
@@ -285,6 +289,7 @@ function PathConfig.OpenMenu()
 		PathConfig.Signals[PathConfig.selected] = nil
 		PathConfig.selected_path = nil
 		pathlist:Repopulate()
+		Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 	end
 	
 	--Speed, Divergence, Switchlist Controls
@@ -320,6 +325,7 @@ function PathConfig.OpenMenu()
 		if PathConfig.selected_path and PathConfig.Signals[PathConfig.selected] then
 			PathConfig.Signals[PathConfig.selected][PathConfig.selected_path].speed = data
 			pathlist:Repopulate()
+			Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 		end
 	end
 	
@@ -336,6 +342,7 @@ function PathConfig.OpenMenu()
 		if PathConfig.selected_path and PathConfig.Signals[PathConfig.selected] then
 			PathConfig.Signals[PathConfig.selected][PathConfig.selected_path].divergence = val
 			pathlist:Repopulate()
+			Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 		end
 	end
 	
@@ -349,6 +356,7 @@ function PathConfig.OpenMenu()
 		if PathConfig.selected_path and PathConfig.Signals[PathConfig.selected] then
 			PathConfig.Signals[PathConfig.selected][PathConfig.selected_path].switchlist = {}
 			pathlist:Repopulate()
+			Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 		end
 	end
 	
@@ -622,7 +630,7 @@ function PathConfig.Save()
 	file.Write("trakpak3/pathconfig/"..game.GetMap()..".txt", json)
 	local gray = Color(127,255,255)
 	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/pathconfig/"..game.GetMap()..".txt! To include it with your map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/pathconfig/!")
-	
+	Trakpak3.AutosaveClear("pathconfig")
 end
 
 --Load PathConfig File
@@ -665,6 +673,7 @@ function PathConfig.Clear()
 	PathConfig.selected = nil
 	PathConfig.selected_ent = nil
 	PathConfig.selected_path = nil
+	Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 end
 --Receive From Server
 --[[

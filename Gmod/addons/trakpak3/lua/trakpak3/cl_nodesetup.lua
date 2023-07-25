@@ -20,11 +20,13 @@ function Trakpak3.NewNode(id, position)
 	else
 		Trakpak3.NodeList[id] = position
 	end
+	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
 function Trakpak3.DeleteNode(id)
 	if not Trakpak3.NodeList then return end
 	Trakpak3.NodeList[id] = nil
+	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
 function Trakpak3.FindNode(position, threshold)
@@ -148,6 +150,7 @@ function Trakpak3.AddNodeToChain(chain_id, node_id, skip, beforenode)
 		chain.Nodes[seq] = node_id
 		chain.Skips[seq] = skip or false
 	end
+	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
 function Trakpak3.RemoveNodeFromChain(chain_id, node_id)
@@ -162,6 +165,7 @@ function Trakpak3.RemoveNodeFromChain(chain_id, node_id)
 			break
 		end
 	end
+	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
 function Trakpak3.SetNodeSkip(chain_id, node_id, skip)
@@ -175,6 +179,7 @@ function Trakpak3.SetNodeSkip(chain_id, node_id, skip)
 			break
 		end
 	end
+	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
 --Wipe and start over
@@ -186,6 +191,7 @@ function Trakpak3.ClearNodes()
 			Trakpak3.NewNodeChain(name, data.pos)
 		end
 	end
+	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
 --Tell the server it's okay to send the blockpack
@@ -787,6 +793,7 @@ function Trakpak3.SaveNodeFile()
 	file.Write("trakpak3/nodes/"..game.GetMap()..".txt", json)
 	local gray = Color(127,255,255)
 	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/nodes/"..game.GetMap()..".txt! To include it with your map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/nodes/!")
+	Trakpak3.AutosaveClear("nodetools")
 end
 
 function Trakpak3.LoadNodeFile()
@@ -974,7 +981,13 @@ function Trakpak3.NodeEditMenu(panel)
 		end
 	end
 	panel:AddPanel(button)
-
+		
+	--Auto Save Button
+	local button = vgui.Create("DButton",panel)
+	button:SetText("Autosave Menu")
+	button.DoClick = function() Trakpak3.AutosaveMenu() end
+	panel:AddPanel(button)
+	
 end
 
 --Showhulls Console Command

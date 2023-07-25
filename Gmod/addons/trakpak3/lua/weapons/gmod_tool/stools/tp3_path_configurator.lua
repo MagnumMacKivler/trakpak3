@@ -81,41 +81,6 @@ if CLIENT then
 	--local PathConfig = Trakpak3.PathConfig
 	
 	--Left Click
-	--[[
-	net.Receive("tp3_pc_leftclick", function()
-		local id = net.ReadUInt(32)
-		local use = net.ReadBool()
-		--print(id)
-		if id!=0 then
-			local ent = Entity(id)
-
-			if ent and ent:IsValid() then
-				if Trakpak3.PathConfig.selected then
-					if use and Trakpak3.PathConfig.selected_path then --Scan for a Block/Gate
-						Trakpak3.PathConfig.SelectBlock()
-					else --Click a physical object
-						if ent:GetClass()=="tp3_signal_master" then --A signal, may or may not be editing a path
-							Trakpak3.PathConfig.SelectSignal(ent)
-							--print(Trakpak3.PathConfig.selected)
-						elseif Trakpak3.PathConfig.selected_path then --Not a signal, but you are editing a path
-							Trakpak3.PathConfig.CycleSwitch(ent)
-						end
-					end
-					
-				else --Nothing is selected, attempt to select a signal
-					Trakpak3.PathConfig.SelectSignal(ent)
-				end
-			end
-		else --Hit World; Search for Blocks in area or Deselect
-			--Trakpak3.PathConfig.DeselectSignal()
-			if Trakpak3.PathConfig.selected and Trakpak3.PathConfig.selected_path then
-				Trakpak3.PathConfig.SelectBlock()
-			elseif Trakpak3.PathConfig.selected then
-				Trakpak3.PathConfig.DeselectSignal()
-			end
-		end
-	end)
-	]]--
 	Trakpak3.Net.tp3_pc_leftclick = function(len,ply)
 		local id = net.ReadUInt(32)
 		local use = net.ReadBool()
@@ -317,6 +282,12 @@ if CLIENT then
 			nobutton:Dock(RIGHT)
 
 		end
+		panel:AddPanel(button)
+		
+		--Auto Save Button
+		local button = vgui.Create("DButton",panel)
+		button:SetText("Autosave Menu")
+		button.DoClick = function() Trakpak3.AutosaveMenu() end
 		panel:AddPanel(button)
 		
 	end

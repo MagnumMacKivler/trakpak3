@@ -1,11 +1,18 @@
 --General Entity Functions for Trakpak3
 --MsgC(Trakpak3.Magenta,"Running TP3Lib\n")
 
---Helper function for finding by targetname
+--Helper function for finding by targetname, also notifies mapper of duplicate entity names that can cause problems.
 Trakpak3.FindByTargetname = function(name)
 	if name and (name != "") then
-		local result = ents.FindByName(name)[1]
-		if IsValid(result) then
+		local found = ents.FindByName(name)
+		local result = found[1]
+		if found[2] then --There are 2 or more entities with the same name
+			local message = "[Trakpak3] Multiple entities share a targetname ("..name..")! These entities must be uniquely named, or things may break!"
+			for n=1,#found do
+				message = message.."\n    Entity "..n..": "..tostring(found[n])
+			end
+			ErrorNoHalt(message)
+		elseif IsValid(result) then --Only one entity, and it's valid
 			return result, true
 		end
 	end
@@ -90,6 +97,8 @@ function Trakpak3.SetBodygroups(ent, bgs)
 		for bg, part in ipairs(bgs) do ent:SetBodygroup(bg, tonumber(part)) end
 	end
 end
+
+--Trakpak3.GetBodygroups is located in trakpak3/shared.lua
 
 --Projects a point onto a line segment
 function Trakpak3.LineProject(startpos, endpos, sample)

@@ -264,3 +264,15 @@ Trakpak3.BlacklistClassStatic("tp3_sign_prop")
 Trakpak3.BlacklistClassStatic("tp3_sign_auto")
 
 Trakpak3.BlacklistClassStatic("prop_dynamic") --Primarily for use with moveable bridges.
+
+--Bodygroup Retrieval
+--Get the bodygroups as a simple list
+function Trakpak3.GetBodygroups(ent)
+	local bglist = {}
+	
+	for n = 2, #ent:GetBodyGroups() do --The table starts at 1 but includes the reference mesh (0)
+		bglist[n-1] = ent:GetBodygroup(n-1)
+	end
+	
+	return bglist
+end

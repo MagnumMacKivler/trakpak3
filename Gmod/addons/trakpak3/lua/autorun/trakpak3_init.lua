@@ -17,6 +17,7 @@ if SERVER then
 	include("trakpak3/mapseats.lua") --
 	include("trakpak3/remoteswitcher.lua") --
 	include("trakpak3/pathconfig.lua") --
+	include("trakpak3/signalsprites.lua") --
 	include("trakpak3/shared.lua") --
 	
 	AddCSLuaFile("trakpak3/cl_autosave.lua") --
@@ -31,6 +32,7 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_remoteswitcher.lua") --
 	AddCSLuaFile("trakpak3/cl_pathconfig.lua") --
 	AddCSLuaFile("trakpak3/cl_defect_detector.lua") --
+	AddCSLuaFile("trakpak3/cl_signalsprites.lua") --
 	AddCSLuaFile("trakpak3/shared.lua") --
 	
 	--Macro for E2 limits for JH
@@ -78,6 +80,7 @@ if CLIENT then
 	include("trakpak3/cl_remoteswitcher.lua")
 	include("trakpak3/cl_pathconfig.lua")
 	include("trakpak3/cl_defect_detector.lua")
+	include("trakpak3/cl_signalsprites.lua")
 	include("trakpak3/shared.lua")
 	
 	--Net Message Handler

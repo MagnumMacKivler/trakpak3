@@ -12,6 +12,7 @@ Dispatch.RealData = {}
 local black = Color(0,0,0)
 local dark = Color(31,31,31)
 local gray = Color(127,127,127)
+local darkgray = Color(63,63,63)
 local color_sel = Color(255,255,191)
 local cursor1 = Color(0,255,0)
 local cursor2 = Color(255,255,0)
@@ -718,7 +719,7 @@ function Dispatch.OpenEditor()
 	--Click the background
 	function canvas:DoClick()
 		if Dispatch.placing==1 then --First click when placing
-			if (Dispatch.placetype=="line") or (Dispatch.placetype=="blockline") or (Dispatch.placetype=="box") or (Dispatch.placetype=="text") then
+			if (Dispatch.placetype=="line") or (Dispatch.placetype=="blockline") or (Dispatch.placetype=="box") or (Dispatch.placetype=="text") or (Dispatch.placetype=="nav") then
 				Dispatch.placex, Dispatch.placey = self:GetGridCoords(self:LocalCursorPos())
 				Dispatch.placing = 2
 			elseif Dispatch.placetype=="signal" then
@@ -755,11 +756,15 @@ function Dispatch.OpenEditor()
 				local x2, y2 = self:GetGridCoords(self:LocalCursorPos())
 				Dispatch.AddText(nil, Dispatch.placex, Dispatch.placey, x2, y2)
 				self:DoRightClick()
+			elseif Dispatch.placetype=="nav" then
+				local x2, y2 = self:GetGridCoords(self:LocalCursorPos())
+				Dispatch.AddNav(nil, Dispatch.placex, Dispatch.placey, x2, y2)
+				self:DoRightClick()
 			end
 		elseif Dispatch.editing==1 then --First click when editing
 			
 		elseif Dispatch.editing==2 then --Second click when editing
-			if (Dispatch.placetype=="line") or (Dispatch.placetype=="blockline") or (Dispatch.placetype=="box") or (Dispatch.placetype=="text") then
+			if (Dispatch.placetype=="line") or (Dispatch.placetype=="blockline") or (Dispatch.placetype=="box") or (Dispatch.placetype=="text") or (Dispatch.placetype=="nav") then
 				local x2, y2 = self:GetGridCoords(self:LocalCursorPos())
 				Dispatch.Boards[Dispatch.page].elements[Dispatch.selected]:Update(true, Dispatch.placex, Dispatch.placey, x2, y2)
 				self:DoRightClick()
@@ -817,7 +822,7 @@ function Dispatch.OpenEditor()
 				local px, py = self:GetPanelCoords(Dispatch.placex, Dispatch.placey)
 				surface.SetDrawColor(cursor2)
 				surface.DrawOutlinedRect(px-5, py-5, 10, 10)
-				if (Dispatch.placetype=="box") or (Dispatch.placetype=="text") then
+				if (Dispatch.placetype=="box") or (Dispatch.placetype=="text") or (Dispatch.placetype=="nav") then
 				
 					local minx = math.min(px, cx)
 					local miny = math.min(py, cy)
@@ -961,6 +966,19 @@ function Dispatch.OpenEditor()
 		Dispatch.Deselect()
 		Dispatch.placing = 1
 		Dispatch.placetype = "text"
+		Dispatch.PopulatePage(canvas, Dispatch.page, true)
+	end
+	
+	--Nav Buttons
+	local button = vgui.Create("DButton",scroll)
+	button:SetSize(1,36)
+	button:Dock(TOP)
+	button:SetText("Navigation Buttons")
+	button:SetIcon("trakpak3_common/icons/nav.png")
+	function button:DoClick()
+		Dispatch.Deselect()
+		Dispatch.placing = 1
+		Dispatch.placetype = "nav"
 		Dispatch.PopulatePage(canvas, Dispatch.page, true)
 	end
 	
@@ -2500,16 +2518,19 @@ function Dispatch.AddBlockLine(ent, x1, y1, x2, y2, block, color0, color1, weigh
 		local verts = Dispatch.GetLineVerts(px1, py1, self.corner1, self.weight)
 		table.Add(verts, Dispatch.GetLineVerts(px2, py2, self.corner2, self.weight))
 		
+		--Get occupancy
 		local occupied = false
 		if Dispatch.RealData[self.block] then
 			occupied = Dispatch.RealData[self.block].occupied
 		end
 		
-		if occupied then --if selected or occupied then 
-			surface.SetDrawColor(Dispatch.StringToColor(self.color1))
-		else
-			surface.SetDrawColor(Dispatch.StringToColor(self.color0))
+		--Draw the color-changing line
+		local lcolor = self.color0
+		
+		if occupied==1 then --if selected or occupied then 
+			lcolor = self.color1
 		end
+		surface.SetDrawColor(Dispatch.StringToColor(lcolor))
 		surface.DrawPoly(verts)
 		
 		--Reposition Button
@@ -2697,9 +2718,9 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text, textcolor, textsize, textal
 		y2 = "integer",
 		text = "string",
 		textcolor = "string",
-		textsize = "integer",
-		textalign_h = "integer",
-		textalign_v = "integer",
+		textsize = "choices",
+		textalign_h = "choices",
+		textalign_v = "choices",
 		boxcolor = "string",
 		boxweight = "integer",
 		boxsolid = "boolean"
@@ -2724,6 +2745,8 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text, textcolor, textsize, textal
 		textalign_v = 1,
 		boxweight = 5
 	}
+	element.choices = {textsize = {5,4,3,2,1}, textalign_h = {"Left", "Center", "Right"}, textalign_v = {"Top", "Center", "Bottom"}}
+	element.values = {textsize = {5,4,3,2,1}, textalign_h = {-1, 0, 1}, textalign_v = {1, 0, -1}}
 	
 	function element:Update(newprop, x1, y1, x2, y2, text, textcolor, textsize, textalign_h, textalign_v, boxcolor, boxweight, boxsolid)
 		self.x1 = x1 or self.x1
@@ -2913,6 +2936,232 @@ function Dispatch.AddText(ent, x1, y1, x2, y2, text, textcolor, textsize, textal
 	--if Dispatch.selectnew then Dispatch.PopulatePage(Dispatch.page) end
 end
 
+--Navigation Buttons
+function Dispatch.AddNav(ent, x1, y1, x2, y2, destination, textcolor, bgcolor, textsize)
+	local element = Dispatch.AddElement(ent)
+	element.type = "nav"
+	element.proporder = { "x1", "y1", "x2", "y2", "destination", "textcolor", "bgcolor", "textsize" }
+	element.properties = {
+		x1 = "integer",
+		y1 = "integer",
+		x2 = "integer",
+		y2 = "integer",
+		destination = "choices",
+		textcolor = "string",
+		bgcolor = "string",
+		textsize = "choices"
+	}
+	element.mins = {
+		x1 = 0,
+		y1 = 0,
+		x2 = 0,
+		y2 = 0,
+		destination = 1,
+		textsize = 1
+	}
+	element.maxs = {
+		x1 = Dispatch.Boards[Dispatch.page].x_res,
+		y1 = Dispatch.Boards[Dispatch.page].y_res,
+		x2 = Dispatch.Boards[Dispatch.page].x_res,
+		y2 = Dispatch.Boards[Dispatch.page].y_res,
+		destination = #Dispatch.Boards,
+		textsize = 5
+	}
+	
+	--Produce destination choices
+	element.choices = {destination = {}, textsize = {1,2,3,4,5}}
+	element.values = {destination = {}, textsize = {1,2,3,4,5}}
+	for pagenum, page in ipairs(Dispatch.Boards) do
+		element.choices[pagenum] = page.name or "UNNAMED"
+		element.values[pagenum] = pagenum
+	end
+	
+	function element:Update(newprop, x1, y1, x2, y2, destination, textcolor, bgcolor, textsize)
+		self.x1 = x1 or self.x1
+		self.y1 = y1 or self.y1
+		self.x2 = x2 or self.x2
+		self.y2 = y2 or self.y2
+		
+		self.destination = destination or self.destination or 1
+		
+		self.textcolor = textcolor or self.textcolor or "255 255 255"
+		self.bgcolor = bgcolor or self.bgcolor or "0 0 0"
+		self.textsize = textsize or self.textsize or 2
+		
+		--[[
+		local button = self.button
+		if button and button:IsValid() then
+			local textname = "ERROR"
+			local pagetable = Dispatch.Boards[self.destination]
+			if pagetable then --The page actually exists
+				textname = Dispatch.Boards[self.destination].name or "UNTITLED"
+			end
+			button:SetText(textname)
+		end
+		]]--
+		
+		
+		--Make sure all the points are nicely ordered
+		local minx = math.min(self.x1, self.x2)
+		local miny = math.min(self.y1, self.y2)
+		local maxx = math.max(self.x1, self.x2)
+		local maxy = math.max(self.y1, self.y2)
+		self.x1 = minx
+		self.y1 = miny
+		self.x2 = maxx
+		self.y2 = maxy
+		
+		if Dispatch.selectnew then timer.Simple(0.1,function() Dispatch.Select(self:GetIndex(),newprop) end) end
+	end
+	
+	function element:OnSelect(editor)
+		local canvas = self.button:GetParent()
+		self.eh1 = Dispatch.CreateHandle(self.x1, self.y1,canvas)
+		self.eh2 = Dispatch.CreateHandle(self.x2, self.y2,canvas)
+		local e = self
+		function self.eh1:DoClick()
+			Dispatch.editing = 2
+			Dispatch.placex = e.x2
+			Dispatch.placey = e.y2
+			Dispatch.placetype = "nav"
+			e.eh1:Remove()
+			e.eh2:Remove()
+			Dispatch.PopulatePage(canvas, Dispatch.page, true)
+		end
+		function e.eh2:DoClick()
+			Dispatch.editing = 2
+			Dispatch.placex = e.x1
+			Dispatch.placey = e.y1
+			Dispatch.placetype = "nav"
+			e.eh1:Remove()
+			e.eh2:Remove()
+			Dispatch.PopulatePage(canvas, Dispatch.page, true)
+		end
+	end
+	
+	function element:OnDeselect()
+		if self.eh1 and self.eh1:IsValid() then self.eh1:Remove() end
+		if self.eh2 and self.eh2:IsValid() then self.eh2:Remove() end
+	end
+	
+	function element:Generate(pnl,nohelpers,selected,editor)
+		local button = vgui.Create("DButton",pnl)
+		self.button = button
+		local px1, py1 = pnl:GetPanelCoords(self.x1, self.y1)
+		local px2, py2 = pnl:GetPanelCoords(self.x2, self.y2)
+		button:SetPos(px1, py1)
+		button:SetSize(px2-px1, py2-py1)
+		
+		button:SetText("")
+		--print(textname, self.destination)
+		
+		local e = element
+		
+		--Custom button behavior??? Wow!
+		function button:Paint(w,h)
+			
+			local textname = "ERROR"
+			local pagetable = Dispatch.Boards[e.destination]
+			if pagetable then --The page actually exists
+				textname = Dispatch.Boards[e.destination].name or "UNTITLED"
+			end
+			if not self:IsEnabled() then --Button is disabled
+				surface.SetDrawColor(gray)
+				surface.DrawRect(0,0, w, h)
+				
+				surface.SetDrawColor(darkgray)
+				surface.DrawOutlinedRect(0,0,w,h,4)
+				draw.SimpleText(textname,"tp3_dispatch_"..e.textsize, w/2, h/2, darkgray, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			elseif self:IsHovered() then --Mouse cursor over it
+				surface.SetDrawColor(Dispatch.StringToColor(e.textcolor))
+				surface.DrawRect(0,0, w, h)
+				
+				draw.SimpleText(textname,"tp3_dispatch_"..e.textsize, w/2, h/2, Dispatch.StringToColor(e.bgcolor), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			else --Cursor NOT over it
+				surface.SetDrawColor(Dispatch.StringToColor(e.bgcolor))
+				surface.DrawRect(0,0, w, h)
+				
+				local tc = Dispatch.StringToColor(e.textcolor)
+				surface.SetDrawColor(tc)
+				surface.DrawOutlinedRect(0,0,w,h,4)
+				draw.SimpleText(textname,"tp3_dispatch_"..e.textsize, w/2, h/2, tc, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+			end
+		end
+		
+		
+		if e.entity then --This is on a map board
+			button:SetEnabled(false)
+		else --Client dispatch board
+			function button:DoClick()
+				if Dispatch.Boards[e.destination] then
+					Dispatch.PopulatePage(self:GetParent(), e.destination)
+					LocalPlayer():EmitSound("buttons/button9.wav")
+				end
+			end
+		end
+	end
+	
+	function element:GenerateEditor(pnl,nohelpers,selected)
+		local button = self.button
+		if button and button:IsValid() then
+			if nohelpers then
+				function button.DoClick() pnl:DoClick() end
+			else
+				local e = self
+				function button:DoClick() 
+					Dispatch.Select(e:GetIndex(),true)
+				end
+			end
+		end
+		--Set these here because they all have to do with grid dims and this func is called when the grid changes
+		self.mins.x1 = 0
+		self.mins.y1 = 0
+		self.mins.x2 = 0
+		self.mins.y2 = 0
+		
+		self.maxs.x1 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y1 = Dispatch.Boards[Dispatch.page].y_res
+		self.maxs.x2 = Dispatch.Boards[Dispatch.page].x_res
+		self.maxs.y2 = Dispatch.Boards[Dispatch.page].y_res
+		
+		--Produce destination choices
+		element.choices.destination = {}
+		element.values.destination = {}
+		for pagenum, page in pairs(Dispatch.Boards) do
+			element.choices.destination[pagenum] = page.name or "UNNAMED"
+			element.values.destination[pagenum] = pagenum
+		end
+	end
+	
+	function element:Render(pnl)
+		--Update Pos
+		local px1, py1 = pnl:GetPanelCoords(self.x1, self.y1)
+		local px2, py2 = pnl:GetPanelCoords(self.x2, self.y2)
+		local button = self.button
+		if button and button:IsValid() then
+			button:SetPos(px1, py1)
+			button:SetSize(px2-px1, py2-py1)
+		end
+		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
+			surface.SetDrawColor(color_sel)
+			surface.DrawOutlinedRect(px1 - 2, py1 - 2, px2-px1 + 4, py2-py1 + 4, 2)
+		end
+		
+		--Reposition Helpers
+		if nohelpers then return end
+		if self.eh1 and self.eh1:IsValid() then self.eh1:SetPos(px1 - 8, py1 - 8) end
+		if self.eh2 and self.eh2:IsValid() then self.eh2:SetPos(px2 - 8, py2 - 8) end
+		
+	end
+	
+	--Receive Info from World (Proxy State)
+	function element:UpdateValue(name, parm, value)
+		
+	end
+	
+	element:Update(true,x1,y1,x2,y2,destination,textcolor,bgcolor)
+	
+end
 
 --Helper Functions for Elements
 
@@ -2976,57 +3225,6 @@ function Dispatch.SaveBoards()
 				new[pname] = element[pname]
 			end
 			
-			--if element.type=="line" then
-				--print(element.color)
-			--end
-			
-			--[[
-			if new.type=="signal" then
-				new.x = element.x
-				new.y = element.y
-				new.signal = element.signal
-				new.orientation = element.orientation
-			elseif new.type=="switch" then
-				new.x = element.x
-				new.y = element.y
-				new.switch = element.switch
-			elseif new.type=="block" then
-				new.x = element.x
-				new.y = element.y
-				new.block = element.block
-			elseif new.type=="line" then
-				new.x1 = element.x1
-				new.y1 = element.y1
-				new.x2 = element.x2
-				new.y2 = element.y2
-				new.color = element.color
-			elseif new.type=="blockline" then
-				new.x1 = element.x1
-				new.y1 = element.y1
-				new.x2 = element.x2
-				new.y2 = element.y2
-				new.block = element.block
-			elseif new.type=="box" then
-				new.x1 = element.x1
-				new.y1 = element.y1
-				new.x2 = element.x2
-				new.y2 = element.y2
-			elseif new.type=="proxy" then
-				new.x = element.x
-				new.y = element.y
-				new.proxy = element.proxy
-				for n = 0,7 do
-					new["icon"..n] = element["icon"..n]
-					new["color"..n] = element["color"..n]
-				end
-			else --text
-				new.x1 = element.x1
-				new.y1 = element.y1
-				new.x2 = element.x2
-				new.y2 = element.y2
-				new.text = element.text
-			end
-			]]--
 			ftable[page].elements[id] = new
 		end
 	end
@@ -3083,6 +3281,8 @@ function Dispatch.LoadBoards(fromdata, ent)
 						element.icon0, element.icon1, element.icon2, element.icon3, element.icon4, element.icon5, element.icon6, element.icon7, element.icon8, element.icon9,
 						element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7, element.color8, element.color9
 					)
+				elseif element.type=="nav" then
+					Dispatch.AddNav(ent, element.x1, element.y1, element.x2, element.y2, element.destination, element.textcolor, element.bgcolor)
 				end
 			end
 		end
@@ -3145,30 +3345,11 @@ hook.Add("InitPostEntity", "Trakpak3_Request_Dispatch", function()
 end)
 
 --Receive DS data from server
---[[
-net.Receive("tp3_transmit_dsdata",function(mlen, ply)
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	Dispatch.RealData = util.JSONToTable(JSON)
-	--PrintTable(Dispatch.RealData)
-end)
-]]--
 Trakpak3.Net.tp3_transmit_dsdata = function(len,ply)
 	Dispatch.RealData = net.ReadTable()
 end
 
 --Receive DS board from server
---[[
-net.Receive("tp3_transmit_ds",function(mlen, ply)
-	print("[Trakpak3] Dispatch Board Received.")
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	Dispatch.MapBoards = util.JSONToTable(JSON)
-	Dispatch.LoadBoards(false)
-	Dispatch.canload = true
-	--PrintTable(Dispatch.MapBoards)
-end)
-]]--
 Trakpak3.Net.tp3_transmit_ds = function(len,ply)
 	print("[Trakpak3] Dispatch Board Received.")
 	Dispatch.MapBoards = net.ReadTable()
@@ -3189,31 +3370,6 @@ function Dispatch.SendCommand(target, cmd, arg)
 end
 
 --Receive Status from Entity
---[[
-net.Receive("tp3_dispatch_comm", function(mlen, ply)
-	local entname = net.ReadString()
-	local parm = net.ReadString()
-	local dtype = net.ReadString()
-	local value
-	if dtype=="int" then
-		value = net.ReadUInt(16)
-	elseif dtype=="string" then
-		value = net.ReadString()
-	end
-	--print("Dispatch Update: ", entname, parm, value)
-	if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
-	Dispatch.RealData[entname][parm] = value
-	
-	for page, board in pairs(Dispatch.Boards) do
-		for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
-	end
-	for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
-		for page, board in pairs(ent.Boards) do
-			for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
-		end
-	end
-end)
-]]--
 Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 	local entname = net.ReadString()
 	local parm = net.ReadString()
@@ -3433,50 +3589,18 @@ concommand.Add("tp3_dispatch",Dispatch.OpenDispatcher)
 
 CreateClientConVar("tp3_dispatch_usemetric", "0", true, false, "0 for MPH, 1 for KPH", 0, 1)
 
---Get Tag List from Server
---[[
-Dispatch.BlockTagMap = {}
-net.Receive("Trakpak3_UpdateTrainTags", function()
-	local TagList = net.ReadTable()
-	
-	--Translate from a tag list to a block list
-	Dispatch.BlockTagMap = {}
-	
-	for tag, data in pairs(TagList) do
-		Dispatch.BlockTagMap[data.block] = {tag = tag, speed = data.speed}
-	end
-	
-	for page, board in pairs(Dispatch.Boards) do
-		for index, element in pairs(board.elements) do
-			if element.type=="block" then
-				local name = element.block
-				local btd = Dispatch.BlockTagMap[name]
-				local speed
-				if btd and btd.speed then speed = math.floor(btd.speed / 17.6) end
-				local tag
-				if btd and btd.tag then tag = btd.tag end
-				element:UpdateValue(name, "tag", tag)
-				element:UpdateValue(name, "speed", speed)
-			end
-		end
-	end
-	for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
-		for page, board in pairs(ent.Boards) do
-			for index, element in pairs(board.elements) do
-				if element.type=="block" then
-					local name = element.block
-					local btd = Dispatch.BlockTagMap[name]
-					local speed
-					if btd and btd.speed then speed = math.floor(btd.speed / 17.6) end
-					local tag
-					if btd and btd.tag then tag = btd.tag end
-					element:UpdateValue(name, "tag", tag)
-					element:UpdateValue(name, "speed", speed)
-				end
-			end
-		end
-	end
-end)
-]]--
+local function requestlog()
+	net.Start("trakpak3")
+		net.WriteString("tp3_dispatch_printlog")
+	net.SendToServer()
+end
 
---hook.Add("KeyPress", "Trakpak3_Test_Shit", function(ply, key) if key==IN_USE then print("E") end end)
+concommand.Add("tp3_dispatch_printlog", requestlog, nil, "Print a log of all dispatch actions up to a certain maximum.")
+
+Trakpak3.Net.tp3_dispatch_printlog = function() --Received dispatch command log from server
+	--local dlen = net.ReadUInt(16)
+	--local data = net.ReadData(dlen)
+	--local message = util.Decompress(data)
+	local message = net.ReadString()
+	print(message)
+end

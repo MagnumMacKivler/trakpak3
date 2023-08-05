@@ -116,7 +116,6 @@ if SERVER then
 			self:UpdateNodeList(true)
 		elseif not state and self.occupied then --Block is no longer occupied
 			self.occupied = false
-			
 			--Train Tag
 			self.traintag = nil
 			self.nextspeedtime = nil
@@ -130,7 +129,6 @@ if SERVER then
 			--Update Wireframe
 			self:UpdateNodeList(false)
 		elseif state then --No state change, but you still hit something
-			
 			--Train Tag
 			local tag, speed = self:ReadTrainTag(ent)
 			
@@ -269,10 +267,8 @@ if SERVER then
 				self:HandleNewState(false,false)
 			end
 		elseif iname=="UnForceOccupancy" then
-			if self.canrun then
-				self.run = true
-				self.scanid = 1
-			end
+			self.run = true
+			self.scanid = 1
 		elseif iname=="TestOccupancy" then
 			if self.occupied then
 				self:TriggerOutput("OnTestedOccupied",self)

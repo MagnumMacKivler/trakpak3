@@ -73,35 +73,37 @@ hook.Add("DrawOverlay","Trakpak3_SignalVision",function()
 	
 	if SignalVision.active and SignalVision.signals and not table.IsEmpty(SignalVision.signals) then --show all signals you're looking at
 		SignalVision.selected = nil
-		local others = {} --actually used for all signals
+		local visiblesignals = {} --actually used for all signals
 		local distances = {}
 		local maxdot = 0
 		local ep = EyePos()
 		local ev = EyeVector()
-		--find which signal you're looking at
+		--find which signals you're looking at (and which ones are looking at you)
 		for k, signal in pairs(SignalVision.signals) do
 			if signal and signal:IsValid() then
 				local disp = (signal:GetPos() - ep)
+				local fwd = signal:GetForward()
+				local sviewdot = -fwd:Dot(disp) --Signal View Dot: a measure of how directly the signal is facing a player
 				local dist = math.max(disp:Length(),1)
 				local lvec = disp:GetNormalized()
-				local viewdot = ev:Dot(lvec)
-				if viewdot>0.95 then
+				local pviewdot = ev:Dot(lvec) --Player View Dot: a measure of how directly the player is looking at a signal
+				if (pviewdot>0.95) and (sviewdot > 0) and (not signal:IsDormant()) then --Signal is in PVS, within about 18 degrees of player aim direction, and is facing the player within 90 degrees
 					
-					if (viewdot > maxdot) then
-						maxdot = viewdot
+					if (pviewdot > maxdot) then --This signal is the one being looked at the most so far
+						maxdot = pviewdot
 						SignalVision.selected = signal
 					end
 					
-					table.insert(others,signal)
+					table.insert(visiblesignals,signal)
 					table.insert(distances,math.Clamp(dist,0,16384))
 				end
 			end
 		end
 		
 		
-		
-		if not table.IsEmpty(others) then
-			for k, v in pairs(others) do
+		--Draw boxes around each of the signals in the player's limited FOV
+		if not table.IsEmpty(visiblesignals) then
+			for k, v in pairs(visiblesignals) do
 				local color = Color(127,127,127)
 				local examine = false
 				if v==SignalVision.selected then

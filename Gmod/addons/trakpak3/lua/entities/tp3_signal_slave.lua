@@ -172,3 +172,10 @@ if SERVER then
 	function ENT:SetPathState() self:AddPath() end
 	
 end
+
+if CLIENT then
+	--Render Signal Sprites
+	function ENT:Draw(flags)
+		Trakpak3.SignalSprites.DrawSpriteSignal(self, flags)
+	end
+end

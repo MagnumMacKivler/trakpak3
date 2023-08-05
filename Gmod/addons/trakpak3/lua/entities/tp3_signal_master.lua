@@ -652,4 +652,9 @@ if CLIENT then
 		if name=="" then name = nil end
 		return name
 	end
+	
+	--Render signal sprites
+	function ENT:Draw(flags)
+		Trakpak3.SignalSprites.DrawSpriteSignal(self, flags)
+	end
 end

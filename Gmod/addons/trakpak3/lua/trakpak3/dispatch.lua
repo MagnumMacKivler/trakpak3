@@ -131,22 +131,6 @@ end
 Trakpak3.Dispatch.CommandLog = {}
 
 --Receive Command from a DS board
---[[
-net.Receive("tp3_dispatch_comm", function(mlen, ply)
-	
-	local entname = net.ReadString()
-	local cmd = net.ReadString()
-	local arg = net.ReadUInt(3)
-	
-	--print("Update from map: ", entname, cmd, arg)
-	
-	local tt = string.FormattedTime(CurTime()) --time table
-	
-	table.insert(Trakpak3.Dispatch.CommandLog, "[" .. tt.h .. "h:" .. tt.m .."m:" .. tt.s .. "s] " .. ply:GetName() .. " ENT " .. entname .. " CMD " .. cmd .. " ARG " .. arg)
-	
-	hook.Run("TP3_Dispatch_Command", entname, cmd, arg)
-end)
-]]--
 Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 	local entname = net.ReadString()
 	local cmd = net.ReadString()
@@ -157,17 +141,6 @@ Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 end
 
 --Teleport Player to Element
---util.AddNetworkString("tp3_dispatch_teleport")
---[[
-net.Receive("tp3_dispatch_teleport",function(length,ply)
-	local pos = net.ReadVector()
-	ply:SetPos(pos + Vector(0,0,64))
-	if ply:GetMoveType()==MOVETYPE_WALK then
-		--ply:ConCommand("noclip")
-		ply:SetMoveType(MOVETYPE_NOCLIP)
-	end
-end)
-]]--
 Trakpak3.Net.tp3_dispatch_teleport = function(len,ply)
 	local pos = net.ReadVector()
 	ply:SetPos(pos + Vector(0,0,64))
@@ -177,6 +150,33 @@ Trakpak3.Net.tp3_dispatch_teleport = function(len,ply)
 	end
 end
 
+--Received Dispatch Command Log request from player
+Trakpak3.Net.tp3_dispatch_printlog = function(len, ply)
+	--Make the list as a bigass string
+	local tt = string.FormattedTime(CurTime())
+	local commandlog = "Dispatch Command Log:\n\nThe current time is [" .. tt.h .. "h:" .. tt.m .."m:" .. tt.s .. "s]\n"
+	local count = #Trakpak3.Dispatch.CommandLog
+	for n = 0, count-1 do
+		commandlog = commandlog.."\n"..Trakpak3.Dispatch.CommandLog[count - n] --Add log to message, starting with most recent.
+		if #commandlog > 65000 then
+			commandlog = commandlog.."\nMaximum Net Message Length Reached!"
+			break
+		end --Terminate the loop if the string is too long
+	end
+	
+	
+	--Compress it
+	--local data = util.Compress(commandlog)
+	--local dlen = #data --Number of bytes
+	net.Start("trakpak3") --Send it
+		net.WriteString("tp3_dispatch_printlog")
+		--net.WriteUInt(dlen,16)
+		--net.WriteData(data)
+		net.WriteString(commandlog)
+	net.Send(ply)
+end
+
+--[[
 concommand.Add("tp3_dispatch_printlog", function(ply, cmd, args)
 
 	if ply:IsAdmin() then
@@ -190,3 +190,4 @@ concommand.Add("tp3_dispatch_printlog", function(ply, cmd, args)
 	end
 	
 end)
+]]--

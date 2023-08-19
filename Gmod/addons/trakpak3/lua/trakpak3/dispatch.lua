@@ -63,48 +63,25 @@ end
 hook.Add("InitPostEntity","TP3_DispLoad", tryDispatch)
 hook.Add("PostCleanUpMap","TP3_DispLoad", tryDispatch)
 
---Receive DS Board request from client
---Send Dispatch Board data to Client
---util.AddNetworkString("tp3_transmit_ds")
---util.AddNetworkString("tp3_transmit_dsdata")
---[[
-net.Receive("tp3_transmit_ds",function(len, ply)
-	print("[Trakpak3] Received dispatch board data request.")
-	Trakpak3.Dispatch.SendDSData(ply)
-end)
-]]--
-Trakpak3.Net.tp3_transmit_ds = function(len,ply)
-	print("[Trakpak3] Received dispatch board data request.")
-	Trakpak3.Dispatch.SendDSData(ply)
+--Return the dispatch entity status data
+Trakpak3.GetDSPack = function()
+	if not Trakpak3.Dispatch.InitData or table.IsEmpty(Trakpak3.Dispatch.InitData) then
+		return nil
+	else
+		return Trakpak3.Dispatch.InitData
+	end
 end
 
-function Trakpak3.Dispatch.SendDSData(ply)
-	if Trakpak3.Dispatch.Loaded then
-		--local JSON = util.TableToJSON(Trakpak3.Dispatch.InitData)
-		--JSON = util.Compress(JSON)
-		--net.Start("tp3_transmit_dsdata")
-		net.Start("trakpak3")
-		net.WriteString("tp3_transmit_dsdata")
-		--net.WriteData(JSON,#JSON)
-		net.WriteTable(Trakpak3.Dispatch.InitData)
-		net.Send(ply)
-		
-		--local JSON = util.TableToJSON(Trakpak3.Dispatch.MapBoards)
-		--JSON = util.Compress(JSON)
-		--net.Start("tp3_transmit_ds")
-		net.Start("trakpak3")
-		--net.WriteData(JSON,#JSON)
-		net.WriteString("tp3_transmit_ds")
-		net.WriteTable(Trakpak3.Dispatch.MapBoards)
-		net.Send(ply)
-	elseif not Trakpak3.Dispatch.Attempted then --Didn't succeed or fail yet, wait 1 second and try again
-		timer.Simple(1,function() Trakpak3.Dispatch.SendDSData(ply) end)
+--Return the dispatch board configuration data
+Trakpak3.GetDSBoards = function()
+	if not Trakpak3.Dispatch.MapBoards or table.IsEmpty(Trakpak3.Dispatch.MapBoards) then
+		return nil
+	else
+		return Trakpak3.Dispatch.MapBoards
 	end
 end
 
 
-
---util.AddNetworkString("tp3_dispatch_comm")
 --Send Parameter to Clients
 function Trakpak3.Dispatch.SendInfo(entname, parm, value, dtype)
 	if Trakpak3.Dispatch.Loaded and entname and (entname!="") then
@@ -113,8 +90,7 @@ function Trakpak3.Dispatch.SendInfo(entname, parm, value, dtype)
 		
 		Trakpak3.Dispatch.InitData[entname][parm] = value
 		--net.Start("tp3_dispatch_comm")
-		net.Start("trakpak3")
-			net.WriteString("tp3_dispatch_comm")
+		Trakpak3.NetStart("tp3_dispatch_comm")
 			net.WriteString(entname)
 			net.WriteString(parm)
 			net.WriteString(dtype)

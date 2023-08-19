@@ -155,26 +155,9 @@ end
 
 --Signal System Printout
 
---Request signal systems from server
-hook.Add("InitPostEntity","Trakpak3_GetSignalSystems",function()
-	--net.Start("Trakpak3_GetSignalSystems") --Received in signalsetup.lua
-	net.Start("trakpak3") --Received in signalsetup.lua
-	net.WriteString("trakpak3_getsignalsystems")
-	net.SendToServer()
-end)
---[[
-net.Receive("Trakpak3_GetSignalSystems",function(length, ply)
-	--print("[Trakpak3] Signal Systems Received.")
-	local data = net.ReadData(length)
-	local json = util.Decompress(data)
-	if json then
-		Trakpak3.UsedSignalSystems = util.JSONToTable(json)
-		--print(table.Count(Trakpak3.UsedSignalSystems))
-	end
-end)
-]]--
-Trakpak3.Net.trakpak3_getsignalsystems = function(len,ply)
-	Trakpak3.UsedSignalSystems = util.JSONToTable(net.ReadString())
+--Receive signal systems from the server
+Trakpak3.ReceiveSignalSystemPack = function(data)
+	Trakpak3.UsedSignalSystems = data
 end
 
 local colortable = { --Shamelessly copy-pasted from cl_sigedit.lua

@@ -1,10 +1,36 @@
+--SHARED First:
+Trakpak3 = {} --The Holy Table
+Trakpak3.Magenta = Color(255,63,255)
+
+--Net Code
+Trakpak3.Net = {} --List of net message handlers
+
+Trakpak3.NetStart = function(cmd) --Initiate a net message with the channel "trakpak3" (used for all TP3 net messages) and the given command.
+	net.Start("trakpak3")
+	net.WriteString(cmd)
+end
+
+--Net Message Handler
+net.Receive("trakpak3",function(len,ply)
+	local cmd = net.ReadString()
+	local func = Trakpak3.Net[cmd]
+	local subtract = 8*(#cmd + 1)--Number of bits to subtract from the message length
+	if func then func(len - subtract,ply) end
+end)
+
+--Usage: function Trakpak3.Net.<cmd> = function(len, ply) <function text> end
+--To create a net message that calls it:
+--Trakpak3.NetStart(<cmd>)
+--<net message text>
+--net.Send()
+
+--SERVER Initialization
 if SERVER then
 	
-	Trakpak3 = {}
+	util.AddNetworkString("trakpak3")
+	
 	Trakpak3.SwitchStandPlots = {}
 	Trakpak3.SignalPlots = {}
-	Trakpak3.Magenta = Color(255,0,255)
-	Trakpak3.Net = {}
 	
 	
 	include("trakpak3/tp3lib.lua") --
@@ -18,6 +44,7 @@ if SERVER then
 	include("trakpak3/remoteswitcher.lua") --
 	include("trakpak3/pathconfig.lua") --
 	include("trakpak3/signalsprites.lua") --
+	include("trakpak3/clientloader.lua")
 	include("trakpak3/shared.lua") --
 	
 	AddCSLuaFile("trakpak3/cl_autosave.lua") --
@@ -33,6 +60,7 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_pathconfig.lua") --
 	AddCSLuaFile("trakpak3/cl_defect_detector.lua") --
 	AddCSLuaFile("trakpak3/cl_signalsprites.lua") --
+	AddCSLuaFile("trakpak3/cl_clientloader.lua") --
 	AddCSLuaFile("trakpak3/shared.lua") --
 	
 	--Macro for E2 limits for JH
@@ -48,26 +76,13 @@ if SERVER then
 		end
 	end)
 	
-	util.AddNetworkString("trakpak3")
 	
-	--Net Message Handlers
-	net.Receive("trakpak3",function(len,ply)
-		local cmd = net.ReadString()
-		local func = Trakpak3.Net[cmd]
-		if func then func(len,ply) end
-	end)
-	
-	--Usage: function Trakpak3.Net.<identifier> = function(len, ply) <function text> end
-	--To create a net message that calls it:
-	--net.Start("trakpak3")
-	--net.WriteString(<identifier>)
-	--<net message text>
-	--net.Send()
 	
 end
+
+--CLIENT Initialization
 if CLIENT then
-	Trakpak3 = {}
-	Trakpak3.Net = {}
+	
 	include("trakpak3/cl_autosave.lua")
 	include("trakpak3/cl_nodesetup.lua")
 	include("trakpak3/cl_sigedit.lua")
@@ -81,15 +96,8 @@ if CLIENT then
 	include("trakpak3/cl_pathconfig.lua")
 	include("trakpak3/cl_defect_detector.lua")
 	include("trakpak3/cl_signalsprites.lua")
+	include("trakpak3/cl_clientloader.lua")
 	include("trakpak3/shared.lua")
-	
-	--Net Message Handler
-	net.Receive("trakpak3",function(len,ply)
-		local cmd = net.ReadString()
-		local func = Trakpak3.Net[cmd]
-		local subtract = 8*(#cmd + 1)--Number of bits to subtract from the message length
-		if func then func(len - subtract,ply) end
-	end)
 	
 	--Fix EyePos, EyeAngles, and EyeVector functions
 	hook.Add("PreDrawTranslucentRenderables", "Trakpak3_FixEyeFunctions", function()
@@ -97,28 +105,6 @@ if CLIENT then
 		EyeVector()
 		EyeAngles()
 	end)
-	
-	--[[
-	concommand.Add("+tp3_test", function()
-		print("Button Down!")
-	end)
-	
-	concommand.Add("-tp3_test", function()
-		print("Button Up!")
-	end)
-	]]--
-	
-	--[[
-	hook.Add("PopulatePropMenu", "TestMakeSpawnlists", function()
-		
-		local contents = { {type = "model", model = "models/editor/playerstart.mdl" } }
-		
-		spawnmenu.AddPropCategory("Test1", "Test Spawnlist 1", contents, "icon16/folder_table.png", 1000, 0)
-		spawnmenu.AddPropCategory("Test2", "Test Spawnlist 2", contents, "icon16/folder_table.png", 1001, 0)
-		spawnmenu.AddPropCategory("Test3", "Test Spawnlist 3", contents, "icon16/folder_table.png", 1002, 0)
-		
-	end)
-	]]--
 	
 	--[[
 	concommand.Add("orthocamtest",function()

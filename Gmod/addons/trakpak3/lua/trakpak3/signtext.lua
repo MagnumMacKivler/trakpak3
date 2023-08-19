@@ -3,30 +3,35 @@ Trakpak3.SignText = {}
 Trakpak3.SignText.Signs = {}
 --util.AddNetworkString("tp3_register_sign")
 
---will be triggered when each player intializes clientside
---[[
-net.Receive("tp3_register_sign", function(mlen, ply)
-	print("[Trakpak3] Sending sign data...")
+--Return pack of sign data
+Trakpak3.GetSignPack = function()
+	if Trakpak3.SignTextPack then return Trakpak3.SignTextPack end
+	
+	Trakpak3.SignTextPack = {}
+	local stpack = Trakpak3.SignTextPack
 	for _, ent in pairs(ents.FindByClass("tp3_sign_*")) do
-		--Send Text Data to Client
-		for index = 1,4 do
+		for index=1,4 do
 			local data = ent["text_data_"..index]
-			if data then Trakpak3.SignText.SyncSign(ent,data,index,ply) end
+			if data then
+				local signtable = {
+					ent = ent, --For tp3_sign_world, this will be nil on client because it's not networked.
+					data = data,
+					index = index
+				}
+				table.insert(stpack,signtable)
+			end
 		end
 	end
-end)
-]]--
-Trakpak3.Net.tp3_register_sign = function(len,ply)
-	print("[Trakpak3] Sending sign data...")
-	for _, ent in pairs(ents.FindByClass("tp3_sign_*")) do
-		--Send Text Data to Client
-		for index = 1,4 do
-			local data = ent["text_data_"..index]
-			if data then Trakpak3.SignText.SyncSign(ent,data,index,ply) end
-		end
+	
+	if table.IsEmpty(stpack) then
+		return nil
+	else
+		return stpack
 	end
 end
 
+
+--Send a live update
 function Trakpak3.SignText.SyncSign(ent, data, index, ply)
 	index = index or 1
 	--net.Start("tp3_register_sign")

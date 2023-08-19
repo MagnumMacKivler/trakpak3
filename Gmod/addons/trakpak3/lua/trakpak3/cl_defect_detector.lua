@@ -3,6 +3,8 @@ if not Trakpak3.EDD then --EDD stands for Equipment Defect Detector
 end
 
 --Sound Fonts
+--[id used by defect detector] = {">soundpath.wav>", duration}
+
 --GE Defect Detector (prototypic)
 Trakpak3.EDD.SoundFonts["ge"] = {
 	staticloop = "trakpak3/defect_detectors/static.wav",

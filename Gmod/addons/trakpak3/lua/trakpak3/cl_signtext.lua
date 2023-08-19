@@ -45,25 +45,10 @@ function SignText.GetFont(fontname, size, weight, italic, underline, strike, sha
 	return fname
 end
 
---Request sign data from server
-hook.Add("InitPostEntity","Trakpak3_RequestSignData",function()
-	--net.Start("tp3_register_sign")
-	net.Start("trakpak3")
-	net.WriteString("tp3_register_sign")
-	net.SendToServer()
-	print("[Trakpak3] Requesting Sign Data...")
-end)
-
---Net message triggered by each sign entity to register their info on client.
---net.Receive("tp3_register_sign",function(mlen, ply)
-Trakpak3.Net.tp3_register_sign = function(len,ply)
-	
-	local ent = net.ReadEntity()
-	local JSON = net.ReadString()
-	local data = util.JSONToTable(JSON)
-	local index = net.ReadUInt(16)
-	
+local RegisterSign = function(ent,data,index)
 	--On-Delivery Processing
+	
+	--print("SIGN", ent, data, index)
 	
 	--Font
 	local font = SignText.GetFont(data.text_font, data.text_res, data.text_weight, data.text_it, data.text_un, false, false)
@@ -134,6 +119,25 @@ Trakpak3.Net.tp3_register_sign = function(len,ply)
 	--PrintTable(data)
 	
 --end)
+end
+
+--Net message triggered by each sign entity to UPDATE info on client
+Trakpak3.Net.tp3_register_sign = function(len,ply)
+	
+	local ent = net.ReadEntity()
+	local JSON = net.ReadString()
+	local data = util.JSONToTable(JSON)
+	local index = net.ReadUInt(16)
+	
+	RegisterSign(ent,data,index)
+end
+
+--Upon receipt of sign pack from server
+Trakpak3.ReceiveSignPack = function(allsigns)
+	for _, sdata in ipairs(allsigns) do
+		--PrintTable(sdata)
+		RegisterSign(sdata.ent, sdata.data, sdata.index)
+	end
 end
 
 function SignText.DrawSign(ent,index)

@@ -3336,23 +3336,14 @@ function Dispatch.LoadBoards(fromdata, ent)
 	end
 end
 
---Request DS board from server
-hook.Add("InitPostEntity", "Trakpak3_Request_Dispatch", function()
-	--net.Start("tp3_transmit_ds")
-	net.Start("trakpak3")
-	net.WriteString("tp3_transmit_ds")
-	net.SendToServer()
-end)
-
---Receive DS data from server
-Trakpak3.Net.tp3_transmit_dsdata = function(len,ply)
-	Dispatch.RealData = net.ReadTable()
+--Receive Dispatch Status data from server
+Trakpak3.ReceiveDSPack = function(data)
+	Dispatch.RealData = data
 end
 
---Receive DS board from server
-Trakpak3.Net.tp3_transmit_ds = function(len,ply)
-	print("[Trakpak3] Dispatch Board Received.")
-	Dispatch.MapBoards = net.ReadTable()
+--Receive DS board configuration from server
+Trakpak3.ReceiveDSBoards = function(data)
+	Dispatch.MapBoards = data
 	Dispatch.LoadBoards(false)
 	Dispatch.canload = true
 end
@@ -3360,8 +3351,7 @@ end
 --Send Command to Entity
 function Dispatch.SendCommand(target, cmd, arg)
 	--net.Start("tp3_dispatch_comm")
-	net.Start("trakpak3")
-		net.WriteString("tp3_dispatch_comm")
+	Trakpak3.NetStart("tp3_dispatch_comm")
 		net.WriteString(target)
 		net.WriteString(cmd)
 		net.WriteUInt(arg,3)

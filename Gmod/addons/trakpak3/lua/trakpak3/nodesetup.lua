@@ -38,16 +38,11 @@ hook.Add("InitPostEntity","TP3_NodeLoad",load_nodes)
 hook.Add("PostCleanupMap","TP3_NodeLoad", load_nodes)
 
 
---util.AddNetworkString("tp3_request_blockpack")
-
---Send all the block entity info to the client so they can actually bind the blocks - should only be useful in singleplayer. Also does signal Cabsignal Points.
---Also does Signals and Switches for DS boards
---net.Receive("tp3_request_blockpack", function(length, ply)
-Trakpak3.Net.tp3_request_blockpack = function(len,ply)
+function Trakpak3.GetBlockPack() --Return the table of blocks and nodes, aka "The Blockpack"
+	if Trakpak3.BlockPack then return Trakpak3.BlockPack end --Skip the rest of the function if the data already exists
 	
-	print("[Trakpak3] Received Blockpack Request from player.")
-	
-	local blockpack = {BlockData = {}, NodeList = Trakpak3.NodeList}
+	Trakpak3.BlockPack = {BlockData = {}, NodeList = Trakpak3.NodeList}
+	local blockpack = Trakpak3.BlockPack
 	
 	--key: name
 	--value: pos
@@ -55,6 +50,7 @@ Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 	local allblocks = ents.FindByClass("tp3_signal_block")
 	if allblocks then
 		for k, block in pairs(allblocks) do
+			--Project the block's position down onto the map so the player can click a surface and select it.
 			local pos
 			local tr = {
 				start = block:GetPos(),
@@ -75,32 +71,23 @@ Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 		end
 	end
 	
-	if table.IsEmpty(blockpack) then
-		print("[Trakpak3] There are no Trakpak3 signal blocks on this map to send to client.")
+	if table.IsEmpty(blockpack.BlockData) then --There were no blocks. Return nil
+		return nil
 	else
-		--print("The table is NOT empty.")
-		
-		local JSON = util.TableToJSON(blockpack)
-		JSON = util.Compress(JSON)
-		net.Start("trakpak3")
-			net.WriteString("tp3_blockpack")
-			net.WriteData(JSON)
-		net.Send(ply)
-		
-		--[[
-		net.Start("trakpak3")
-			net.WriteString("tp3_blockpack")
-			net.WriteTable(blockpack)
-		net.Send(ply)
-		]]--
+		return blockpack
 	end
 	
-	--Signals and Cab Signal Positions
-	local allsigs = ents.FindByClass("tp3_signal_master")
-	local positions = {}
-	local signals = {}
-	if allsigs then
+end
+
+function Trakpak3.GetSignalPack() --Return the table of all signals. Must be executed before Trakpak3.GetCSPosPack!
+	if Trakpak3.SignalPack then return Trakpak3.SignalPack end
+	Trakpak3.SignalPack = {}
+	Trakpak3.CSPosPack = {}
+	local signals = Trakpak3.SignalPack
+	local positions = Trakpak3.CSPosPack
 	
+	local allsigs = ents.FindByClass("tp3_signal_master")
+	if allsigs then
 		for _, signal in pairs(allsigs) do
 			table.insert(positions, signal.cs_pos)
 			
@@ -109,39 +96,34 @@ Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 				signals[name] = signal:GetPos()
 			end
 		end
-		
-		--CS Pos
-		--[[
-		local JSON = util.TableToJSON(positions)
-		JSON = util.Compress(JSON)
-		util.AddNetworkString("tp3_cabsignal_pospack")
-		net.Start("tp3_cabsignal_pospack")
-		net.WriteData(JSON,#JSON)
-		net.Send(ply)
-		]]--
-		net.Start("trakpak3")
-			net.WriteString("tp3_cabsignal_pospack")
-			net.WriteTable(positions)
-		net.Send(ply)
-		
-		--Signal Pos
-		--[[
-		local JSON = util.TableToJSON(signals)
-		JSON = util.Compress(JSON)
-		util.AddNetworkString("tp3_signalpack")
-		net.Start("tp3_signalpack")
-		net.WriteData(JSON,#JSON)
-		net.Send(ply)
-		]]--
-		net.Start("trakpak3")
-			net.WriteString("tp3_signalpack")
-			net.WriteTable(signals)
-		net.Send(ply)
 	end
 	
-	--Switches
+	if table.IsEmpty(signals) then --There were no signals. Return nil
+		return nil
+	else
+		return signals
+	end
+end
+
+function Trakpak3.GetCSPosPack() --Return the table of all cab signal positions, this is evaluated in Trakpak3.GetSignalPack.
+	if Trakpak3.CSPosPack then
+		if table.IsEmpty(Trakpak3.CSPosPack) then
+			return nil
+		else
+			return Trakpak3.CSPosPack
+		end
+	else
+		return nil
+	end
+end
+
+function Trakpak3.GetSwitchPack() --Switch Stands
+	if Trakpak3.SwitchPack then return Trakpak3.SwitchPack end
+	
+	Trakpak3.SwitchPack = {}
+	local switches = Trakpak3.SwitchPack
+	
 	local allswitches = ents.FindByClass("tp3_switch_lever_anim")
-	local switches = {}
 	if allswitches then
 		for _, switch in pairs(allswitches) do
 			local name = switch:GetName()
@@ -149,26 +131,22 @@ Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 				switches[name] = switch:GetPos()
 			end
 		end
-		
-		--Switch Pos
-		--[[
-		local JSON = util.TableToJSON(switches)
-		JSON = util.Compress(JSON)
-		util.AddNetworkString("tp3_switchpack")
-		net.Start("tp3_switchpack")
-		net.WriteData(JSON,#JSON)
-		net.Send(ply)
-		]]--
-		net.Start("trakpak3")
-			net.WriteString("tp3_switchpack")
-			net.WriteTable(switches)
-		net.Send(ply)
-		
 	end
 	
-	--Logic Gates
+	if table.IsEmpty(switches) then --There were no switches. Return nil
+		return nil
+	else
+		return switches
+	end
+end
+
+function Trakpak3.GetGatePack() --Logic Gates
+	if Trakpak3.GatePack then return Trakpak3.GatePack end
+	
+	Trakpak3.GatePack = {}
+	local gates = Trakpak3.GatePack
 	local allgates = ents.FindByClass("tp3_logic_gate")
-	local gates = {}
+	
 	if allgates then
 		for _, gate in pairs(allgates) do
 			local name = gate:GetName()
@@ -176,44 +154,34 @@ Trakpak3.Net.tp3_request_blockpack = function(len,ply)
 				gates[name] = {pos = gate:GetPos(), occupied = gate.occupied}
 			end
 		end
-		
-		--Gate Pos & Occupancy
-		--[[
-		local JSON = util.TableToJSON(gates)
-		JSON = util.Compress(JSON)
-		util.AddNetworkString("tp3_gatepack")
-		net.Start("tp3_gatepack")
-		net.WriteData(JSON, #JSON)
-		net.Send(ply)
-		]]--
-		net.Start("trakpak3")
-			net.WriteString("tp3_gatepack")
-			net.WriteTable(gates)
-		net.Send(ply)
 	end
 	
-	--Path Config
+	if table.IsEmpty(gates) then --There were no gates. Return nil
+		return nil
+	else
+		return gates
+	end
+end
+
+function Trakpak3.GetPathPack() --Path Configs
+	if Trakpak3.PathPack then return Trakpak3.PathPack end
+	
+	Trakpak3.PathPack = {}
+	local psignals = Trakpak3.PathPack
+	
 	if Trakpak3.PathConfig.Signals then
-		local psignals = {}
 		for signame, paths in pairs(Trakpak3.PathConfig.Signals) do
 			local signal, valid = Trakpak3.FindByTargetname(signame)
 			if valid then psignals[signame] = paths end
 		end
-		
-		--[[
-		local JSON = util.TableToJSON(psignals)
-		JSON = util.Compress(JSON)
-		util.AddNetworkString("tp3_pathpack")
-		net.Start("tp3_pathpack")
-		net.WriteData(JSON,#JSON)
-		net.Send(ply)
-		]]--
-		net.Start("trakpak3")
-			net.WriteString("tp3_pathpack")
-			net.WriteTable(psignals)
-		net.Send(ply)
 	end
---end)
+	
+	if table.IsEmpty(psignals) then --There were no path signals. Return nil
+		return nil
+	else
+		return psignals
+	end
+	
 end
 
 --Clipboard

@@ -194,40 +194,9 @@ function Trakpak3.ClearNodes()
 	Trakpak3.AutosaveLog("nodetools") --Record Delta for Autosave
 end
 
---Tell the server it's okay to send the blockpack
-hook.Add("InitPostEntity","Trakpak3_RequestBlockPack",function()
-	--net.Start("tp3_request_blockpack")
-	net.Start("trakpak3")
-	net.WriteString("tp3_request_blockpack")
-	net.SendToServer()
-end)
-
 --Receive blocks
---[[
-net.Receive("tp3_blockpack", function(mlen)
-
+Trakpak3.ReceiveBlockPack = function(alldata)
 	print("[Trakpak3] Block Pack Received.")
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	local alldata = util.JSONToTable(JSON)
-	Trakpak3.Blocks = alldata.BlockData
-	Trakpak3.BlockDims = {}
-	Trakpak3.NodeList = alldata.NodeList
-	if Trakpak3.Blocks and not table.IsEmpty(Trakpak3.Blocks) then
-		Trakpak3.NodeChainList = {}
-		for name, data in pairs(Trakpak3.Blocks) do
-			Trakpak3.NewNodeChain(name, data.pos, data.nodes, data.skips)
-			Trakpak3.BlockDims[name] = {lw = data.lw, h = data.h, offset = data.offset, occupied = data.occupied}
-			--PrintTable(Trakpak3.BlockDims[name])
-		end
-	end
-end)
-]]--
-Trakpak3.Net.tp3_blockpack = function(len,ply)
-	print("[Trakpak3] Block Pack Received.")
-	local data = net.ReadData(len/8)
-	local JSON = util.Decompress(data)
-	local alldata = util.JSONToTable(JSON)
 	
 	--local alldata = net.ReadTable()
 	Trakpak3.Blocks = alldata.BlockData
@@ -243,51 +212,23 @@ Trakpak3.Net.tp3_blockpack = function(len,ply)
 end
 
 --Reveive Cab Signal Positions
---[[
-net.Receive("tp3_cabsignal_pospack", function(mlen)
-	--local JSON = net.ReadData(mlen)
-	--JSON = util.Decompress(JSON)
-	--Trakpak3.CS_Positions = util.JSONToTable(JSON)
-end)
-]]--
-Trakpak3.Net.tp3_cabsignal_pospack = function(len,ply)
-	Trakpak3.CS_Positions = net.ReadTable()
+Trakpak3.ReceiveCSPosPack = function(data)
+	Trakpak3.CS_Positions = data
 end
 
 --Receive Signal Positions themselves
---[[
-net.Receive("tp3_signalpack",function(mlen)
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	Trakpak3.Signals = util.JSONToTable(JSON)
-end)
-]]--
-Trakpak3.Net.tp3_signalpack = function(len,ply)
-	Trakpak3.Signals = net.ReadTable()
+Trakpak3.ReceiveSignalPack = function(data)
+	Trakpak3.Signals = data
 end
 
 --Receive Switches
---[[
-net.Receive("tp3_switchpack",function(mlen)
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	Trakpak3.Switches = util.JSONToTable(JSON)
-end)
-]]--
-Trakpak3.Net.tp3_switchpack = function(len,ply)
-	Trakpak3.Switches = net.ReadTable()
+Trakpak3.ReceiveSwitchPack = function(data)
+	Trakpak3.Switches = data
 end
 
 --Receive Logic Gates
---[[
-net.Receive("tp3_gatepack",function(mlen)
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	Trakpak3.LogicGates = util.JSONToTable(JSON)
-end)
-]]--
-Trakpak3.Net.tp3_gatepack = function(len,ply)
-	Trakpak3.LogicGates = net.ReadTable()
+Trakpak3.ReceiveGatePack = function(data)
+	Trakpak3.LogicGates = data
 end
 
 --Occupancy Update

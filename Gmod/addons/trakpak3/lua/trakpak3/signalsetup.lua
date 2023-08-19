@@ -74,27 +74,10 @@ hook.Add("InitPostEntity","Trakpak3_SystemSetup",SETUP_SIGNALS)
 hook.Add("PostCleanUpMap","Trakpak3_ReSystemSetup",SETUP_SIGNALS)
 
 --Signal System Packing
---[[
-util.AddNetworkString("Trakpak3_GetSignalSystems")
-net.Receive("Trakpak3_GetSignalSystems",function(length, ply) --Received from cl_signalvision.lua
-	--print("Received Request for Signal Systems")
-	if TP3Signals and TP3Signals.systems then
-		local json = util.TableToJSON(TP3Signals.systems)
-		if json then
-			local data = util.Compress(json)
-			net.Start("Trakpak3_GetSignalSystems")
-			net.WriteData(data)
-			net.Send(ply)
-		end
-	end
-end)
-]]--
-Trakpak3.Net.trakpak3_getsignalsystems = function(len,ply) --Received from cl_signalvision.lua
-	if TP3Signals and TP3Signals.systems then
-		net.Start("trakpak3")
-			net.WriteString("trakpak3_getsignalsystems")
-			local json = util.TableToJSON(TP3Signals.systems)
-			net.WriteString(json)
-		net.Send(ply)
+Trakpak3.GetSignalSystemPack = function()
+	if not TP3Signals or not TP3Signals.systems or table.IsEmpty(TP3Signals.systems) then
+		return nil
+	else
+		return TP3Signals.systems
 	end
 end

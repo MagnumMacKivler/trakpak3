@@ -676,20 +676,9 @@ function PathConfig.Clear()
 	Trakpak3.AutosaveLog("pathconfig") --Record Delta for Autosave
 end
 --Receive From Server
---[[
-net.Receive("tp3_pathpack", function(mlen)
-	print("[Trakpak3] Path Pack Received.")
-	local JSON = net.ReadData(mlen)
-	JSON = util.Decompress(JSON)
-	PathConfig.MapSignals = util.JSONToTable(JSON)
-	
-	PathConfig.LoadFromServer(false)
-end)
-]]--
-Trakpak3.Net.tp3_pathpack = function(len,ply)
-	print("[Trakpak3] Path Pack Received.")
+Trakpak3.ReceivePathPack = function(data)
 
-	PathConfig.MapSignals = net.ReadTable()
+	PathConfig.MapSignals = data
 	
 	PathConfig.LoadFromServer(false)
 end

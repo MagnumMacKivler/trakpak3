@@ -680,20 +680,22 @@
 	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The gate prop's orientation in the world."
 	
 	skin(integer) : "Skin (Open)" : 0 : "The gate model's skin when the lights are off."
-	skin2(integer) : "Skin (Closed)" : 1 : "The gate model's skin when the lights are on."
+	skin2(integer) : "Skin (Closed)" : 3 : "The gate model's skin when the lights are on."
 	bodygroups(string) : "Bodygroups (Open)" : "" : "The gate model's bodygroups when the gate is open. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
 	bodygroups2(string) : "Bodygroups (Closed)" : "" : "The gate model's bodygroups when the gate is closed. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1. If blank, bodygroups will not be changed."
 	anim_trans(string) : "Transition Anim (Open)" : "open" : "The gate's transition-to-open animation (sequence). If blank, model will not be animated."
 	anim_trans2(string) : "Transition Anim (Closed)" : "close" : "The gate's transition-to-closed animation (sequence). If blank, model will not be animated."
 	anim_idle(string) : "Idle Anim (Open)" : "idle_open" : "The gate's default animation (sequence) when open. If blank, model will not be animated."
-	anim_idle2(string) : "Idle Anim (Closed)" : "idle_close" : "The gate's default animation (sequence) when down. If blank, model will not be animated."
+	anim_idle2(string) : "Idle Anim (Closed)" : "idle_closed" : "The gate's default animation (sequence) when down. If blank, model will not be animated."
 	
-	bellsound(sound) : "Bell Sound" : "" : "The sound to play and loop when the gates start to close."
+	bellsound(sound) : "Bell Sound" : "" : "The sound to play and loop when the gates start to close. If blank, there will be no bell sound."
 	bellmode(choices) : "Bell Mode" : 2 : "When should the bell stop ringing?" =
 	[
-		0 : "Bell doesn't ring"
-		1 : "Bell rings until gate closed"
-		2 : "Bell rings until lights off"
+		0 : "Bell doesn't ring."
+		1 : "Bell rings until gate is fully closed."
+		2 : "Bell rings until gate is fully open."
+		3 : "Bell rings until gate starts to open."
+		4 : "Bell rings while gate is in motion."
 	]
 	
 	warning(float) : "Warning Delay" : "4.0" : "After the lights/bell come on, the gate will wait this many seconds before closing."

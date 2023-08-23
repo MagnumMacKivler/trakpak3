@@ -5,6 +5,7 @@ ENT.PrintName = "Trakpak3 Signal Block Controller"
 ENT.Author = "Magnum MacKivler"
 ENT.Purpose = "Monitors Block Occupancy"
 ENT.Instructions = "Place in Hammer"
+ENT.Type = "anim" --Required for multiconvex triggers to work
 
 --KeyVals: blockmode (0 1 2), scaninterval, hull_lw, hull_h, hull_offset
 --Inputs: ForceOccupancy(N), UnForceOccupancy, TestOccupancy
@@ -33,15 +34,11 @@ if SERVER then
 		self.occupied = (self.blockmode==1)
 		self.scanid = 1
 		self.run = false --will wait until a node chain is provided
+		self.softoccupied = false --Controls hull trace detection.
+		self.TriggerEnts = {}
+		
+		self:SetAngles(Angle(0,0,0)) --If somehow hammer places this at an angle, this ensures the trigger hulls will still work.
 	end
-	--[[
-	hook.Add("InitPostEntity",function()
-		local blocks = ents.FindByClass("tp3_signal_block")
-		for k, v in pairs(blocks) do
-			v:Initialize2()
-		end
-	end)
-	]]--
 	
 	--Set up node chain using the new system
 	function ENT:SetupNodes(nodechain)
@@ -60,14 +57,18 @@ if SERVER then
 		else
 			if self.blockmode==0 then self.run = true end
 			print("[Trakpak3] Signal Block '"..self:GetName().."' set up successfully with "..self.nodecount.." nodes.")
+			self:BecomeTrigger()
 		end
 	end
 	
+	--Called by a tp3_crossing to enable it to do hull traces
+	function ENT:SetupCrossingBlock(enable)
+		self.runscans = enable
+	end
+	
 	--Update occupancy state of all nodes in my block
-	--util.AddNetworkString("tp3_block_hull_update")
 	
 	function ENT:UpdateNodeList(occupancy)
-		--net.Start("tp3_block_hull_update")
 		net.Start("trakpak3")
 		net.WriteString("tp3_block_hull_update")
 		net.WriteString(self:GetName())
@@ -75,24 +76,6 @@ if SERVER then
 		net.Broadcast()
 	end
 	
-	--[[
-	Trakpak3.TrainTagList = {} --List of blocks and speeds associated with each train tag
-	Trakpak3.NextTrainTagBroadcastTime = 0
-	util.AddNetworkString("Trakpak3_UpdateTrainTags")
-	--Broadcast all Tag Data
-	function Trakpak3.BroadcastTrainTagData()
-		Trakpak3.NextTrainTagBroadcastTime = CurTime() + 5
-		net.Start("Trakpak3_UpdateTrainTags")
-		net.WriteTable(Trakpak3.TrainTagList)
-		net.Broadcast()
-	end
-	--Every 5 seconds
-	hook.Add("Think","Trakpak3_TrainTagBroadcastTimer",function()
-		if CurTime() > Trakpak3.NextTrainTagBroadcastTime then
-			Trakpak3.BroadcastTrainTagData()
-		end
-	end)
-	]]--
 	--Handle New State
 	function ENT:HandleNewState(state, natural, ent)
 		if state and not self.occupied then --Block is now occupied
@@ -165,53 +148,113 @@ if SERVER then
 		return tag, speed
 	end
 	
-	--[[
-	function ENT:CheckAndUpdateTag(ent)
-		local newtag
-		if ent and ent:IsValid() then
-			newtag = ent.Trakpak3_TrainTag
-		elseif not ent then --Block is empty, delete all tags that say they are in here (edge case to protect against multi-train cleanups)
-			for tag, data in pairs(Trakpak3.TrainTagList) do
-				if data.block==self:GetName() then
-					Trakpak3.TrainTagList[tag] = nil
-				end
-			end
-		end
-		if newtag then --The hit entity is valid and has a train tag
-			local phys = ent:GetPhysicsObject()
-			local speed = math.floor(phys:GetVelocity():Length())
-			if newtag != self.traintag then --New or Changed Tag
-				
-				
-				if self.traintag and Trakpak3.TrainTagList[self.traintag] and (Trakpak3.TrainTagList[self.traintag].block==self:GetName()) then --The stored tag is associated with this block, so clear it
-					Trakpak3.TrainTagList[self.traintag] = nil
-				end
-				
-				
-				self.traintag = newtag
-				Trakpak3.TrainTagList[newtag] = {block = self:GetName(), speed = speed} --Create/Overwrite this tag, associate with this block
-			elseif Trakpak3.TrainTagList[newtag] and (Trakpak3.TrainTagList[newtag].block==self:GetName()) then --Still the same tag, you are the "master" block
-				Trakpak3.TrainTagList[newtag].speed = speed --Update speed only
-			end
-		elseif self.traintag then --The hit entity has no train tag, but you had one stored
-			if Trakpak3.TrainTagList[self.traintag] and (Trakpak3.TrainTagList[self.traintag].block==self:GetName()) then --The stored tag is associated with this block, so clear it
-				Trakpak3.TrainTagList[self.traintag] = nil
-			end
-			self.traintag = nil
-		end
-		
-	end
-	]]--
-	
 	function ENT:InitialBroadcast() --Fired Externally by startup script (signalsetup)
 		hook.Run("TP3_BlockUpdate",self:GetName(),self.occupied,true)
 	end
 	
+	--Create the convex physics mesh based on node data
+	function ENT:BecomeTrigger()
+		if Trakpak3.NodeList and self.nodes and self.skips then
+			local convexes = {}
+		
+			local startingpos = self:GetPos() --Position of the entity
+			
+			for id = 1, #self.nodes - 1 do --For each node except the last:
+				if not self.skips[id] then --Node is not marked as a skip
+					--Get node IDs
+					local node1 = self.nodes[id]
+					local node2 = self.nodes[id+1]
+					
+					--Get node positions
+					local pos1 = Trakpak3.NodeList[node1]
+					local pos2 = Trakpak3.NodeList[node2]
+					
+					if pos1 and pos2 then
+						--Get the positions local to the signal block ent
+						local pos1r = pos1-startingpos
+						local pos2r = pos2-startingpos
+						
+						local disp = pos2r-pos1r --Defined as the Forward Axis, non normalized
+						local dispflat = Vector(disp.x, disp.y, 0) --Flattened
+						local left = dispflat:GetNormalized()
+						left:Rotate(Angle(0,90,0))
+						local up = Vector(0,0,1)
+						
+						--Near Face
+						local BL = pos1r + (self.hull_lw/2)*left + (self.hull_offset)*up
+						local BR = pos1r + (-self.hull_lw/2)*left + (self.hull_offset)*up
+						local TL = pos1r + (self.hull_lw/2)*left + (self.hull_offset + self.hull_h)*up
+						local TR = pos1r + (-self.hull_lw/2)*left + (self.hull_offset + self.hull_h)*up
+						
+						--Far Face
+						local FBL = BL + disp
+						local FBR = BR + disp
+						local FTL = TL + disp
+						local FTR = TR + disp
+						
+						--Add the points that form the convex.
+						table.insert(convexes,{BL, BR, TL, TR, FBL, FBR, FTL, FTR})
+					end
+				end
+			end
+			
+			if next(convexes) then --We have convexes!
+				
+				local res = self:PhysicsInitMultiConvex(convexes)
+				self:SetSolid(SOLID_VPHYSICS)
+				self:EnableCustomCollisions(true)
+				self:SetNotSolid(true)
+				self:SetTrigger(true)
+				local mins, maxs = self:WorldSpaceAABB()
+				self:SetCollisionBoundsWS(mins, maxs)
+			end
+			
+		end
+	end
+	
+	--Funny debug function haha oh god I'm so glad I figured the trigger thing out
+	--[[
+	function ENT:Kaboom(pos)
+		local barrel = ents.Create("prop_physics")
+		barrel:SetModel("models/props_c17/oildrum001_explosive.mdl")
+		barrel:SetPos(pos or self:GetPos())
+		barrel:Spawn()
+		barrel:Fire("break",1,0)
+	end
+	]]--
+	
+	--Trigger Functions
+	function ENT:StartTouch(ent)
+		--print("Start Trigger: ",ent)
+		if ent and ent:IsValid() and not Trakpak3.IsBlacklisted(ent) and ent:IsSolid() then
+			if table.IsEmpty(self.TriggerEnts) then --Nothing is in there... StartTouchAll!
+				self.softoccupied = true
+			end
+			self.TriggerEnts[ent] = true
+		end
+	end
+	
+	function ENT:EndTouch(ent)
+		--print("End Trigger: ",ent)
+		if ent and ent:IsValid() then
+			self.TriggerEnts[ent] = nil
+		end
+		
+		if table.IsEmpty(self.TriggerEnts) then --Nothing is triggering it... EndTouchAll
+			self.softoccupied = false
+			if self.occupied then --Clear the state if occupied
+				self:HandleNewState(false, true)
+			end
+		end
+	end
+	
 	function ENT:Think()
-		--print("AAA")
-		if self.run and Trakpak3.NodeList and self.nodes and self.skips and self.scanid then
-			--print(Entity(35).run)
+		
+		
+		--Hull Trace detection for "Hard" Occupancy. Only runs when the block trigger is active.
+		if self.run and self.softoccupied and Trakpak3.NodeList and self.nodes and self.skips and self.scanid then
 			--Perform a hull trace between two nodes
+			
 			if not self.skips[self.scanid] then  --OK to scan
 				--Get node IDs
 				local node1 = self.nodes[self.scanid]

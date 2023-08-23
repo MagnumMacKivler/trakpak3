@@ -118,9 +118,10 @@ function Trakpak3.LineProject(startpos, endpos, sample)
 	return progress, prognorm, opposite, baselength
 end
 
+--Calculate "Zig Zag Distance"... A rough approximation of how far a sample point is along a multi-point path. This is used to calculate the distance from the start of a block to the entity triggering it, for crossings. It uses square roots (Trakpak3.LineProject()) so it's expensive, but should only be run while a train is approaching a crossing.
 function Trakpak3.ZZDistance(points, sample, tolerance)
 	local cum_length = 0 --cum is short for cumulative you pervert
-	for seg = 1, table.Count(points) - 1 do
+	for seg = 1, #points - 1 do
 		--get start and end points
 		local startpos = points[seg]
 		local endpos = points[seg+1]
@@ -135,6 +136,53 @@ function Trakpak3.ZZDistance(points, sample, tolerance)
 	end
 	
 	return cum_length
+end
+
+--Apply Train Tag. Don't use this function, use Trakpak3.ApplyTrainTag.
+local function ApplyTrainTag(ent, tag, entlog)
+	if ent and ent:IsValid() then
+		local id = ent:EntIndex()
+		--print(id, entlog[id]) 
+		if not entlog[id] then --New Entity
+			entlog[id] = true
+			ent.Trakpak3_TrainTag = tag --Apply Tag
+			if ent:GetClass()=="gmod_wire_tp3_cabsignal_box" then
+				WireLib.TriggerOutput(ent, "TrainTag", tag or "")
+			end
+			
+			--Constrained Entities
+			if ent:IsConstrained() then
+				local contable = constraint.GetTable(ent)
+				for _, con in pairs(contable) do --For each Constraint Subtable:
+					local e1 = con.Ent1
+					local e2 = con.Ent2
+					
+					if e2==ent then --Check whichever entity isn't the original one
+						ApplyTrainTag(e1, tag, entlog)
+					else
+						ApplyTrainTag(e2, tag, entlog)
+					end
+				end
+			end
+			
+			--Children
+			local kids = ent:GetChildren()
+			for _, kid in pairs(kids) do
+				ApplyTrainTag(kid, tag, entlog)
+			end
+			
+			--Parent
+			local par = ent:GetParent()
+			if par then ApplyTrainTag(par, tag, entlog) end
+			
+		end
+	end
+end
+
+--This one! Use This one!
+function Trakpak3.ApplyTrainTag(ent, tag)
+	local entlog = {}
+	ApplyTrainTag(ent, tag, entlog)
 end
 
 --Unused

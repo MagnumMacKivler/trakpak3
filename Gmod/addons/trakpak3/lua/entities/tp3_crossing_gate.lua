@@ -5,6 +5,7 @@ ENT.PrintName = "Trakpak3 Crossing Gate Prop"
 ENT.Author = "Magnum MacKivler"
 ENT.Purpose = "Stop Cars from getting fenderbent by trains"
 ENT.Instructions = "Place in Hammer"
+ENT.AutomaticFrameAdvance = true
 
 if SERVER then
 	ENT.KeyValueMap = {
@@ -28,7 +29,7 @@ if SERVER then
 		OnGateClose = "output"
 	}
 	
-	ENT.AutomaticFrameAdvance = true
+	
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
@@ -53,20 +54,19 @@ if SERVER then
 			local types = {"NORMAL", "NORMAL", "NORMAL"}
 			WireLib.CreateSpecialOutputs(self, names, types, nil)
 		end
+		
+		if self.xing_valid then self.randomoffset = self.xing_ent:RequestDelay() else self.randomoffset = 0 end --Used for slightly desynchronizing the opening/closing action <3
+		
+		--print(self, self.anim_trans, self.anim_trans2, self.anim_idle, self.anim_idle2)
 	end
 	
 	
+	--Lights turn on
 	function ENT:LightsOn()
 		if self.skin2 then
 			--Change Lights
 			self:SetSkin(self.skin2)
 		end
-		
-		--Setup Gate Delay
-		if self.warning then timer.Simple(self.warning, function() self:GateClose() end) end
-		
-		--Bell
-		self:BellStart()
 		
 		--Hammer
 		self:TriggerOutput("OnLightsOn",self)
@@ -78,6 +78,7 @@ if SERVER then
 		self.working = true
 	end
 	
+	--Lights turn off
 	function ENT:LightsOff()
 		if self.skin then
 			--Change Lights
@@ -93,6 +94,7 @@ if SERVER then
 		self.working = false
 	end
 	
+	--Gate starts moving down
 	function ENT:GateClose()
 		local timedelay = 0
 		
@@ -101,15 +103,16 @@ if SERVER then
 			Trakpak3.SetBodygroups(self.bodygroups2)
 		end
 		
-		--Animations
+		--Close Gate Animation
 		if self.anim_trans2 then
 			self:ResetSequence(self.anim_trans2)
 			timedelay = self:SequenceDuration(self:LookupSequence(self.anim_trans2)) or 0
 		end
 		
+		--Setup the timer for Close Idle Animation
 		timer.Simple(timedelay, function()
 			if self.anim_idle2 then self:ResetSequence(self.anim_idle2) end
-			if self.bellmode==1 then self:BellStop() end
+			if (self.bellmode==1) or (self.bellmode==4) then timer.Simple(self.randomoffset, function() self:BellStop() end) end --BM 1/4: Bell stops once gates are fully down
 			self.working = false
 		end)
 		
@@ -122,6 +125,7 @@ if SERVER then
 		end
 	end
 	
+	--Gate starts moving back up
 	function ENT:GateOpen()
 		self.working = true
 		local timedelay = 0
@@ -131,17 +135,21 @@ if SERVER then
 			Trakpak3.SetBodygroups(self.bodygroups)
 		end
 		
-		--Animations
+		--Open Gate Animation
 		if self.anim_trans then
 			self:ResetSequence(self.anim_trans)
 			timedelay = self:SequenceDuration(self:LookupSequence(self.anim_trans)) or 0
 		end
 		
+		--Setup timer for Idle Open Animation
 		timer.Simple(timedelay, function()
 			if self.anim_idle then self:ResetSequence(self.anim_idle) end
-			if self.bellmode==2 then self:BellStop() end
-			self:LightsOff()
 		end)
+		
+		--Bellmode 3
+		if self.bellmode==3 then
+			timer.Simple(self.randomoffset, function () self:BellStop() end)
+		end
 		
 		--Hammer
 		self:TriggerOutput("OnGateOpen",self)
@@ -153,9 +161,9 @@ if SERVER then
 	end
 	
 	function ENT:BellStart()
-		if self.bellmode>0 and self.bellsound then
+		if (self.bellmode > 0) and self.bellsound and (self.bellsound != "") then
 			self.bell = CreateSound(self,self.bellsound)
-			self.bell:SetSoundLevel(75)
+			self.bell:SetSoundLevel(80)
 			self.bell:Play()
 		end
 	end
@@ -170,12 +178,40 @@ if SERVER then
 		if not self.xing_valid then return end
 		
 		if not self.working then
-			if self.trigger and not self.triggered then
+			if self.trigger and not self.triggered then --Begin crossing sequence
 				self.triggered = true
-				self:LightsOn()
-			elseif not self.trigger and self.triggered then
+				
+				self:LightsOn() --Lights
+				
+				if self.bellmode != 0 then timer.Simple(self.randomoffset, function() self:BellStart() end) end --Bell
+				
+				timer.Simple((self.warning or 0) + self.randomoffset, function() self:GateClose() end) --Gate
+				
+			elseif not self.trigger and self.triggered then --Release crossing sequence
 				self.triggered = false
-				self:GateOpen()
+				
+				local timedelay = 0
+				if self.anim_trans then
+					timedelay = self:SequenceDuration(self:LookupSequence(self.anim_trans)) or 0
+				end
+				
+				if (self.bellmode==0) or (self.bellmode==1) then --BM0/1: No Bell ringing at this time
+					timer.Simple(self.randomoffset, function() self:GateOpen() end) --Gate
+					timer.Simple(timedelay + 0.5, function() self:LightsOff() end) --Lights
+				elseif self.bellmode==2 then --BM 2: Bell stops once gates are fully up
+					timer.Simple(self.randomoffset, function() self:GateOpen() end) --Gate
+					timer.Simple(timedelay + 0.5, function() self:LightsOff() end) --Lights
+					timer.Simple(timedelay + self.randomoffset + 0.5, function() self:BellStop() end) --Bell
+				elseif self.bellmode==3 then --BM 3: Bell stops once gates begin to go up
+					timer.Simple(self.randomoffset, function() self:BellStop() end) --Bell
+					timer.Simple(timedelay + 0.5, function() self:LightsOff() end) --Lights
+					timer.Simple(self.randomoffset + 0.5, function() self:GateOpen() end) --Gate
+				elseif self.bellmode==4 then --BM 4: Bell rings while gates in motion
+					timer.Simple(self.randomoffset, function() self:BellStart() end) --Bell
+					timer.Simple(timedelay + self.randomoffset + 1, function() self:BellStop() end)
+					timer.Simple(self.randomoffset + 0.5, function() self:GateOpen() end) --Gate
+					timer.Simple(timedelay + self.randomoffset + 0.5, function() self:LightsOff() end) --Lights
+				end
 			end
 		end
 		
@@ -186,11 +222,13 @@ if SERVER then
 				WireLib.TriggerOutput(self, "ETA", self.ETA)
 			end
 		end
+		self:NextThink(CurTime())
+		return true
 	end
 	
 	--Receive update from crossings
 	hook.Add("TP3_CrossingUpdate","Trakpak3_CrossingUpdateGates",function(xing_name, state)
-		--print("Updated Received, ",xing_name,state)
+		--print("Update Received, ",xing_name,state)
 		for n, self in pairs(ents.FindByClass("tp3_crossing_gate")) do
 			if xing_name==self.xing then self.trigger = state end
 		end
@@ -210,4 +248,11 @@ if SERVER then
 			end
 		end
 	end)
+end
+
+if CLIENT then
+	--Render Signal Sprites
+	function ENT:Draw(flags)
+		Trakpak3.SignalSprites.DrawSpriteSignal(self, flags)
+	end
 end

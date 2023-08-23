@@ -80,20 +80,7 @@ if SERVER then
 		self:SetCollisionGroup( COLLISION_GROUP_WORLD )
 		self:SetUseType(SIMPLE_USE)
 		
-		--Wire Input Creation
-		--[[
-		local names = {"Enable","Reset","BasePropOverride","TrainTag","ApplyTag"}
-		local types = {"NORMAL","NORMAL","ENTITY","STRING","NORMAL"}
-		local descs = {"Required","","","",""}
-		WireLib.CreateSpecialInputs(self, names, types, descs)
-		
-		--Wire Output Creation
-		
-		local names = {"LastSignalAspect",	"LastSignalSpeed",	"LastSignalSpeedNum",	"LastSignalDescription",	"NextSignalAspect",	"NextSignalSpeed",	"NextSignalSpeedNum",	"NextSignalDescription",	"EmBrake",	"TrainTag"}
-		local types = {"STRING",			"STRING",			"NORMAL",				"STRING",					"STRING",			"STRING",			"NORMAL",				"STRING",					"NORMAL"}
-		local descs = {}
-		WireLib.CreateSpecialOutputs(self, names, types, descs)
-		]]--
+		--Wire I/O
 		
 		local inputs = {
 			"Enable",
@@ -139,58 +126,28 @@ if SERVER then
 		self.nextsignal_ent = NULL
 		self.enabled = false
 		self:SetNWBool("enabled",false)
-	end
-	
-	--Trakpak3.TestLog = {}
-	
-	--Apply Train Tag
-	function Trakpak3.ApplyTrainTag(ent, tag, entlog)
-		if ent and ent:IsValid() then
-			local id = ent:EntIndex()
-			--print(id, entlog[id]) 
-			if not entlog[id] then --New Entity
-				entlog[id] = true
-				ent.Trakpak3_TrainTag = tag --Apply Tag
-				if ent:GetClass()=="gmod_wire_tp3_cabsignal_box" then
-					WireLib.TriggerOutput(ent, "TrainTag", tag or "")
+		
+		--Apply a default Train Tag, use the player's name
+		
+		timer.Simple(0.5,function()
+			if self.CPPIGetOwner then
+				local creator = self:CPPIGetOwner()
+				if creator and creator:IsValid() then
+					local name = creator:GetName()
+					self.Trakpak3_TrainTag = name
 				end
-				
-				--Constrained Entities
-				if ent:IsConstrained() then
-					local contable = constraint.GetTable(ent)
-					for _, con in pairs(contable) do --For each Constraint Subtable:
-						local e1 = con.Ent1
-						local e2 = con.Ent2
-						
-						if e2==ent then --Check whichever entity isn't the original one
-							Trakpak3.ApplyTrainTag(e1, tag, entlog)
-						else
-							Trakpak3.ApplyTrainTag(e2, tag, entlog)
-						end
-					end
-				end
-				
-				--Children
-				local kids = ent:GetChildren()
-				for _, kid in pairs(kids) do
-					Trakpak3.ApplyTrainTag(kid, tag, entlog)
-				end
-				
-				--Parent
-				local par = ent:GetParent()
-				if par then Trakpak3.ApplyTrainTag(par, tag, entlog) end
-				
 			end
-		end
+		end)
+
 	end
+	
+	
 	
 	--Train Tag Dialog Net Traffic
-	--util.AddNetworkString("Trakpak3_TrainTagDialog")
 	--Player pressed E on it
 	function ENT:Use(ply)
 		if ply:IsPlayer() then
 			local mytag = self.Trakpak3_TrainTag or ""
-			--net.Start("Trakpak3_TrainTagDialog")
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(self:EntIndex(),16)
@@ -200,21 +157,6 @@ if SERVER then
 	end
 	
 	--Player Entered a New Train Tag
-	--[[
-	net.Receive("Trakpak3_TrainTagDialog",function(length, ply)
-		local id = net.ReadUInt(16)
-		local ent = Entity(id)
-		local newtag = net.ReadString()
-		
-		if newtag=="" then newtag = nil end
-		
-		if ent and ent:IsValid() and (ent:GetClass()=="gmod_wire_tp3_cabsignal_box") then
-			local entlog = {}
-			Trakpak3.ApplyTrainTag(ent, newtag, entlog)
-			ent:SetupOverlay()
-		end
-	end)
-	]]--
 	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
 		local id = net.ReadUInt(16)
 		local ent = Entity(id)
@@ -223,8 +165,7 @@ if SERVER then
 		if newtag=="" then newtag = nil end
 		
 		if ent and ent:IsValid() and (ent:GetClass()=="gmod_wire_tp3_cabsignal_box") then
-			local entlog = {}
-			Trakpak3.ApplyTrainTag(ent, newtag, entlog)
+			Trakpak3.ApplyTrainTag(ent, newtag)
 			ent:SetupOverlay()
 		end
 	end
@@ -275,8 +216,7 @@ if SERVER then
 		elseif iname=="TrainTag" then
 			if value!="" then self.wiretag = value else self.wiretag = nil end
 		elseif (iname=="ApplyTag") and (value>=1) then
-			local entlog = {}
-			Trakpak3.ApplyTrainTag(self, self.wiretag, entlog)
+			Trakpak3.ApplyTrainTag(self, self.wiretag)
 			self:SetupOverlay()
 		end
 	end
@@ -347,17 +287,26 @@ if SERVER then
 					end
 				end
 			end
+			
+			--Automatically apply train tag, if there is one
+			local mytag = self.Trakpak3_TrainTag
+			local speed2 = vel:LengthSqr()
+			local threshold = 5/17.6
+			
+			if mytag and not self.moving then --Train tag exists and the box is "standing still"
+				
+				if speed2 > 4*threshold*threshold then --CS Box has exceeded 10 mph
+					self.moving = true
+					
+					Trakpak3.ApplyTrainTag(self, mytag)
+				end
+			elseif mytag and self.moving then --Train tag exists and the box is "moving"
+				if speed2 < threshold*threshold then self.moving = false end --CS Box less than 5 mph
+			end
+			
 		elseif not self.signals then
 			self.signals = ents.FindByClass("tp3_signal_master")
 		end
-	
-		--Calculate the rough distance between the box and the next signal (straight line)
-		--[[
-		if self.nextsignal and self.nextsignal_ent and self.nextsignal_ent:IsValid() then
-			local Dist = (self:GetPos() - self.nextsignal_ent:GetPos()):Length()
-			WireLib.TriggerOutput(self,"Distance",math.Round(Dist))
-		end
-		]]--
 		
 		--Turbo Think
 		self:NextThink(CurTime())
@@ -450,19 +399,6 @@ if SERVER then
 				end)
 			end
 		end
-		--[[
-		elseif speedcode==1 then --test SPAR
-			local root = Trakpak3.GetRoot(self)
-			local speed = root:GetVelocity():Length()
-			
-			if speed > self.restrictedspeed*Trakpak3.speedmul[self.units] then
-				WireLib.TriggerOutput(self,"EmBrake",1) --Dump the air!
-				timer.Simple(1,function()
-					WireLib.TriggerOutput(self,"EmBrake",0) --Reset after 1 second
-				end)
-			end
-		end
-		]]--
 		
 	end
 	
@@ -471,7 +407,6 @@ end
 
 if CLIENT then
 	--User pressed E to enter a Train Tag
-	--net.Receive("Trakpak3_TrainTagDialog",function(length, ply)
 	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
 		
 		local id = net.ReadUInt(16)
@@ -497,7 +432,6 @@ if CLIENT then
 		text:SetValue(mytag or "")
 		text:Dock(TOP)
 		function text:OnEnter(value)
-			--net.Start("Trakpak3_TrainTagDialog")
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(id,16)
@@ -521,7 +455,6 @@ if CLIENT then
 		button:DockMargin(24,2,2,2)
 		button:SetText("Apply")
 		function button:DoClick()
-			--net.Start("Trakpak3_TrainTagDialog")
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(id,16)
@@ -545,7 +478,6 @@ if CLIENT then
 		button:DockMargin(2,2,24,2)
 		button:SetText("Clear")
 		function button:DoClick()
-			--net.Start("Trakpak3_TrainTagDialog")
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
 				net.WriteUInt(id,16)

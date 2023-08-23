@@ -3055,7 +3055,7 @@ function Dispatch.AddNav(ent, x1, y1, x2, y2, destination, textcolor, bgcolor, t
 		button:SetText("")
 		--print(textname, self.destination)
 		
-		local e = element
+		local e = self
 		
 		--Custom button behavior??? Wow!
 		function button:Paint(w,h)
@@ -3075,7 +3075,6 @@ function Dispatch.AddNav(ent, x1, y1, x2, y2, destination, textcolor, bgcolor, t
 			elseif self:IsHovered() then --Mouse cursor over it
 				surface.SetDrawColor(Dispatch.StringToColor(e.textcolor))
 				surface.DrawRect(0,0, w, h)
-				
 				draw.SimpleText(textname,"tp3_dispatch_"..e.textsize, w/2, h/2, Dispatch.StringToColor(e.bgcolor), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
 			else --Cursor NOT over it
 				surface.SetDrawColor(Dispatch.StringToColor(e.bgcolor))
@@ -3159,7 +3158,7 @@ function Dispatch.AddNav(ent, x1, y1, x2, y2, destination, textcolor, bgcolor, t
 		
 	end
 	
-	element:Update(true,x1,y1,x2,y2,destination,textcolor,bgcolor)
+	element:Update(true,x1,y1,x2,y2,destination,textcolor,bgcolor,textsize)
 	
 end
 
@@ -3282,7 +3281,7 @@ function Dispatch.LoadBoards(fromdata, ent)
 						element.color0, element.color1, element.color2, element.color3, element.color4, element.color5, element.color6, element.color7, element.color8, element.color9
 					)
 				elseif element.type=="nav" then
-					Dispatch.AddNav(ent, element.x1, element.y1, element.x2, element.y2, element.destination, element.textcolor, element.bgcolor)
+					Dispatch.AddNav(ent, element.x1, element.y1, element.x2, element.y2, element.destination, element.textcolor, element.bgcolor, element.textsize)
 				end
 			end
 		end
@@ -3357,6 +3356,15 @@ function Dispatch.SendCommand(target, cmd, arg)
 		net.WriteUInt(arg,3)
 	net.SendToServer()
 	LocalPlayer():EmitSound("buttons/lightswitch2.wav")
+end
+
+--Send Admin Commands
+function Dispatch.SendAdminCommand(cmd, arg) --commands are setsignals (0 or 2), and setswitches (0 or 1)
+	Trakpak3.NetStart("tp3_dispatch_admin")
+		net.WriteString(cmd)
+		net.WriteUInt(arg,8)
+	net.SendToServer()
+	surface.PlaySound("buttons/button18.wav")
 end
 
 --Receive Status from Entity
@@ -3496,6 +3504,98 @@ function Dispatch.OpenDispatcher()
 		end
 	end
 	
+	--Global Signal Controls (Admin Only)
+	if LocalPlayer() and LocalPlayer():IsAdmin() then
+		local button = vgui.Create("DButton",bottombar)
+		button:SetSize(136,1)
+		button:Dock(RIGHT)
+		button:SetText("Admin Options")
+		button:SetIcon("icon16/world.png")
+		button.DoClick = function()
+			surface.PlaySound("buttons/button1.wav")
+			
+			
+			--Admin Options Panel
+			local aframe = vgui.Create("DFrame")
+			local w, h = 384, 384
+			aframe:SetSize(w,h)
+			aframe:SetPos(ScrW()/2 - w/2, ScrH()/2 - h/2)
+			aframe:SetTitle("Admin Options")
+			aframe:MakePopup()
+			
+			local pnl = vgui.Create("DPanel",aframe)
+			pnl:Dock(FILL)
+			pnl:DockPadding(8,8,8,8)
+			
+			--Set all CTC Signals
+			local label = vgui.Create("DLabel",pnl)
+			label:SetSize(1,48)
+			label:SetText("Set All CTC Signals:\nThese buttons allow you to set the CTC states of all CTC signals on the dispatch board.")
+			label:SetWrap(true)
+			label:Dock(TOP)
+			label:SetTextColor(dark)
+			label:SetContentAlignment(5)
+			
+			local bpanel = vgui.Create("DPanel",pnl)
+			bpanel:SetSize(1,48)
+			bpanel:Dock(TOP)
+			bpanel.Paint = function() end
+			
+			local holdbutton = vgui.Create("DButton",bpanel)
+			holdbutton:SetSize(128,1)
+			holdbutton:SetText("Hold")
+			holdbutton:SetIcon("trakpak3_common/icons/signal_red_n.png")
+			holdbutton:Dock(LEFT)
+			holdbutton.DoClick = function()
+				Dispatch.SendAdminCommand("setsignals",0)
+			end
+			
+			local allowbutton = vgui.Create("DButton",bpanel)
+			allowbutton:SetSize(128,1)
+			allowbutton:SetText("Allow")
+			allowbutton:SetIcon("trakpak3_common/icons/signal_grn_n.png")
+			allowbutton:Dock(RIGHT)
+			allowbutton.DoClick = function()
+				Dispatch.SendAdminCommand("setsignals",2)
+			end
+			
+			--Reset all Switches
+			local label = vgui.Create("DLabel",pnl)
+			label:SetSize(1,48)
+			label:SetText("Reset Switches:\nThese buttons allow you to reset all switches on the dispatch board, or in the entire map.")
+			label:SetWrap(true)
+			label:Dock(TOP)
+			label:SetTextColor(dark)
+			label:SetContentAlignment(5)
+			
+			local bpanel = vgui.Create("DPanel",pnl)
+			bpanel:SetSize(1,48)
+			bpanel:Dock(TOP)
+			bpanel.Paint = function() end
+			
+			local dswitchbutton = vgui.Create("DButton",bpanel)
+			dswitchbutton:SetSize(160,1)
+			dswitchbutton:SetText("CTC Switches")
+			dswitchbutton:SetIcon("trakpak3_common/icons/switch_n_lit.png")
+			dswitchbutton:Dock(LEFT)
+			dswitchbutton.DoClick = function()
+				Dispatch.SendAdminCommand("resetswitches",0)
+			end
+			
+			local mswitchbutton = vgui.Create("DButton",bpanel)
+			mswitchbutton:SetSize(160,1)
+			mswitchbutton:SetText("All Switches")
+			mswitchbutton:SetIcon("trakpak3_common/icons/generic_unlocked.png")
+			mswitchbutton:Dock(RIGHT)
+			mswitchbutton.DoClick = function()
+				Dispatch.SendAdminCommand("resetswitches",1)
+			end
+			
+		end
+	end
+	
+	--Bottom Bar Reminder
+	
 	local label = vgui.Create("DLabel",bottombar)
 	label:Dock(FILL)
 	label:SetContentAlignment(5)
@@ -3574,8 +3674,8 @@ function Dispatch.OpenDispatcher()
 end
 
 --Console Commands
-concommand.Add("tp3_dispatch_editor",Dispatch.OpenEditor)
-concommand.Add("tp3_dispatch",Dispatch.OpenDispatcher)
+concommand.Add("tp3_dispatch_editor",Dispatch.OpenEditor, nil, "Opens the Dispatch Board Editor.")
+concommand.Add("tp3_dispatch",Dispatch.OpenDispatcher, nil, "Opens the Dispatch Board for the current map.")
 
 CreateClientConVar("tp3_dispatch_usemetric", "0", true, false, "0 for MPH, 1 for KPH", 0, 1)
 
@@ -3585,6 +3685,7 @@ local function requestlog()
 	net.SendToServer()
 end
 
+--Get Log Console Command
 concommand.Add("tp3_dispatch_printlog", requestlog, nil, "Print a log of all dispatch actions up to a certain maximum.")
 
 Trakpak3.Net.tp3_dispatch_printlog = function() --Received dispatch command log from server
@@ -3593,4 +3694,106 @@ Trakpak3.Net.tp3_dispatch_printlog = function() --Received dispatch command log 
 	--local message = util.Decompress(data)
 	local message = net.ReadString()
 	print(message)
+end
+
+--Mass Signal CTC States
+local function setsignals(ply, cmd, args)
+	if not args[1] then
+		print("Set all CTC signals (the ones on the dispatch board) to Hold or Allow. Accepted arguments are 'hold' and 'allow'. Only works for Admins.")
+		return nil
+	end
+	
+	args[1] = string.lower(args[1])
+	
+	local state
+	if args[1]=="hold" then
+		state = 0
+	elseif args[1]=="allow" then
+		state = 2
+	end
+	
+	if state then
+		Dispatch.SendAdminCommand("setsignals",state)
+		print("Asking the server to set all signals to "..args[1]..". Will only work if you are an Admin.")
+	else
+		print("Set all CTC signals (the ones on the dispatch board) to Hold or Allow. Accepted arguments are 'hold' and 'allow'. Only works for Admins.")
+	end
+end
+local function autocomplete(cmd, args)
+	return {"hold", "allow"}
+end
+concommand.Add("tp3_dispatch_setsignals", setsignals, autocomplete, "Set all CTC signals (the ones on the dispatch board) to Hold or Allow. Accepted arguments are 'hold' and 'allow'. Only works for Admins.")
+
+--Mass Switch Reset
+local function resetswitches(ply, cmd, args)
+	if not args[1] then
+		print("Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+		return nil
+	end
+	
+	args[1] = string.lower(args[1])
+	
+	local state
+	if args[1]=="ctc" then
+		state = 0
+	elseif args[1]=="map" then
+		state = 1
+	end
+	
+	if state then
+		Dispatch.SendAdminCommand("resetswitches",state)
+		print("Asking the server to reset all "..args[1].." switches. Will only work if you are an Admin.")
+	else
+		print("Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+	end
+end
+local function autocomplete2(cmd, args)
+	return {"ctc", "map"}
+end
+concommand.Add("tp3_dispatch_resetswitches", setswitches, autocomplete2, "Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+
+local white = Color(255,255,255)
+local yellow = Color(255,255,127)
+local red = Color(255,0,0)
+local green = Color(0,255,0)
+local blue = Color(0,127,255)
+
+
+--Notify all players of admin commands
+Trakpak3.Net["tp3_dispatch_admin"] = function()
+	local name = net.ReadString()
+	local cmd = net.ReadString()
+	local arg = net.ReadUInt(8)
+	
+	if cmd=="setsignals" then
+		local c
+		local t
+		if arg==0 then
+			c = red
+			t = "Hold."
+		elseif arg==2 then
+			c = green
+			t = "Allow."
+		end
+		
+		if c and t then
+			chat.AddText(white,"[Trakpak3] ",yellow,name,white," has set all CTC (Dispatch Board) signals to ",c,t)
+			surface.PlaySound("ambient/alarms/warningbell1.wav")
+		end
+	elseif cmd=="resetswitches" then
+		local c
+		local t
+		if arg==0 then
+			c = green
+			t = "on the Dispatch Board."
+		elseif arg==1 then
+			c = blue
+			t = "in the Map."
+		end
+		
+		if c and t then
+			chat.AddText(white,"[Trakpak3] ",yellow,name,white," has reset all switches ",c,t)
+			surface.PlaySound("ambient/alarms/warningbell1.wav")
+		end
+	end
 end

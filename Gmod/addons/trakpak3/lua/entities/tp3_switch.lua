@@ -596,7 +596,8 @@ if SERVER then
 	
 	--The above note is no longer applicable to these switches since they use tp3_collision_feeders now.
 	
-	function ENT:StartTouch(ent, caller)
+	function ENT:StartTouch(ent)
+		--print("SW Start Touch:",ent)
 		if not self.trigger_ents then --Initialize the list if it for some reason didn't initialize before
 			self.trigger_ents = {}
 			self.hastouchers = false
@@ -610,8 +611,8 @@ if SERVER then
 		end		
 	end
 
-	function ENT:EndTouch(ent, caller)
-
+	function ENT:EndTouch(ent)
+		--print("SW End Touch:",ent)
 		if ent and ent:IsValid() and self.trigger_ents[ent] then --The entity is valid and is registered as a touching entity
 			self.trigger_ents[ent] = nil
 			if self.derail and not self.switchstate then --If the switch is a derail in the derailing position (normal),
@@ -626,13 +627,13 @@ if SERVER then
 			self.hastouchers = false
 			self:EndTouchAll()
 		end
-		
+		--self:SetColor(Color(255,255,255))
 	end
 
 	function ENT:StartTouchAll()
 		self.softoccupied = true
 		self:SetNWBool("occupied",true)
-		--if self.usetrigger and self.lever_valid then self.lever_ent:StandSetOccupied(true) end
+		--print("SW StartTouchAll")
 		--self:SetColor(Color(255,0,0))
 	end
 	function ENT:EndTouchAll()
@@ -647,6 +648,7 @@ if SERVER then
 			self.hardoccupied = false
 			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 		end
+		--print("SW EndTouchAll")
 		--self:SetColor(Color(255,255,255))
 	end
 

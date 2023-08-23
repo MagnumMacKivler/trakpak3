@@ -152,6 +152,123 @@ Trakpak3.Net.tp3_dispatch_printlog = function(len, ply)
 	net.Send(ply)
 end
 
+--Global Signal/Switch CTC Controls (Admin Only)
+local function AdminCommand(ply, cmd, arg)
+	if cmd=="setsignals" then
+	
+		for _, Board in pairs(Trakpak3.Dispatch.MapBoards) do --For every dispatch board page...
+			for __, Element in pairs(Board.elements) do --For every element on that dispatch board...
+				if Element.signal and (Element.type=="signal") then --Element is a signal and it is valid
+					local signal, valid = Trakpak3.FindByTargetname(Element.signal)
+					if valid then
+						hook.Run("TP3_Dispatch_Command", Element.signal, "set_ctc", arg)
+					end --Set CTC State
+				end
+			end
+		end
+		
+		Trakpak3.NetStart("tp3_dispatch_admin")
+			net.WriteString(ply and ply:GetName() or "A Remote Admin")
+			net.WriteString(cmd)
+			net.WriteUInt(arg,8)
+		net.Broadcast()
+		
+	elseif cmd=="resetswitches" then
+	
+		if arg==0 then --CTC Switches Only
+			for _, Board in pairs(Trakpak3.Dispatch.MapBoards) do --For every dispatch board page...
+				for __, Element in pairs(Board.elements) do --For every element on that dispatch board...
+					if Element.switch and (Element.type=="switch") then --Element is a signal and it is valid
+						local switch, valid = Trakpak3.FindByTargetname(Element.switch)
+						if valid then
+							switch:SetTargetState(false)
+						end 
+					end
+				end
+			end
+			
+		elseif arg==1 then --All switches in the map
+			for _, switch in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
+				if switch.levertype and (switch.levertype!=3) then --Include all switches and derails but not "generic" levers like those for turntable locks
+					switch:SetTargetState(false)
+				end
+			end
+		end
+		
+		Trakpak3.NetStart("tp3_dispatch_admin")
+			net.WriteString(ply and ply:GetName() or "A Remote Admin")
+			net.WriteString(cmd)
+			net.WriteUInt(arg,8)
+		net.Broadcast()
+		
+	end
+end
+
+--From Client
+Trakpak3.Net.tp3_dispatch_admin = function(len, ply)
+	if ply and ply:IsValid() and ply:IsAdmin() then
+		local cmd = net.ReadString()
+		local arg = net.ReadUInt(8)
+		AdminCommand(ply, cmd, arg)
+	end
+end
+
+--Serverside Commands
+local function setsignals(ply, cmd, args)
+	if not args[1] then
+		print("Set all CTC signals (the ones on the dispatch board) to Hold or Allow. Accepted arguments are 'hold' and 'allow'. Only works for Admins.")
+		return nil
+	end
+	
+	args[1] = string.lower(args[1])
+	
+	local state
+	if args[1]=="hold" then
+		state = 0
+	elseif args[1]=="allow" then
+		state = 2
+	end
+	
+	if state then
+		AdminCommand(nil,"setsignals",state)
+		print("Asking the server to set all signals to "..args[1]..".")
+	else
+		print("Set all CTC signals (the ones on the dispatch board) to Hold or Allow. Accepted arguments are 'hold' and 'allow'. Only works for Admins.")
+	end
+end
+local function autocomplete(cmd, args)
+	return {"hold", "allow"}
+end
+concommand.Add("tp3_dispatch_setsignals", setsignals, autocomplete, "Set all CTC signals (the ones on the dispatch board) to Hold or Allow. Accepted arguments are 'hold' and 'allow'. Only works for Admins.")
+
+--Mass Switch Reset
+local function resetswitches(ply, cmd, args)
+	if not args[1] then
+		print("Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+		return nil
+	end
+	
+	args[1] = string.lower(args[1])
+	
+	local state
+	if args[1]=="ctc" then
+		state = 0
+	elseif args[1]=="map" then
+		state = 1
+	end
+	
+	if state then
+		AdminCommand("resetswitches",state)
+		print("Asking the server to reset all "..args[1].." switches.")
+	else
+		print("Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+	end
+end
+local function autocomplete2(cmd, args)
+	return {"ctc", "map"}
+end
+concommand.Add("tp3_dispatch_resetswitches", setswitches, autocomplete2, "Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+
 --[[
 concommand.Add("tp3_dispatch_printlog", function(ply, cmd, args)
 

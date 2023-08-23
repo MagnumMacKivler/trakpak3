@@ -4,6 +4,7 @@ ENT.PrintName = "Trakpak3 Collision Trigger"
 ENT.Author = "Xayrga"
 ENT.Purpose = "Collides with things"
 ENT.Instructions = "Place in Hammer"
+ENT.Type = "brush"
 
 if SERVER then
 
@@ -15,23 +16,25 @@ if SERVER then
 	
 	 
 	function ENT:Initialize()
+
 		self:SetSolid(SOLID_BBOX)
+
 		self:SetNotSolid(true)
 		self:SetTrigger(true) 
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
-		--print(self, "Initialized!")
 	end	
 	
+	
 	function ENT:StartTouch(...)
-		--print("Collision Feeder Start Touch.")
 		if (self.TouchRedirector and self.TouchRedirector.StartTouch) then 
+			--print("Collision Feeder ",self," Start Touch.")
 			self.TouchRedirector:StartTouch(...) 
 		end 
 	end 
 	
 	function ENT:EndTouch(...) 
-		--print("Collision Feeder End Touch.")
 		if (self.TouchRedirector and self.TouchRedirector.EndTouch) then 
+			--print("Collision Feeder ",self," End Touch.")
 			self.TouchRedirector:EndTouch(...) 
 		end 
 	end
@@ -43,5 +46,15 @@ if SERVER then
 	function ENT:PlaceCollisionRelative(min, max)
 		self:SetCollisionBounds(min,max)
 	end 
+	
+	--[[
+	function ENT:SetupConvexCollisions(convexes) --Called by a tp3_signal_block to give it convex collisions instead of the usual box, before Spawn()/Initialize()
+		if convexes and next(convexes) then
+			self.convexes = convexes
+		else
+			self.convexes = nil
+		end
+	end
+	]]--
 	
 end

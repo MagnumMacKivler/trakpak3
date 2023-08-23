@@ -7,7 +7,13 @@ Sprites.Materials = {
 	fl_red = Material("models/trakpak3_common/signals/generic/red_fl_b"),
 	fl_yellow = Material("models/trakpak3_common/signals/generic/yel_fl_b"),
 	fl_green = Material("models/trakpak3_common/signals/generic/grn_fl_b"),
-	fl_white = Material("models/trakpak3_common/signals/generic/wht_fl_c")
+	fl_white = Material("models/trakpak3_common/signals/generic/wht_fl_c"),
+	xh_a1 = Material("models/trakpak3_common/signals/crossing/xlight_xh_a1"),
+	xh_b1 = Material("models/trakpak3_common/signals/crossing/xlight_xh_b1"),
+	fr_a1 = Material("models/trakpak3_common/signals/crossing/xlight_fr_a1"),
+	fr_b1 = Material("models/trakpak3_common/signals/crossing/xlight_fr_b1"),
+	hc_a1 = Material("models/trakpak3_common/signals/crossing/xlight_hc_a1"),
+	hc_b1 = Material("models/trakpak3_common/signals/crossing/xlight_hc_b1"),
 }
 
 --Precache colors
@@ -69,7 +75,11 @@ Each aspect table can display multiple sprites. <sprite1>, <sprite2>, etc. can b
 The "pos" element is the position, LOCAL TO THE SIGNAL MODEL, where the sprite should be placed.
 The "color" element should point to an entry in Sprites.Colors.
 The "size" element is the diameter of the signal lens. Larger lenses make larger sprites.
-The "samplemat" element is for flashing aspects only. It should point to an entry in Sprites.Materials for the corresponding flashing light to sync the sprite with. For solid color lights, omit this element.
+The "samplemat" element is for flashing signal aspects only. It should point to an entry in Sprites.Materials for the corresponding flashing light to sync the sprite with. For solid color lights, omit this element.
+
+The "xing_a" element is similar to samplemat but for Crossing Light materials (A).
+The "xing_b" element is for (B) Crossing Light materials.
+If you set an element "backwards" = true, the sprite will render facing the rear of the model (instead of the front).
 
 ]]--
 
@@ -104,42 +114,61 @@ function Sprites.DrawSpriteSignal(ent, flags) --self
 			
 			if not ent.forward then ent.forward = ent:GetForward() end
 			if not ent.flexcolor then ent.flexcolor = Color(255,255,255) end
-			
-			--Calculate alpha based on vision dot product and distance
 			local disp = EyePos()-ent:GetPos()
 			local dist = disp:Length() --Yeah, it's a square root. Fight me
-			local viewdot = (disp/dist):Dot(ent.forward)
-			local dotalpha = math.max(viewdot,0)
+			local fwd
 			
-			--local dist2 = EyePos():DistToSqr(self:GetPos())
-			
-			local dist2 = math.Clamp(dist, fadestart, fadeend)
-			local distalpha = minalpha + (maxalpha-minalpha)*(dist2-fadestart)/(fadeend-fadestart)
-			
-			local alpha = dotalpha*dotalpha*distalpha
-			
-			--Increase size with distance
-			
-			dist2 = math.Clamp(dist, mindist, maxdist)
-			local sizefactor = minsize + (maxsize-minsize)*(dist2-mindist)/(maxdist-mindist)
 			
 			--Calculate colors and draw the sprites
-			if alpha > 0 then
-				for k, sprite in pairs(sprite_table[aspect]) do
-					local draw = true
-					
-					if sprite.samplemat then
-						draw = sprite.samplemat:GetInt("$frame")==1
-						--print(draw)
+
+			for k, sprite in pairs(sprite_table[aspect]) do
+				
+				--Calculate alpha based on vision dot product and distance
+				
+				if sprite.backward then fwd = -ent.forward else fwd = ent.forward end
+				local viewdot = (disp/dist):Dot(fwd)
+				local dotalpha = math.max(viewdot,0)
+				
+				local dist2 = math.Clamp(dist, fadestart, fadeend)
+				local distalpha = minalpha + (maxalpha-minalpha)*(dist2-fadestart)/(fadeend-fadestart)
+				
+				local alpha = dotalpha*dotalpha*distalpha
+				
+				--Increase size with distance
+				
+				dist2 = math.Clamp(dist, mindist, maxdist)
+				local sizefactor = minsize + (maxsize-minsize)*(dist2-mindist)/(maxdist-mindist)
+				
+				
+				local draw = alpha>0
+				local framealpha = 1
+				
+				if sprite.samplemat then
+					draw = sprite.samplemat:GetInt("$frame")==1
+					--print(draw)
+				elseif sprite.xing_a then
+					local frame = sprite.xing_a:GetInt("$frame")
+					if (frame==7) or (frame==13) then
+						framealpha = 0.5
+					elseif (frame>=0) and (frame<=6) then
+						framealpha = 0
 					end
-					
-					if draw then
-						local r, g, b = sprite.color:Unpack()
-						ent.flexcolor:SetUnpacked(r*alpha, g*alpha, b*alpha, 255)
-						render.DrawSprite(ent:LocalToWorld(sprite.pos), sprite.size*sizefactor, sprite.size*sizefactor, ent.flexcolor)
+				elseif sprite.xing_b then
+					local frame = sprite.xing_b:GetInt("$frame")
+					if (frame==0) or (frame==6) then
+						framealpha = 0.5
+					elseif (frame>=7) and (frame<=13) then
+						framealpha = 0
 					end
 				end
+				
+				if draw then
+					local r, g, b = sprite.color:Unpack()
+					ent.flexcolor:SetUnpacked(r*alpha*framealpha, g*alpha*framealpha, b*alpha*framealpha, 255)
+					render.DrawSprite(ent:LocalToWorld(sprite.pos), sprite.size*sizefactor, sprite.size*sizefactor, ent.flexcolor)
+				end
 			end
+			
 		end
 	end
 end

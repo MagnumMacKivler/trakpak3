@@ -6,14 +6,7 @@ ENT.Author = "Magnum MacKivler"
 ENT.Purpose = "Monitors Blocks and controls gates"
 ENT.Instructions = "Place in Hammer"
 
---[[
 
-TO DO
-
-Integrate with node systems to get better measurements
-Get Distance based on node array
-Add timeouts
-]]--
 if SERVER then
 	ENT.KeyValueMap = {
 		predicting = "boolean",
@@ -38,6 +31,7 @@ if SERVER then
 		--Entity validation
 		self:RegisterEntity("block_island",self.block_island)
 		self:ValidateNumerics()
+		
 		
 		if self.pkvs then
 			self.tracks = {}
@@ -72,6 +66,14 @@ if SERVER then
 				end
 			end
 		end
+	end
+	
+	--Give a semi-random delay to each crossing gate that asks for it.
+	function ENT:RequestDelay()
+		if not self.totaldelay then self.totaldelay = -0.5 end
+		
+		self.totaldelay = self.totaldelay + 0.5 + math.Rand(0,0.5)
+		return self.totaldelay
 	end
 	
 	function ENT:HandleNewState(trigger, skiphysteresis)

@@ -228,7 +228,7 @@ if SERVER then
 		local trace = {
 			start = self.rangerpoint1,
 			endpos = self.rangerpoint2,
-			filter = Trakpak3.GetBlacklist(),
+			filter = Trakpak3.TraceFilter,
 			ignoreworld = true,
 			mins = Vector(-48,-48,-8),
 			maxs = Vector(48,48,2)
@@ -255,7 +255,7 @@ if SERVER then
 			local trace = {
 				start = self.autopoint,
 				endpos = self.autopoint + Vector(0,0,64),
-				filter = Trakpak3.GetBlacklist(),
+				filter = Trakpak3.TraceFilter,
 				ignoreworld = true,
 				mins = Vector(-4,-4,-8),
 				maxs = Vector(4,4,8)
@@ -290,7 +290,7 @@ if SERVER then
 			local trace = {
 				start = self.rangerpoint1,
 				endpos = self.rangerpoint2,
-				filter = Trakpak3.GetBlacklist(),
+				filter = Trakpak3.TraceFilter,
 				ignoreworld = true,
 				mins = Vector(-48,-48,-8),
 				maxs = Vector(48,48,2)
@@ -619,7 +619,7 @@ if SERVER then
 				--Apply a surface prop to slow the train down
 				local physobj = ent:GetPhysicsObject()
 				local physprop = {GravityToggle = true, Material = "metal"}
-				if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
+				if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,physobj,physprop) end
 			end
 		end
 		

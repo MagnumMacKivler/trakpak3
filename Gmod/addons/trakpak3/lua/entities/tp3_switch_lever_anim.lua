@@ -592,7 +592,7 @@ if SERVER then
 				--Apply a surface prop to slow the train down
 				local physobj = ent:GetPhysicsObject()
 				local physprop = {GravityToggle = true, Material = "metal"}
-				if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,nil,physprop) end
+				if physobj:IsValid() then construct.SetPhysProp(nil,ent,0,physobj,physprop) end
 			end
 			
 			local stillhas = false

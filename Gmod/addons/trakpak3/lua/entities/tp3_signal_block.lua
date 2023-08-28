@@ -271,7 +271,7 @@ if SERVER then
 						endpos = pos2 + Vector(0,0,self.hull_h/2 + self.hull_offset),
 						mins = Vector(-self.hull_lw/2, -self.hull_lw/2, -self.hull_h/2),
 						maxs = Vector(self.hull_lw/2, self.hull_lw/2, self.hull_h/2),
-						filter = Trakpak3.GetBlacklist(),
+						filter = Trakpak3.TraceFilter,
 						ignoreworld = true
 					}
 					local tr = util.TraceHull(ht)

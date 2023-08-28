@@ -102,7 +102,7 @@ if SERVER then
 		--Dragging Equipment Scan
 		if self.running and self.endtime then
 			if CurTime() < self.endtime then --Scan
-				local blist = Trakpak3.GetBlacklist()
+				local blist = Trakpak3.TraceFilter
 				
 				local mins = Vector(-self.boxsize/2, -self.boxsize/2, -self.boxdepth)
 				local maxs = Vector(self.boxsize/2, self.boxsize/2, 0)

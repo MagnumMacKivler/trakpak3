@@ -171,66 +171,26 @@ sound.Add({
 	pitch = 100
 })
 
---Ranger Class Blacklisting: Use this function to add NPC classes you don't want to trigger block detection, auto switches, or frogs! Can use the '*' wildcard.
+--Ranger Class Blacklisting: Use this function to add NPC classes you don't want to trigger block detection, auto switches, or frogs! Does not respect wildcards.
 function Trakpak3.BlacklistClass(class)
 	if not Trakpak3.Blacklist then Trakpak3.Blacklist = {} end
 	Trakpak3.Blacklist[class] = true
 	
-end
---Blacklist Class (Static). Use this for entities that exist on map start and won't increase or decrease--more efficient than finding them every call. Can use the '*' wildcard.
-function Trakpak3.BlacklistClassStatic(class)
-	if not Trakpak3.BlacklistStatic then Trakpak3.BlacklistStatic = {} end
-	Trakpak3.BlacklistStatic[class] = true
-end
-
---On map start, put all the static blacklisted entities into a table.
-local function blacklist_post_entities()
-	Trakpak3.BlacklistMaster = {} --The static table to stick your static entities into
-	if Trakpak3.BlacklistStatic then
-		for class, v in pairs(Trakpak3.BlacklistStatic) do
-			for k, ent in pairs(ents.FindByClass(class)) do
-				table.insert(Trakpak3.BlacklistMaster, ent)
-			end
-		end
-	end
-end
-
-hook.Add("InitPostEntity","TP3_BlacklistStatic",blacklist_post_entities)
-hook.Add("PostCleanupMap","TP3_BlacklistStatic",blacklist_post_entities)
-
-
-
---This function retrieves the list of all blacklisted entities
-function Trakpak3.GetBlacklist()
-	local tbl = player.GetAll() --Start with all the players because rangers should never hit them
-	if Trakpak3.BlacklistMaster then table.Add(tbl, Trakpak3.BlacklistMaster) end --Add the static blacklisted entities
-	if Trakpak3.Blacklist then
-		for class, blacked in pairs(Trakpak3.Blacklist) do --Mix in the live-blacklisted entities and bake on high for 20 minutes
-			if blacked then
-				table.Add(tbl, ents.FindByClass(class))
-			end
-		end
-	end
-	return tbl
 end
 
 function Trakpak3.IsBlacklisted(ent) --Check if a specific entity would be blacklisted.
 	if not ent:IsValid() then return true end
 	if ent:IsPlayer() then return true end --Automatically fail all players
 	local class = ent:GetClass()
+	if not Trakpak3.Blacklist then return false end
 	
+	if Trakpak3.Blacklist[class] then return true end --The class is in the blacklist
 	
-	if not Trakpak3.BlacklistStatic then return false end
-	for c, v in pairs(Trakpak3.BlacklistStatic) do
-		if string.EndsWith(c,"*") then --Has a trailing wildcard
-			if string.Left(class, #c - 1)==string.Left(c, #c - 1) then --It matches the wildcard
-				return true
-			end
-		elseif class==c then
-			return true
-		end
-	end
+	if string.StartsWith(class,"npc_") then return true end --The class is an NPC (Hardcoded)
 	
+	--Leave this for future use, in case multiple wildcards are needed?:
+	
+	--[[
 	if not Trakpak3.Blacklist then return false end
 	for c, v in pairs(Trakpak3.Blacklist) do
 		if string.EndsWith(c,"*") then --Has a trailing wildcard
@@ -241,29 +201,35 @@ function Trakpak3.IsBlacklisted(ent) --Check if a specific entity would be black
 			return true
 		end
 	end
+	]]--
 	
-	return false
+	return false --No criteria were met, return OK
 	
 end
 
+--Convenience function for trace filters.
+function Trakpak3.TraceFilter(ent)
+	return not Trakpak3.IsBlacklisted(ent)
+end
+
 --Blacklist all NPCs and combine balls
-Trakpak3.BlacklistClass("npc_*") --includes thrown grenades
+--Trakpak3.BlacklistClass("npc_*") --includes thrown grenades. This is hardcoded into the IsBlacklisted function
 Trakpak3.BlacklistClass("prop_combine_ball")
 
 --Blacklist all Trakpak3 entities that could possibly cause a problem with signals
-Trakpak3.BlacklistClassStatic("tp3_switch")
-Trakpak3.BlacklistClassStatic("tp3_diamond")
-Trakpak3.BlacklistClassStatic("tp3_switch_lever_anim")
-Trakpak3.BlacklistClassStatic("tp3_signal_master")
-Trakpak3.BlacklistClassStatic("tp3_signal_slave")
-Trakpak3.BlacklistClassStatic("tp3_moveable_bridge")
-Trakpak3.BlacklistClassStatic("tp3_turntable")
-Trakpak3.BlacklistClassStatic("tp3_transfertable")
-Trakpak3.BlacklistClassStatic("tp3_crossing_gate")
-Trakpak3.BlacklistClassStatic("tp3_sign_prop")
-Trakpak3.BlacklistClassStatic("tp3_sign_auto")
+Trakpak3.BlacklistClass("tp3_switch")
+Trakpak3.BlacklistClass("tp3_diamond")
+Trakpak3.BlacklistClass("tp3_switch_lever_anim")
+Trakpak3.BlacklistClass("tp3_signal_master")
+Trakpak3.BlacklistClass("tp3_signal_slave")
+Trakpak3.BlacklistClass("tp3_moveable_bridge")
+Trakpak3.BlacklistClass("tp3_turntable")
+Trakpak3.BlacklistClass("tp3_transfertable")
+Trakpak3.BlacklistClass("tp3_crossing_gate")
+Trakpak3.BlacklistClass("tp3_sign_prop")
+Trakpak3.BlacklistClass("tp3_sign_auto")
 
-Trakpak3.BlacklistClassStatic("prop_dynamic") --Primarily for use with moveable bridges.
+Trakpak3.BlacklistClass("prop_dynamic") --Primarily for use with moveable bridges.
 
 --Bodygroup Retrieval
 --Get the bodygroups as a simple list

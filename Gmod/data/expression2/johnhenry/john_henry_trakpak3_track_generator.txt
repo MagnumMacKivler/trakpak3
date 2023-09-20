@@ -84,7 +84,7 @@
 
 if(first()){
     #Version Info - Don't Change This!
-    Version = "1.3"
+    Version = "1.4"
     
     #What track gauge are you developing for?
     #include "johnhenry/gauges/standard"
@@ -102,7 +102,7 @@ if(first()){
     #include "johnhenry/library/consolescreen"
     
     AutoVis = 0
-    AutoDraw = 1
+    AutoDraw = 0
     AutoName = 1
     AutoVMFName = 1
     SuppressOutput = 0
@@ -826,10 +826,10 @@ if(first()){
                 BankedArcSegments[Index,number] = Data["Segments",number]
                 BankedArcSegmentsDefined[Index,number] = 1
                 
-                BankedArcBlendIn[Index,number] = Data["BlendIn",number]
+                BankedArcBlendIn[Index,vector2] = Data["BlendIn",vector2]
                 BankedArcBlendInDefined[Index,number] = 1
                 
-                BankedArcBlendOut[Index,number] = Data["BlendOut",number]
+                BankedArcBlendOut[Index,vector2] = Data["BlendOut",vector2]
                 BankedArcBlendOutDefined[Index,number] = 1
             break
             case "bezier", #StartPos StartDir EndPos EndDir StartCPLength EndCPLength Height Segments
@@ -6322,12 +6322,23 @@ if(clk("makebrush")){
                                         local GS = toString(GR):replace(".","")
                                         NewName += GS+"pg_"
                                         
-                                        #Banking Indicator
+                                        
                                         if(Banked){
-                                            local StartBanked = BankedArcBlendIn[TrackID,vector2]==vec2()
-                                            local EndBanked = BankedArcBlendOut[TrackID,vector2]==vec2()
+                                            #Bank Height + Segments
                                             
-                                            NewName += (StartBanked ? "b" : "f")+(EndBanked ? "b_" : "f_")
+                                            NewName += BankHeight+"h_"+Segs+"s_"
+                                            
+                                            #Banking Indicator
+                                            
+                                            local InSmoothing = BankedArcBlendIn[TrackID,vector2]
+                                            local OutSmoothing = BankedArcBlendOut[TrackID,vector2]
+                                            
+                                            local StartBanked = InSmoothing==vec2() #start joint, end joint (from start)
+                                            local EndBanked = OutSmoothing==vec2() #start joint, end joint (from end)
+                                            
+                                            NewName += InSmoothing:x() + (StartBanked ? "b" : "f") + InSmoothing:y()+"_"
+                                            NewName += OutSmoothing:y() + (EndBanked ? "b" : "f") + OutSmoothing:x()+"_"
+                                            #NewName += (StartBanked ? "b" : "f")+(EndBanked ? "b_" : "f_")
                                         }
                                         
                                         #Dimensions

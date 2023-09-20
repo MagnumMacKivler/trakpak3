@@ -1321,10 +1321,10 @@ function string writeAllVons(){
                 DTable["Radius",number] = Data["radius",number]
                 DTable["Height",number] = Data["height",number]
                 DTable["Segments",number] = Data["segments",number]
-                DTable["BlendIn",number] = Data["blendin",number]
-                DTable["BlendOut",number] = Data["blendout",number]
-                Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND "+DTable["BlendIn",number]+" in, "+DTable["BlendOut",number]+" out"
-            break
+                DTable["BlendIn",vector2] = Data["blendin",vector2]
+                DTable["BlendOut",vector2] = Data["blendout",vector2]
+                Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND "+DTable["BlendIn",vector2]:x()+" to "+DTable["BlendIn",vector2]:y()+" in, "+DTable["BlendOut",vector2]:y()+" to "+DTable["BlendOut",vector2]:x()+" out"
+        break
             case "bezier",
                 DTable["StartPos",vector2] = Data["startpos",vector2]
                 DTable["EndPos",vector2] = Data["endpos",vector2]
@@ -1386,9 +1386,9 @@ function string writeSingleVon(){
             DTable["Radius",number] = Data["radius",number]
             DTable["Height",number] = Data["height",number]
             DTable["Segments",number] = Data["segments",number]
-            DTable["BlendIn",number] = Data["blendin",number]
-            DTable["BlendOut",number] = Data["blendout",number]
-            Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND "+DTable["BlendIn",number]+" in, "+DTable["BlendOut",number]+" out"
+            DTable["BlendIn",vector2] = Data["blendin",vector2]
+            DTable["BlendOut",vector2] = Data["blendout",vector2]
+            Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND "+DTable["BlendIn",vector2]:x()+" to "+DTable["BlendIn",vector2]:y()+" in, "+DTable["BlendOut",vector2]:y()+" to "+DTable["BlendOut",vector2]:x()+" out"
         break
         case "bezier",
             DTable["StartPos",vector2] = Data["startpos",vector2]
@@ -1761,8 +1761,8 @@ function void wirelink:pressContinue(){
                         break
                     case 10, #Write and Compile
                         if(VonMode){
-                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
-                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                            fileAppend("johnhenry_saves/dockets/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/dockets/von_docket.txt!")
                         }else{
                             Script = This:writePieces()
                             AutoCompile = 1
@@ -1846,8 +1846,8 @@ function void wirelink:pressContinue(){
                         break
                     case 13, #Write and Compile
                         if(VonMode){
-                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
-                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                            fileAppend("johnhenry_saves/dockets/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/dockets/von_docket.txt!")
                         }else{
                             Script = This:writePieces()
                             AutoCompile = 1
@@ -1942,8 +1942,8 @@ function void wirelink:pressContinue(){
                         break
                     case 16, #Write and Compile
                         if(VonMode){
-                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
-                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                            fileAppend("johnhenry_saves/dockets/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/dockets/von_docket.txt!")
                         }else{
                             Script = This:writePieces()
                             AutoCompile = 1
@@ -2036,8 +2036,8 @@ function void wirelink:pressContinue(){
                         break
                     case 15, #Write and Compile
                         if(VonMode){
-                            fileAppend("johnhenry_saves/von_docket.txt",writeSingleVon()+"%END%\n")
-                            print("VON strings for this piece have been added to johnhenry_saves/von_docket.txt!")
+                            fileAppend("johnhenry_saves/dockets/von_docket.txt",writeSingleVon()+"%END%\n")
+                            print("VON strings for this piece have been added to johnhenry_saves/dockets/von_docket.txt!")
                         }else{
                             Script = This:writePieces()
                             AutoCompile = 1
@@ -2082,8 +2082,8 @@ function void wirelink:pressContinue(){
                         break
                     case 8, #Write and Compile
                         if(VonMode){
-                            fileAppend("johnhenry_saves/von_docket.txt",writeAllVons()+"%END%\n")
-                            print("VON strings for all pieces have been added to e2files/johnhenry_saves/von_docket.txt!")
+                            fileAppend("johnhenry_saves/dockets/von_docket.txt",writeAllVons()+"%END%\n")
+                            print("VON strings for all pieces have been added to e2files/johnhenry_saves/dockets/von_docket.txt!")
                         }else{
                             Script = This:writePieces()
                             AutoCompile = 1
@@ -2317,7 +2317,7 @@ function void wirelink:pressContinue(){
             break
         case 26, #Reset VON Prompt
             if(Line==5){
-                fileWrite("johnhenry_saves/von_docket.txt","")
+                fileWrite("johnhenry_saves/dockets/von_docket.txt","")
             }
             This:initPage(19)
             Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")

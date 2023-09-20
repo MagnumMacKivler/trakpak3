@@ -1,15 +1,28 @@
 --SigEdit: Trakpak3's Signal System Editor
 
---Signal Editor variables
-function Trakpak3.ResetSigEdit()
+if not Trakpak3.SigEdit then
 	Trakpak3.SigEdit = {
 		rules = {},
 		tags = {},
 		sigtypes = {},
-		panels = {rules = {}, tags = {}, types = {}, cfg = {}, nodes = {}},
+		panels = { rules = {}, tags = {}, types = {}, cfg = {}, nodes = {}, logic_buttons_att = {}, logic_buttons_noatt = {} },
+		page = 0,
+		sysname = ""
 	}
 end
-Trakpak3.ResetSigEdit()
+
+--Reset Signal Editor variables
+function Trakpak3.ResetSigEdit()
+
+	Trakpak3.SigEdit.rules = {}
+	Trakpak3.SigEdit.tags = {}
+	Trakpak3.SigEdit.sigtypes = {}
+	Trakpak3.SigEdit.panels = { rules = {}, tags = {}, types = {}, cfg = {}, nodes = {}, logic_buttons_att = {}, logic_buttons_noatt = {} }
+	Trakpak3.SigEdit.page = 0
+	Trakpak3.SigEdit.sysname = ""
+	
+end
+
 
 --Signal Editor Concommand
 concommand.Add("tp3_signal_editor", function()
@@ -23,7 +36,7 @@ concommand.Add("tp3_sigedit_reset", function()
 end)
 ]]--
 
-local function SSC(panel, w, h)
+local function SSC(panel, w, h) --Set Size & Center
 	panel:SetPos(ScrW()/2 - w/2, ScrH()/2 - h/2)
 	panel:SetSize(w,h)
 end
@@ -38,56 +51,62 @@ function Trakpak3.OpenSigEdit(page)
 	--Populate with chosen page
 	Trakpak3.SigEdit.page = page or Trakpak3.SigEdit.page or 0
 	if Trakpak3.SigEdit.page==0 then --New/Load menu
-		SSC(frame, 440,192)
-		frame:SetTitle("SigEdit (Trakpak3 Signal System Editor): New/Load System")
+		SSC(frame, 384,512)
+		frame:SetTitle("SigEdit (Trakpak3 Signal System Editor)!")
 		frame:SetIcon("trakpak3_common/icons/signal_lun_n.png")
+		
+		local loadname = ""
+		local loadbutton
 		
 		local epanel = vgui.Create("DPanel",frame)
 		epanel:Dock(FILL)
 		
-		local left = vgui.Create("DPanel",epanel)
-		left:SetSize(256,1)
-		left:Dock(LEFT)
-		function left:Paint() end
-		
-		local label = vgui.Create("DLabel",left)
-		label:SetSize(1,32)
+		local label = vgui.Create("DLabel",epanel)
+		label:SetSize(1,48)
 		label:Dock(TOP)
-		label:SetText("Create a new Trakpak3 signaling system,\nor load one with the following name:")
+		label:DockMargin(8,8,8,8)
+		label:SetText("Create a new Trakpak3 signaling system, or load one from the following list. Editable signal system files are stored in data/trakpak3/signalsystems.")
+		label:SetWrap(true)
 		label:SetContentAlignment(5)
 		label:SetTextColor(Color(63,63,63))
 		
-		local newtext = vgui.Create("DTextEntry", left)
-		newtext:SetSize(192,32)
-		newtext:Dock(TOP)
+		local bpanel = vgui.Create("DPanel",epanel)
+		bpanel:SetSize(1,32)
+		bpanel:Dock(BOTTOM)
 		
-		local right = vgui.Create("DPanel",epanel)
-		right:Dock(FILL)
-		function right:Paint() end
-		
-		--Create new signal system button
-		local newbutton = vgui.Create("DButton",right)
-		newbutton:SetSize(128,32)
-		newbutton:Dock(TOP)
-		newbutton:SetText("Create New")
-		newbutton.DoClick = function()
-			local name = newtext:GetValue()
-			if true then
-				--Trakpak3.SigEdit.sysname = name
-				
-				Trakpak3.OpenSigEdit(1)
-				frame:Close()
-			end
+		--File List
+		local files = file.Find("trakpak3/signalsystems/*.txt","DATA")
+		local flist = vgui.Create("DListView",epanel)
+		flist:Dock(FILL)
+		flist:AddColumn("Signal System Files")
+		for index, fname in ipairs(files) do
+			flist:AddLine(fname)
 		end
 		
-		local loadbutton = vgui.Create("DButton",right)
+		function flist:OnRowSelected(index, row)
+			loadname = row:GetValue(1)
+			loadbutton:SetEnabled(true)
+		end
+		
+		
+		--Create new signal system button
+		local newbutton = vgui.Create("DButton",bpanel)
+		newbutton:SetSize(128,32)
+		newbutton:Dock(LEFT)
+		newbutton:SetText("Create New")
+		newbutton.DoClick = function()
+			Trakpak3.OpenSigEdit(1)
+			frame:Close()
+		end
+		
+		--Load Existing Signal System Button
+		loadbutton = vgui.Create("DButton",bpanel)
 		loadbutton:SetSize(128,32)
-		loadbutton:Dock(TOP)
-		loadbutton:SetText("Load Existing")
+		loadbutton:Dock(RIGHT)
+		loadbutton:SetText("Load Selected")
 		loadbutton.DoClick = function()
-			local name = newtext:GetValue()
-			if name and name != "" then
-				local loaded = Trakpak3.SigEdit.LoadSigEdit(name)
+			if loadname and loadname != "" then
+				local loaded = Trakpak3.SigEdit.LoadSigEdit(loadname)
 				if loaded then
 					Trakpak3.OpenSigEdit(1)
 					frame:Close()
@@ -101,6 +120,7 @@ function Trakpak3.OpenSigEdit(page)
 				end
 			end
 		end
+		loadbutton:SetEnabled(false)
 		
 	elseif Trakpak3.SigEdit.page==1 then --Everything Else
 		SSC(frame, 1280,640)
@@ -1738,6 +1758,19 @@ function Trakpak3.OpenSigEdit(page)
 		panel:Dock(RIGHT)
 		function panel:Paint() end
 		
+		--Return to Main Menu
+		local rbutton = vgui.Create("DButton",panel)
+		rbutton:SetSize(128,48)
+		rbutton:Dock(BOTTOM)
+		rbutton:DockMargin(32,0,32,0)
+		rbutton:SetText("Return to Main Menu")
+		rbutton.DoClick = function()
+			frame:Close()
+			Trakpak3.ResetSigEdit()
+			Trakpak3.OpenSigEdit(0)
+			
+		end
+		
 		local panel = vgui.Create("DPanel",spanel)
 		panel:Dock(FILL)
 		function panel:Paint() end
@@ -1754,6 +1787,7 @@ function Trakpak3.OpenSigEdit(page)
 		textbox:SetValue(Trakpak3.SigEdit.sysname or "")
 		textbox:Dock(TOP)
 		
+		--Save Button
 		local button = vgui.Create("DButton",panel)
 		button:SetSize(128,48)
 		button:Dock(FILL)
@@ -2206,9 +2240,6 @@ Trakpak3.SigEdit.dictionary = {
 	["CTC State"] = "CTC"
 }
 
-Trakpak3.SigEdit.panels.logic_buttons_att = {}
-Trakpak3.SigEdit.panels.logic_buttons_noatt = {}
-
 function Trakpak3.SigEdit.CreateNodeTable(node,canattach)
 	local id = Trakpak3.SigEdit.node_id
 	local nodetable = {node = node, canattach = canattach}
@@ -2591,10 +2622,15 @@ function Trakpak3.SigEdit.SaveSigEdit(sysname)
 	file.Write("trakpak3/signalsystems/"..sysname..".txt", json)
 	local gray = Color(127,255,255)
 	chat.AddText(gray, "File saved as ",Color(255,127,127),"data",gray,"/trakpak3/signalsystems/"..sysname..".txt! To include it with this map, change its extension to .lua and place it in ",Color(0,127,255),"lua",gray,"/trakpak3/signalsystems/",Color(255,255,0),"<your map>/!")
+	
+	--Print Cheat Sheet
+	local cheat = Trakpak3.SigEdit.CheatSheet(sysname)
+	file.CreateDir("trakpak3/signalsystems/cheatsheets")
+	file.Write("trakpak3/signalsystems/cheatsheets/"..sysname.."_cheatsheet.txt", cheat)
 end 
 
 function Trakpak3.SigEdit.LoadSigEdit(sysname)
-	local json = file.Read("trakpak3/signalsystems/"..sysname..".txt", "DATA")
+	local json = file.Read("trakpak3/signalsystems/"..sysname, "DATA")
 	if json then
 		local ftable = util.JSONToTable(json)
 		Trakpak3.SigEdit.sysname = ftable.sysname
@@ -2608,4 +2644,165 @@ function Trakpak3.SigEdit.LoadSigEdit(sysname)
 		chat.AddText(Color(127,255,255),"Could not find SigEdit file data/trakpak3/signalsystems/"..sysname..".txt!")
 		return false
 	end
+end
+
+--Surround text with =======
+local function FormatHeading(heading)
+	local w = #heading
+	local border = string.rep("=",w)
+	
+	return border.."\n"..heading.."\n"..border.."\n"
+end
+
+--Format a table of tables as a string, with lines and shit
+local function FormatTable(rows, justifications)
+
+	local totalwidth = 0
+	local columnwidths = {}
+	local rowdepths = {}
+	
+	--Find the column widths
+	for row = 1, #rows do
+		for col = 1, #rows[1] do
+			local contents = string.Explode("\n", rows[row][col]) --Table for each line
+			for line=1,#contents do
+				columnwidths[col] = math.max(columnwidths[col] or 0, #contents[line])
+			end
+			rowdepths[row] = math.max(rowdepths[row] or 1, #contents)
+		end
+	end
+	
+	--Calculate the total width, used for horizontal rules
+	for col, width in pairs(columnwidths) do
+		--print(columnwidths[col])
+		totalwidth = totalwidth + width + 3
+	end
+	
+	local text = ""
+	
+	--Format the Table
+	for row = 1, #rows do
+		for line = 1, rowdepths[row] do
+			for col = 1, #rows[1] do
+				local contents = string.Explode("\n", rows[row][col])
+				
+				local j = 0
+				local pre = 1
+				local post = 1
+				
+				local cw = columnwidths[col] + 2
+				local entry = contents[line] or ""
+				local ew = #entry
+				local diff = cw-ew
+				
+				if justifications then
+					j = justifications[col]
+				end
+				
+				if j==-1 then --Left Justification
+					pre = 1
+					post = diff-1
+				elseif j==1 then --Right Justification
+					pre = diff-1
+					post = 1
+				else --Center
+					pre = math.ceil(diff/2)
+					post = math.floor(diff/2)
+				end 
+			
+				text = text..(string.rep(" ",pre)..entry..string.rep(" ",post))
+				
+				if col < #rows[1] then
+					text = text.."|"
+				end
+				
+			end
+			text = text.."\n"
+		end
+		if row==1 then
+			text = text..string.rep("=",totalwidth).."\n"
+		else
+			text = text..string.rep("-",totalwidth).."\n"
+		end
+	end
+	
+	return text
+end
+
+function Trakpak3.SigEdit.CheatSheet(sysname)
+	local text = FormatHeading("Trakpak3 Signal System Cheat Sheet: "..sysname).."\n"
+	
+	--Rules Table
+	text = text..FormatHeading("RULES").."\n"
+	
+	local rules = Trakpak3.SigEdit.rules
+	--name, speed, description
+	local rows = {{"Rule Name", "Speed", "Description"}}
+	for order, rule in ipairs(rules) do
+		table.insert(rows, {rule.name, rule.speed, rule.description})
+	end
+	
+	text = text..FormatTable(rows,{0,0,-1}).."\n"
+	
+	--Signal Types Data
+	--Trakpak3.SigEdit.sigtypes[sigtype][aspect] = data
+	text = text..FormatHeading("RULE COMPATIBILITY BY SIGNAL TYPE").."\n"
+	local sigtypes = Trakpak3.SigEdit.sigtypes
+	
+	local rows = {}
+	
+	local row1 = {"Rule"}
+	for name, sigtype in SortedPairs(sigtypes) do
+		table.insert(row1,name)
+	end
+	rows[1] = row1
+	
+	for order, rule in ipairs(rules) do
+		local row = {rule.name}
+		for n=2,#row1 do
+			local name = row1[n]
+			local sigtype = sigtypes[name]
+			local data = sigtype[rule.name]
+			
+			if data then
+				if data.override then
+					row[n] = "RO"
+				elseif 
+				(data.skin1 and data.skin1!="") or
+				(data.skin2 and data.skin2!="") or
+				(data.skin3 and data.skin3!="") or
+				(data.bg1 and data.bg1!="") or
+				(data.bg2 and data.bg2!="") or
+				(data.bg3 and data.bg3!="") or
+				(data.cycle1 and data.cycle1!="") or
+				(data.cycle2 and data.cycle2!="") or
+				(data.cycle3 and data.cycle3!="")
+				then
+					row[n] = "Y"
+				else
+					row[n] = ""
+				end
+			else
+				row[n] = ""
+			end
+			
+		end
+		table.insert(rows,row)
+	end
+	
+	text = text..FormatTable(rows).."\nY -> This signal type has a definition for this rule.\nRO -> This signal type has a rule override for this rule.\nBlank -> This signal cannot display this rule! Errors will result if it tries to.\n\n"
+	
+	--Tag List
+	text = text..FormatHeading("SIGNAL TAG LIST").."\n"
+	
+	local tags = Trakpak3.SigEdit.tags
+	for tag, _ in SortedPairs(tags) do
+		text = text..tag.."\n"
+	end
+	
+	--Logic Function
+	text = text.."\n"..FormatHeading("LOGIC FUNCTION").."\n"..(Trakpak3.SigEdit.func_text or "<Function Not Written>")
+	
+	
+	return text
 end

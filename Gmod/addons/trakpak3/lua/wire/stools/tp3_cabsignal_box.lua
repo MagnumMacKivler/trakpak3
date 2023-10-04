@@ -14,17 +14,18 @@ end
 
 TOOL.ClientConVar = {
 	model = "models/gsgtrainprops/parts/cabsignals/cab_signal_box.mdl",
-	spadspeed = "10",
+	spadspeed = "15",
 	--restrictedspeed = "15",
 	units = "mph",
 	lw = "96",
-	h = "192"
+	h = "192",
+	radius = "2048"
 }
 
 if SERVER then
 	function TOOL:GetConVars()
 		--return self:GetClientInfo("spadspeed"), self:GetClientInfo("restrictedspeed"), self:GetClientInfo("units"), self:GetClientInfo("lw"), self:GetClientInfo("h")
-		return self:GetClientInfo("spadspeed"), self:GetClientInfo("units"), self:GetClientInfo("lw"), self:GetClientInfo("h")
+		return self:GetClientInfo("spadspeed"), self:GetClientInfo("units"), self:GetClientInfo("lw"), self:GetClientInfo("h"), self:GetClientInfo("radius")
 	end
 end
 
@@ -148,7 +149,41 @@ function TOOL.BuildCPanel(panel)
 	label:SetSize(1,128)
 	label:SetWrap(true)
 	panel:AddPanel(label)
+	
+	--Receiver Radius
+	local slider = vgui.Create("DNumSlider",panel)
+	slider:SetText("Defect Detector Radius:")
+	slider:SetMin(0)
+	slider:SetMax(16384)
+	slider:SetDecimals(0)
+	slider:SetConVar("wire_tp3_cabsignal_box_radius")
+	slider:SetDark(true)
+	panel:AddPanel(slider)
+	
+	local label = vgui.Create("DLabel",panel)
+	label:SetText("The Defect Detector Radius is the maximum distance at which your cabsignal box will receive defect detector broadcasts. Note, this only applies to the initial broadcast; if you move out of range after starting a defect detector cycle, it will still broadcast the results to you.")
+	label:SetTextColor(black)
+	label:SetSize(1,96)
+	label:SetWrap(true)
+	panel:AddPanel(label)
+	
+	--Volume Slider
+	local slider = vgui.Create("DNumSlider",panel)
+	slider:SetText("Defect Detector Volume:")
+	slider:SetMin(0)
+	slider:SetMax(1)
+	slider:SetDecimals(2)
+	slider:SetConVar("tp3_defect_detector_volume")
+	slider:SetDark(true)
+	panel:AddPanel(slider)
+	
+	local label = vgui.Create("DLabel",panel)
+	label:SetText("This is a global client setting (not linked to any particular defect detector). Set to 0 to disable defect detector playback entirely.")
+	label:SetTextColor(black)
+	label:SetSize(1,96)
+	label:SetWrap(true)
+	panel:AddPanel(label)
 end
 
 --duplicator.RegisterEntityClass("gmod_wire_tp3_cabsignal_box", WireLib.MakeWireEnt, "Data", "spadspeed", "restrictedspeed", "units", "lw", "h")
-duplicator.RegisterEntityClass("gmod_wire_tp3_cabsignal_box", WireLib.MakeWireEnt, "Data", "spadspeed", "units", "lw", "h")
+duplicator.RegisterEntityClass("gmod_wire_tp3_cabsignal_box", WireLib.MakeWireEnt, "Data", "spadspeed", "units", "lw", "h", "radius")

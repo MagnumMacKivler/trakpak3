@@ -86,6 +86,26 @@ if SERVER then
 		
 	end
 	
+	--Wrapper for transmitting EDD broadcasts. 0: subscribe but no broadcast, 1: subscribe and broadcast, 2: broadcast, 3: broadcast and clear.
+	function ENT:Transmit(stage, soundfont, sentence)
+	
+		if stage<=1 then --Initial broadcast, ping the cabsignal boxes for distance and broadcast as necessary
+			self.subscribers = {}
+			
+			for _, box in pairs(ents.FindByClass("gmod_wire_tp3_cabsignal_box")) do
+				local r = box.radius or 2048
+				if box:GetPos():DistToSqr(self:GetPos()) <= (r*r) then
+					self.subscribers[box] = true --Add to list of subscribers for following transmissions
+					if stage==1 then box:DetectorQueue(soundfont, sentence) end
+				end
+			end
+		elseif stage>=2 then --Immediate Alarm
+			for box, _ in pairs(self.subscribers) do
+				box:DetectorQueue(soundfont, sentence)
+			end
+			if stage==3 then self.subscribers = {} end
+		end
+	end
 	
 	function ENT:Think()
 		--Auto-Wire the Trigger
@@ -143,12 +163,7 @@ if SERVER then
 						--print("DEFECT")
 						
 						--Broadcast Sentence
-						--net.Start("tp3_edd_broadcast")
-						net.Start("trakpak3")
-							net.WriteString("tp3_edd_broadcast")
-							net.WriteString(self.soundfont)
-							net.WriteString(sentence)
-						net.Broadcast()
+						self:Transmit(2, self.soundfont, sentence)
 					end
 				end
 				
@@ -170,12 +185,7 @@ if SERVER then
 				sentence = self:SubstituteVars(sentence)
 				
 				--Broadcast Sentence
-				--net.Start("tp3_edd_broadcast")
-				net.Start("trakpak3")
-					net.WriteString("tp3_edd_broadcast")
-					net.WriteString(self.soundfont)
-					net.WriteString(sentence)
-				net.Broadcast()
+				self:Transmit(3, self.soundfont, sentence)
 				
 			end
 		end
@@ -211,6 +221,8 @@ if SERVER then
 		return sentence
 	end
 	
+	
+	
 	--Hammer Input Handler
 	function ENT:AcceptInput( iname, activator, caller, data )
 		if iname=="AddProp" then
@@ -236,13 +248,9 @@ if SERVER then
 					
 					--Broadcast intro when train first drives over
 					if self.speakintro then
-						--net.Start("tp3_edd_broadcast")
-						net.Start("trakpak3")
-							net.WriteString("tp3_edd_broadcast")
-							net.WriteString(self.soundfont)
-							net.WriteString(self.s_intro)
-							net.WriteBool(false)
-						net.Broadcast()
+						self:Transmit(1, self.soundfont, self.s_intro)
+					else
+						self:Transmit(0)
 					end
 				end
 				
@@ -309,12 +317,7 @@ if SERVER then
 						--print("DEFECT")
 						
 						--Broadcast Sentence
-						--net.Start("tp3_edd_broadcast")
-						net.Start("trakpak3")
-							net.WriteString("tp3_edd_broadcast")
-							net.WriteString(self.soundfont)
-							net.WriteString(sentence)
-						net.Broadcast()
+						self:Transmit(2, self.soundfont, sentence)
 					end
 				end
 				

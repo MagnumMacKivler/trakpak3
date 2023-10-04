@@ -23,28 +23,20 @@ end
 if SERVER then
 	
 	--This function is called on creation?
-	--function ENT:Setup(spadspeed, restrictedspeed, units, lw, h)
-	function ENT:Setup(spadspeed, units, lw, h)
-		--print("Setup Cabsignal Box!")
-		--self:SetupSpeedInfo(spadspeed,restrictedspeed,units, lw, h)
-		self:SetupSpeedInfo(spadspeed, units, lw, h)
-		
+	function ENT:Setup(spadspeed, units, lw, h, radius)
+		self:SetupSpeedInfo(spadspeed, units, lw, h, radius)
 	end
 	
-	--Sanity check the speed/scan values, assign default otherwise
-	--function ENT:SetupSpeedInfo(s,r,u,lw,h) 
-	function ENT:SetupSpeedInfo(s,u,lw,h) 
+	--Sanity check the speed/scan values, assign default otherwise 
+	function ENT:SetupSpeedInfo(s,u,lw,h,r) 
 		local s_good = s and (tonumber(s)>=0)
-		--local r_good = r and (tonumber(r)>=0)
 		local u_good = (u=="mph") or (u=="kph") or (u=="ins")
 		
 		local lw_good = lw and tonumber(lw)>0
 		local h_good = h and tonumber(h)>0
 		
-		--if s_good and r_good and u_good and lw_good and h_good then
 		if s_good and u_good and lw_good and h_good then
 			self.spadspeed = tonumber(s)
-			self.restrictedspeed = tonumber(r)
 			self.units = u
 			
 			self.lw = tonumber(lw)
@@ -60,15 +52,16 @@ if SERVER then
 		end
 		
 		self.scansize = Vector(self.lw/2, self.lw/2, self.h/2)
-		--self:SetOverlayText("SPAD Trip: "..self.spadspeed.." "..self.units.."\nRestricting Trip: "..self.restrictedspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h)
-		--self:SetOverlayText("SPAD Trip: "..self.spadspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h)
+		
+		self.radius = r or 2048
+		
 		self:SetupOverlay()
 	end
 	
 	function ENT:SetupOverlay()
 		local tag = ""
 		if self.Trakpak3_TrainTag then tag = self.Trakpak3_TrainTag.."\n" end
-		self:SetOverlayText(tag.."SPAD Trip: "..self.spadspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h)
+		self:SetOverlayText(tag.."SPAD Trip: "..self.spadspeed.." "..self.units.."\nScan Size: "..self.lw.."x"..self.lw.."x"..self.h.."\nDefect Detector Receiver Radius: "..self.radius)
 	end
 	
 	Trakpak3.speedmul = {mph = 17.6, kph = 10.93, ins = 1.0}
@@ -402,6 +395,15 @@ if SERVER then
 		
 	end
 	
+	--Receive Defect Detector Ping/Broadcast from EDD. Receiver function is in cl_defect_detector.lua.
+	function ENT:DetectorQueue(soundfont, sentence)
+		Trakpak3.NetStart("tp3_edd_broadcast")
+			net.WriteEntity(self)
+			net.WriteString(soundfont)
+			net.WriteString(sentence)
+		net.Broadcast()
+	end
+	
 	
 end
 
@@ -490,7 +492,7 @@ if CLIENT then
 	--end)
 	end
 	
-	--Defect Detector Queue
+	--Defect Detector Queue - called from cl_defect_detector.lua
 	function ENT:DetectorQueue(font,sentence)
 		if self:GetNWBool("enabled") then
 			--Add to Queue
@@ -503,6 +505,13 @@ if CLIENT then
 	
 	--Defect Detector Start Playback
 	function ENT:DetectorSpeak()
+		
+		local volvar = GetConVar("tp3_defect_detector_volume")
+		local vol = 0
+		if volvar then vol = volvar:GetFloat() end
+		
+		if vol==0 then return end
+		
 		local q_item = self.edd_queue[1]
 		local font = q_item[1]
 		local sentence = q_item[2]
@@ -536,6 +545,7 @@ if CLIENT then
 			
 			if #self.edd_schedule > 0 then --Sounds actually made it in
 				self.edd_static:Play()
+				self.edd_static:ChangeVolume(vol)
 			else --No valid words
 				self.speaking = false
 				self.edd_schedule = nil
@@ -553,12 +563,17 @@ if CLIENT then
 		--Play Defect Detector Sounds
 		if self:GetNWBool("enabled") then
 			if self.speaking and self.edd_schedule then
+				
+				local volvar = GetConVar("tp3_defect_detector_volume")
+				local vol = 0
+				if volvar then vol = volvar:GetFloat() end
+				
 				local nextevent = self.edd_schedule[1][1]
 				local nextsound = self.edd_schedule[1][2]
 				
 				if CurTime() > nextevent then
 					if nextsound then --Play the sound
-						self:EmitSound(nextsound)
+						self:EmitSound(nextsound,nil,nil,vol)
 						table.remove(self.edd_schedule,1)
 					else --End of Sentence
 						self.edd_schedule = nil
@@ -598,5 +613,7 @@ if CLIENT then
 			self.edd_static = nil
 		end
 	end
+	
+	CreateClientConVar("tp3_defect_detector_volume","1",true,false,"The decimal volume to play defect detector sounds at. 1 is full, 0 disables playback.",0,1)
 	
 end

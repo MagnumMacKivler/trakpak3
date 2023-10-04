@@ -916,3 +916,48 @@
 	//input AddProp(void) : "Auto-Wired in-game. Do not wire this input."
 	//input RemoveProp(void) : "Auto-Wired in-game. Do not wire this input."
 ]
+
+//Rotary Dumper
+@PointClass base(Targetname, Angles) studioprop() = tp3_rotary_dumper : "A rotating drum that unloads open-top cars by tipping them over."
+[
+	model(studio) : "Model" : "" : "The model path for the dumper."
+	skin(integer) : "Skin" : 0 : "The skin for the dumper model."
+	bodygroups(string) : "Bodygroups" : "" : "The model's default bodygroups. Formatted as a sequence of numbers separated by spaces. So for example '0 2 1' will set the first bodygroup to 0, the second bodygroup to 2, and the third bodygroup to 1."
+	
+	dumpangle(float) : "Dump Angle" : "-135" : "The roll angle the dumper. If the dumper rotates the wrong way, use a negative number."
+	maxspeed(float) : "Max Speed" : "15" : "Max rotational speed, in degrees per second."
+	acceleration(float) : "Acceleration Factor" : "2.5" : "Acceleration/Deceleration rate in degrees per second per second. You probably don't need to change this."
+	
+	clamp_model(studio) : "Clamp Model" : : "The model path for the dumper clamps."
+	clamp_max(float) : "Max Clamp Height" : "192" : "The maximum height of the car clamps above the railhead, varies from model to model."
+	clamp_min(float) : "Min Clamp Height" : "128" : "The minimum height of the car clamps above the railhead, varies from model to model."
+	axis_height(float) : "Axis Height" : "34" : "The height of the rotation axis (the model origin) above the railhead. This usually corresponds with the height from the railhead to the coupler centers."
+	
+	sound_start(sound) : "Start Move Sound" : "ambient/machines/machine3.wav" : "The sound the dumper makes when it starts to move."
+	sound_stop(sound) : "Stop Move Sound" : "doors/garage_stop1.wav" : "The sound the dumper makes when it comes to a complete stop."
+	sound_dump(sound) : "Dump Sound" : : "The sound of the car's contents being dumped out."
+	sound_clamp(sound) : "Clamp Sound" : : "The sound played when the clamps grab onto a car."
+	
+	motor_model(studio) : "Motor Model" : : "The model path for the drive motors."
+	motor_f(choices) : "Motor Position (Front)" : 1 : "This entity can automatically place animated motors and gears to drive the dumper." =
+	[
+		0 : "None"
+		1 : "Outside"
+		2 : "Inside"
+	]
+	motor_r(choices) : "Motor Position (Rear)" : 1 : "This entity can automatically place animated motors and gears to drive the dumper." =
+	[
+		0 : "None"
+		1 : "Outside"
+		2 : "Inside"
+	]
+	
+	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
+	
+	gmod_allowtools(string) readonly : "Allow Tools" : "none" : "Disables the toolgun on this entity except for the tools listed here."
+	
+	input Dump(void) : "Begin the dump cycle."
+	output OnCarEmptied(void) : "Fired when a car is in the dumper and has been dumped."
+	output OnCycleFinished(void) : "Fired when the dumper has returned to its normal position."
+	
+]

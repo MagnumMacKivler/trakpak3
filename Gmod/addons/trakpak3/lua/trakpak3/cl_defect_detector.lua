@@ -456,22 +456,16 @@ end)
 
 
 --Receive EDD Broadcast from Server
---[[
-net.Receive("tp3_edd_broadcast", function(length, ply)
-	local font = net.ReadString()
-	local sentence = net.ReadString()
-	
-	Trakpak3.EDD.BroadcastNear(font, sentence)
-	
-end)
-]]--
 Trakpak3.Net.tp3_edd_broadcast = function(len,ply)
+	local ent = net.ReadEntity()
 	local font = net.ReadString()
 	local sentence = net.ReadString()
 	
-	Trakpak3.EDD.BroadcastNear(font, sentence)
+	--Trakpak3.EDD.BroadcastNear(font, sentence)
+	if ent and ent:IsValid() then ent:DetectorQueue(font, sentence) end
 end
 
+--Clientside test command
 concommand.Add("tp3_defect_detector_test", function(ply, cmd, args, argStr)
 	local font = args[1]
 	local sentence = ""
@@ -509,7 +503,7 @@ concommand.Add("tp3_defect_detector_test", function(ply, cmd, args, argStr)
 
 end, nil, "Test the Defect Detector functions. You must be near a Trakpak3 Cab Signal Box with the 'Enable' input on.\n1: If you enter no arguments, it will print a list of sound fonts.\n2: If you enter a font name, it will print a list of sounds in that font and play them in alphabetical order.\n3: If you enter a font name and a string of words, it will attempt to play that string of words.")
 
---Send the EDD message to all cabsignal boxes within 2048 inches of the player
+--Send the EDD message to all cabsignal boxes within 2048 inches of the player; only used by clientside test
 function Trakpak3.EDD.BroadcastNear(font, sentence)
 	if font and sentence then
 		local ppos = LocalPlayer():GetPos()

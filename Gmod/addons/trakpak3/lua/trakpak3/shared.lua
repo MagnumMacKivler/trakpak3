@@ -228,6 +228,7 @@ Trakpak3.BlacklistClass("tp3_transfertable")
 Trakpak3.BlacklistClass("tp3_crossing_gate")
 Trakpak3.BlacklistClass("tp3_sign_prop")
 Trakpak3.BlacklistClass("tp3_sign_auto")
+Trakpak3.BlacklistClass("tp3_rotary_dumper")
 
 Trakpak3.BlacklistClass("prop_dynamic") --Primarily for use with moveable bridges.
 

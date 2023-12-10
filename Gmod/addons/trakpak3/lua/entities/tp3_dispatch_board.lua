@@ -186,4 +186,17 @@ if CLIENT then
 		end
 		self.selected = nil
 	end
+	
+	--Set flags required to reinitialize boards following a map cleanup
+	local resetboards = function()
+		for _, board in pairs(ents.FindByClass("tp3_dispatch_board")) do
+			board.hasparams = false
+			board.hasframe = false
+		end
+	end
+	
+	hook.Add("PostCleanupMap","Trakpak3_ResetWorldDSBoards",function()
+		timer.Simple(1,resetboards)
+	end)
+	
 end

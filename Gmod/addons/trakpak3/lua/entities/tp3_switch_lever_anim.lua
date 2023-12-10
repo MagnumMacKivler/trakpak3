@@ -97,7 +97,7 @@ if SERVER then
 		self.originalpos = self:GetPos()
 		self.originalang = self:GetAngles()
 		
-		--Link Stands
+		--Register your linked stand. The handshake is performed in InitPostEntity below.
 		self:RegisterEntity("linked_stand",self.linked_stand)
 		
 		--Auto Setup Hammer Outputs to Trigger
@@ -474,7 +474,7 @@ if SERVER then
 		
 		local b = me_blocker or linked_blocker
 		
-		if not me_occupied and not linked_occupied then
+		if not me_occupied and not linked_occupied then --Set your self.targetstate for the stand code to pick up automatically
 			self.targetstate = state
 			if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
 		elseif ply and b then --Notify player of the blocking entity
@@ -629,14 +629,16 @@ if SERVER then
 		end
 	end)
 	
-	--Link up other stands
-	hook.Add("InitPostEntity","Trakpak3_Link_Stands",function()
+	--Perform "handshake" with linked stand to link the linked stand back to this one
+	local function handshakes()
 		for _, stand in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
 			if stand.linked_stand_valid then --Auto Link the other stand to this one
 				stand.linked_stand_ent:RegisterEntity("linked_stand",stand:GetName())
 			end
 		end
-	end)
+	end
+	hook.Add("InitPostEntity","Trakpak3_Link_Stands",handshakes)
+	hook.Add("PostCleanupMap","Trakpak3_Link_Stands",handshakes)
 end
 
 if CLIENT then

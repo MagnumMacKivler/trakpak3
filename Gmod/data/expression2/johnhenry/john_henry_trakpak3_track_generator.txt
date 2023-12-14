@@ -84,7 +84,7 @@
 
 if(first()){
     #Version Info - Don't Change This!
-    Version = "1.4"
+    Version = "1.5"
     
     #What track gauge are you developing for?
     #include "johnhenry/gauges/standard"

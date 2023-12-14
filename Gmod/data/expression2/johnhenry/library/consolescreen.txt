@@ -2290,7 +2290,7 @@ function void wirelink:pressContinue(){
         case 24, #Save/Load Screen
             local Frac = frac(Page)
             local FileID = Line-2
-            if(Frac==0.1){ #Save
+            if(abs(Frac-0.1) < 0.05){ #Save
                 local FileString = vonEncode(CS_Data)
                 local FileName = "johnhenry_saves/save_"+FileID+".txt"
                 fileWrite(FileName,FileString)
@@ -2298,7 +2298,7 @@ function void wirelink:pressContinue(){
                 This:initPage(25)
                 Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")
                 timer("updatemanifest",1000)
-            }elseif(Frac==0.2){ #Load
+            }elseif(abs(Frac-0.2) < 0.05){ #Load
                 if(Manifest:exists(FileID)){
                     fileLoad(Manifest[FileID,string])
                     Pod:soundPlay(0,0.5,"ambient/machines/keyboard7_clicks_enter.wav")

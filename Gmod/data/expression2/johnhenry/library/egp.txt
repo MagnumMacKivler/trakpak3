@@ -292,6 +292,7 @@ function string egpDirFormat(N){
     }elseif(N<0){
         return toString(-N)+"rt"
     }
+    return ""
 }
 
 function void wirelink:egpInitPage(PageID){

@@ -242,7 +242,7 @@ if SERVER then
 		
 		if table.IsEmpty(self.TriggerEnts) then --Nothing is triggering it... EndTouchAll
 			self.softoccupied = false
-			if self.occupied then --Clear the state if occupied
+			if self.occupied and self.run then --Clear the state if occupied and not being forced
 				self:HandleNewState(false, true)
 			end
 		end

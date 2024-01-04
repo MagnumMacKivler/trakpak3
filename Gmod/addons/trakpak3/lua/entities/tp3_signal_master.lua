@@ -139,6 +139,7 @@ if SERVER then
 					for k, v in pairs(self.target_bg) do self:SetBodygroup(k, v) end
 				end
 				if self.target_skin then
+					--print("Setting ",self," Skin to ",self.target_skin)
 					self:SetSkin(self.target_skin)
 				end
 			else --target has not yet been reached, apply interim bodygroups
@@ -240,7 +241,7 @@ if SERVER then
 					end
 					if data.skin1 and not self.first_anim then
 						if data.cycle1 then --store for later
-							self.target_skin = skin1
+							self.target_skin = data.skin1
 						else --apply now
 							self:SetSkin(data.skin1)
 						end

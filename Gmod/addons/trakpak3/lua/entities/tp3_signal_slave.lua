@@ -130,6 +130,7 @@ if SERVER then
 		end
 		if skin and not self.first_anim then
 			if cycle then --save for later
+				--print("Setting ",self," Skin to ",self.target_skin)
 				self.target_skin = skin
 			else --apply now
 				self:SetSkin(skin)

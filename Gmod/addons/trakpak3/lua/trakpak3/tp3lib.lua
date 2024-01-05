@@ -11,7 +11,7 @@ Trakpak3.FindByTargetname = function(name)
 			for n=1,#found do
 				message = message.."\n    Entity "..n..": "..tostring(found[n])
 			end
-			ErrorNoHalt(message)
+			ErrorNoHalt(message.."\n")
 		elseif IsValid(result) then --Only one entity, and it's valid
 			return result, true
 		end

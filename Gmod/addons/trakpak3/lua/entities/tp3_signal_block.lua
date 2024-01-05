@@ -40,13 +40,33 @@ if SERVER then
 		self:SetAngles(Angle(0,0,0)) --If somehow hammer places this at an angle, this ensures the trigger hulls will still work.
 	end
 	
-	--Set up node chain using the new system
+	--Set up node chain, called from nodessetup.lua
 	function ENT:SetupNodes(nodechain)
 		self.nodes = nodechain.Nodes
 		self.skips = nodechain.Skips
 		self.chainpos = nodechain.Pos
 		
-		self.nodecount = table.Count(self.nodes)
+		
+		
+		--Check for duplicate nodes in sequence which would cause degenerate convexes.
+		local lastnode
+		local duplicates = {}
+		for index, node in ipairs(self.nodes) do
+			if node==lastnode then --Duplicate node detected!
+				ErrorNoHalt("[Trakpak3] Error! tp3_signal_block '"..self:GetName().."' has the same node ("..node..") twice in the chain! To fix this, clear this block's nodes and re-save the node file.\n")
+				table.insert(duplicates,index)
+			end
+			lastnode = node
+		end
+		--If any duplicates were found, pop them from the tables so the map will load:
+		if next(duplicates) then
+			for _, index in ipairs(duplicates) do
+				table.remove(self.nodes, index)
+				table.remove(self.skips, index)
+			end
+		end
+		
+		self.nodecount = #self.nodes --table.Count(self.nodes)
 		
 		if self.nodecount==1 then
 			self.run = false

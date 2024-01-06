@@ -5,9 +5,14 @@ local Loada = Trakpak3.Loada
 
 local LoadStartTime = 0
 	
+--Console Variable for moderating the packet size Trakpak3 sends to clients
+local kb_cvar = CreateClientConVar("tp3_loada_packetsize", 10, true, false, "The maximum packet size, in kilobytes, for the server to send map data to the client. Must be an integer between 1 and 60. Lowering this value can help mitigate 'Reliable Channel Overflow' errors.",1,60)
+
 --Ask for Trakpak3 data from server after joining. See clientloader.lua for details.
 hook.Add("InitPostEntity","Trakpak3_RequestServerData",function()
 	Trakpak3.NetStart("tp3_requestserverdata")
+		net.WriteUInt(kb_cvar:GetInt(),6)
+		--print(kb_cvar:GetInt(),"Kilobytes")
 	net.SendToServer()
 	LoadStartTime = SysTime()
 	MsgC(Trakpak3.Magenta, "[Trakpak3] Initiating Client Loading...\n")
@@ -69,7 +74,7 @@ Trakpak3.Net["tp3_sendserverdata"] = function(len, ply)
 		
 		--Print Progress
 		local progress = math.Round(100*packet/#Loada.PacketDestinations)
-		MsgC(Trakpak3.Magenta,"[Trakpak3] Loading... "..progress.."%\n")
+		MsgC(Trakpak3.Magenta,"[Trakpak3] Loading... "..progress.."%, "..maxpieces.." Packets\n")
 		
 		if packet==#Loada.PacketDestinations then --You're Done!
 			local load_duration = SysTime()-LoadStartTime

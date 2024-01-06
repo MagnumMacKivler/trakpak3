@@ -39,18 +39,18 @@ Loada.Schedule = {
 }
 --[index] = Callback
 
-
 --Convert an input table to a string and return it in <=60kB (61440 B) chunks
-function Loada.PackageTable(tbl)
+function Loada.PackageTable(tbl, kilobytes)
 	if not tbl or table.IsEmpty(tbl) then return end
 	
 	local json = util.TableToJSON(tbl)
 	local totalbytes = #json
-	local numchunks = math.ceil(totalbytes/61440)
+	--print("[Trakpak3] Sending Packet consisting of "..math.Round(totalbytes/1024,2).."kB in "..kilobytes.."kB chunks.")
+	local numchunks = math.ceil(totalbytes/(1024*kilobytes))
 	local chunks = {}
 	for n = 1, numchunks do
-		local startpos = (n-1)*61440 + 1
-		local endpos = n*61440
+		local startpos = (n-1)*(1024*kilobytes) + 1
+		local endpos = n*(1024*kilobytes)
 		chunks[n] = string.sub(json, startpos, math.min(endpos, totalbytes))
 	end
 	return chunks
@@ -90,11 +90,11 @@ local function SpewChunks(ply, chunks, packet)
 end
 
 --The master Spewing Function, send all the info to the client in order.
-local function SpewMaster(ply)
+local function SpewMaster(ply, kilobytes)
 	if not (ply and ply:IsValid()) then return end --Exit and kill the coroutine if the player is gone
 	
 	for packet, callback in ipairs(Loada.Schedule) do
-		local chunks = Loada.PackageTable(callback()) --Retrieve the data table and split it into chunks
+		local chunks = Loada.PackageTable(callback(), kilobytes) --Retrieve the data table and split it into chunks
 		if chunks then --There is data
 			local result = SpewChunks(ply, chunks, packet) --Start sending it to client
 			if not result then return end --SpewChunks returned false because the player is gone. Return and kill the coroutine.
@@ -111,8 +111,11 @@ end
 --A player has requested the server data, set up the coroutine.
 Trakpak3.Net["tp3_requestserverdata"] = function(len, ply)
 	if IsValid(ply) and ( not Loada.COs[ply] or not coroutine.resume(Loada.COs[ply]) ) then --Player is real and is not currently requesting data
+		local kilobytes = net.ReadUInt(6)
+		kilobytes = math.Clamp(kilobytes,1,60)
+		--print(kilobytes, "Kilobytes")
 		Loada.COs[ply] = coroutine.create(SpewMaster) --Create a new coroutine for sending data to the player
-		coroutine.resume(Loada.COs[ply], ply) --And start it, passing the player arg
+		coroutine.resume(Loada.COs[ply], ply, kilobytes) --And start it, passing the player arg
 	end
 end
 

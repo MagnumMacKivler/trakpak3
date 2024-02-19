@@ -267,22 +267,27 @@ if SERVER then
 				if math.abs(self.speed) > self.creepspeed then
 					self.speed = math.Approach(self.speed, Trakpak3.Sign(self.dumpangle)*self.creepspeed, self.acceleration/10)
 					self:SetLocalAngularVelocity(Angle(0,0,self.speed))
-					self:EnableMover()
 				else --Reached creep speed; creep to stopping point, and schedule the return
-					local duration = self:MoveToRoll(self.dumpangle, self.speed)
 					self.dumpstage = 4
-					timer.Simple(duration, function()
-						self:DoStopSound()
-						self.speed = 0
-						self.dumpstage = 5
-						if self.hascar and self.hascar:IsValid() then self:TriggerOutput("OnCarEmptied",self) end
-						timer.Simple(2, function()
-							self.dumpstage = 6
-							self:DoStartSound()
-						end)
-					end)
 				end
-				
+				self:EnableMover()
+			elseif self.dumpstage==4 then --Creeping to stop
+				local angdist = math.NormalizeAngle(self.dumpangle - self:GetAngles().roll)
+				--self.speed = Trakpak3.Sign(angdist)*math.Clamp(math.abs(angdist)/self.acceleration, 1, self.creepspeed)
+				if math.abs(angdist) < 0.5 then --Close enough
+					self:DoStopSound()
+					self:DisableMover()
+					self.speed = 0
+					self.dumpstage = 5
+					if self.hascar and self.hascar:IsValid() then self:TriggerOutput("OnCarEmptied",self) end
+					timer.Simple(2, function()
+						self.dumpstage = 6
+						self:DoStartSound()
+					end)
+				else
+					self:SetLocalAngularVelocity(Angle(0,0,self.speed))
+					self:EnableMover()
+				end
 			elseif self.dumpstage==6 then --Return Acceleration
 			
 				if math.abs(self.speed) < self.maxspeed then
@@ -306,10 +311,10 @@ if SERVER then
 				if math.abs(self.speed) > self.creepspeed then
 					self.speed = math.Approach(self.speed, -Trakpak3.Sign(self.dumpangle)*self.creepspeed, self.acceleration/10)
 					self:SetLocalAngularVelocity(Angle(0,0,self.speed))
-					self:EnableMover()
 				else --Reached creep speed; creep to stopping point, and schedule the return
-					local duration = self:MoveToRoll(0, self.speed)
+					--local duration = self:MoveToRoll(0, self.speed)
 					self.dumpstage = 9
+					--[[
 					timer.Simple(duration, function()
 						self:DoStopSound()
 						self.speed = 0
@@ -320,6 +325,26 @@ if SERVER then
 						constraint.RemoveConstraints(self,"Weld") --Unweld the car
 						self.hascar = nil
 					end)
+					]]--
+				end
+				self:EnableMover()
+			elseif self.dumpstage==9 then --Creeping to a stop
+				local angdist = math.NormalizeAngle(-self:GetAngles().roll)
+				--self.speed = Trakpak3.Sign(angdist)*math.Clamp(math.abs(angdist)/self.acceleration, 1, self.creepspeed)
+				if math.abs(angdist) < 0.25 then --Close enough
+					self:DoStopSound()
+					self:DisableMover()
+					self:SetAngles(self.angles) --Make sure it snaps. The angular difference between the car and the dumper should be negligible here.
+					self.speed = 0
+					self.dumpstage = 0
+					self.moving = false
+					self:TriggerOutput("OnCycleFinished",self)
+					self:SetCollisionGroup(COLLISION_GROUP_NONE)
+					constraint.RemoveConstraints(self,"Weld") --Unweld the car
+					self.hascar = nil
+				else
+					self:SetLocalAngularVelocity(Angle(0,0,self.speed))
+					self:EnableMover()
 				end
 			end
 			

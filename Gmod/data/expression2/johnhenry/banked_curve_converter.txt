@@ -1,0 +1,243 @@
+@name johnhenry/banked_curve_converter
+@inputs 
+@outputs Index
+@persist OutputFile:string RawLines:array UniqueLines:table Pieces:table Index LineCount SegLimits:table Compiles:table WriteString:string
+@trigger 
+
+if(first()){
+    
+	#This script can be used to automatically create banked curves from a set of non-banked curve model paths and input data.
+    #Converts a text file with the following format into a von docket:
+    #arc curve model path \t Start Banked Y/N \t EndBanked Y/N \r\n
+	
+	#For Example:
+	#models/trakpak3_rsg/arcs/r3072/a0fw_8lt_left_0pg_+3072x-3072x0000.mdl	N	N
+	#models/trakpak3_rsg/arcs/r3264/a0fw_8lt_left_0pg_+3264x-3264x0000.mdl	N	N
+	#models/trakpak3_rsg/arcs/r4096/a0fw_8rt_right_0pg_+4096x+4096x0000.mdl	N	N
+	
+    #This is the format you get by copy-pasting excel cells into notepad++.
+    
+    local InputFile = "banked_curves_in.txt" #Located in /e2files/
+    
+    OutputFile = "johnhenry_saves/dockets/banked_curves_out.txt"
+    
+    #From the Quickplanner:
+    #ArcRadii = array(2048,3072,4096,6144,8192) #The principal (non-double tracked) curve radii.
+    #SegLimits = array(32,40,48,56,64) #The Max number of segments for a 90 degree curve for each principal radius.
+    SegLimits = table()
+    SegLimits[2048,number] = 32
+    SegLimits[2240,number] = 32
+    SegLimits[3072,number] = 40
+    SegLimits[3264,number] = 40
+    SegLimits[4096,number] = 48
+    SegLimits[4288,number] = 48
+    SegLimits[6144,number] = 56
+    SegLimits[6336,number] = 56
+    SegLimits[8192,number] = 64
+    SegLimits[8384,number] = 64
+    
+    runOnFile(1)
+    fileLoad(InputFile)
+    
+    RawLines = array()
+    UniqueLines = table()
+    Pieces = table()
+    Compiles = table()
+    WriteString = ""
+    
+    LineCount = 0
+    
+    
+    function vector2 tp3dir(Direction){
+        local Dir = vec2()
+        switch(abs(Direction)){
+            case 0,
+                Dir = vec2(0,4)
+                break
+                
+            case 1,
+                Dir = vec2(-1,4)
+                break
+            case 2,
+                Dir = vec2(-2,4)
+                break
+            case 4,
+                Dir = vec2(-4,4)
+                break
+            
+            case 6,
+                Dir = vec2(-4,2)
+                break
+            case 7,
+                Dir = vec2(-4,1)
+                break
+            case 8,
+                Dir = vec2(-4,0)
+                break
+                
+            case 9,
+                Dir = vec2(-4,-1)
+                break
+            case 10,
+                Dir = vec2(-4,-2)
+                break
+            case 12,
+                Dir = vec2(-4,-4)
+                break
+                
+            case 14,
+                Dir = vec2(-2,-4)
+                break
+            case 15,
+                Dir = vec2(-1,-4)
+                break
+            case 16,
+                Dir = vec2(0,-4)
+                break
+            
+            default,
+                Dir = vec2(0,4)
+                break
+        }
+        Dir = vec2(Dir:x()*sign(Direction), Dir:y())
+        return Dir/4
+    }
+    
+    function number tp3ang(Dir){
+        local D = vec(tp3dir(Dir),0)
+        local Angle = -bearing(vec(),ang(),D)
+        return Angle
+    }
+    
+}
+
+if(fileClk()){
+    local Raw = fileRead()
+    RawLines = Raw:explode("\r\n")
+    LineCount = RawLines:count()
+    Index = 1
+    print(LineCount + " Entries.")
+    timer("checkduplicates",100)
+}elseif(clk("checkduplicates")){
+    local MyLine = RawLines[Index,string]
+    local IsDuplicate = 0
+    if(Index > 1){
+        for(N=1,Index-1){
+            if(MyLine==RawLines[N,string]){
+                IsDuplicate = 1
+                break
+            }
+        }
+    }
+    if(!IsDuplicate & (MyLine!="")){
+        local Components = MyLine:explode("\t")
+        UniqueLines:pushArray(Components)
+    }
+    Index++
+    if(Index>LineCount){
+        LineCount = UniqueLines:count()
+        Index = 1
+        print(LineCount + " Unique Pieces.")
+        timer("translate",100)
+    }else{
+        timer("checkduplicates",20)
+    }
+    
+}elseif(clk("translate")){
+    local Raw2 = UniqueLines[Index,array] #arcmdl, start, end
+    local MdlParts = Raw2[1,string]:explode("/") #arcs, radius, modelname
+    
+    local Modelname = MdlParts[5,string] #models/trakpak3_rsg/arcs/r3072/a0fw_8lt_left_0pg_+3072x-3072x0000_drp.mdl
+    
+    local Components = Modelname:explode("_") #a+startdir, enddir, left/right, grade, dimensions, drp+.mdl
+    
+    #Radius
+    local Radius = MdlParts[4,string]:replace("r",""):toNumber()
+    #print(MdlParts[4,string])
+    
+    #Start Dir
+    local RawStartDir = Components[1,string]
+    
+    local StartDir = RawStartDir:index(2):toNumber()
+    if(RawStartDir:right(2)=="rt"){StartDir = -StartDir}
+    
+    #End Dir
+    local RawEndDir = Components[2,string]
+    
+    local EndDir = RawEndDir:index(1):toNumber()
+    if(RawEndDir:right(2)=="rt"){EndDir = -EndDir}
+    
+    local Ortho = (StartDir%8==0) & (EndDir%8==0)
+    
+    #Skip L/R: 3
+    #Skip Grade: 4
+    #Dimensions
+    local RawDims = Components[5,string]:replace(".mdl",""):explode("x")
+    local Fwd = RawDims[1,string]:toNumber()
+    local Rgt = RawDims[2,string]:toNumber()
+    local Height = RawDims[3,string]:replace("up",""):replace("dn",""):toNumber()
+    local EndPos = vec2(Rgt,Fwd)
+    
+    #Segments, method stolen from quickplanner
+    local StartAng = tp3ang(StartDir)
+    local EndAng = tp3ang(EndDir)
+    local AngSweep = angnorm(EndAng-StartAng)
+    
+    local Segments = ceil(SegLimits[Radius,number]*abs(AngSweep)/90)
+    
+    #Blending
+    local BlendIn = vec2(0,0)
+    if(Raw2[2,string]=="N"){
+        BlendIn = vec2(!Ortho,min(4,!Ortho + floor(Segments/2 - 1)))
+    }
+    
+    local BlendOut = vec2(0,0)
+    if(Raw2[3,string]=="N"){
+        BlendOut = vec2(!Ortho,min(4,!Ortho + floor(Segments/2 - 1)))
+    }
+    
+    #Write to Von
+    local DTable = table()
+    DTable["Index",number] = 1
+    DTable["Type",string] = "banked_arc"
+    
+    DTable["StartPos",vector2] = vec2()
+    DTable["EndPos",vector2] = EndPos
+    DTable["StartDir",number] = StartDir
+    DTable["EndDir",number] = EndDir
+    DTable["Radius",number] = Radius
+    DTable["Height",number] = Height
+    DTable["Segments",number] = Segments
+    DTable["BlendIn",vector2] = BlendIn
+    DTable["BlendOut",vector2] = BlendOut
+    
+    local Descriptor = "//BANKED ARC, DIR "+DTable["StartDir",number]+" to "+DTable["EndDir",number]+", RADIUS "+DTable["Radius",number]+", HEIGHT "+DTable["Height",number]+", BLEND IN "+DTable["BlendIn",vector2]:toString()+" BLEND OUT "+DTable["BlendOut",vector2]:toString()
+    Compiles:pushString(Descriptor+"\n"+vonEncode(DTable)+"\n%END%\n")
+    
+    #print(EndPos,StartDir,EndDir,Radius,Height,Segments,BlendIn,BlendOut)
+    
+    Index++
+    if(Index > LineCount){ #I reused LineCount because I'm lazy
+        Index = 1
+        print("Finished Translating.")
+        timer("print",100)
+    }else{
+        timer("translate",20)
+    }
+    
+}elseif(clk("print")){
+    
+    WriteString += "//["+Index+"]\n" + Compiles[Index,string]
+    
+    Index++
+    if(Index > LineCount){
+    
+        fileWrite(OutputFile,WriteString)
+        print("Done! Wrote "+OutputFile)
+    }else{
+        timer("print",20)
+    }
+    
+}elseif(clk("finish")){
+    print(UniqueLines:count() + " Unique Lines.")
+}

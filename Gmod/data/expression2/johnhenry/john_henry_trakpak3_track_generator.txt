@@ -73,7 +73,7 @@
 #Options
 
 @persist SMDQC AutoVis AutoDraw AutoName Script:array ScriptLine RunningScript SuppressOutput DrawCheap AutoVMFName VMFName:string ForceSegmentType BufferWrite
-@persist AutoCompile AutoCompileID FinalCompileID
+@persist AutoCompile AutoCompileID FinalCompileID DoubleRailPrecision
 
 #Version Info
 
@@ -84,12 +84,16 @@
 
 if(first()){
     #Version Info - Don't Change This!
-    Version = "1.5"
+    Version = "1.6"
     
     #What track gauge are you developing for?
-    #include "johnhenry/gauges/standard"
+    #include "johnhenry/gauges/standard_bridge"
     
     SMDQC = 1 #Generate SMD and QC files instead of VMF files... Recommended.
+    
+    DoubleRailPrecision = 0 #If 1, rail vertices will snap to half-unit precision. This allows smoother curves. SMDQC must be 1 for this to work.
+    #If set, all models will have '_drp' appended to the file names. This setting is only recommended for arc/banked/bezier curves.
+	#Not tested extensively with switches! Use with caution.
     
     #End of Simple Launch Options
     
@@ -487,6 +491,10 @@ if(first()){
             Ballast_Edge = flipy(Ballast_Edge)
         }
         
+        #Implement DoubleRailPrecision
+        local PScale = 1
+        if(SMDQC & DoubleRailPrecision){PScale = 2}
+        
         #          K M      N L
         #          G I      J H
         #       E----------------F
@@ -499,14 +507,14 @@ if(first()){
         Out["D",vector] = round(Center + vec(Ballast_Corner,-OriginHeight))
         Out["E",vector] = round(Center + vec(-Ballast_Corner,-OriginHeight+BallastHeight))
         Out["F",vector] = round(Center + vec(Ballast_Corner,-OriginHeight+BallastHeight))
-        Out["G",vector] = round(Center + vec(-Rail_Outer,-OriginHeight+RailBottomHeight))
-        Out["H",vector] = round(Center + vec(Rail_Outer,-OriginHeight+RailBottomHeight))
-        Out["I",vector] = round(Center + vec(-Rail_Inner,-OriginHeight+RailBottomHeight))
-        Out["J",vector] = round(Center + vec(Rail_Inner,-OriginHeight+RailBottomHeight))
-        Out["K",vector] = round(Center + vec(-Rail_Outer,-OriginHeight+RailTopHeight))
-        Out["L",vector] = round(Center + vec(Rail_Outer,-OriginHeight+RailTopHeight))
-        Out["M",vector] = round(Center + vec(-Rail_Inner,-OriginHeight+RailTopHeight))
-        Out["N",vector] = round(Center + vec(Rail_Inner,-OriginHeight+RailTopHeight))
+        Out["G",vector] = round((Center + vec(-Rail_Outer,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["H",vector] = round((Center + vec(Rail_Outer,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["I",vector] = round((Center + vec(-Rail_Inner,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["J",vector] = round((Center + vec(Rail_Inner,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["K",vector] = round((Center + vec(-Rail_Outer,-OriginHeight+RailTopHeight))*PScale)/PScale
+        Out["L",vector] = round((Center + vec(Rail_Outer,-OriginHeight+RailTopHeight))*PScale)/PScale
+        Out["M",vector] = round((Center + vec(-Rail_Inner,-OriginHeight+RailTopHeight))*PScale)/PScale
+        Out["N",vector] = round((Center + vec(Rail_Inner,-OriginHeight+RailTopHeight))*PScale)/PScale
         
         return Out
     }
@@ -520,20 +528,24 @@ if(first()){
         local Ballast_Corner = (TrackFace_Ang0["ballast_corner",vector2]):rotate(Ang)
         local Ballast_Edge = (TrackFace_Ang0["ballast_edge",vector2]):rotate(Ang)
         
+        #Implement DoubleRailPrecision
+        local PScale = 1
+        if(SMDQC & DoubleRailPrecision){PScale = 2}
+        
         Out["A",vector] = round(Center + vec(-Ballast_Edge,-OriginHeight))
         Out["B",vector] = round(Center + vec(Ballast_Edge,-OriginHeight))
         Out["C",vector] = round(Center + vec(-Ballast_Corner,-OriginHeight))
         Out["D",vector] = round(Center + vec(Ballast_Corner,-OriginHeight))
         Out["E",vector] = round(Center + vec(-Ballast_Corner,-OriginHeight+BallastHeight))
         Out["F",vector] = round(Center + vec(Ballast_Corner,-OriginHeight+BallastHeight))
-        Out["G",vector] = round(Center + vec(-Rail_Outer,-OriginHeight+RailBottomHeight))
-        Out["H",vector] = round(Center + vec(Rail_Outer,-OriginHeight+RailBottomHeight))
-        Out["I",vector] = round(Center + vec(-Rail_Inner,-OriginHeight+RailBottomHeight))
-        Out["J",vector] = round(Center + vec(Rail_Inner,-OriginHeight+RailBottomHeight))
-        Out["K",vector] = round(Center + vec(-Rail_Outer,-OriginHeight+RailTopHeight))
-        Out["L",vector] = round(Center + vec(Rail_Outer,-OriginHeight+RailTopHeight))
-        Out["M",vector] = round(Center + vec(-Rail_Inner,-OriginHeight+RailTopHeight))
-        Out["N",vector] = round(Center + vec(Rail_Inner,-OriginHeight+RailTopHeight))
+        Out["G",vector] = round((Center + vec(-Rail_Outer,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["H",vector] = round((Center + vec(Rail_Outer,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["I",vector] = round((Center + vec(-Rail_Inner,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["J",vector] = round((Center + vec(Rail_Inner,-OriginHeight+RailBottomHeight))*PScale)/PScale
+        Out["K",vector] = round((Center + vec(-Rail_Outer,-OriginHeight+RailTopHeight))*PScale)/PScale
+        Out["L",vector] = round((Center + vec(Rail_Outer,-OriginHeight+RailTopHeight))*PScale)/PScale
+        Out["M",vector] = round((Center + vec(-Rail_Inner,-OriginHeight+RailTopHeight))*PScale)/PScale
+        Out["N",vector] = round((Center + vec(Rail_Inner,-OriginHeight+RailTopHeight))*PScale)/PScale
         #print(Out["A",vector])
         return Out
     }
@@ -6111,6 +6123,8 @@ if(clk("makebrush")){
                             }
                             NewName += DF+"x"+DL+"x"+DH
                             
+                            #Double Rail Precision
+                            if(SMDQC & DoubleRailPrecision){NewName += "_drp"}
                             
                             #Rename
                             timer(".rename "+TrackID+" "+NewName,50)
@@ -6352,6 +6366,9 @@ if(clk("makebrush")){
                                         }
                                         NewName += DF+"x"+DL+"x"+DH
                                         
+                                        #Double Rail Precision
+                                        if(SMDQC & DoubleRailPrecision){NewName += "_drp"}
+                                        
                                         #Rename
                                         timer(".rename "+TrackID+" "+NewName,50)
                                         
@@ -6540,6 +6557,9 @@ if(clk("makebrush")){
                                 DH += "dn"
                             }
                             NewName += DF+"x"+DL+"x"+DH
+                            
+                            #Double Rail Precision
+                            if(SMDQC & DoubleRailPrecision){NewName += "_drp"}
                             
                             #Rename
                             timer(".rename "+TrackID+" "+NewName,50)
@@ -7002,6 +7022,9 @@ if(clk("makebrush")){
                                     local DF = pad4s(((EndPDV-StartPDV):y())/Scale)
                                     local DL = pad4s(((EndPDV-StartPDV):x())/Scale)
                                     NewName += DF+"x"+DL
+                                    
+                                    #Double Rail Precision
+                                    if(SMDQC & DoubleRailPrecision){NewName += "_drp"}
                                     
                                     #Rename
                                     timer(".rename "+TrackID+" "+NewName,50)

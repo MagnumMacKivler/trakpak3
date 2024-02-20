@@ -273,8 +273,8 @@ if SERVER then
 				self:EnableMover()
 			elseif self.dumpstage==4 then --Creeping to stop
 				local angdist = math.NormalizeAngle(self.dumpangle - self:GetAngles().roll)
-				--self.speed = Trakpak3.Sign(angdist)*math.Clamp(math.abs(angdist)/self.acceleration, 1, self.creepspeed)
-				if math.abs(angdist) < 0.5 then --Close enough
+				self.speed = Trakpak3.Sign(angdist)*math.Clamp(10*math.abs(angdist)/self.acceleration, 0.5, self.creepspeed)
+				if math.abs(angdist) < 0.25 then --Close enough
 					self:DoStopSound()
 					self:DisableMover()
 					self.speed = 0
@@ -330,7 +330,7 @@ if SERVER then
 				self:EnableMover()
 			elseif self.dumpstage==9 then --Creeping to a stop
 				local angdist = math.NormalizeAngle(-self:GetAngles().roll)
-				--self.speed = Trakpak3.Sign(angdist)*math.Clamp(math.abs(angdist)/self.acceleration, 1, self.creepspeed)
+				self.speed = Trakpak3.Sign(angdist)*math.Clamp(10*math.abs(angdist)/self.acceleration, 0.5, self.creepspeed)
 				if math.abs(angdist) < 0.25 then --Close enough
 					self:DoStopSound()
 					self:DisableMover()

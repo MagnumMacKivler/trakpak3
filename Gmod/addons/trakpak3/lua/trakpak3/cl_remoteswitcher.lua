@@ -239,20 +239,22 @@ hook.Add("DrawOverlay","Trakpak3_RemoteSwitcher",function()
 		local fovdot = math.cos(math.rad(RemoteSwitcher.FOV))
 		--find which switch you're looking at
 		for k, stand in pairs(RemoteSwitcher.Stands) do
-			local disp = (stand:GetPos() - ep)
-			local dist = math.max(disp:Length(),1)
-			local lvec = disp:GetNormalized()
-			local viewdot = ev:Dot(lvec)
-			if not stand:IsDormant() and (viewdot>fovdot) and (dist<RemoteSwitcher.Distance) then --Only mark stands that you're looking at, and are actually being rendered.
-				
-				if (viewdot > maxdot) then
-					maxdot = viewdot
-					RemoteSwitcher.selected = stand
+			if stand and stand:IsValid() then
+				local disp = (stand:GetPos() - ep)
+				local dist = math.max(disp:Length(),1)
+				local lvec = disp:GetNormalized()
+				local viewdot = ev:Dot(lvec)
+				if not stand:IsDormant() and (viewdot>fovdot) and (dist<RemoteSwitcher.Distance) then --Only mark stands that you're looking at, and are actually being rendered.
+					
+					if (viewdot > maxdot) then
+						maxdot = viewdot
+						RemoteSwitcher.selected = stand
+					end
+					
+					table.insert(others,stand)
+					table.insert(distances,math.Clamp(dist,0,16384))
+					table.insert(indices,k)
 				end
-				
-				table.insert(others,stand)
-				table.insert(distances,math.Clamp(dist,0,16384))
-				table.insert(indices,k)
 			end
 		end
 		--print(RemoteSwitcher.selected)

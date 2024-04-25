@@ -172,7 +172,7 @@ if SERVER then
 
 	--Set local parameters
 	function ENT:SwitchSetup(behavior, autoscan)
-		print(self, " Performing Switch Setup!")
+		--print(self, " Performing Switch Setup!")
 		self.behavior = behavior
 		if self.slip then self.behavior = 0 end --Force slip switches to be dumb due to the complexity
 		self.autoscan = autoscan
@@ -586,6 +586,15 @@ if SERVER then
 			self:SetNWVector("frogpoint",nil)
 			--print("No Better Points")
 		end
+		
+		--[[
+		print(self:GetName()..", Position:",self:GetPos())
+		print("Auto Point: ", self.autopoint)
+		print("Frog Point: ", self.frogpoint)
+		print("Blade Point: ", self.bladepoint)
+		print("Ranger Point 1: ", self.rangerpoint1)
+		print("Ranger Point 2: ", self.rangerpoint2)
+		]]--
 	end
 
 	--Trigger Functions

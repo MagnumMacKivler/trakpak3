@@ -78,6 +78,9 @@ if SERVER then
 		}
 		
 		Trakpak3.SignText.UpdateSign(self, self.text_data_1, 1)
+		
+		--Disable Shadows
+		self:DrawShadow(false)
 	end
 	
 	function ENT:AcceptInput(iname, activator, caller, data)

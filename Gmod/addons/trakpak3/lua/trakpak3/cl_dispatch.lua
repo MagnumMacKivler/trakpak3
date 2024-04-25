@@ -2099,23 +2099,28 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 	end
 	
 	function element:Generate(pnl,nohelpers,selected,editor)
-		local button = vgui.Create("DImageButton",pnl)
-		self.button = button
-		button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
-		local px, py = pnl:GetPanelCoords(self.x, self.y)
-		button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+		local button
 		if editor then
-			if true then 
-				button:SetImage(self.header..self.icon0)
-				button:SetColor(Dispatch.StringToColor(self.color0))
-			else
-				--button:SetImage(self.header..self.icon1)
-				--button:SetColor(Dispatch.StringToColor(self.color1))
-			end
+			 
+			button = vgui.Create("DImageButton",pnl)
+			self.button = button
+			button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
+			local px, py = pnl:GetPanelCoords(self.x, self.y)
+			button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+			 
+			button:SetImage(self.header..self.icon0)
+			button:SetColor(Dispatch.StringToColor(self.color0))
+			
 		else
 			if self.proxy and (self.proxy!="") then
 				local proxy = Dispatch.RealData[self.proxy]
 				if proxy then
+					button = vgui.Create("DImageButton",pnl)
+					self.button = button
+					button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
+					local px, py = pnl:GetPanelCoords(self.x, self.y)
+					button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+					
 					local state = proxy.setstate
 					self.state = state
 					button:SetImage(self.header..self["icon"..state])
@@ -2138,7 +2143,17 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 					ErrorNoHalt("[Trakpak3] Dispatch Board Proxy name '"..self.proxy.."' does not match an existing entity.")
 				end
 			else
-				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Proxy with no proxy name.")
+				--ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Proxy with no proxy name.")
+				
+				--Generate static image instead
+				button = vgui.Create("DImage",pnl)
+				self.button = button
+				button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
+				local px, py = pnl:GetPanelCoords(self.x, self.y)
+				button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+				
+				button:SetImage(self.header..self.icon0)
+				button:SetImageColor(Dispatch.StringToColor(self.color0))
 			end
 			
 		end

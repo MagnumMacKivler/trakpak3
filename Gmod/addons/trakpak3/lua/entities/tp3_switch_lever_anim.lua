@@ -720,4 +720,8 @@ if CLIENT then
 		return name
 	end
 	
+	--Render signal sprites
+	function ENT:Draw(flags)
+		Trakpak3.SignalSprites.DrawSpriteSignal(self, flags)
+	end
 end

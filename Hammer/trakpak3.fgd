@@ -952,11 +952,19 @@
 		2 : "Inside"
 	]
 	
+	positioner_enabled(choices) : "Automatic Car Positioner" : 0 : "If enabled, the dumper will attempt to automatically center cars being fed into it. Can be turned on and off with inputs." =
+	[
+		0 : "Disabled"
+		1 : "Enabled"
+	]
+	
 	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	
 	gmod_allowtools(string) readonly : "Allow Tools" : "none" : "Disables the toolgun on this entity except for the tools listed here."
 	
 	input Dump(void) : "Begin the dump cycle."
+	input EnablePositioner(void) : "Enable the automatic car positioner."
+	input DisablePositioner(void) : "Disable the automatic car positioner."
 	output OnCarEmptied(void) : "Fired when a car is in the dumper and has been dumped."
 	output OnCycleFinished(void) : "Fired when the dumper has returned to its normal position."
 	

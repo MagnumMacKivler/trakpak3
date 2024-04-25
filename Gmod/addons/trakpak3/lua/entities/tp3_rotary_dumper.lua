@@ -8,6 +8,9 @@ ENT.Instructions = "Place in Hammer"
 
 if SERVER then
 	
+	local V2D = Vector(1,1,0)
+	local tick = engine.TickInterval()
+	
 	ENT.KeyValueMap = {
 		model = "string",
 		angles = "angle",
@@ -31,6 +34,8 @@ if SERVER then
 		motor_model = "string",
 		motor_f = "number",
 		motor_r = "number",
+		
+		positioner_enabled = "boolean",
 		
 		OnCarEmptied = "output",
 		OnCycleFinished = "output"
@@ -76,6 +81,7 @@ if SERVER then
 		self.mul_motorr = 12
 		if self.motor_f==2 then self.mul_motorf = -12 end
 		if self.motor_r==2 then self.mul_motorr = -12 end
+		
 		
 	end
 	
@@ -220,6 +226,11 @@ if SERVER then
 	function ENT:AcceptInput( inputname, activator, caller, data )
 		if (inputname=="Dump") then
 			self:StartDump()
+		elseif (inputname=="EnablePositioner") then
+			self.positioner_enabled = true
+		elseif (inputname=="DisablePositioner") then
+			self.positioner_enabled = false
+			self.positioning_ent = nil
 		end
 	end
 	
@@ -394,6 +405,7 @@ if SERVER then
 					self.clamp:SetPos(self:GetPos())
 					self.clamp:Spawn()
 					self.clamp:SetParent(self)
+					self.clamp:SetSkin(self.skin)
 					--self.clamp:SetAutomaticFrameAdvance(false)
 				end
 			end
@@ -416,6 +428,7 @@ if SERVER then
 						
 						self.motor1:SetAngles(a)
 						self.motor1:Spawn()
+						self.motor1:SetSkin(self.skin)
 						--self.motor1:PhysicsInitStatic(SOLID_VPHYSICS)
 						self.motor1:SetAutomaticFrameAdvance(true)
 					end
@@ -433,6 +446,7 @@ if SERVER then
 						
 						self.motor2:SetAngles(a)
 						self.motor2:Spawn()
+						self.motor2:SetSkin(self.skin)
 						--self.motor2:PhysicsInitStatic(SOLID_VPHYSICS)
 						self.motor2:SetAutomaticFrameAdvance(true)
 					end
@@ -440,6 +454,21 @@ if SERVER then
 				end
 				
 			end
+			
+			--Create Trigger Feeder for car positioner
+			if not self.triedtrigger then
+				self.triedtrigger = true
+				self.trigger = ents.Create("tp3_collision_feeder")
+				self.trigger:SetPos(self:GetPos())
+				self.trigger:SetAngles(self:GetAngles())
+				self.trigger:Spawn()
+				self.trigger.TouchRedirector = self
+				self.trigger:SetParent(self) 
+				
+				local abmins, abmaxs = self:WorldSpaceAABB()
+				self.trigger:PlaceCollision(abmins,abmaxs)
+			end
+			
 		end --End initpostentity
 		
 		--Control Gears
@@ -479,12 +508,58 @@ if SERVER then
 			if self.motor2 and self.motor2:IsValid() then self.motor2:SetPlaybackRate(mspeed/360) end
 		end
 		
-		
+		--Auto Positioner
+		if self.positioner_enabled and (self.dumpstage==0) and self.positioning_ent and self.positioning_ent:IsValid() then
+			local physobj = self.positioning_ent:GetPhysicsObject()
+			local disp = (self:GetPos() - self.positioning_ent:GetPos())*V2D
+			local vel = physobj:GetVelocity()
+			local dist2 = disp:LengthSqr()
+			local towards = (disp:Dot(vel)) > 0
+			
+			local distance = disp:Length()
+			local disp_n = disp/distance
+			local speedtowards = vel:Dot(disp_n)
+			
+			if vel:LengthSqr() < (200*200) then --If the car is moving at a reasonable pace:
+				if (dist2 < 16*16) then --Car is close to center
+					physobj:ApplyForceCenter((disp - vel)*0.5*physobj:GetMass()*tick*20)
+				elseif towards then --Car is moving towards the dumper center
+					local targetspeed = math.max(distance/4, 32) --The speed setpoint, will slow the car down to at or below this
+					
+					--Apply braking force
+					if speedtowards > targetspeed then
+						--local speed_err = speedtowards - targetspeed
+						physobj:ApplyForceCenter(-disp_n*physobj:GetMass()*tick*200)
+					end
+					
+				end
+			end
+			
+		end
 		
 		--Execute Think every tick for smooth movement
 		if self.clamp_target and self.clamp and self.clamp:IsValid() then self.clamp:SetCycle(self.clamp_cycle) end
 		self:NextThink(CurTime())
 		return true
+	end
+	
+	--Trigger mirroring functions
+	function ENT:StartTouch(ent)
+		if not (ent and ent:IsValid()) then return end
+		if self.positioner_enabled and not (self.positioning_ent and self.positioning_ent:IsValid()) and not Trakpak3.IsBlacklisted(ent) then --Positioning is enabled and there is no entity already being positioned, and it's not blacklisted
+			local root = Trakpak3.GetRoot(ent) --Get the root in case it's parented
+			self.positioning_ent = root
+			print("Dumper locked on to entity ",root)
+		end
+		
+		
+	end
+	
+	function ENT:EndTouch(ent)
+		if not (ent and ent:IsValid()) then return end
+		if ent==self.positioning_ent then
+			self.positioning_ent = nil
+		end
 	end
 	
 end

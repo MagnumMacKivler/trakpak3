@@ -66,6 +66,7 @@ Sprites[<model>] = {
 GetAspect is a function that is used to determine what aspect/"color" the signal is showing, based on its bodygroups, skins, and animation cycle.
 For most signals, aspects are colors like "red" "lunar" "fl_yellow" etc., as opposed to rules/indications like "Stop" "Restricting" "Advanced Approach" etc.
 The function should return an aspect name that is a key in Sprites[<model>] or return nil if the parameters given don't align with a valid aspect.
+The function can also return a table of aspects. Make sure to reuse tables in the individual files to avoid increased performance costs!
 The bodygroups argument is a numeric table of bodygroups starting with 1 (skipping 0, the reference mesh). An example would be {1, 0, 2}.
 The skin argument is an integer from 0 to 31.
 The cycle argument is a float from 0.0 to 1.0 representing the percent progress through the model's animation. Only useful for animated signals such as semaphores.
@@ -99,21 +100,20 @@ local maxsize = 6
 local mindist = 0
 local maxdist = 2048
 
---Sprite Render Function
-function Sprites.DrawSpriteSignal(ent, flags) --self
-	ent:DrawModel(flags)
-	local sprite_table = Trakpak3.SignalSprites[ent:GetModel()]
-	
-	local cvar = GetConVar("tp3_signalsprites")
-	
-	if cvar and cvar:GetBool() and sprite_table then --Sprites exist for this model!
-		local aspect = sprite_table.GetAspect(Trakpak3.GetBodygroups(ent), ent:GetSkin(), ent:GetCycle()) --Get the aspect the signal model is showing. Aspect here means literally what color/position the signal is showing, not which rule.
-		
+--Globals to Locals
+local isstring = isstring 
+local istable = istable
+local EyePos = EyePos
+local atable = {} --a table we will be reusing to feed into the following function:
+
+--Function to draw a list of aspects
+function RenderAspects(ent, sprite_table, aspect_list)
+	for _, aspect in ipairs(aspect_list) do
 		if aspect and sprite_table[aspect] then --This aspect is registered and therefore has sprites
 			render.SetMaterial(Trakpak3.SignalSprites.Materials.glow)
 			
 			if not ent.forward then ent.forward = ent:GetForward() end
-			if not ent.flexcolor then ent.flexcolor = Color(255,255,255) end
+			if not ent.flexcolor then ent.flexcolor = Color(255,255,255) end --This creates a new color, once per entity, on purpose, because it is reused later.
 			local disp = EyePos()-ent:GetPos()
 			local dist = disp:Length() --Yeah, it's a square root. Fight me
 			local fwd
@@ -170,6 +170,28 @@ function Sprites.DrawSpriteSignal(ent, flags) --self
 			end
 			
 		end
+	end
+end
+
+--Sprite Render Function
+function Sprites.DrawSpriteSignal(ent, flags) --self
+	ent:DrawModel(flags)
+	local sprite_table = Trakpak3.SignalSprites[ent:GetModel()]
+	
+	local cvar = GetConVar("tp3_signalsprites")
+	
+	if cvar and cvar:GetBool() and sprite_table then --Sprites exist for this model!
+		
+		local aspects_var = sprite_table.GetAspect(Trakpak3.GetBodygroups(ent), ent:GetSkin(), ent:GetCycle(), ent:GetSequenceName(ent:GetSequence())) --Get the aspect or list of aspects the signal model is showing. Aspect here means literally what color/position the signal is showing, not which rule.
+		
+		--aspects_var is either a single string or a table of strings.
+		if isstring(aspects_var) then
+			atable[1] = aspects_var
+			RenderAspects(ent, sprite_table, atable)
+		elseif istable(aspects_var) then --It's a table
+			RenderAspects(ent, sprite_table, aspects_var)
+		end
+		
 	end
 end
 

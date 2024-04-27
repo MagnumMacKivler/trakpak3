@@ -162,7 +162,9 @@ if SERVER then
 	
 	function ENT:BellStart()
 		if (self.bellmode > 0) and self.bellsound and (self.bellsound != "") then
-			self.bell = CreateSound(self,self.bellsound)
+			local filter = RecipientFilter()
+			filter:AddAllPlayers() --Sound plays even for those outside of PAS
+			self.bell = CreateSound(self,self.bellsound, filter)
 			self.bell:SetSoundLevel(80)
 			self.bell:Play()
 		end

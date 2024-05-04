@@ -289,11 +289,11 @@
 		1 : "Yes"
 	]
 	
-	nowire(choices) : "Disable Wiremod Input" : 0 : "If set, the bridge will ignore wiremod inputs." =
-	[
-		0 : "No"
-		1 : "Yes"
-	]
+	//nowire(choices) : "Disable Wiremod Input" : 0 : "If set, the bridge will ignore wiremod inputs." =
+	//[
+	//	0 : "No"
+	//	1 : "Yes"
+	//]
 	
 	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	

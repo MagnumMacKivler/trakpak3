@@ -232,6 +232,8 @@ Trakpak3.BlacklistClass("tp3_rotary_dumper")
 
 Trakpak3.BlacklistClass("prop_dynamic") --Primarily for use with moveable bridges.
 
+Trakpak3.BlacklistClass("gmod_wire_hologram") --Because apparently these can be solid sometimes. Lmao source go home you're drunk
+
 --Bodygroup Retrieval
 --Get the bodygroups as a simple list
 function Trakpak3.GetBodygroups(ent)

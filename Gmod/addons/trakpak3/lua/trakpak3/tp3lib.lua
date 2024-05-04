@@ -148,6 +148,7 @@ local function ApplyTrainTag(ent, tag, entlog)
 			ent.Trakpak3_TrainTag = tag --Apply Tag
 			if ent:GetClass()=="gmod_wire_tp3_cabsignal_box" then
 				WireLib.TriggerOutput(ent, "TrainTag", tag or "")
+				ent:SetNWString("Trakpak3_TrainTag",tag)
 			end
 			
 			--Constrained Entities

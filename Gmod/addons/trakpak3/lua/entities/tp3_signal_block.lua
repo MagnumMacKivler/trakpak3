@@ -155,6 +155,7 @@ if SERVER then
 	end
 	
 	function ENT:ReadTrainTag(ent) --Return Tag and Speed if applicable
+		if not self.RecordTrainTags then return nil, nil end -- self.RecordTrainTags is set in dispatch.lua, for all blocks on the dispatch board.
 		local tag
 		local speed
 		if ent and ent:IsValid() then

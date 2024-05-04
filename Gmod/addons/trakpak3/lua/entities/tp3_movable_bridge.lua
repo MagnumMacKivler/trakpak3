@@ -134,36 +134,7 @@ if SERVER then
 		
 		self.leafid = self:LookupAttachment("leaf1")
 		
-		--[[
-		for n=1,4 do
-			local dkey = "deck"..n
-			self:RegisterEntity(dkey,self[dkey])
-			local leafid = self:LookupAttachment("leaf"..n)
-			if leafid <=0 then leafid = self:LookupAttachment("leaf1") end
-			
-			if self[dkey.."_valid"] and (leafid>0) then 
-				--print(self[dkey.."_valid"])
-				self:SetNWInt("attachment"..n,leafid)
-				local att = self:GetAttachment(leafid)
-				local apos = att.Pos
-				local aang = att.Ang
-				
-				local ent = self[dkey.."_ent"]
-				
-				local v, a = WorldToLocal( ent:GetPos(), ent:GetAngles(), apos, aang )
-				self:SetNWString("deckmodel"..n,ent:GetModel())
-				self:SetNWVector("deckpos"..n,v)
-				self:SetNWAngle("deckang"..n,a)
-				self:SetNWInt("deckskin"..n,ent:GetSkin())
-				
-				ent:SetNoDraw(true)
-			elseif (leafid<1) then
-				ErrorNoHalt("[Trakpak3] Movable Bridge "..self.model.." with invalid attachment name (needs 'leaf1', 'leaf2', 'leaf3', or 'leaf4')!")
-			end
-		end
-		]]--
-		
-		--Wire I/O
+		--Wire I/O (Removed compatibility)
 		if WireLib then
 			if not self.nowire then
 				local names = {"Open", "Close", "TargetCycle", "Stop"}

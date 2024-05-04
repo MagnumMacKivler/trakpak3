@@ -246,8 +246,8 @@ if SERVER then
 		sentence = string.Replace(sentence, "%feet", DFormatNumber(math.ceil(self.trainlength/12))) --Length (ft)
 		sentence = string.Replace(sentence, "%meters", DFormatNumber(math.ceil(self.trainlength/39.37))) --Length (m)
 		
-		sentence = string.Replace(sentence, "%mph", DFormatNumber(math.Round(self.trainspeed/17.6,1))) --Speed (MPH)
-		sentence = string.Replace(sentence, "%kph", DFormatNumber(math.Round(self.trainspeed/10.94,1))) --Speed (KPH)
+		sentence = string.Replace(sentence, "%mph", DFormatNumber(math.Round(self.trainspeed/17.6))) --Speed (MPH)
+		sentence = string.Replace(sentence, "%kph", DFormatNumber(math.Round(self.trainspeed/10.94))) --Speed (KPH)
 		
 		sentence = string.Replace(sentence, "%temp", DFormatNumber(self.temp)) --Temperature
 		
@@ -270,7 +270,6 @@ if SERVER then
 			local DistToLine = DispToStart:Cross(self.norm_c):Length()
 			
 			if DistToLine < 64 then
-			
 			
 				local phys = activator:GetPhysicsObject()
 				local velv = phys:GetVelocity()

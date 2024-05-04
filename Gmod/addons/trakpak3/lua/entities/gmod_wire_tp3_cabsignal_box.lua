@@ -8,18 +8,6 @@ ENT.Purpose = "Receiver for Cab Signal and ATS indications"
 ENT.Instructions = "Spawn with the tool and use wiremod"
 ENT.RenderGroup = RENDERGROUP_BOTH
 
-if CLIENT then
-	function ENT:Draw()
-		if not WireLib then return end
-		self:DoNormalDraw(true,false)
-		if LocalPlayer():GetEyeTrace().Entity == self and EyePos():Distance( self:GetPos() ) < 512 then
-			self:DrawEntityOutline()
-			
-		end
-		Wire_Render(self)
-	end
-end
-
 if SERVER then
 	
 	--This function is called on creation?
@@ -127,7 +115,7 @@ if SERVER then
 				local creator = self:CPPIGetOwner()
 				if creator and creator:IsValid() then
 					local name = creator:GetName()
-					self.Trakpak3_TrainTag = name
+					Trakpak3.ApplyTrainTag(self,name)
 				end
 			end
 		end)
@@ -140,19 +128,16 @@ if SERVER then
 	--Player pressed E on it
 	function ENT:Use(ply)
 		if ply:IsPlayer() then
-			local mytag = self.Trakpak3_TrainTag or ""
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
-				net.WriteUInt(self:EntIndex(),16)
-				net.WriteString(mytag)
+				net.WriteEntity(self)
 			net.Send(ply)
 		end
 	end
 	
 	--Player Entered a New Train Tag
 	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
-		local id = net.ReadUInt(16)
-		local ent = Entity(id)
+		local ent = net.ReadEntity()
 		local newtag = net.ReadString()
 		
 		if newtag=="" then newtag = nil end
@@ -408,12 +393,24 @@ if SERVER then
 end
 
 if CLIENT then
-	--User pressed E to enter a Train Tag
-	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
-		
-		local id = net.ReadUInt(16)
-		local mytag = net.ReadString()
-		
+	local LP = LocalPlayer
+	
+	
+	--Wire Entity Draw Functions
+	function ENT:Draw()
+		if not WireLib then return end
+		self:DoNormalDraw(true,false)
+		if LocalPlayer():GetEyeTrace().Entity == self and EyePos():Distance( self:GetPos() ) < 512 then
+			self:DrawEntityOutline()
+			
+		end
+		Wire_Render(self)
+	end
+	
+	--Open Train Tag Dialog
+	function ENT:OpenTrainTagDialog()
+		local e = self
+	
 		local frame = vgui.Create("DFrame")
 		local sx = 256
 		local sy = 144
@@ -429,6 +426,9 @@ if CLIENT then
 		label:SetWrap(true)
 		label:Dock(TOP)
 		
+		--Get current Train Tag from NWString
+		local mytag = self:GetNWString("Trakpak3_TrainTag")
+		
 		local text = vgui.Create("DTextEntry",frame)
 		text:SetSize(1,24)
 		text:SetValue(mytag or "")
@@ -436,17 +436,17 @@ if CLIENT then
 		function text:OnEnter(value)
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
-				net.WriteUInt(id,16)
+				net.WriteEntity(e)
 				local newtag = value or ""
 				net.WriteString(newtag)
 			net.SendToServer()
 			frame:Close()
 			if newtag!="" then
 				chat.AddText("[Trakpak3 Cab Signal Box] Set Train Tag to '"..newtag.."'.")
-				LocalPlayer():EmitSound("ambient/machines/keyboard_fast1_1second.wav")
+				surface.PlaySound("ambient/machines/keyboard_fast1_1second.wav")
 			else
 				chat.AddText("[Trakpak3 Cab Signal Box] Cleared Train Tag.")
-				LocalPlayer():EmitSound("ambient/machines/keyboard7_clicks_enter.wav")
+				surface.PlaySound("ambient/machines/keyboard7_clicks_enter.wav")
 			end
 			
 		end
@@ -459,17 +459,17 @@ if CLIENT then
 		function button:DoClick()
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
-				net.WriteUInt(id,16)
+				net.WriteEntity(e)
 				local newtag = text:GetValue() or ""
 				net.WriteString(newtag)
 			net.SendToServer()
 			frame:Close()
 			if newtag!="" then
 				chat.AddText("[Trakpak3 Cab Signal Box] Set Train Tag to '"..newtag.."'.")
-				LocalPlayer():EmitSound("ambient/machines/keyboard_fast1_1second.wav")
+				surface.PlaySound("ambient/machines/keyboard_fast1_1second.wav")
 			else
 				chat.AddText("[Trakpak3 Cab Signal Box] Cleared Train Tag.")
-				LocalPlayer():EmitSound("ambient/machines/keyboard7_clicks_enter.wav")
+				surface.PlaySound("ambient/machines/keyboard7_clicks_enter.wav")
 			end
 			
 		end
@@ -482,14 +482,22 @@ if CLIENT then
 		function button:DoClick()
 			net.Start("trakpak3")
 				net.WriteString("trakpak3_traintagdialog")
-				net.WriteUInt(id,16)
+				net.WriteEntity(e)
 				net.WriteString("")
 			net.SendToServer()
 			frame:Close()
 			chat.AddText("[Trakpak3 Cab Signal Box] Cleared Train Tag.")
-			LocalPlayer():EmitSound("ambient/machines/keyboard7_clicks_enter.wav")
+			surface.PlaySound("ambient/machines/keyboard7_clicks_enter.wav")
 		end
 	--end)
+	end
+	
+	--User pressed E to enter a Train Tag
+	Trakpak3.Net.trakpak3_traintagdialog = function(len,ply)
+		local ent = net.ReadEntity()
+		if ent and ent:IsValid() then
+			ent:OpenTrainTagDialog()
+		end
 	end
 	
 	--Defect Detector Queue - called from cl_defect_detector.lua
@@ -556,9 +564,19 @@ if CLIENT then
 		end
 	end
 	
-	
+	local clicking = false
 	
 	function ENT:Think()
+		--"Allow Buttons" Interaction, apparently the default wire Allow buttons functionality already works with it
+		--[[
+		if(LP():InVehicle() and (LP():GetPos():DistToSqr(self:EyePos()) < 96*96) ) and LP():KeyDown(IN_ATTACK) and LP():GetEyeTrace().Entity==self and not clicking then
+			clicking = true
+			--self:OpenTrainTagDialog()
+			--print("Bepis")
+		elseif clicking and not LP():KeyDown(IN_ATTACK) then
+			clicking = false
+		end
+		]]--
 		
 		--Play Defect Detector Sounds
 		if self:GetNWBool("enabled") then

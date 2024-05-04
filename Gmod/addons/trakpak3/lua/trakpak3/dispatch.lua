@@ -49,6 +49,18 @@ local function tryDispatch()
 				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { setstate = state, pos = ent:GetPos() } end
 			end
 			
+			--Sift through the dispatch data and enable train tag recording for all blocks on the dispatch board
+			for _, page in pairs(ftable) do --For each page:
+				if page.elements then
+					for __, element in pairs(page.elements) do --For each element in the page:
+						if element.type=="block" and element.block and element.block!="" then --If it's a valid block with a valid value
+							local block, valid = Trakpak3.FindByTargetname(element.block)
+							if valid then block.RecordTrainTags = true end
+						end
+					end
+				end
+			end
+			
 			Trakpak3.Dispatch.Loaded = true
 		else
 			--MsgC(Trakpak3.Magenta,"Could not convert JSON to Table correctly!")

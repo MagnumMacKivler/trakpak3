@@ -300,6 +300,7 @@ if SERVER then
 						self.scanid = 0 --will be reset to 1 at the end
 						self.hitsomething = true
 						self:HandleNewState(true, true, Trakpak3.GetRoot(tr.Entity))
+						self.HitEntity = tr.Entity
 					end
 				else
 					self.run = false
@@ -314,6 +315,7 @@ if SERVER then
 				if not self.hitsomething then self:HandleNewState(false, true) end
 				self.scanid = 1
 				self.hitsomething = false
+				self.HitEntity = nil
 			end
 		end
 		--Set up next think

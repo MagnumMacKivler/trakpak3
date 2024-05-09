@@ -151,7 +151,7 @@ if SERVER then
 		end
 		
 		--Auto-play animation
-		timer.Simple(1,function() self:ResetSequence("range") end)
+		--timer.Simple(1,function() self:ResetSequence("range") end)
 	end
 	
 	function ENT:TT_Driver()
@@ -484,6 +484,7 @@ if SERVER then
 			end
 			
 			self.cycle = self.cycle + self.speed*engine.TickInterval()
+			if (self.cycle > 0) and (self:GetSequenceName(self:GetSequence())=="idle") then self:ResetSequence("range") end
 			
 			if self.targetcycle then --Automatic
 				if (self.direction>0) and (self.cycle >= self.targetcycle) then
@@ -514,6 +515,7 @@ if SERVER then
 					if atmin then
 						self:TriggerOutput("OnFullyClosed",self)
 						--print("Bridge Fully Closed!")
+						self:ResetSequence("idle")
 					end
 					
 				end
@@ -535,6 +537,7 @@ if SERVER then
 					self:AnalyzeDirection(false)
 					self:TriggerOutput("OnFullyClosed",self)
 					self:TriggerOutput("OnBridgeStopped",self,"0")
+					self:ResetSequence("idle")
 					if WireLib then WireLib.TriggerOutput(self,"FullyClosed",1) end
 				end
 			end
@@ -553,6 +556,21 @@ if SERVER then
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
+	
+	--General open/close functions
+	function ENT:Open()
+		if ((self.cycle > 0) or not self.locked) then
+			self.targetcycle = 1
+			self:AnalyzeDirection(true)
+		end
+	end
+	
+	function ENT:Close()
+		if (self.cycle>0) then
+			self.targetcycle = 0
+			self:AnalyzeDirection(true)
+		end
+	end
 	
 	--Hammer Input Handler
 	function ENT:AcceptInput( iname, activator, caller, data )

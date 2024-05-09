@@ -100,6 +100,68 @@ end
 
 --Trakpak3.GetBodygroups is located in trakpak3/shared.lua
 
+local st = SysTime
+--More efficient versions of Trakpak3.ZZDistance, designed to minimize the calculation of square roots
+local max = math.max
+
+function Trakpak3.BlockDistance(block_ent, sample)
+	--local st1 = st()
+	if not ( block_ent and block_ent:IsValid() ) then return end
+	if not ( block_ent.nodes and block_ent.skips) then return end
+	if not ( Trakpak3.NodeList ) then return end
+	
+	if not block_ent.seglengths then block_ent.seglengths = {} end
+	
+	local cum_length = 0
+	
+	for seg = 1, #block_ent.nodes - 1 do --For each segment in the block...
+		if not block_ent.skips[seg] then --If it's not a skipped node...
+			
+			--Get start and end points of the scan
+			local startpos = Trakpak3.NodeList[block_ent.nodes[seg]]
+			local endpos = Trakpak3.NodeList[block_ent.nodes[seg + 1]]
+			
+			if startpos and endpos then --Both are valid positions
+				local baseline = endpos - startpos
+				local blength = block_ent.seglengths[seg] --use saved value for length, or calculate it once and save it.
+				if not blength then
+					blength = baseline:Length()
+					block_ent.seglengths[seg] = blength
+				end
+				
+				local bnormal = baseline/blength
+				
+				--Project onto the base line segment to get the distance along the segment
+				local sampline = sample - startpos
+				local progress = sampline:Dot(bnormal)
+				
+				if (progress > blength) then --Point is beyond the end of the line; add the block's cum_length and move onto the next segment
+					cum_length = cum_length + blength
+				else --Point is before the end of the line (or behind it); check distance from line.
+				
+					--Get squared distance from line
+					local samplength2 = sampline:LengthSqr()
+					local dist2 = samplength2 - (progress*progress) --B^2 = C^2 - A^2
+					
+					local tolerance = (block_ent.hull_lw or 96)*4
+					if dist2 < (tolerance*tolerance) then --It's close enough to the line
+						cum_length = cum_length + max(progress, 0) --clipping progress to 0 prevents negative distances from being added as a train rolls by the start of the block
+						break
+					else --It's too far away from the line, may be a false positive. Try the next segment
+						cum_length = cum_length + blength
+					end
+					
+				end
+				
+			end --else add 0
+			
+		end --else add 0
+	end
+	--print(string.format("%.12f", st()-st1)) --Performance Benchmarking
+	return cum_length
+end
+
+--[[
 --Projects a point onto a line segment
 function Trakpak3.LineProject(startpos, endpos, sample)
 	local baseline = endpos-startpos
@@ -120,6 +182,7 @@ end
 
 --Calculate "Zig Zag Distance"... A rough approximation of how far a sample point is along a multi-point path. This is used to calculate the distance from the start of a block to the entity triggering it, for crossings. It uses square roots (Trakpak3.LineProject()) so it's expensive, but should only be run while a train is approaching a crossing.
 function Trakpak3.ZZDistance(points, sample, tolerance)
+	local st1 = st()
 	local cum_length = 0 --cum is short for cumulative you pervert
 	for seg = 1, #points - 1 do
 		--get start and end points
@@ -134,10 +197,10 @@ function Trakpak3.ZZDistance(points, sample, tolerance)
 			cum_length = cum_length + seglength
 		end
 	end
-	
+	print(string.format("%.12f", st()-st1)) --Performance Benchmarking
 	return cum_length
 end
-
+]]--
 --Apply Train Tag. Don't use this function, use Trakpak3.ApplyTrainTag.
 local function ApplyTrainTag(ent, tag, entlog)
 	if ent and ent:IsValid() then

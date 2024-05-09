@@ -8,16 +8,24 @@ Dispatch.Panels = {} --List of Derma Elements that need to be remembered
 Dispatch.showgrid = true
 Dispatch.selectnew = true
 Dispatch.RealData = {}
+Dispatch.LocalNotes = {} --Local notes for each train tag
 
 local black = Color(0,0,0)
 local dark = Color(31,31,31)
 local gray = Color(127,127,127)
 local darkgray = Color(63,63,63)
+local lightgray = Color(191,191,191)
 local color_sel = Color(255,255,191)
 local cursor1 = Color(0,255,0)
 local cursor2 = Color(255,255,0)
 local color_block = Color(127,63,0)
 local color_block2 = Color(255,95,0)
+
+local white = Color(255,255,255)
+local yellow = Color(255,255,127)
+local red = Color(255,0,0)
+local green = Color(0,255,0)
+local blue = Color(0,127,255)
 
 Dispatch.elementsize = 20
 
@@ -1811,7 +1819,9 @@ function Dispatch.AddBlock(ent, x, y, block)
 				button:SetImage("trakpak3_common/icons/block_clear.png")
 			end
 		else
-			if self.block and (self.block!="") then
+			local sb = self.block
+			if sb and (sb!="") then
+				
 				local block = Dispatch.RealData[self.block]
 				if block then
 					self.occupied = block.occupied==1
@@ -1842,8 +1852,11 @@ function Dispatch.AddBlock(ent, x, y, block)
 							local metric = cvar:GetBool()
 							local units = " MPH"
 							if metric then units = " km/h" end
-							draw.SimpleTextOutlined(e.tag..", "..e.speed..units, "tp3_dispatch_1", w/2, -h/2, Color(255,255,255),TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0))
-							--draw.SimpleTextOutlined(e.tag, "tp3_dispatch_1", 16,16, Color(255,255,255),TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0))
+							draw.SimpleTextOutlined(e.tag..", "..e.speed..units, "tp3_dispatch_1", w/2, -h/2, white ,TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+							local note = Dispatch.LocalNotes[e.tag]
+							if note and note!="" then
+								draw.SimpleTextOutlined(Dispatch.LocalNotes[e.tag],"tp3_dispatch_1",w/2,h*1.5, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+							end
 						end
 					end
 					
@@ -1859,10 +1872,14 @@ function Dispatch.AddBlock(ent, x, y, block)
 					
 					--Teleport to object on right click
 					function button:DoRightClick()
-						local pos = block.pos
-						if pos then
-							Dispatch.Teleport(pos)
-						end
+
+						Dispatch.Teleport(sb)
+
+					end
+					
+					--Open Note Editor
+					function button:DoClick()
+						if e.occupied and e.tag then Dispatch.EditNote(e.tag) end
 					end
 					
 				else
@@ -3415,21 +3432,86 @@ Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 	end
 end
 
+--Dispatcher Note Editor
+function Dispatch.EditNote(traintag)
+	if not Dispatch.LocalNotes then Dispatch.LocalNotes = {} end
+	local mynote = Dispatch.LocalNotes[traintag]
 
---Teleport Player to Position
-function Dispatch.Teleport(pos)
+	local frame = vgui.Create("DFrame")
+	local x, y = 256, 192
+	
+	frame:SetSize(x,y)
+	frame:SetPos(ScrW()/2 - x/2, ScrH()/2 - y/2)
+	frame:SetTitle("Edit Dispatcher Note")
+	frame:SetIcon("icon16/note_edit.png")
+	frame:SetSizable(false)
+	frame:MakePopup()
+	
+	local pnl = vgui.Create("DPanel",frame)
+	pnl:Dock(FILL)
+	
+	local label = vgui.Create("DLabel",pnl)
+	label:SetSize(1,56)
+	label:Dock(TOP)
+	label:DockMargin(4,4,4,4)
+	label:SetContentAlignment(5)
+	label:SetTextColor(black)
+	label:SetWrap(true)
+	label:SetText("Enter text below to add a note to the selected Train Tag. This tag will only be visible to you. Great for keeping track of destinations or who is driving!")
+	
+	local panel2 = vgui.Create("DPanel",pnl)
+	panel2:SetSize(1,24)
+	panel2:Dock(TOP)
+	panel2:DockMargin(4,4,4,4)
+	panel2:SetBackgroundColor(lightgray)
+	
+	local label = vgui.Create("DLabel",panel2)
+	label:Dock(FILL)
+	label:DockMargin(4,4,4,4)
+	label:SetContentAlignment(4)
+	label:SetTextColor(black)
+	label:SetText(traintag)
+	
+	local text = vgui.Create("DTextEntry",pnl)
+	text:SetSize(1,24)
+	text:Dock(TOP)
+	text:DockMargin(4,4,4,4)
+	text:SetUpdateOnType(true)
+	text:SetValue(mynote or "")
+	function text:OnGetFocus() self:SelectAll() end
+	function text:OnValueChange(val)
+		if val=="" then val = nil end
+		Dispatch.LocalNotes[traintag] = val
+	end
+	
+	local button = vgui.Create("DButton",pnl)
+	button:Dock(FILL)
+	button:DockMargin(64,4,64,4)
+	button:SetText("OK")
+	function button:DoClick() frame:Close() end
+	
+end
+
+--Teleport Player to Position or other functions as needed
+function Dispatch.Teleport(target)
 	if LocalPlayer():InVehicle() then
-		chat.AddText("[Trakpak3 Dispatch Board] Cannot teleport you becuase you are in a vehicle!")
+		chat.AddText("[Trakpak3 Dispatch Board] Cannot teleport you because you are in a vehicle!")
 		LocalPlayer():EmitSound("buttons/combine_button_locked.wav")
 	else
 		--net.Start("tp3_dispatch_teleport")
 		net.Start("trakpak3")
 		net.WriteString("tp3_dispatch_teleport")
-		net.WriteVector(pos)
+		if type(target)=="Vector" then
+			net.WriteBool(false)
+			net.WriteVector(target)
+		elseif type(target)=="string" then
+			net.WriteBool(true)
+			net.WriteString(target)
+		end
 		net.SendToServer()
 		local disp = Dispatch.Panels.dispatcher
 		if disp and disp:IsValid() then disp:Close() end
-		LocalPlayer():EmitSound("garrysmod/balloon_pop_cute.wav")
+		surface.PlaySound("garrysmod/balloon_pop_cute.wav")
 	end
 end
 							
@@ -3767,11 +3849,7 @@ local function autocomplete2(cmd, args)
 end
 concommand.Add("tp3_dispatch_resetswitches", setswitches, autocomplete2, "Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
 
-local white = Color(255,255,255)
-local yellow = Color(255,255,127)
-local red = Color(255,0,0)
-local green = Color(0,255,0)
-local blue = Color(0,127,255)
+
 
 
 --Notify all players of admin commands

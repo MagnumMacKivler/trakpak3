@@ -130,7 +130,22 @@ end
 
 --Teleport Player to Element
 Trakpak3.Net.tp3_dispatch_teleport = function(len,ply)
-	local pos = net.ReadVector()
+	local isname = net.ReadBool()
+	local pos
+	if isname then --String targetname
+		local ent, valid = Trakpak3.FindByTargetname(net.ReadString())
+		if valid then
+			if ent:GetClass()=="tp3_signal_block" then
+				if ent.occupied and ent.HitEntity and ent.HitEntity:IsValid() then
+					pos = ent.HitEntity:GetPos()
+				else
+					pos = ent:GetPos()
+				end
+			end
+		end
+	else --Vector Target
+		pos = net.ReadVector()
+	end
 	ply:SetPos(pos + Vector(0,0,64))
 	if ply:GetMoveType()==MOVETYPE_WALK then
 		--ply:ConCommand("noclip")

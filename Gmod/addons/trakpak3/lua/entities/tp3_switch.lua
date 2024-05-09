@@ -223,7 +223,7 @@ if SERVER then
 	
 	--Do a one-time scan when a switch stand is attempting to throw this switch; block it if there's something on it. True for Occupied, False for Empty.
 	function ENT:QuickOccupancyCheck()
-		if not self.rangerpoint1 and self.rangerpoint2 then return false end
+		if not (self.rangerpoint1 and self.rangerpoint2) then return false end
 		
 		local trace = {
 			start = self.rangerpoint1,

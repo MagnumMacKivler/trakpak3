@@ -112,13 +112,12 @@ if SERVER then
 	end
 	
 	function ENT:GetBlockDistance(block_ent, targetpos)
-		local nodepositions = {}
-		for seq, node in pairs(block_ent.nodes) do
-			nodepositions[seq] = Trakpak3.NodeList[node]
-		end
 
-		return Trakpak3.ZZDistance(nodepositions, targetpos, 96)
+
+		return Trakpak3.BlockDistance(block_ent, targetpos)
 	end
+	
+	local SysTime = SysTime
 	
 	function ENT:Think()
 		if self.tracks then

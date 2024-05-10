@@ -424,6 +424,7 @@ if SERVER then
 							self.speed = 0
 							self.forcestop = false
 							self:DoStopSound()
+							self:UpdateClientCycle(self.cycle)
 							self.movementq = false
 							self:TriggerOutput("OnBridgeStopped",self,tostring(self.cycle))
 						end
@@ -433,6 +434,7 @@ if SERVER then
 							self.speed = 0
 							self.forcestop = false
 							self:DoStopSound()
+							self:UpdateClientCycle(self.cycle)
 							self.movementq = false
 							self:TriggerOutput("OnBridgeStopped",self,tostring(self.cycle))
 						end
@@ -494,6 +496,7 @@ if SERVER then
 					local atmax = self.cycle==self.maxcycle
 					--print(self.cycle, self.maxcycle)
 					self:DoStopSound(atmax)
+					self:UpdateClientCycle(self.cycle)
 					self.movementq = false
 					self:AnalyzeDirection(false)
 					self:TriggerOutput("OnBridgeStopped",self,tostring(self.cycle))
@@ -509,13 +512,13 @@ if SERVER then
 					local atmin = self.cycle==0
 					--print(self.cycle, 0)
 					self:DoStopSound(atmin)
+					self:UpdateClientCycle(self.cycle)
 					self.movementq = false
 					self:AnalyzeDirection(false)
 					self:TriggerOutput("OnBridgeStopped",self,tostring(self.cycle))
 					if atmin then
 						self:TriggerOutput("OnFullyClosed",self)
 						--print("Bridge Fully Closed!")
-						self:ResetSequence("idle")
 					end
 					
 				end
@@ -525,6 +528,7 @@ if SERVER then
 					self.speed = 0
 					self.cycle = self.maxcycle
 					self:DoStopSound(true)
+					self:UpdateClientCycle(self.cycle)
 					self.movementq = false
 					self:AnalyzeDirection(false)
 					self:TriggerOutput("OnFullyOpen",self)
@@ -533,6 +537,7 @@ if SERVER then
 					self.speed = 0
 					self.cycle = 0
 					self:DoStopSound(true)
+					self:UpdateClientCycle(self.cycle)
 					self.movementq = false
 					self:AnalyzeDirection(false)
 					self:TriggerOutput("OnFullyClosed",self)
@@ -552,6 +557,14 @@ if SERVER then
 		--do the gofast
 		self:NextThink(CurTime())
 		return true
+	end
+	
+	--Update clients to prevent animation cycle desync
+	function ENT:UpdateClientCycle(cycle)
+		Trakpak3.NetStart("tp3_bridge_sync")
+			net.WriteEntity(self)
+			net.WriteFloat(cycle)
+		net.Broadcast()
 	end
 	
 	--Disable Physgun
@@ -668,6 +681,14 @@ if CLIENT then
 		local message = "Movable Bridge Controls:\n"..open.." - Open Bridge\n"..close.." - Close Bridge"
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
+	end
+	
+	--Receive cycle sync from server
+	Trakpak3.Net.tp3_bridge_sync = function(len,ply)
+		local ent = net.ReadEntity()
+		if ent and ent:IsValid() and not ent:IsDormant() then
+			ent:SetCycle(net.ReadFloat())
+		end
 	end
 	
 	--[[

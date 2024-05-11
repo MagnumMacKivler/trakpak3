@@ -687,7 +687,9 @@ if CLIENT then
 	Trakpak3.Net.tp3_bridge_sync = function(len,ply)
 		local ent = net.ReadEntity()
 		if ent and ent:IsValid() and not ent:IsDormant() then
-			ent:SetCycle(net.ReadFloat())
+			local cycle = net.ReadFloat()
+			ent:SetCycle(cycle)
+			timer.Simple(0.2,function() ent:SetCycle(cycle) end)
 		end
 	end
 	

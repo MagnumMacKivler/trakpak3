@@ -22,8 +22,8 @@ local function load_path_configs()
 			
 			PathConfig.Signals = ftable
 			for signame, paths in pairs(PathConfig.Signals) do --For each signal that has paths
-				PathConfig.ProcessLogic(signame)
-				PathConfig.EvaluateLogic(signame)
+				PathConfig.ProcessLogic(signame, paths)
+				--PathConfig.EvaluateLogic(signame, paths)
 			end
 			
 		end
@@ -33,8 +33,7 @@ end
 hook.Add("InitPostEntity","TP3_PathLoad",load_path_configs) 
 hook.Add("PostCleanupMap","TP3_PathLoad", load_path_configs)
 
-function PathConfig.ProcessLogic(signame) --Set Up Signal with Path Info
-	local paths = PathConfig.Signals[signame]
+function PathConfig.ProcessLogic(signame, paths) --Set Up Signal with Path Info
 	local signal, valid = Trakpak3.FindByTargetname(signame)
 	--print(signal, valid)
 	if not valid then return end
@@ -46,11 +45,12 @@ function PathConfig.ProcessLogic(signame) --Set Up Signal with Path Info
 		
 	end
 	
+	PathConfig.EvaluateLogic(signame, paths)
+	
 	signal:SetCTCState() --Force the signal to apply interlocks if applicable
 end
 
-function PathConfig.EvaluateLogic(signame) --Evaluate the path state for a specific signal
-	local paths = PathConfig.Signals[signame]
+function PathConfig.EvaluateLogic(signame, paths) --Evaluate the path state for a specific signal
 	local signal, valid = Trakpak3.FindByTargetname(signame)
 	if not valid then return end
 	
@@ -63,29 +63,11 @@ function PathConfig.EvaluateLogic(signame) --Evaluate the path state for a speci
 			local sw, valid = Trakpak3.FindByTargetname(ssname)
 			if (not valid) or sw.animating or (sw.state != reqstate) then
 				condition = false
-				if not valid then ErrorNoHalt("[Trakpak3] Error, Signal '"..signame.."' with path '"..pindex.."' has invalid switch stand '"..ssname.."'!") end
+				if not valid then ErrorNoHalt("[Trakpak3] Error, Signal '"..signame.."' with path '"..pindex.."' has invalid switch stand '"..ssname.."'!\n") end
 				break
 			end
 		end
-		
-		--print(signame, pindex, condition, path.currentstate)
-		
-		--[[
-		if condition then --This path is true
-			--found = true --Found any path: true
-			if not path.currentstate then
-				path.currentstate = true
-				signal:SetPathState(pindex,true)
-			end
-			--Do Stuff to set this path state true
-		else --This path is false
-			if path.currentstate or (path.currentstate==nil) then --true or nil
-				path.currentstate = false
-				signal:SetPathState(pindex,false)
-			end
-		end
-		]]--
-		
+
 		signal:SetPathState(pindex,condition)
 		
 	end
@@ -95,7 +77,7 @@ end
 hook.Add("TP3_SwitchUpdate","Trakpak3_PathConfig_Update",function(ssname, switchstate, broken)
 	if PathConfig.Signals then
 		for signame, paths in pairs(PathConfig.Signals) do --For each signal:
-			PathConfig.EvaluateLogic(signame)
+			PathConfig.EvaluateLogic(signame, paths)
 		end
 	end
 	

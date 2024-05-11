@@ -180,7 +180,7 @@ if SERVER then
 		if not self.xing_valid then return end
 		
 		if not self.working then
-			if self.trigger and not self.triggered then --Begin crossing sequence
+			if self.xing_ent.TriggerGates and not self.triggered then --Begin crossing sequence
 				self.triggered = true
 				
 				self:LightsOn() --Lights
@@ -189,7 +189,7 @@ if SERVER then
 				
 				timer.Simple((self.warning or 0) + self.randomoffset, function() self:GateClose() end) --Gate
 				
-			elseif not self.trigger and self.triggered then --Release crossing sequence
+			elseif not self.xing_ent.TriggerGates and self.triggered then --Release crossing sequence
 				self.triggered = false
 				
 				local timedelay = 0
@@ -228,14 +228,15 @@ if SERVER then
 		return true
 	end
 	
-	--Receive update from crossings
+	--Receive update from crossings; gates now directly poll the entity instead
+	--[[
 	hook.Add("TP3_CrossingUpdate","Trakpak3_CrossingUpdateGates",function(xing_name, state)
 		--print("Update Received, ",xing_name,state)
 		for n, self in pairs(ents.FindByClass("tp3_crossing_gate")) do
 			if xing_name==self.xing then self.trigger = state end
 		end
 	end)
-	
+	]]--
 	
 	--Add offsets to controller
 	hook.Add("InitPostEntity","Trakpak3_CrossingGateOffsets",function()

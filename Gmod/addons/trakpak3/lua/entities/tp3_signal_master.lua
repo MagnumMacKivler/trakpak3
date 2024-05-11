@@ -507,27 +507,31 @@ if SERVER then
 		elseif iname=="SetCTC_Hold" then
 			--self.ctc_state = 0
 			self:SetCTCState(0)
-			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",0)
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
-			if newaspect then self:HandleNewAspect(newaspect) end
+			if self.automatic then
+				local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
+				if newaspect then self:HandleNewAspect(newaspect) end
+			end
 		elseif iname=="SetCTC_Once" then
 			--self.ctc_state = 1
 			self:SetCTCState(1)
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
-			if newaspect then self:HandleNewAspect(newaspect) end
-			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",1)
+			if self.automatic then
+				local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
+				if newaspect then self:HandleNewAspect(newaspect) end
+			end
 		elseif iname=="SetCTC_Allow" then
 			--self.ctc_state = 2
 			self:SetCTCState(2)
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
-			if newaspect then self:HandleNewAspect(newaspect) end
-			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",2)
+			if self.automatic then
+				local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
+				if newaspect then self:HandleNewAspect(newaspect) end
+			end
 		elseif iname=="SetCTC_Force" then
 			--self.ctc_state = 3
 			self:SetCTCState(3)
-			local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
-			if newaspect then self:HandleNewAspect(newaspect) end
-			--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",3)
+			if self.automatic then
+				local newaspect = self:CalculateAspect(self.my_occupied, self.my_diverging, self.my_speed, self.my_nextaspect, self.my_nextspeed, self.tags, self.ctc_state, self.my_nextdiv)
+				if newaspect then self:HandleNewAspect(newaspect) end
+			end
 		end
 	end
 	
@@ -637,9 +641,10 @@ if SERVER then
 				if val<=3 then
 					--signal.ctc_state = val
 					signal:SetCTCState(val)
-					local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv)
-					if newaspect then signal:HandleNewAspect(newaspect) end
-					--Trakpak3.Dispatch.SendInfo(signal:GetName(),"ctc_state",val)
+					if signal.automatic then
+						local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv)
+						if newaspect then signal:HandleNewAspect(newaspect) end
+					end
 				end
 			end
 		end

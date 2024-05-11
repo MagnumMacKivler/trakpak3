@@ -59,8 +59,8 @@ if SERVER then
 							triggered_b = false,
 							ETA_a = nil,
 							ETA_b = nil,
-							subtract_a = 0,
-							subtract_b = 0
+							--subtract_a = 0,
+							--subtract_b = 0
 						}
 					end
 				end
@@ -85,7 +85,8 @@ if SERVER then
 			timer.Remove("tp3_xing_"..self:EntIndex().."_hysteresis")
 			
 			--Broadcast to gates
-			hook.Run("TP3_CrossingUpdate",self:GetName(),true)
+			--hook.Run("TP3_CrossingUpdate",self:GetName(),true)
+			self.TriggerGates = true
 			
 			--Hammer Output
 			self:TriggerOutput("OnTrigger",self)
@@ -96,99 +97,131 @@ if SERVER then
 			local hdelay = 5
 			if skiphysteresis then hdelay = 0 end
 			
-			--Setup hysteresis timer
+			--Setup hysteresis timer; all this does is keep the gates down for a bit after the train passes over.
 			timer.Create("tp3_xing_"..self:EntIndex().."_hysteresis",hdelay,1, function()
 				--Broadcast to gates
-				hook.Run("TP3_CrossingUpdate",self:GetName(),false)
+				--hook.Run("TP3_CrossingUpdate",self:GetName(),false)
+				self.TriggerGates = false
 				
 				--Hammer Output
 				self:TriggerOutput("OnClear",self)
 			end)
 			
-			--Stop timeout timer
-			timer.Remove("tp3_xing_"..self:EntIndex().."_timeout")
-			
 		end
 	end
 	
 	function ENT:GetBlockDistance(block_ent, targetpos)
-
-
 		return Trakpak3.BlockDistance(block_ent, targetpos)
 	end
 	
-	local SysTime = SysTime
+	--local SysTime = SysTime
+	local max = math.max
+	local min = math.min
 	
 	function ENT:Think()
 		if self.tracks then
 			local should_trigger = false
 			local ETA
+			
+			--Island Block
+			local onisland = self.block_island_valid and self.block_island_ent.occupied
+			
+			--A/B Blocks
 			for tracknum, trackdata in pairs(self.tracks) do
+				
+				local occ_a = trackdata.ent_a.occupied
+				local occ_b = trackdata.ent_b.occupied
+				
 				if self.predicting then --use predictor circuit
 					--Block A
-					if trackdata.culprit_a and trackdata.culprit_a:IsValid() then
-						if trackdata.olddist_a then --prior data exists
-							local newpos = trackdata.culprit_a:GetPos()
-							local dist_new = self:GetBlockDistance(trackdata.ent_a, newpos) - trackdata.subtract_a
+					
+					local culprit = trackdata.ent_a.HitEntity
+					
+					if occ_a and culprit and culprit:IsValid() then
+						
+						if culprit != trackdata.culprit_a then --Reset data for a new entity
+							trackdata.culprit_a = culprit
+							trackdata.olddist_a = nil
+							trackdata.ETA_a = nil
+						end
+						
+						local boxsize = culprit:OBBMaxs()
+						local subtract = max(boxsize.x, boxsize.y, boxsize.z)
+						if trackdata.olddist_a then --prior distance data exists
+							local newpos = culprit:GetPos()
+							local dist_new = max(self:GetBlockDistance(trackdata.ent_a, newpos) - subtract, 0)
 							local dvel = (trackdata.olddist_a - dist_new)*10 --positive = closer
-							--print("A", math.Round(dvel))
 							trackdata.olddist_a = dist_new
-							if dvel>1 then --Only bother calculating arrival time if it's moving towards you at a speed greater than 1 inch per second
+							if dvel>1 then --Train is moving closer
 								trackdata.ETA_a = dist_new/dvel
 								
-								--print(trackdata.ETA_a)
 								if ((dist_new<1024) or (trackdata.ETA_a < (self.arrivaltarget + self.TargetOffset))) and not trackdata.triggered_a then
 									trackdata.triggered_a = true
-									--print("A true")
 								end
-							elseif (dist_new > 1024) and not self.onisland then
+							elseif (dist_new > 1024) and not onisland then --Train out of range, not moving closer, and not blocking the island
 								trackdata.triggered_a = false
-								trackdata.olddist_a = nil
 								trackdata.ETA_a = nil
 							end
-						else --prior data does not exist
-							trackdata.olddist_a = self:GetBlockDistance(trackdata.ent_a, trackdata.culprit_a:GetPos()) - trackdata.subtract_a
+						else --prior distance data does not exist
+							trackdata.olddist_a = max(self:GetBlockDistance(trackdata.ent_a, culprit:GetPos()) - subtract, 0)
 						end
-					elseif not self.onisland and trackdata.triggered_a then --block not occupied, nothing on the island; clear trigger
+					elseif not onisland and trackdata.triggered_a then --block not occupied, or there's no culprit; nothing on the island; clear trigger
 						trackdata.triggered_a = false
 						trackdata.olddist_a = nil
 						trackdata.ETA_a = nil
-						--print("A false")
+						trackdata.culprit_a = nil
 					end
+					if trackdata.culprit_a and not occ_a then
+						trackdata.culprit_a = nil
+						trackdata.olddist_a = nil
+					end
+					
+					
 					--Block B
-					if trackdata.culprit_b and trackdata.culprit_b:IsValid() then
-						if trackdata.olddist_b then --prior data exists
-							local newpos = trackdata.culprit_b:GetPos()
-							local dist_new = self:GetBlockDistance(trackdata.ent_b, newpos) - trackdata.subtract_b
+					local culprit = trackdata.ent_b.HitEntity
+					
+					if occ_b and culprit and culprit:IsValid() then
+						
+						if culprit != trackdata.culprit_b then --Reset data for a new entity
+							trackdata.culprit_b = culprit
+							trackdata.olddist_b = nil
+							trackdata.ETA_b = nil
+						end
+						
+						local boxsize = culprit:OBBMaxs()
+						local subtract = max(boxsize.x, boxsize.y, boxsize.z)
+						if trackdata.olddist_b then --prior distance data exists
+							local newpos = culprit:GetPos()
+							local dist_new = max(self:GetBlockDistance(trackdata.ent_b, newpos) - subtract,0)
 							local dvel = (trackdata.olddist_b - dist_new)*10 --positive = closer
-							--print("B", math.Round(dvel))
 							trackdata.olddist_b = dist_new
-							if dvel>1 then --Only bother calculating arrival time if it's moving towards you at a speed greater than 1 inch per second
+							if dvel>1 then --Train is moving closer
 								trackdata.ETA_b = dist_new/dvel
-								--print(trackdata.ETA_b)
+								
 								if ((dist_new<1024) or (trackdata.ETA_b < (self.arrivaltarget + self.TargetOffset))) and not trackdata.triggered_b then
 									trackdata.triggered_b = true
-									--print("B true")
 								end
-							elseif (dist_new > 1024) and not self.onisland then
+							elseif (dist_new > 1024) and not onisland then --Train out of range, not moving closer, and not blocking the island
 								trackdata.triggered_b = false
-								trackdata.olddist_b = nil
-							trackdata.ETA_b = nil
+								trackdata.ETA_b = nil
 							end
-						else --prior data does not exist
-							trackdata.olddist_b = self:GetBlockDistance(trackdata.ent_b, trackdata.culprit_b:GetPos()) - trackdata.subtract_b
+						else --prior distance data does not exist
+							trackdata.olddist_b = max(self:GetBlockDistance(trackdata.ent_b, culprit:GetPos()) - subtract, 0)
 						end
-					elseif not self.onisland and trackdata.triggered_b then --block not occupied, nothing on the island; clear trigger
+					elseif not onisland and trackdata.triggered_b then --block not occupied, or there's no culprit; nothing on the island; clear trigger
 						trackdata.triggered_b = false
 						trackdata.olddist_b = nil
 						trackdata.ETA_b = nil
-						--print("B false")
+						trackdata.culprit_b = nil
+					end
+					if trackdata.culprit_b and not occ_b then
+						trackdata.culprit_b = nil
+						trackdata.olddist_b = nil
 					end
 					
-					
 				else --use block occupancy instead of predictor
-					if trackdata.culprit_a then trackdata.triggered_a = true else trackdata.triggered_a = false end
-					if trackdata.culprit_b then trackdata.triggered_b = true else trackdata.triggered_b = false end
+					trackdata.triggered_a = occ_a
+					trackdata.triggered_b = occ_b
 				end
 				
 				--If either condition is met, overall trigger should be true
@@ -199,7 +232,7 @@ if SERVER then
 				local myeta
 				
 				if trackdata.ETA_a and trackdata.ETA_b then
-					myeta = math.min(trackdata.ETA_a, trackdata.ETA_b)
+					myeta = min(trackdata.ETA_a, trackdata.ETA_b)
 				elseif trackdata.ETA_a then
 					myeta = trackdata.ETA_a
 				elseif trackdata.ETA_b then
@@ -209,12 +242,12 @@ if SERVER then
 					ETA = myeta
 				end
 			end
-			self.ETA = math.max(ETA or -1,-1)
+			self.ETA = min(ETA or 60,60) --grabbed by the gates for ETA wire outputs
 			self:HandleNewState(should_trigger or self.force)
 			
 		end
 		
-		self:NextThink(CurTime()+0.1)
+		self:NextThink(CurTime()+0.1) --Execute 10Hz
 		return true
 	end
 	
@@ -237,6 +270,7 @@ if SERVER then
 	end
 	
 	--Receive Block Updates
+	--[[
 	hook.Add("TP3_BlockUpdate","Trakpak3_BlockUpdateCrossings",function(blockname, occupied, force, ent)
 		
 		for k, self in pairs(ents.FindByClass("tp3_crossing")) do
@@ -251,17 +285,17 @@ if SERVER then
 				--print("Island ",occupied)
 			end
 			
-			if self.tracks then --Execute only if the crossing has tracks to speak of
+			if false and self.tracks then --Execute only if the crossing has tracks to speak of
 				for tracknum, trackdata in pairs(self.tracks) do
 					--if this is one of my blocks, assign/clear entities
 					if blockname==trackdata.block_a then
-						if occupied then
+						if occupied and ent then
 							trackdata.culprit_a = ent
 							local maxs = ent:OBBMaxs()
 							trackdata.subtract_a = math.max(maxs.x, maxs.y, maxs.z)/2
 						else trackdata.culprit_a = nil end
 					elseif blockname==trackdata.block_b then
-						if occupied then
+						if occupied and ent then
 							trackdata.culprit_b = ent
 							local maxs = ent:OBBMaxs()
 							trackdata.subtract_b = math.max(maxs.x, maxs.y, maxs.z)/2
@@ -272,4 +306,5 @@ if SERVER then
 		end
 		
 	end)
+	]]--
 end

@@ -267,38 +267,19 @@ if SERVER then
 			
 			--print(self.start_c, self.end_c, self.norm_c, Pos_2d)
 			
-			local DistToLine = DispToStart:Cross(self.norm_c):Length()
+			local DistToLine = DispToStart:Cross(self.norm_c):LengthSqr()
 			
-			if DistToLine < 64 then
+			if DistToLine < (64*64) then
 			
 				local phys = activator:GetPhysicsObject()
 				local velv = phys:GetVelocity()
 				local vel2 = velv:LengthSqr()
-				if vel2 >= (self.minspeed^2) then --It passes the speed threshold
-				
-					if not self.running then
-						self.running = true
-						self.lastent = nil
-						self.trainaxles = 0
-						self.ropes = 0
-						self.traincars = 0
-						self.trainlength = 0
-						self.trainspeed = 0
-						self.defect_axle = nil
-						self.defect_car = nil
-						self.dtype = nil
-						
-						if not self.temp then self.temp = math.random(self.mintemp, self.maxtemp) end --Do this once the first time a train rolls over it
-						
-						--Broadcast intro when train first drives over
-						if self.speakintro then
-							self:Transmit(1, self.soundfont, self.s_intro)
-						else
-							self:Transmit(0)
-						end
-					end
+				if vel2 >= (self.minspeed*self.minspeed) then --It passes the speed threshold
 					
-					--Determine number of axles based on length
+					--Determine if the object is a truck or not
+					local validtruck = false
+					
+					--Determine direction of motion
 					local vx = math.abs(velv:Dot(activator:GetForward()))
 					local vy = math.abs(velv:Dot(activator:GetRight()))
 					local vz = math.abs(velv:Dot(activator:GetUp()))
@@ -306,34 +287,60 @@ if SERVER then
 					local maxs = activator:OBBMaxs()
 					
 					local proplength
+					local propspeed
+					
 					if (vy > vx) and (vy > vz) then --Moving in Local Y
 						proplength = maxs.y - mins.y
-						self.trainspeed = vy
+						propspeed = vy
 					elseif (vz > vx) and (vz > vy) then --Moving in Local Z
 						proplength = maxs.z - mins.z
-						self.trainspeed = vz
+						propspeed = vz
 					else --Moving in Local X
 						proplength = maxs.x - mins.x
-						self.trainspeed = vx
+						propspeed = vx
 					end
 					
-					local validtruck = false
-					
-					if proplength<100 then
-						self.trainaxles = self.trainaxles + 1
-						validtruck = true
-					elseif proplength<200 then
-						self.trainaxles = self.trainaxles + 2
-						validtruck = true
-					elseif proplength<240 then
-						self.trainaxles = self.trainaxles + 3
-						validtruck = true
-					elseif proplength<300 then --Anything longer than 300 isn't a truck
-						self.trainaxles = self.trainaxles + 4
+					if proplength<300 then
 						validtruck = true
 					end
 					
 					if validtruck then
+						
+						--Activate Detector
+						if not self.running then
+							self.running = true
+							self.lastent = nil
+							self.trainaxles = 0
+							self.ropes = 0
+							self.traincars = 0
+							self.trainlength = 0
+							self.defect_axle = nil
+							self.defect_car = nil
+							self.dtype = nil
+							
+							if not self.temp then self.temp = math.random(self.mintemp, self.maxtemp) end --Do this once the first time a train rolls over it
+							
+							--Broadcast intro when train first drives over
+							if self.speakintro then
+								self:Transmit(1, self.soundfont, self.s_intro)
+							else
+								self:Transmit(0)
+							end
+						end
+						
+						--Measure speed and count axles
+						if proplength<100 then
+							self.trainaxles = self.trainaxles + 1
+						elseif proplength<200 then
+							self.trainaxles = self.trainaxles + 2
+						elseif proplength<240 then
+							self.trainaxles = self.trainaxles + 3
+						elseif proplength<300 then --Anything longer than 300 isn't a truck
+							self.trainaxles = self.trainaxles + 4
+						end
+						
+						self.trainspeed = propspeed
+						
 						--Determine if this truck/axle is coupled or not
 						
 						local coupled = constraint.FindConstraint(activator, "Rope")

@@ -581,6 +581,11 @@ function Dispatch.OpenEditor()
 				"signal_red_w",
 				"signal_red_e",
 				
+				"signal_nopath_n",
+				"signal_nopath_s",
+				"signal_nopath_w",
+				"signal_nopath_e",
+				
 				"signal_yel_n",
 				"signal_yel_s",
 				"signal_yel_w",
@@ -600,6 +605,11 @@ function Dispatch.OpenEditor()
 				"signal_red_s_alt",
 				"signal_red_w_alt",
 				"signal_red_e_alt",
+				
+				"signal_nopath_n_alt",
+				"signal_nopath_s_alt",
+				"signal_nopath_w_alt",
+				"signal_nopath_e_alt",
 				
 				"signal_yel_n_alt",
 				"signal_yel_s_alt",

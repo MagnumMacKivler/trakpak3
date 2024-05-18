@@ -239,7 +239,7 @@ if SERVER then
 	]]--
 	
 	--Add offsets to controller
-	hook.Add("InitPostEntity","Trakpak3_CrossingGateOffsets",function()
+	function Trakpak3.ADD_XING_OFFSETS()
 		for k, self in pairs(ents.FindByClass("tp3_crossing_gate")) do
 			if self.xing_valid then
 				local addoffset = 0
@@ -250,7 +250,8 @@ if SERVER then
 				print("[Trakpak3] tp3_crossing_gate without a corresponding tp3_crossing: ["..self:EntIndex().."], "..self:GetModel())
 			end
 		end
-	end)
+	end
+	
 end
 
 if CLIENT then

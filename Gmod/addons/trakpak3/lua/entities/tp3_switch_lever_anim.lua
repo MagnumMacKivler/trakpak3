@@ -630,15 +630,15 @@ if SERVER then
 	end)
 	
 	--Perform "handshake" with linked stand to link the linked stand back to this one
-	local function handshakes()
+	function Trakpak3.STAND_HANDSHAKES()
 		for _, stand in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
 			if stand.linked_stand_valid then --Auto Link the other stand to this one
 				stand.linked_stand_ent:RegisterEntity("linked_stand",stand:GetName())
 			end
 		end
 	end
-	hook.Add("InitPostEntity","Trakpak3_Link_Stands",handshakes)
-	hook.Add("PostCleanupMap","Trakpak3_Link_Stands",handshakes)
+	--hook.Add("InitPostEntity","Trakpak3_Link_Stands",handshakes)
+	--hook.Add("PostCleanupMap","Trakpak3_Link_Stands",handshakes)
 end
 
 if CLIENT then

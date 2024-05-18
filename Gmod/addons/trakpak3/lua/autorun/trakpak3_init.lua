@@ -63,6 +63,29 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_clientloader.lua") --
 	AddCSLuaFile("trakpak3/shared.lua") --
 	
+	--Function to run all the InitPostEntity requirements. Order matters for some of these so I might as well put everything in one function.
+	function Trakpak3.InitPostEntityLoad()
+		Trakpak3.LOAD_NODES()
+		Trakpak3.PathConfig.IPE() --Must be done before dispatch
+		Trakpak3.Dispatch.IPE()
+		Trakpak3.BLOCK_INITIAL_BROADCAST()
+		Trakpak3.CHECK_MAP_VEHICLES()
+		Trakpak3.ADD_XING_OFFSETS()
+		Trakpak3.INIT_FIND_SWITCHES()
+		Trakpak3.STAND_HANDSHAKES()
+		
+		timer.Simple(1,function() Trakpak3.InitPostEntity = true end)
+	end
+	
+	--Function to run on map cleanup
+	function Trakpak3.PostCleanupMapLoad()
+		Trakpak3.InitPostEntity = false
+		Trakpak3.InitPostEntityLoad()
+	end
+	
+	hook.Add("InitPostEntity","TP3_InitPostEntityLoad",Trakpak3.InitPostEntityLoad)
+	hook.Add("PostCleanupMap","TP3_PostCleanupMapLoad",Trakpak3.PostCleanupMapLoad)
+	
 	--Macro for E2 limits for JH
 	concommand.Add("tp3_jh_prep", function()
 		if game.SinglePlayer() then

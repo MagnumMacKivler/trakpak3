@@ -672,31 +672,31 @@ if SERVER then
 	end)
 
 	--Find all the switches initially
-	hook.Add("InitPostEntity","Trakpak3_InitFindSwitches",function()
-		if Trakpak3 then
-			local allswitches = ents.FindByClass("tp3_switch")
+	function Trakpak3.INIT_FIND_SWITCHES()
+		
+		local allswitches = ents.FindByClass("tp3_switch")
 
-			--Filter OUT all dumb switches
-			Trakpak3.Switches = {}
-			for n=1,#allswitches do
-				local sw = allswitches[n]
-				if (sw.behavior > -1) and sw.autoscan then
-					table.insert(Trakpak3.Switches,sw)
-				end
-			end
-
-			Trakpak3.SwitchMaxIndex = #Trakpak3.Switches
-			if Trakpak3.SwitchMaxIndex > 0 then
-				Trakpak3.SwitchScanIndex = 1
-
-				local convar = GetConVar("tp3_switch_scanrate")
-				local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/(convar:GetInt() or 5))*engine.TickInterval(),2)
-				print("\n[Trakpak3] Switch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." non-dumb switches.\n")
-			else
-				print("\n[Trakpak3] Map has no non-dumb switches.\n")
+		--Filter OUT all dumb switches
+		Trakpak3.Switches = {}
+		for n=1,#allswitches do
+			local sw = allswitches[n]
+			if (sw.behavior > -1) and sw.autoscan then
+				table.insert(Trakpak3.Switches,sw)
 			end
 		end
-	end)
+
+		Trakpak3.SwitchMaxIndex = #Trakpak3.Switches
+		if Trakpak3.SwitchMaxIndex > 0 then
+			Trakpak3.SwitchScanIndex = 1
+
+			local convar = GetConVar("tp3_switch_scanrate")
+			local t = math.Round(math.ceil(Trakpak3.SwitchMaxIndex/(convar:GetInt() or 5))*engine.TickInterval(),2)
+			print("\n[Trakpak3] Switch Scan Time: "..t.." seconds for "..Trakpak3.SwitchMaxIndex.." non-dumb switches.\n")
+		else
+			print("\n[Trakpak3] Map has no non-dumb switches.\n")
+		end
+		
+	end
 
 	hook.Add("EntityRemoved","Trakpak3_SwitchTriggerDeleteProp",function(ent)
 		if ent:GetClass()=="prop_physics" then

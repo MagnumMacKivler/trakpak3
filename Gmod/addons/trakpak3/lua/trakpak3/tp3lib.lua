@@ -282,10 +282,12 @@ Trakpak3.SpeedDictionary = {
 }
 
 
---Global Init Variable
+--Global Init Variable; moved to autorun
+--[[
 hook.Add("InitPostEntity","Trakpak3_GlobalInit",function()
 	timer.Simple(5,function() Trakpak3.InitPostEntity = true end)
 end)
+]]--
 
 --Mover Library, used for Turntables, Transfer tables, etc.
 --[[

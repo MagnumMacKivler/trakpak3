@@ -1,7 +1,7 @@
 --Set up all the signal blocks
 --MsgC(Trakpak3.Magenta,"Running Node Setup\n")
 
-local function load_nodes()
+function Trakpak3.LOAD_NODES()
 	
 	--print("\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA\nAAAAAAAAAAAAAA")
 
@@ -34,8 +34,8 @@ local function load_nodes()
 end
 
 
-hook.Add("InitPostEntity","TP3_NodeLoad",load_nodes) 
-hook.Add("PostCleanupMap","TP3_NodeLoad", load_nodes)
+--hook.Add("InitPostEntity","TP3_NodeLoad",load_nodes) 
+--hook.Add("PostCleanupMap","TP3_NodeLoad", load_nodes)
 
 
 function Trakpak3.GetBlockPack() --Return the table of blocks and nodes, aka "The Blockpack"

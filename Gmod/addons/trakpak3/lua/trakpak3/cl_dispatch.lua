@@ -1337,7 +1337,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				Dispatch.placetype = "signal"
 				Dispatch.PopulatePage(canvas, Dispatch.page, true)
 			end
-		else
+		elseif e.signal and (e.signal!="") then
 			local mpanel = vgui.Create("DPanel",canvas)
 			mpanel:SetSize(96,144)
 			local cx, cy, sx, sy = button:GetBounds() --Button Pos (relative to canvas) and size
@@ -1353,11 +1353,18 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 			mpanel:SetPos(cx,cy)
 			self.menu = mpanel
 			
+			local sig = Dispatch.RealData[e.signal]
+			local nopath = sig.nopath
+			
 			local button = vgui.Create("DButton",mpanel)
 			button:SetSize(1,36)
 			button:Dock(TOP)
 			button:SetText("Hold")
-			button:SetImage("trakpak3_common/icons/signal_red_n.png")
+			if nopath==1 then
+				button:SetImage("trakpak3_common/icons/signal_nopath_n.png")
+			else
+				button:SetImage("trakpak3_common/icons/signal_red_n.png")
+			end
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 0)
 				--mpanel:Remove()
@@ -1376,6 +1383,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				--self.menu = nil
 				Dispatch.Deselect()
 			end
+			if nopath==1 then button:SetEnabled(false) end
 			
 			local button = vgui.Create("DButton",mpanel)
 			button:SetSize(1,36)
@@ -1388,6 +1396,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				--self.menu = nil
 				Dispatch.Deselect()
 			end
+			if nopath==1 then button:SetEnabled(false) end
 			
 			local button = vgui.Create("DButton",mpanel)
 			button:SetSize(1,36)
@@ -1455,7 +1464,11 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				if sig then
 					local state = sig.ctc_state
 					if state==0 then --Hold
-						button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
+						if sig.nopath==1 then
+							button:SetImage("trakpak3_common/icons/signal_nopath_"..dir..alt..".png")
+						else
+							button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
+						end
 					elseif state==1 then --Once
 						button:SetImage("trakpak3_common/icons/signal_yel_"..dir..alt..".png")
 					elseif state==2 then --Allow
@@ -1518,23 +1531,34 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 	
 	--Receive Info from World (CTC State)
 	function element:UpdateValue(name, parm, value)
-		if (name==self.signal) and (parm=="ctc_state") then
+		if (name==self.signal) then
+			--Update button based on Dispatch.RealData
+			local sig = Dispatch.RealData[self.signal]
+			
 			local button = self.button
 			if button and button:IsValid() then
 				local dt = {"n", "s", "e", "w"}
 				local dir = dt[self.orientation]
 				local alt = ""
 				if self.style then alt = "_alt" end
-				if value==0 then --Hold
-					button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
-				elseif value==1 then --Once
+				
+				local ctc_state = sig.ctc_state
+				
+				if ctc_state==0 then --Hold
+					if sig.nopath==1 then
+						button:SetImage("trakpak3_common/icons/signal_nopath_"..dir..alt..".png")
+					else
+						button:SetImage("trakpak3_common/icons/signal_red_"..dir..alt..".png")
+					end
+				elseif ctc_state==1 then --Once
 					button:SetImage("trakpak3_common/icons/signal_yel_"..dir..alt..".png")
-				elseif value==2 then --Allow
+				elseif ctc_state==2 then --Allow
 					button:SetImage("trakpak3_common/icons/signal_grn_"..dir..alt..".png")
 				else --Force
 					button:SetImage("trakpak3_common/icons/signal_lun_"..dir..alt..".png")
 				end
 			end
+			
 		end
 	end
 	
@@ -3399,35 +3423,39 @@ function Dispatch.SendAdminCommand(cmd, arg) --commands are setsignals (0 or 2),
 	surface.PlaySound("buttons/button18.wav")
 end
 
---Receive Status from Entity
+--Receive Updates from Server
 Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
-	local entname = net.ReadString()
-	local parm = net.ReadString()
-	local dtype = net.ReadString()
-	local value
-	if dtype=="int" then
-		value = net.ReadUInt(16)
-	elseif dtype=="string" then
-		value = net.ReadString()
-	end
-	--print("Dispatch Update: ", entname, parm, value)
-	if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
-	Dispatch.RealData[entname][parm] = value
-	
-	if Dispatch.Boards then
-		for page, board in pairs(Dispatch.Boards) do
-			for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+	local numupdates = net.ReadUInt(16)
+	--print((len/8) .." bytes, "..numupdates.." updates.")
+	for n = 1, numupdates do
+		local entname = net.ReadString()
+		local parm = net.ReadString()
+		local dtype = net.ReadString()
+		local value
+		if dtype=="int" then
+			value = net.ReadUInt(16)
+		elseif dtype=="string" then
+			value = net.ReadString()
 		end
-	else
-		print("[Trakpak3] Attempted to update UI dispatch boards that didn't exist yet, somehow. This should be fixed the next time the player opens their dispatch board.")
-	end
-	for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
-		if ent.Boards then
-			for page, board in pairs(ent.Boards) do
+		--print("Dispatch Update: ", entname, parm, dtype, value)
+		if not Dispatch.RealData[entname] then Dispatch.RealData[entname] = {} end
+		Dispatch.RealData[entname][parm] = value
+		
+		if Dispatch.Boards then
+			for page, board in pairs(Dispatch.Boards) do
 				for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
 			end
 		else
-			print("[Trakpak3] Attempted to update physical dispatch boards that didn't exist yet, somehow. This should be fixed once they initialize.")
+			print("[Trakpak3] Attempted to update UI dispatch boards that didn't exist yet, somehow. This should be fixed the next time the player opens their dispatch board.")
+		end
+		for _, ent in pairs(ents.FindByClass("tp3_dispatch_board")) do
+			if ent.Boards then
+				for page, board in pairs(ent.Boards) do
+					for index, element in pairs(board.elements) do element:UpdateValue(entname, parm, value) end
+				end
+			else
+				print("[Trakpak3] Attempted to update physical dispatch boards that didn't exist yet, somehow. This should be fixed once they initialize.")
+			end
 		end
 	end
 end

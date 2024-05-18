@@ -12,7 +12,9 @@ ENT.Type = "anim" --Required for multiconvex triggers to work
 --Outputs: OnOccupied, OnOccupiedNatural, OnClear, OnClearNatural, OnTestedOccupied, OnTestedClear
 
 if SERVER then
-
+	
+	local Dispatch = Trakpak3.Dispatch
+	
 	ENT.KeyValueMap = {
 		blockmode = "number",
 		scaninterval = "number",
@@ -81,11 +83,6 @@ if SERVER then
 		end
 	end
 	
-	--Called by a tp3_crossing to enable it to do hull traces
-	function ENT:SetupCrossingBlock(enable)
-		self.runscans = enable
-	end
-	
 	--Update occupancy state of all nodes in my block
 	
 	function ENT:UpdateNodeList(occupancy)
@@ -104,8 +101,8 @@ if SERVER then
 			--Train Tag
 			self.traintag, self.trainspeed = self:ReadTrainTag(ent)
 			if self.traintag then
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "traintag", self.traintag, "string")
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", self.trainspeed)
+				Dispatch.SendInfo(self:GetName(), "traintag", self.traintag, "string")
+				Dispatch.SendInfo(self:GetName(), "trainspeed", self.trainspeed)
 				self.nextspeedtime = CurTime() + 5
 			end
 			
@@ -114,7 +111,7 @@ if SERVER then
 			self:TriggerOutput("OnOccupied",self)
 			--Block Update to Signal System
 			hook.Run("TP3_BlockUpdate",self:GetName(),true, false, ent)
-			Trakpak3.Dispatch.SendInfo(self:GetName(),"occupied",1)
+			Dispatch.SendInfo(self:GetName(),"occupied",1)
 			--Update Wireframe
 			self:UpdateNodeList(true)
 		elseif not state and self.occupied then --Block is no longer occupied
@@ -128,7 +125,7 @@ if SERVER then
 			self:TriggerOutput("OnClear",self)
 			--Block Update to Signal System
 			hook.Run("TP3_BlockUpdate",self:GetName(),false)
-			Trakpak3.Dispatch.SendInfo(self:GetName(),"occupied",0)
+			Dispatch.SendInfo(self:GetName(),"occupied",0)
 			--Update Wireframe
 			self:UpdateNodeList(false)
 		elseif state then --No state change, but you still hit something
@@ -137,25 +134,27 @@ if SERVER then
 			
 			if tag and tag!=self.traintag then --Different Train Tag
 				self.traintag = tag
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "traintag", self.traintag, "string")
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", speed)
+				Dispatch.SendInfo(self:GetName(), "traintag", self.traintag, "string")
+				Dispatch.SendInfo(self:GetName(), "trainspeed", speed)
 				self.nextspeedtime = CurTime() + 5
 			elseif tag and self.nextspeedtime and (CurTime() > self.nextspeedtime) then --Same train tag, re-measure speed
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", speed)
+				Dispatch.SendInfo(self:GetName(), "trainspeed", speed)
 				self.nextspeedtime = CurTime() + 5
 			elseif not tag and self.traintag then --No train tag!
 				self.traintag = nil
 				self.nextspeedtime = nil
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "traintag", nil, "nil")
-				Trakpak3.Dispatch.SendInfo(self:GetName(), "trainspeed", nil, "nil")
+				Dispatch.SendInfo(self:GetName(), "traintag", nil, "nil")
+				Dispatch.SendInfo(self:GetName(), "trainspeed", nil, "nil")
 			end
 			
 		end
 		
 	end
 	
+	
 	function ENT:ReadTrainTag(ent) --Return Tag and Speed if applicable
-		if not self.RecordTrainTags then return nil, nil end -- self.RecordTrainTags is set in dispatch.lua, for all blocks on the dispatch board.
+		if not Dispatch.RecordTrainTags then return nil, nil end
+		if not Dispatch.RecordTrainTags[self:GetName()] then return nil, nil end -- Trakpak3.Dispatch.RecordTrainTags is set in dispatch.lua, for all blocks on the dispatch board.
 		local tag
 		local speed
 		if ent and ent:IsValid() then

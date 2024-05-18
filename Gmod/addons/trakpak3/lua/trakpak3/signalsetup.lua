@@ -60,7 +60,7 @@ end
 --Total System Setup in order and shit
 
 
-local function SETUP_SIGNALS()
+function Trakpak3.BLOCK_INITIAL_BROADCAST()
 	for _, block in pairs(ents.FindByClass("tp3_signal_block")) do
 		block:InitialBroadcast()
 	end
@@ -70,8 +70,8 @@ local function SETUP_SIGNALS()
 end 
 
 
-hook.Add("InitPostEntity","Trakpak3_SystemSetup",SETUP_SIGNALS)
-hook.Add("PostCleanUpMap","Trakpak3_ReSystemSetup",SETUP_SIGNALS)
+--hook.Add("InitPostEntity","Trakpak3_SystemSetup",SETUP_SIGNALS)
+--hook.Add("PostCleanUpMap","Trakpak3_ReSystemSetup",SETUP_SIGNALS)
 
 --Signal System Packing
 Trakpak3.GetSignalSystemPack = function()

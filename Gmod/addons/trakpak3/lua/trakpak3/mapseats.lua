@@ -1,15 +1,15 @@
 Trakpak3.MapVehicleScripts = {}
 
 --Assign all map-placed vehicles the appropriate animation
-local function checkMapVehicles()
+function Trakpak3.CHECK_MAP_VEHICLES()
 	local Vehicles = list.Get("Vehicles") --Master list containing vehicle generation scripts
 	
-	//for k, veh in pairs(ents.FindByClass("prop_vehicle_*")) do --For every prop_vehicle_<whatever> do
-	// findByClass already does ents.GetAll(), and it's more expensive on top of that because it's string comparing every entity.
-	// not all vehicles may have prop_vehicle in their name, as well. 
+	--for k, veh in pairs(ents.FindByClass("prop_vehicle_*")) do --For every prop_vehicle_<whatever> do
+	-- findByClass already does ents.GetAll(), and it's more expensive on top of that because it's string comparing every entity.
+	-- not all vehicles may have prop_vehicle in their name, as well. 
 
 	for k, veh in pairs(ents.GetAll()) do 
-		if not veh:IsVehicle() then continue end // Skip this iteration if it's not a vehicle, checks class, less expensive
+		if not veh:IsVehicle() then continue end -- Skip this iteration if it's not a vehicle, checks class, less expensive
 		if veh:CreatedByMap() then --Vehicle was included with the map and not spawned/duped/whatever
 			
 			if veh.genscript then --Vehicle has a preferred generation script already, corresponding to a table entry in the Vehicles table.
@@ -33,8 +33,8 @@ local function checkMapVehicles()
 	end
 end
 
-hook.Add("InitPostEntity","Trakpak3_MapVehicleAnims",checkMapVehicles)
-hook.Add("PostCleanupMap","Trakpak3_MapVehicleAnims",checkMapVehicles)
+--hook.Add("InitPostEntity","Trakpak3_MapVehicleAnims",checkMapVehicles)
+--hook.Add("PostCleanupMap","Trakpak3_MapVehicleAnims",checkMapVehicles)
 
 --Set the local animation function for the player who gets in to the map vehicle
 --util.AddNetworkString("Trakpak3_SetMapSeat")

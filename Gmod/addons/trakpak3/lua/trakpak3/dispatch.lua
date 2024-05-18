@@ -5,8 +5,10 @@ Trakpak3.Dispatch.InitData = {}
 Trakpak3.Dispatch.MapBoards = {}
 Trakpak3.Dispatch.Loaded = false
 Trakpak3.Dispatch.Attempted = false
+Trakpak3.Dispatch.RecordTrainTags = {}
+Trakpak3.Dispatch.Deltas = {}
 
-local function tryDispatch()
+function Trakpak3.Dispatch.IPE() --InitPostEntity
 	--MsgC(Trakpak3.Magenta,"InitPostEntity! Looking for file trakpak3/dispatch/"..game.GetMap()..".lua")
 	local json = file.Read("trakpak3/dispatch/"..game.GetMap()..".lua","LUA")
 
@@ -19,7 +21,9 @@ local function tryDispatch()
 			
 			for id, ent in pairs(ents.FindByClass("tp3_signal_master")) do
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[name] = { ctc_state = ent.ctc_state, pos = ent:GetPos() } end
+				local nopath
+				if ent.interlock and not ent.pindex then nopath = 1 else nopatch = 0 end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[name] = { ctc_state = ent.ctc_state, nopath = nopath, pos = ent:GetPos() } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
@@ -55,8 +59,7 @@ local function tryDispatch()
 				if page.elements then
 					for __, element in pairs(page.elements) do --For each element in the page:
 						if element.type=="block" and element.block and element.block!="" then --If it's a valid block with a valid value
-							local block, valid = Trakpak3.FindByTargetname(element.block)
-							if valid then block.RecordTrainTags = true end
+							Trakpak3.Dispatch.RecordTrainTags[element.block] = true
 						end
 					end
 				end
@@ -73,8 +76,8 @@ local function tryDispatch()
 	Trakpak3.Dispatch.Attempted = true
 end
 
-hook.Add("InitPostEntity","TP3_DispLoad", tryDispatch)
-hook.Add("PostCleanUpMap","TP3_DispLoad", tryDispatch)
+--hook.Add("InitPostEntity","TP3_DispLoad", tryDispatch)
+--hook.Add("PostCleanUpMap","TP3_DispLoad", tryDispatch)
 
 --Return the dispatch entity status data
 Trakpak3.GetDSPack = function()
@@ -95,27 +98,57 @@ Trakpak3.GetDSBoards = function()
 end
 
 
---Send Parameter to Clients
+--Pool server-to-client updates in the Deltas table before sending
 function Trakpak3.Dispatch.SendInfo(entname, parm, value, dtype)
 	if Trakpak3.Dispatch.Loaded and entname and (entname!="") then
 		
 		if not dtype then dtype = "int" end
 		
 		Trakpak3.Dispatch.InitData[entname][parm] = value
-		--net.Start("tp3_dispatch_comm")
-		Trakpak3.NetStart("tp3_dispatch_comm")
-			net.WriteString(entname)
-			net.WriteString(parm)
-			net.WriteString(dtype)
-			if dtype=="int" then
-				net.WriteUInt(value,16)
-			elseif dtype=="string" then
-				net.WriteString(value)
-			end
-		net.Broadcast()
-		--print(entname, parm, value)
+		table.insert(Trakpak3.Dispatch.Deltas,{entname, parm, dtype, value})
 	end
 end
+
+local timestamp
+local CurTime = CurTime
+
+--Send delta pool to Clients
+function Trakpak3.Dispatch.SendDeltas()
+	
+	if next(Trakpak3.Dispatch.Deltas) then --There is at least 1 pooled delta
+		local ct = CurTime()
+		
+		if not timestamp then timestamp = ct end --Initialize the last sent value
+	
+		if (ct - timestamp) > 0.1 then --1 second has passed since the first delta was added
+		
+			Trakpak3.NetStart("tp3_dispatch_comm")
+				net.WriteUInt(#Trakpak3.Dispatch.Deltas,16) --number of individual updates
+				for n, ctable in ipairs(Trakpak3.Dispatch.Deltas) do
+					local entname = ctable[1]
+					local parm = ctable[2]
+					local dtype = ctable[3]
+					local value = ctable[4]
+					net.WriteString(entname) --entity name
+					net.WriteString(parm) --parm
+					net.WriteString(dtype) --dtype
+					if dtype=="int" then
+						net.WriteUInt(value,16) --value
+					elseif dtype=="string" then
+						net.WriteString(value) --value (string)
+					end
+					--print(entname, parm, dtype, value)
+				end
+			--print((net.BytesWritten() - 9 - 18).." Bytes")
+			net.Broadcast()
+			
+			table.Empty(Trakpak3.Dispatch.Deltas) --Clear the pool
+			timestamp = nil
+		end
+	end
+end
+
+hook.Add("Think","TP3_Dispatch_SendDeltas",Trakpak3.Dispatch.SendDeltas)
 
 Trakpak3.Dispatch.CommandLog = {}
 

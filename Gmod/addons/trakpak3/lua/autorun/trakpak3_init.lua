@@ -46,6 +46,7 @@ if SERVER then
 	include("trakpak3/signalsprites.lua") --
 	include("trakpak3/clientloader.lua")
 	include("trakpak3/shared.lua") --
+	include("trakpak3/sh_autocoupler.lua") --
 	
 	AddCSLuaFile("trakpak3/cl_autosave.lua") --
 	AddCSLuaFile("trakpak3/cl_nodesetup.lua") --
@@ -62,6 +63,7 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_signalsprites.lua") --
 	AddCSLuaFile("trakpak3/cl_clientloader.lua") --
 	AddCSLuaFile("trakpak3/shared.lua") --
+	AddCSLuaFile("trakpak3/sh_autocoupler.lua") --
 	
 	--Function to run all the InitPostEntity requirements. Order matters for some of these so I might as well put everything in one function.
 	function Trakpak3.InitPostEntityLoad()
@@ -121,6 +123,7 @@ if CLIENT then
 	include("trakpak3/cl_signalsprites.lua")
 	include("trakpak3/cl_clientloader.lua")
 	include("trakpak3/shared.lua")
+	include("trakpak3/sh_autocoupler.lua") --
 	
 	--Fix EyePos, EyeAngles, and EyeVector functions
 	hook.Add("PreDrawTranslucentRenderables", "Trakpak3_FixEyeFunctions", function()
@@ -128,6 +131,10 @@ if CLIENT then
 		EyeVector()
 		EyeAngles()
 	end)
+	
+	
+	--Trakpak3.InitPostEntity is set once client loading is done.
+	
 	
 	--[[
 	concommand.Add("orthocamtest",function()

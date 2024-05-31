@@ -80,6 +80,7 @@ Trakpak3.Net["tp3_sendserverdata"] = function(len, ply)
 			local load_duration = SysTime()-LoadStartTime
 			MsgC(Trakpak3.Magenta,"[Trakpak3] Loading Complete! Took "..math.Round(load_duration,6).." seconds.\n")
 			LoadStartTime = nil
+			Trakpak3.InitPostEntity = true
 		end
 	end
 	
@@ -96,5 +97,6 @@ Trakpak3.Net["tp3_serverdata_finished"] = function()
 		local load_duration = SysTime()-LoadStartTime
 		MsgC(Trakpak3.Magenta,"[Trakpak3] Loading Complete! Took "..math.Round(load_duration,6).." seconds.\n")
 		LoadStartTime = nil
+		Trakpak3.InitPostEntity = true
 	end
 end

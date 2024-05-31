@@ -170,6 +170,24 @@ sound.Add({
 	level = 70,
 	pitch = 100
 })
+--Auto Coupler Sounds
+sound.Add({
+	name = "Trakpak3.autocoupler.couple",
+	sound = "gsgtrainsounds/misc/couple.wav",
+	channel = CHAN_AUTO,
+	volume = 1,
+	level = 80,
+	pitch = 100
+})
+sound.Add({
+	name = "Trakpak3.autocoupler.uncouple",
+	sound = "gsgtrainsounds/misc/uncouple.wav",
+	channel = CHAN_AUTO,
+	volume = 1,
+	level = 80,
+	pitch = 100
+})
+
 
 --Ranger Class Blacklisting: Use this function to add NPC classes you don't want to trigger block detection, auto switches, or frogs! Does not respect wildcards.
 function Trakpak3.BlacklistClass(class)

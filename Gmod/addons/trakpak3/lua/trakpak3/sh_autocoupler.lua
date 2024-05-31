@@ -58,7 +58,7 @@ if SERVER then
 	function AutoCoupler.NewCoupler(car, axis, sign, truck, edge, tolerance, slack, ropewidth)
 		if not (car and car:IsValid() and truck and truck:IsValid() and axis ) then return end
 		tolerance = math.Clamp(tolerance or 48, 0, 96)
-		slack = math.Clamp(slack or 10, 0, 16)
+		slack = math.Clamp(slack or 6, 0, 16)
 		ropewidth = math.Clamp(ropewidth or 2,0,8)
 		
 		--Get a unique index
@@ -695,7 +695,7 @@ if SERVER then
 			
 			if stage==0 then --Auto Solve
 				if not ent.TP3AC then
-					local slack = math.Clamp(tool:GetClientNumber("slack",10),0,16)
+					local slack = math.Clamp(tool:GetClientNumber("slack",6),0,16)
 					local tolerance = math.Clamp(tool:GetClientNumber("tolerance",48),0,96)
 					local ropewidth = math.Clamp(tool:GetClientNumber("ropewidth",2),0,8)
 					
@@ -792,7 +792,7 @@ if SERVER then
 			AutoCoupler.SendCouplerData(ent, ply, false)
 		else
 			local data = net.ReadTable()
-			PrintTable(data)
+			--PrintTable(data)
 			local cf, cr = data[1], data[-1]
 			
 			AutoCoupler.ClearCar(car) --Delete Existing
@@ -1101,6 +1101,7 @@ if CLIENT then
 			local deleto = vgui.Create("DCheckBoxLabel", panel)
 			deleto:SetSize(1,24)
 			deleto:Dock(TOP)
+			deleto:DockMargin(8,2,2,2)
 			deleto:SetText("Delete Coupler?")
 			deleto:SetTextColor(black)
 			function deleto:OnChange(val) delete_r = val end
@@ -1239,6 +1240,7 @@ if CLIENT then
 			local deleto = vgui.Create("DCheckBoxLabel", panel)
 			deleto:SetSize(1,24)
 			deleto:Dock(TOP)
+			deleto:DockMargin(8,2,2,2)
 			deleto:SetText("Delete Coupler?")
 			deleto:SetTextColor(black)
 			function deleto:OnChange(val) delete_f = val end
@@ -1341,7 +1343,7 @@ if CLIENT then
 				if not (axis and edge_f and edge_r and tool) then return end
 				
 				local tolerance = math.Round(tool:GetClientNumber("tolerance", 48))
-				local slack = math.Round(tool:GetClientNumber("slack", 10))
+				local slack = math.Round(tool:GetClientNumber("slack", 6))
 				local ropewidth = math.Round(tool:GetClientNumber("ropewidth", 2))
 				AutoCoupler.SelectedData[destination] = {axis = axis, tolerance = tolerance, slack = slack, ropewidth = ropewidth}
 				if destination==1 then

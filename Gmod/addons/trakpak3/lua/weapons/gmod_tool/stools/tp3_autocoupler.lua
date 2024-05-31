@@ -20,7 +20,7 @@ if CLIENT then
 		{ name = "reload_2", stage = 1 }, --Cancel
 	}
 	
-	TOOL.ClientConVar["slack"] = 10
+	TOOL.ClientConVar["slack"] = 6
 	TOOL.ClientConVar["tolerance"] = 48
 	TOOL.ClientConVar["ropewidth"] = 2
 	TOOL.ClientConVar["decoupletime"] = 1

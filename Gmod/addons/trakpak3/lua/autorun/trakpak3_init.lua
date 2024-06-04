@@ -162,6 +162,11 @@ if CLIENT then
 	end)
 	]]--
 	
+	--Some final stuff
+	language.Add("physprop.friction_00", "Friction 00")
 	
 end
 
+--Other Shared Stuff
+
+list.Set( "PhysicsMaterials", "#physprop.friction_00", { physprop_material = "friction_00" } )

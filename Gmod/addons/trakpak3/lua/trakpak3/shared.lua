@@ -173,7 +173,7 @@ sound.Add({
 --Auto Coupler Sounds
 sound.Add({
 	name = "Trakpak3.autocoupler.couple",
-	sound = "gsgtrainsounds/misc/couple.wav",
+	sound = "trakpak3/couplers/couple.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
 	level = 80,
@@ -181,7 +181,7 @@ sound.Add({
 })
 sound.Add({
 	name = "Trakpak3.autocoupler.uncouple",
-	sound = "gsgtrainsounds/misc/uncouple.wav",
+	sound = "trakpak3/couplers/uncouple.wav",
 	channel = CHAN_AUTO,
 	volume = 1,
 	level = 80,

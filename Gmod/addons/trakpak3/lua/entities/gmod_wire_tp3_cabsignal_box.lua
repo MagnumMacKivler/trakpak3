@@ -568,15 +568,15 @@ if CLIENT then
 	
 	function ENT:Think()
 		--"Allow Buttons" Interaction, apparently the default wire Allow buttons functionality already works with it
-		--[[
-		if(LP():InVehicle() and (LP():GetPos():DistToSqr(self:EyePos()) < 96*96) ) and LP():KeyDown(IN_ATTACK) and LP():GetEyeTrace().Entity==self and not clicking then
+		
+		if((not game.SinglePlayer()) and LP():InVehicle() and (LP():GetPos():DistToSqr(self:EyePos()) < 96*96) ) and LP():KeyDown(IN_ATTACK) and LP():GetEyeTrace().Entity==self and not clicking then
 			clicking = true
-			--self:OpenTrainTagDialog()
+			self:OpenTrainTagDialog()
 			--print("Bepis")
 		elseif clicking and not LP():KeyDown(IN_ATTACK) then
 			clicking = false
 		end
-		]]--
+		
 		
 		--Play Defect Detector Sounds
 		if self:GetNWBool("enabled") then

@@ -36,6 +36,7 @@ end
 if SERVER then
 	
 	AutoCoupler.AllCouplers = {} --table of coupler objects to be slow checked
+	AutoCoupler.LastIndex = 0
 	
 	AutoCoupler.FastChecks = {} --table of coupler pairs to be fast checked
 
@@ -49,10 +50,11 @@ if SERVER then
 	
 	--Benchmarking
 	local printperf = function()
-		print("Auto Coupler Stats:\n",table.Count(AutoCoupler.AllCouplers).." couplers total, "..#AutoCoupler.FastChecks.." fast check pairs, "..math.Round(AutoCoupler.CPUTimeInst).."/"..math.Round(AutoCoupler.CPUTimeAvg).." microseconds CPU time (instantaneous/avg).")
+		--print("Auto Coupler Stats:\n",table.Count(AutoCoupler.AllCouplers).." couplers total, "..#AutoCoupler.FastChecks.." fast check pairs, "..math.Round(AutoCoupler.CPUTimeInst).."/"..math.Round(AutoCoupler.CPUTimeAvg).." microseconds CPU time (instantaneous/avg).")
 	end
 	
 	concommand.Add("tp3_autocoupler_perf", printperf, nil, "Display the current performance stats of the Trakpak3 Autocoupler system.")
+	concommand.Add("tp3_autocoupler_printall",function() for n = 1, AutoCoupler.LastIndex do print(n, AutoCoupler.AllCouplers[n]) end end)
 	
 	--Create a new autocoupler object
 	function AutoCoupler.NewCoupler(car, axis, sign, truck, edge, tolerance, slack, ropewidth)
@@ -63,17 +65,23 @@ if SERVER then
 		
 		--Get a unique index
 		local index
-		local count = 0
-		for idx, used in pairs(AutoCoupler.AllCouplers) do --check and see if an earlier slot can be reused
-			count = count + 1
-			if not used then
-				index = idx
+		--print("NEW COUPLER")
+		for n = 1, AutoCoupler.LastIndex do --Check and see if an earlier slot is open
+			if not AutoCoupler.AllCouplers[n] then --Index is free
+				index = n
+				print("FOUND EMPTY SLOT AT: "..n)
 				break
 			end
 		end
+		
 		if not index then --couldn't find an empty slot, make a new one
-			index = count + 1
+			index = AutoCoupler.LastIndex + 1
+			AutoCoupler.LastIndex = index
 		end
+		
+		--print("ASSIGNING INDEX "..index)
+		
+		
 		
 		local coupler = {
 			index = index,
@@ -88,6 +96,9 @@ if SERVER then
 			coupled = false,
 			decoupling = false,
 		}
+		
+		--Add to the global table
+		AutoCoupler.AllCouplers[index] = coupler
 		
 		--Object Methods
 		
@@ -244,8 +255,8 @@ if SERVER then
 		
 		--Delete the coupler
 		function coupler:Delete()
-			AutoCoupler.AllCouplers[self.index] = nil
 			
+			--print("DELETING "..self.index)
 			if self.truck and self.truck:IsValid() then
 				self.truck.TP3C = nil
 				duplicator.ClearEntityModifier(self.truck, "Trakpak3_AutoCoupler_Truck")
@@ -262,7 +273,7 @@ if SERVER then
 					end
 				end
 				
-				if car.TP3AC_Dupe[-self.sign] then --Data still exists for the other coupler on this car
+				if car.TP3AC_Dupe and car.TP3AC_Dupe[-self.sign] then --Data still exists for the other coupler on this car
 					duplicator.StoreEntityModifier(self.car,"Trakpak3_AutoCoupler",self.car.TP3AC_Dupe)
 				else --That's the last one
 					self.car.TP3AC = nil
@@ -271,6 +282,8 @@ if SERVER then
 					car:SetNWInt("TP3AC_axis",0)
 				end
 			end
+			
+			AutoCoupler.AllCouplers[self.index] = nil
 		end
 		
 		--Bolster Edge Calculation
@@ -290,7 +303,7 @@ if SERVER then
 		end
 		
 		--Duplicator Compatibility
-		if not car.TP3AC_Dupe then car.TP3AC_Dupe = {oldcarid = car:EntIndex()} end
+		if not car.TP3AC_Dupe then car.TP3AC_Dupe = {oldcarid = car:EntIndex()} end --Note: this is in the main level, the coupler data is in a sublevel below:
 		car.TP3AC_Dupe[sign] = {truckid = truck:EntIndex(), axis = axis, tolerance = tolerance, edge = edge, slack = slack, ropewidth = ropewidth}
 		duplicator.StoreEntityModifier(car,"Trakpak3_AutoCoupler",car.TP3AC_Dupe)
 		
@@ -299,8 +312,7 @@ if SERVER then
 		--Find any models/couplers that may be coupled at time of creation
 		coupler:CheckCoupled()
 		
-		--Add to the global table
-		AutoCoupler.AllCouplers[index] = coupler
+		
 		
 		return coupler
 	end
@@ -447,6 +459,7 @@ if SERVER then
 	
 	--Car Dupe Mod
 	duplicator.RegisterEntityModifier("Trakpak3_AutoCoupler",function(ply, car, CouplerData)
+		car.TP3AC = nil
 		car.TP3AC_Dupe = CouplerData
 		
 		--CouplerData Members: oldcarid, index
@@ -480,6 +493,8 @@ if SERVER then
 		--TruckData Members: oldcarid, index
 		local oldcarid = TruckData.oldcarid
 		local index = TruckData.index
+		
+		truck.TP3C = nil
 		
 		local ass = AutoCoupler.Assemblies
 		
@@ -587,17 +602,10 @@ if SERVER then
 				local c1 = data[1]
 				local c2 = data[2]
 				
-				local check = true
-				if not c1:IsValid() then
-					check = false
-					c1:Delete()
-				end
-				if not c2:IsValid() then
-					check = false
-					c2:Delete()
-				end
+				local c1v = c1 and c1:IsValid()
+				local c2v = c2 and c2:IsValid()
 				
-				if check then
+				if c1v and c2v then
 					local dist2 = (c1:GetEdgePos() - c2:GetEdgePos()):Length2DSqr()
 					if dist2 > (AutoCoupler.DecoupleDistance*AutoCoupler.DecoupleDistance) then
 						c1.decoupling = false
@@ -605,6 +613,20 @@ if SERVER then
 						table.remove(AutoCoupler.DecoupleChecks, index)
 						
 					end
+				else --One of the cars wasn't valid
+					
+					if c1v then
+						c1.decoupling = false
+					else
+						c1:Delete()
+					end
+					if c2v then
+						c2.decoupling = false
+					else
+						c2:Delete()
+					end
+					
+					table.remove(AutoCoupler.DecoupleChecks, index)
 				end
 			end
 			
@@ -1408,7 +1430,7 @@ if CLIENT then
 		
 		local slider = vgui.Create("DNumSlider",pnl)
 		slider:SetText("+Use Decoupler Hold Time")
-		slider:SetMinMax(1,5)
+		slider:SetMinMax(0.5,5)
 		slider:SetDecimals(1)
 		slider:SetConVar("tp3_autocoupler_decoupletime")
 		slider:SetDark(true)
@@ -1565,7 +1587,7 @@ if CLIENT then
 					dct_cvar = GetConVar("tp3_autocoupler_decoupletime")
 				end
 				if dct_cvar then
-					holdtime = math.Clamp(1, dct_cvar:GetFloat(), 5)
+					holdtime = math.Clamp(0.5, dct_cvar:GetFloat(), 5)
 				end
 				
 				local frac = math.Clamp((CurTime() - decouplingtime)/holdtime, 0, 1)
@@ -1605,7 +1627,7 @@ if CLIENT then
 			local tr = ply:GetEyeTrace()
 			local car = tr.Entity
 			
-			if car and car:IsValid() then
+			if car and car:IsValid() and not ply:InVehicle() then
 			
 				local axis = car:GetNWInt("TP3AC_axis")
 				local edge_f = car:GetNWInt("TP3AC_edge_f")
@@ -1662,7 +1684,7 @@ if CLIENT then
 				else --car does not have autocouplers
 					decouplingcar = nil
 				end
-			else --Not looking at a valid entity
+			else --Not looking at a valid entity, or in a seat
 				decouplingcar = nil
 			end
 		
@@ -1675,7 +1697,7 @@ if CLIENT then
 					dct_cvar = GetConVar("tp3_autocoupler_decoupletime")
 				end
 				if dct_cvar then
-					holdtime = math.Clamp(1, dct_cvar:GetFloat(), 5)
+					holdtime = math.Clamp(0.5, dct_cvar:GetFloat(), 5)
 				end
 				
 				if CurTime() > (decouplingtime + holdtime) then --Pop it!

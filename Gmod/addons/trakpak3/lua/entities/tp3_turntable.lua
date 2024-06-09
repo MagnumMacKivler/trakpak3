@@ -236,6 +236,11 @@ if SERVER then
 				
 				--Control Input
 				if self.driver then
+					
+					if self.driver:KeyDown(IN_WALK) then --Eject player
+						self.driver:ExitVehicle()
+					end
+					
 					if not self.locked then
 						local move_fwd = self.driver:KeyDown(self.enumccw)
 						local move_rev = self.driver:KeyDown(self.enumcw)
@@ -424,8 +429,9 @@ if CLIENT then
 		local ccw = string.upper(input.LookupBinding(binds.ccw))
 		local cw = string.upper(input.LookupBinding(binds.cw))
 		local stop = string.upper(input.LookupBinding(binds.stop))
+		local eject = string.upper(input.LookupBinding("+walk"))
 		
-		local message = "Turntable Controls:\n"..ccw.." - Move Counterclockwise\n"..cw.." - Move Clockwise\n"..stop.." - Manual Stop"
+		local message = "Turntable Controls:\n"..ccw.." - Move Counterclockwise\n"..cw.." - Move Clockwise\n"..stop.." - Manual Stop".."\n"..eject.." - Force Exit"
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end

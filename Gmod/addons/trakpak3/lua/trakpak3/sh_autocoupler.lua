@@ -69,7 +69,7 @@ if SERVER then
 		for n = 1, AutoCoupler.LastIndex do --Check and see if an earlier slot is open
 			if not AutoCoupler.AllCouplers[n] then --Index is free
 				index = n
-				print("FOUND EMPTY SLOT AT: "..n)
+				--print("FOUND EMPTY SLOT AT: "..n)
 				break
 			end
 		end
@@ -175,7 +175,6 @@ if SERVER then
 			local phys2 = self.truck:GetPhysicsObject()
 			
 			local ropewidth = max(self.ropewidth, coupler2.ropewidth)
-			
 			if not ( phys1 and phys2 and phys1:IsValid() and phys2:IsValid() ) then return false end
 			
 			
@@ -183,7 +182,7 @@ if SERVER then
 			local rope
 			if slack > 0 then --Slack-style coupling
 				local midpoint = ( self.truck:LocalToWorld(phys1:GetMassCenter()) + coupler2.truck:LocalToWorld(phys2:GetMassCenter()) )/2
-				rope = constraint.Rope(self.truck, coupler2.truck, 0, 0, self.truck:WorldToLocal(midpoint), coupler2.truck:WorldToLocal(midpoint), slack, 0, 0, 2, "")
+				rope = constraint.Rope(self.truck, coupler2.truck, 0, 0, self.truck:WorldToLocal(midpoint), coupler2.truck:WorldToLocal(midpoint), slack, 0, 0, ropewidth, "")
 			else --Traditional drawbar
 				local mc1 = self.truck:LocalToWorld(phys1:GetMassCenter())
 				local mc2 = coupler2.truck:LocalToWorld(phys2:GetMassCenter())
@@ -303,7 +302,8 @@ if SERVER then
 		end
 		
 		--Duplicator Compatibility
-		if not car.TP3AC_Dupe then car.TP3AC_Dupe = {oldcarid = car:EntIndex()} end --Note: this is in the main level, the coupler data is in a sublevel below:
+		if not car.TP3AC_Dupe then car.TP3AC_Dupe = {} end --Note: this is in the main level, the coupler data is in a sublevel below:
+		car.TP3AC_Dupe.oldcarid = car:EntIndex()
 		car.TP3AC_Dupe[sign] = {truckid = truck:EntIndex(), axis = axis, tolerance = tolerance, edge = edge, slack = slack, ropewidth = ropewidth}
 		duplicator.StoreEntityModifier(car,"Trakpak3_AutoCoupler",car.TP3AC_Dupe)
 		
@@ -435,6 +435,7 @@ if SERVER then
 	
 	local function checkAll(ply, oldcarid)
 		local cartable = AutoCoupler.Assemblies[ply][oldcarid]
+		--PrintTable(cartable) print("\n")
 		local has_f, has_r, hascar
 		if cartable[0] then
 			hascar = true
@@ -448,11 +449,14 @@ if SERVER then
 		
 		if hascar and has_f and has_r then
 			local car = Entity(cartable[0])
-			if car and car:IsValid() then
+			if car and car:IsValid() and car.TP3AC_Dupe then
 				if car.TP3AC_Dupe[1] then car.TP3AC_Dupe[1].truckid = cartable[1] end
 				if car.TP3AC_Dupe[-1] then car.TP3AC_Dupe[-1].truckid = cartable[-1] end
 				AutoCoupler.RestoreCar(car)
 				AutoCoupler.Assemblies[ply][oldcarid] = nil
+			else
+				AutoCoupler.Assemblies[ply][oldcarid] = nil
+				chat.AddText("The car you have just spawned in is either invalid or has missing autocoupler data. Please remove the autocouplers and try again.")
 			end
 		end
 	end
@@ -461,8 +465,9 @@ if SERVER then
 	duplicator.RegisterEntityModifier("Trakpak3_AutoCoupler",function(ply, car, CouplerData)
 		car.TP3AC = nil
 		car.TP3AC_Dupe = CouplerData
+		--PrintTable(CouplerData) print("\n")
 		
-		--CouplerData Members: oldcarid, index
+		--CouplerData Members: oldcarid, 1, -1
 		local oldcarid = CouplerData.oldcarid
 		
 		local ass = AutoCoupler.Assemblies
@@ -944,8 +949,10 @@ if CLIENT then
 		frame:SetPos(ex, ey)
 		frame:SetTitle("Trakpak3 AutoCoupler Editor")
 		frame:MakePopup()
-		function frame:OnClose()
-			ex, ey = frame:GetPos() --Store for next time
+		function frame:OnRemove()
+			if self then
+				ex, ey = self:GetPos() --Store for next time
+			end
 		end
 		frame:SetSizable(false)
 		frame:SetScreenLock(true)
@@ -1057,7 +1064,7 @@ if CLIENT then
 			num:SetMax(2000)
 			num:SetValue(math.Round(c.edge))
 			
-			function num:OnValueChanged(val) c.edge = val end
+			function num:OnValueChanged(val) c.edge = tonumber(val) or 100 end
 			
 			--Tolerance
 			local lbl = vgui.Create("DLabel",panel)
@@ -1077,7 +1084,7 @@ if CLIENT then
 			num:SetValue(math.Round(c.tolerance))
 			num:SetMin(0)
 			num:SetMax(96)
-			function num:OnValueChanged(val) c.tolerance = val end
+			function num:OnValueChanged(val) c.tolerance = tonumber(val) or 48 end
 			
 			--Slack
 			local lbl = vgui.Create("DLabel",panel)
@@ -1097,7 +1104,7 @@ if CLIENT then
 			num:SetValue(math.Round(c.slack))
 			num:SetMin(0)
 			num:SetMax(16)
-			function num:OnValueChanged(val) c.slack = val end
+			function num:OnValueChanged(val) c.slack = tonumber(val) or 6 end
 			
 			--Rope Width
 			local lbl = vgui.Create("DLabel",panel)
@@ -1117,7 +1124,7 @@ if CLIENT then
 			num:SetValue(math.Round(c.ropewidth))
 			num:SetMin(0)
 			num:SetMax(8)
-			function num:OnValueChanged(val) c.ropewidth = val end
+			function num:OnValueChanged(val) c.ropewidth = tonumber(val) or 2 end
 			
 			--Delete Button
 			local deleto = vgui.Create("DCheckBoxLabel", panel)
@@ -1196,7 +1203,7 @@ if CLIENT then
 			num:SetMin(0)
 			num:SetMax(2000)
 			num:SetValue(math.Round(c.edge))
-			function num:OnValueChanged(val) c.edge = val end
+			function num:OnValueChanged(val) c.edge = tonumber(val) or 100 end
 			
 			--Tolerance
 			local lbl = vgui.Create("DLabel",panel)
@@ -1216,7 +1223,7 @@ if CLIENT then
 			num:SetValue(math.Round(c.tolerance))
 			num:SetMin(0)
 			num:SetMax(96)
-			function num:OnValueChanged(val) c.tolerance = val end
+			function num:OnValueChanged(val) c.tolerance = tonumber(val) or 48 end
 			
 			--Slack
 			local lbl = vgui.Create("DLabel",panel)
@@ -1236,7 +1243,7 @@ if CLIENT then
 			num:SetValue(math.Round(c.slack))
 			num:SetMin(0)
 			num:SetMax(16)
-			function num:OnValueChanged(val) c.slack = val end
+			function num:OnValueChanged(val) c.slack = tonumber(val) or 6 end
 			
 			--Rope Width
 			local lbl = vgui.Create("DLabel",panel)
@@ -1256,7 +1263,7 @@ if CLIENT then
 			num:SetValue(math.Round(c.ropewidth))
 			num:SetMin(0)
 			num:SetMax(8)
-			function num:OnValueChanged(val) c.ropewidth = val end
+			function num:OnValueChanged(val) c.ropewidth = tonumber(val) or 2 end
 			
 			--Delete Button
 			local deleto = vgui.Create("DCheckBoxLabel", panel)
@@ -1438,6 +1445,10 @@ if CLIENT then
 		
 	end
 	
+	--To store input bindings
+	local key_e
+	local key_m1
+	
 	--Draw HUD for tool/decoupler
 	function AutoCoupler.DrawHUD()
 		cam.Start2D()
@@ -1570,6 +1581,30 @@ if CLIENT then
 			end
 		
 		--Decoupling HUD
+		
+		if Trakpak3.InitPostEntity and not (key_e and key_m1) then
+			key_e = string.upper(input.LookupBinding("+use"))
+			key_m1 = string.upper(input.LookupBinding("+attack"))
+		end
+		
+		local vehicle_ok = nil
+		
+		if ply:InVehicle() then
+			local veh = ply:GetVehicle()
+			if veh and veh:IsValid() and veh:GetNWBool( "TP3AC_AllowDecouple" ) then
+				vehicle_ok = true
+			else
+				vehicle_ok = false
+			end
+		end
+		
+		local key
+		if vehicle_ok then
+			key = key_m1
+		else
+			key = key_e
+		end
+		
 		local sx, sy = 128, 24
 		
 		if decouplingcar then
@@ -1600,7 +1635,7 @@ if CLIENT then
 					decoupling_prog:Remove()
 					decoupling_prog = nil
 				end
-				draw.SimpleTextOutlined("Hold +use to decouple...", "DermaDefault", ScrW()/2, ScrH()/2 + 64, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, black)
+				draw.SimpleTextOutlined("Hold "..key.." to decouple...", "DermaDefault", ScrW()/2, ScrH()/2 + 64, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, black)
 			end
 		else
 			if decoupling_prog and decoupling_prog:IsValid() then
@@ -1623,12 +1658,29 @@ if CLIENT then
 	hook.Add("Think","TP3_AutoCoupler_Decoupler",function()
 		local ply = LocalPlayer()
 		
+		
+		
+		local vehicle_ok = nil
+		
+		if ply:InVehicle() then
+			local veh = ply:GetVehicle()
+			if veh and veh:IsValid() and veh:GetNWBool( "TP3AC_AllowDecouple" ) then
+				vehicle_ok = true
+			else
+				vehicle_ok = false
+			end
+		end
+		
+		local key = IN_USE
+		if vehicle_ok then key = IN_ATTACK end
+		
 		if not decouplingtime then
 			local tr = ply:GetEyeTrace()
 			local car = tr.Entity
 			
-			if car and car:IsValid() and not ply:InVehicle() then
-			
+			if car and car:IsValid() and (vehicle_ok != false) then
+				
+				
 				local axis = car:GetNWInt("TP3AC_axis")
 				local edge_f = car:GetNWInt("TP3AC_edge_f")
 				local edge_r = car:GetNWInt("TP3AC_edge_r")
@@ -1664,7 +1716,7 @@ if CLIENT then
 						if inzone then
 							decouplingcar = car
 							
-							if ply:KeyDown(IN_USE) and not decouplinglock then --Holding E
+							if ply:KeyDown(key) and not decouplinglock then --Holding E
 								decouplinglock = true
 								if inzone==1 then
 									decouplingtime = CurTime()
@@ -1674,7 +1726,7 @@ if CLIENT then
 									decouplingsign = -1
 								end
 								
-							elseif decouplinglock and not ply:KeyDown(IN_USE) then --Not holding E
+							elseif decouplinglock and not ply:KeyDown(key) then --Not holding E
 								decouplinglock = false
 							end
 						else --Not in zone
@@ -1689,7 +1741,7 @@ if CLIENT then
 			end
 		
 		else --Holding Decoupling 
-			if decouplingcar and decouplingsign and ply:KeyDown(IN_USE) then --Still Holding
+			if decouplingcar and decouplingsign and ply:KeyDown(key) then --Still Holding
 				
 				local holdtime = 1
 				

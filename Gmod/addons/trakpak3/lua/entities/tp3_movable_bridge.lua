@@ -304,7 +304,11 @@ if SERVER then
 				
 				--Control Input
 				if self.driver then
-
+					
+					if self.driver:KeyDown(IN_WALK) then --Eject player
+						self.driver:ExitVehicle()
+					end
+					
 					local move_fwd = self.driver:KeyDown(self.enumo)
 					local move_rev = self.driver:KeyDown(self.enumc)
 					--local stop_move = self.driver:KeyDown(IN_JUMP)
@@ -677,8 +681,9 @@ if CLIENT then
 		
 		local open = string.upper(input.LookupBinding(binds.open))
 		local close = string.upper(input.LookupBinding(binds.close))
+		local eject = string.upper(input.LookupBinding("+walk"))
 		
-		local message = "Movable Bridge Controls:\n"..open.." - Open Bridge\n"..close.." - Close Bridge"
+		local message = "Movable Bridge Controls:\n"..open.." - Open Bridge\n"..close.." - Close Bridge".."\n"..eject.." - Force Exit"
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end

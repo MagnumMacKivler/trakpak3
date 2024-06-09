@@ -75,13 +75,7 @@ function Trakpak3.RotateAroundAxis(angle, axis, rotation)
 end
 
 --Finds the "root" entity in a chain (I.E. the one that the input entity is directly or indirectly parented to)
-function Trakpak3.GetRoot(ent)
-	if not ent:IsValid() then return end
-	while ent:GetParent():IsValid() do
-		ent = ent:GetParent()
-	end
-	return ent
-end
+--Moved to shared
 
 --Sets multiple bodygroups, takes either an array (list) or a string separated by spaces.
 function Trakpak3.SetBodygroups(ent, bgs)

@@ -215,12 +215,19 @@ if SERVER then
 			--Motion!
 			if self.active then
 				
+				
+				
 				local atmin = self.pos <= self.minpos
 				local atmax = self.pos >= self.maxpos
 				
 				--Control Input
 				local throttle = 0
 					if self.driver then
+					
+						if self.driver:KeyDown(IN_WALK) then --Eject player
+							self.driver:ExitVehicle()
+						end
+							
 						if not self.locked then
 							local move_fwd = self.driver:KeyDown(self.enumf)
 							local move_rev = self.driver:KeyDown(self.enumr)
@@ -404,8 +411,9 @@ if CLIENT then
 		local fwd = string.upper(input.LookupBinding(binds.fwd))
 		local rev = string.upper(input.LookupBinding(binds.rev))
 		local stop = string.upper(input.LookupBinding(binds.stop))
+		local eject = string.upper(input.LookupBinding("+walk"))
 		
-		local message = "Transfer Table Controls:\n"..fwd.." - Move "..df.."\n"..rev.." - Move "..dr.."\n"..stop.." - Manual Stop"
+		local message = "Transfer Table Controls:\n"..fwd.." - Move "..df.."\n"..rev.." - Move "..dr.."\n"..stop.." - Manual Stop".."\n"..eject.." - Force Exit"
 		
 		chat.AddText(Color(0,191,255),"[TRAKPAK3] ",Color(255,223,0),message)
 	end

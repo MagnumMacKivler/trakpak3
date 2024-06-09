@@ -27,6 +27,8 @@ local red = Color(255,0,0)
 local green = Color(0,255,0)
 local blue = Color(0,127,255)
 
+local LocalPlayer = LocalPlayer
+
 Dispatch.elementsize = 20
 
 surface.CreateFont("tp3_dispatch_1",{
@@ -3471,10 +3473,11 @@ Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 end
 
 --Dispatcher Note Editor
+local editing_note
 function Dispatch.EditNote(traintag)
 	if not Dispatch.LocalNotes then Dispatch.LocalNotes = {} end
 	local mynote = Dispatch.LocalNotes[traintag]
-
+	editing_note = true
 	local frame = vgui.Create("DFrame")
 	local x, y = 256, 192
 	
@@ -3484,6 +3487,7 @@ function Dispatch.EditNote(traintag)
 	frame:SetIcon("icon16/note_edit.png")
 	frame:SetSizable(false)
 	frame:MakePopup()
+	function frame:OnClose() editing_note = false end
 	
 	local pnl = vgui.Create("DPanel",frame)
 	pnl:Dock(FILL)
@@ -3521,6 +3525,7 @@ function Dispatch.EditNote(traintag)
 		if val=="" then val = nil end
 		Dispatch.LocalNotes[traintag] = val
 	end
+	function text:OnEnter() frame:Close() end
 	
 	local button = vgui.Create("DButton",pnl)
 	button:Dock(FILL)
@@ -3554,8 +3559,20 @@ function Dispatch.Teleport(target)
 end
 							
 
+local keybind
+local key_holding
+
 --Create Dispatch Board VGUI (not editor)
 function Dispatch.OpenDispatcher()
+	
+	local keystr = input.LookupBinding("tp3_dispatch")
+	if keystr and keystr!="no value" then
+		keybind = input.GetKeyCode(keystr)
+	else
+		keybind = nil
+	end
+	key_holding = true
+	
 	--Dispatcher Frame
 	local sizex = Dispatch.sizex or (ScrW()*0.75)
 	local sizey = Dispatch.sizey or (ScrH()*0.75)
@@ -3573,6 +3590,9 @@ function Dispatch.OpenDispatcher()
 	frame:SetMinHeight(64)
 	frame:SetMinWidth(128)
 	function frame:OnClose()
+		--Remove the closing hook
+		hook.Remove("Think","Trakpak3_CloseDispatcher")
+		
 		
 		--Save Position & Scale Data
 		Dispatch.sizex, Dispatch.sizey = frame:GetSize()
@@ -3581,11 +3601,25 @@ function Dispatch.OpenDispatcher()
 		--Clear the variables
 		Dispatch.Panels.dispatcher = nil
 		
-		--Reinitialize all world dispatch boards
-		--for _, board in pairs(ents.FindByClass("tp3_dispatch_board")) do board:InitializeBoard() end
+		
 	end
 	frame:MakePopup()
 	Dispatch.Panels.dispatcher = frame
+	
+	--Close Dispatcher if the player taps the bind again
+	hook.Add("Think","Trakpak3_CloseDispatcher",function()
+		if keybind and frame and frame:IsValid() then
+			local pressing = input.IsButtonDown(keybind)
+			if pressing and (not key_holding) and (not editing_note) then --Close it
+				frame:Close()
+				hook.Remove("Think","Trakpak3_CloseDispatcher")
+			elseif (not pressing) and key_holding then --Release the initial lock
+				key_holding = false
+			end
+		else --Frame is no longer valid, or the keybind is invalid
+			hook.Remove("Think","Trakpak3_CloseDispatcher")
+		end
+	end)
 	
 	--Control Bar
 	local bottombar = vgui.Create("DPanel",frame)
@@ -3807,6 +3841,7 @@ function Dispatch.OpenDispatcher()
 		end
 	end)
 end
+
 
 --Console Commands
 concommand.Add("tp3_dispatch_editor",Dispatch.OpenEditor, nil, "Opens the Dispatch Board Editor.")

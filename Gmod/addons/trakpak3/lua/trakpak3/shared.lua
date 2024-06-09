@@ -1,5 +1,14 @@
 --SHARED
 
+--Get's the "Root" entity, the parent of all parents.
+function Trakpak3.GetRoot(ent)
+	if not ent:IsValid() then return end
+	while ent:GetParent():IsValid() do
+		ent = ent:GetParent()
+	end
+	return ent
+end
+
 --Custom Vehicles
 
 --Footprint

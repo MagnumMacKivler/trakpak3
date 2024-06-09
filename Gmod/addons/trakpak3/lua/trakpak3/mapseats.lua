@@ -12,6 +12,8 @@ function Trakpak3.CHECK_MAP_VEHICLES()
 		if not veh:IsVehicle() then continue end -- Skip this iteration if it's not a vehicle, checks class, less expensive
 		if veh:CreatedByMap() then --Vehicle was included with the map and not spawned/duped/whatever
 			
+			veh:SetKeyValue("limitview","0")
+			
 			if veh.genscript then --Vehicle has a preferred generation script already, corresponding to a table entry in the Vehicles table.
 				local vtable = Vehicles[veh.genscript]
 				if vtable then

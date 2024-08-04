@@ -1,6 +1,6 @@
 // Trakpak3 FGD File
 
-@include "base.fgd"
+// @include "base.fgd"
 
 //Switch
 @PointClass base(Angles) studioprop() = tp3_switch : "A simple switch. Swaps between two models to change tracks. All Input/Output and Control functions are handled by the Switch Stand."

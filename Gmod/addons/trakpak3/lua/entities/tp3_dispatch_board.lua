@@ -19,7 +19,7 @@ if SERVER then
 		local norm = disp:Cross(Vector(0,0,1)):GetNormalized()
 		
 		self:SetNWVector("campos",pos + norm*0.5)
-		
+		self:SetNWVector("endpos",self.endpos)
 		
 		local dx = Vector(disp.x, disp.y, 0)
 		local dy = Vector(0, 0, disp.z)
@@ -45,12 +45,13 @@ if CLIENT then
 		if not self.init then return end
 		if not self.hasparams then
 			self.pos = self:GetNWVector("campos",nil)
+			self.endpos = self:GetNWVector("endpos",nil)
 			self.ang = self:GetNWAngle("camang",nil)
 			self.scale = self:GetNWFloat("camscale",nil)
 			self.dx = self:GetNWFloat("dx",nil)
 			self.dy = self:GetNWFloat("dy",nil)
 			
-			if self.pos and self.ang and self.scale and self.dx and self.dy then self.hasparams = true end
+			if self.pos and self.endpos and self.ang and self.scale and self.dx and self.dy then self.hasparams = true end
 		end
 		
 		if not self.pagenum and (#self.Boards>0) then
@@ -64,7 +65,7 @@ if CLIENT then
 			if self.pagenum then
 				--print("Your page number is "..self.pagenum)
 			else
-				print("[Trakpak3] Could not find a page number for '"..page.."'")
+				ErrorNoHalt("[Trakpak3] Could not find a page number for '"..page.."'")
 			end
 		end
 		
@@ -150,6 +151,8 @@ if CLIENT then
 				end
 			end
 		end
+		
+		self:SetRenderBoundsWS(self.pos,self.endpos)
 		
 		--Populate Page
 		timer.Simple(1, function() self:PopulatePage(canvas, self.pagenum) end)

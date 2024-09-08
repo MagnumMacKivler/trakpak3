@@ -30,12 +30,14 @@ if SERVER then
 	function ENT:EnableMover(duration)
 		local savetable = self:GetSaveTable()
 		self:SetSaveValue("m_flMoveDoneTime", savetable.ltime + (duration or 1))
+		self:StopFixerPos()
 	end
 	
 	function ENT:DisableMover()
 		local savetable = self:GetSaveTable()
 		self:SetSaveValue("m_flMoveDoneTime", savetable.ltime)
 		self:SetLocalAngularVelocity(Angle(0,0,0))
+		self:SetFixerPos(self.fixerpos, self:GetAngles())
 	end
 	
 	--util.AddNetworkString("TP3_TurnTable_ControlInfo")
@@ -342,7 +344,7 @@ if SERVER then
 				
 				--Continue Movement
 				if not self.targetangle then self:SetLocalAngularVelocity(Angle(0,self.speed,0)) end
-				self:EnableMover()
+				if self.speed != 0 then self:EnableMover() end
 			end
 		end
 		

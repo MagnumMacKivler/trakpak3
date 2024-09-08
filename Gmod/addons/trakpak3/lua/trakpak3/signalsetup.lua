@@ -42,6 +42,7 @@ for k, filename in pairs(file.Find("trakpak3/signalsystems/"..map.."/*.lua","LUA
 				--print(name, rtable.speed, rtable.description)
 			end
 			currentsys.sigtypes = ftable.sigtypes
+			--PrintTable(ftable)
 			if ftable.func_text then
 				RunString("TP3Signals.TempLogic = "..ftable.func_text)
 				--print("TP3Signals.TempLogic = "..ftable.func_text) 

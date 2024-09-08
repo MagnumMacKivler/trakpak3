@@ -45,6 +45,7 @@ if SERVER then
 	include("trakpak3/pathconfig.lua") --
 	include("trakpak3/signalsprites.lua") --
 	include("trakpak3/clientloader.lua")
+	include("trakpak3/positionfixer.lua") --
 	include("trakpak3/shared.lua") --
 	include("trakpak3/sh_autocoupler.lua") --
 	

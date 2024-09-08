@@ -289,11 +289,11 @@
 		1 : "Yes"
 	]
 	
-	//nowire(choices) : "Disable Wiremod Input" : 0 : "If set, the bridge will ignore wiremod inputs." =
-	//[
-	//	0 : "No"
-	//	1 : "Yes"
-	//]
+	nowire(choices) : "Disable Wiremod Input" : 0 : "If set, the bridge will ignore wiremod inputs." =
+	[
+		0 : "No"
+		1 : "Yes"
+	]
 	
 	LightingOrigin(target_destination) : "Lighting Origin" : : "An entity (NOT info_lighting) from which to sample lighting, for example, info_target. The info_lighting entity only works for prop_static."
 	
@@ -813,12 +813,13 @@
 	angles(angle) : "Angle (P Y R)" : "0 0 0" : "The text plane's orientation in the world. The text will be oriented such that the angle's forward axis is the normal of the text plane."
 ]
 
-//Dispatch/CTC Board
+//World Dispatch/CTC Board
 @PointClass vecline(endpos) studioprop("models/editor/axis_helper_thick.mdl") = tp3_dispatch_board : 
 "Creates a 2D Dispatch board in the world for players to operate. Dispatch boards can display block occupancy information on a simplified map of the route, as well as control signals and switches."
 [
-	board(string) : "Dispatch Board Name" : "" : "The name of the dispatch board page to use."
+	board(string) : "Page Name" : "" : "The name of the dispatch board page to use."
 	endpos(vector) : "Bottom Corner" : : "The bottom right corner of the dispatch board. This entity's position is the top left corner."
+	uiscale(float) : "UI Scale Override" : : "By default, the dispatch board calculates the UI (element) scale based on the horizontal size of the board (Width / 1600). Entering a number here forces the board to use that scale. The value is in inches per pixel. Leave blank or enter 0 for automatic calculation."
 ]
 
 //Dispatch-Hammer Interface

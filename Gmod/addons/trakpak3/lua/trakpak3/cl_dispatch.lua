@@ -1395,7 +1395,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				--self.menu = nil
 				Dispatch.Deselect()
 			end
-			if nopath==1 then button:SetEnabled(false) end
+			--if nopath==1 then button:SetEnabled(false) end
 			
 			local button = vgui.Create("DButton",mpanel)
 			button:SetSize(1,36)
@@ -1408,7 +1408,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				--self.menu = nil
 				Dispatch.Deselect()
 			end
-			if nopath==1 then button:SetEnabled(false) end
+			--if nopath==1 then button:SetEnabled(false) end
 			
 			local button = vgui.Create("DButton",mpanel)
 			button:SetSize(1,36)

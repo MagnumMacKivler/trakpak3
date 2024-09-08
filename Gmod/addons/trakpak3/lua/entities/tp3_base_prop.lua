@@ -55,7 +55,20 @@ if SERVER then
 			self[key] = flags
 		elseif datatype=="output" then
 			self:StoreOutput(key, value)
-		end		
+		end
+
+		--Automatically set up fixer pos
+		if key=="origin" then
+			self.fixerpos = Trakpak3.HammerStringToVector(value)
+			if self.fixerang then
+				self:SetFixerPos(self.fixerpos, self.fixerang)
+			end
+		elseif key=="angles" then
+			self.fixerang = Trakpak3.HammerStringToAngle(value)
+			if self.fixerpos then
+				self:SetFixerPos(self.fixerpos, self.fixerang)
+			end
+		end
 	end
 	
 	--Validate Entity KVs
@@ -94,6 +107,26 @@ if SERVER then
 		if type(bgs)=="table" then
 			for bg, part in ipairs(bgs) do self:SetBodygroup(bg, tonumber(part)) end
 		end
+	end
+	
+	--Add entity into the Position Fixer Registry
+	function ENT:SetFixerPos(pos, ang)
+		if not self:IsValid() then return end
+		if not Trakpak3.PositionFixer.Registry[self] then
+			Trakpak3.PositionFixer.Registry[self] = {}
+		end
+		Trakpak3.PositionFixer.Registry[self].pos = pos
+		Trakpak3.PositionFixer.Registry[self].ang = ang
+	end
+	
+	--Unused
+	--function ENT:SetFixerPosEasy()
+		--self:SetFixerPos(self:GetPos(),self:GetAngles())
+	--end
+	
+	--Suspend position fixing
+	function ENT:StopFixerPos()
+		self:SetFixerPos()
 	end
 	
 end

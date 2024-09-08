@@ -739,6 +739,18 @@
 	},
 	"sigtypes": {
 		"cl_dwarf_l": {
+			"281 Approach Medium": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg3": "",
+				"bg2": "",
+				"override": "286 Medium Clear",
+				"cycle2": ""
+			},
 			"290a Restricting": {
 				"cycle1": "",
 				"skin1": "",
@@ -747,8 +759,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"bg3": "0",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "0"
 			},
 			"284 Limited Clear": {
 				"cycle1": "",
@@ -758,13 +770,71 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"cycle2": "",
-				"bg3": "0"
+				"bg3": "0",
+				"cycle2": ""
 			},
 			"291 Stop And Proceed": {
 				"cycle1": "",
 				"skin1": "",
 				"bg1": "1 1 1 1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"cycle2": "",
+				"bg3": "0"
+			},
+			"278 Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "284 Limited Clear",
+				"bg3": ""
+			},
+			"test": true,
+			"290b Grade Signal": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1 1 1 1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"cycle2": "",
+				"bg3": "0"
+			},
+			"285 Limited Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1 5 5 5",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"bg3": "0",
+				"cycle2": ""
+			},
+			"282 Approach Slow": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg3": "",
+				"bg2": "",
+				"override": "288 Slow Clear",
+				"cycle2": ""
+			},
+			"289 Slow Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4 4 4 4",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
@@ -780,10 +850,21 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"cycle2": "",
-				"bg3": "0"
+				"bg3": "0",
+				"cycle2": ""
 			},
-			"test": true,
+			"283 Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg3": "",
+				"bg2": "",
+				"override": "285 Limited Approach",
+				"cycle2": ""
+			},
 			"287 Medium Approach": {
 				"cycle1": "",
 				"skin1": "",
@@ -792,13 +873,726 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
+				"bg3": "0",
+				"cycle2": ""
+			},
+			"280 Approach Limited": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg3": "",
+				"bg2": "",
+				"override": "284 Limited Clear",
+				"cycle2": ""
+			},
+			"292 Stop": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1 1 1 1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
 				"cycle2": "",
 				"bg3": "0"
 			},
+			"279 Advance Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg3": "",
+				"bg2": "",
+				"override": "284 Limited Clear",
+				"cycle2": ""
+			},
+			"288 Slow Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6 6 6 6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"bg3": "0",
+				"cycle2": ""
+			}
+		},
+		"uq_high_l1": {
+			"281 Approach Medium": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"290a Restricting": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "3",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"284 Limited Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "7",
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"291 Stop And Proceed": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"278 Clear": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"test": true,
+			"290b Grade Signal": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"288 Slow Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "1",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "6",
+				"cycle2": "0"
+			},
+			"282 Approach Slow": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"289 Slow Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"280 Approach Limited": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"283 Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"287 Medium Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"286 Medium Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "6",
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"292 Stop": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"279 Advance Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "5",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"285 Limited Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
+			}
+		},
+		"cl_high_l2": {
+			"281 Approach Medium": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"290a Restricting": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "3",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"284 Limited Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "7",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"291 Stop And Proceed": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"278 Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"test": true,
+			"290b Grade Signal": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"279 Advance Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "5",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"282 Approach Slow": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "4"
+			},
+			"289 Slow Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "4"
+			},
+			"280 Approach Limited": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "5",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"283 Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"287 Medium Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"285 Limited Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "5",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"292 Stop": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"288 Slow Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "6"
+			},
+			"286 Medium Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "6",
+				"cycle2": "",
+				"bg3": "1"
+			}
+		},
+		"uq_high": {
+			"281 Approach Medium": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"290a Restricting": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "2",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"284 Limited Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "7",
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"291 Stop And Proceed": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"278 Clear": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"test": true,
+			"290b Grade Signal": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"288 Slow Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "1",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "6",
+				"cycle2": "0"
+			},
+			"282 Approach Slow": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"289 Slow Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"280 Approach Limited": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"283 Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"287 Medium Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"286 Medium Clear": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "6",
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"292 Stop": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"279 Advance Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "5",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"285 Limited Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
+			}
+		},
+		"cl_dwarf": {
+			"281 Approach Medium": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "286 Medium Clear",
+				"bg3": ""
+			},
+			"290a Restricting": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "2 2 2 2",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"bg3": "0",
+				"cycle2": ""
+			},
+			"284 Limited Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1 7 7 7",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"bg3": "0",
+				"cycle2": ""
+			},
+			"291 Stop And Proceed": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1 1 1 1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"cycle2": "",
+				"bg3": "0"
+			},
+			"278 Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "284 Limited Clear",
+				"bg3": ""
+			},
+			"test": true,
 			"290b Grade Signal": {
 				"cycle1": "",
 				"skin1": "",
 				"bg1": "1 1 1 1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"cycle2": "",
+				"bg3": "0"
+			},
+			"279 Advance Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "284 Limited Clear",
+				"bg3": ""
+			},
+			"282 Approach Slow": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "288 Slow Clear",
+				"bg3": ""
+			},
+			"289 Slow Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4 4 4 4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "0",
+				"bg3": "0",
+				"cycle2": ""
+			},
+			"280 Approach Limited": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "284 Limited Clear",
+				"bg3": ""
+			},
+			"283 Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"cycle2": "",
+				"bg2": "",
+				"override": "285 Limited Approach",
+				"bg3": ""
+			},
+			"287 Medium Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1 4 4 4",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
@@ -814,8 +1608,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"cycle2": "",
-				"bg3": "0"
+				"bg3": "0",
+				"cycle2": ""
 			},
 			"292 Stop": {
 				"cycle1": "",
@@ -825,8 +1619,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"bg3": "0",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "0"
 			},
 			"288 Slow Clear": {
 				"cycle1": "",
@@ -836,734 +1630,18 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"cycle2": "",
-				"bg3": "0"
+				"bg3": "0",
+				"cycle2": ""
 			},
-			"289 Slow Approach": {
+			"286 Medium Clear": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "4 4 4 4",
+				"bg1": "1 6 6 6",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "0",
-				"cycle2": "",
-				"bg3": "0"
-			}
-		},
-		"uq_high_l1": {
-			"281 Approach Medium": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"290a Restricting": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "3",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"284 Limited Clear": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "7",
-				"cycle2": "1",
-				"bg3": "1"
-			},
-			"291 Stop And Proceed": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"278 Clear": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"test": true,
-			"290b Grade Signal": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"279 Advance Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"282 Approach Slow": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"289 Slow Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"280 Approach Limited": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"283 Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"287 Medium Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"285 Limited Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"292 Stop": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"288 Slow Clear": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "1",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "6"
-			},
-			"286 Medium Clear": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "6",
-				"cycle2": "1",
-				"bg3": "1"
-			}
-		},
-		"cl_high_l2": {
-			"281 Approach Medium": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"290a Restricting": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "3",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"284 Limited Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "7",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"291 Stop And Proceed": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"278 Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"test": true,
-			"290b Grade Signal": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"288 Slow Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "6",
-				"cycle2": ""
-			},
-			"282 Approach Slow": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"289 Slow Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"286 Medium Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "6",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"283 Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"287 Medium Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"280 Approach Limited": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"292 Stop": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"279 Advance Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"285 Limited Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
-			}
-		},
-		"uq_high": {
-			"281 Approach Medium": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"290a Restricting": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "2",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"284 Limited Clear": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "7",
-				"cycle2": "1",
-				"bg3": "1"
-			},
-			"291 Stop And Proceed": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"278 Clear": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"test": true,
-			"290b Grade Signal": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"279 Advance Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"282 Approach Slow": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"289 Slow Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"280 Approach Limited": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"283 Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"287 Medium Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"285 Limited Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"292 Stop": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"288 Slow Clear": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "1",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "6"
-			},
-			"286 Medium Clear": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "6",
-				"cycle2": "1",
-				"bg3": "1"
-			}
-		},
-		"cl_high_l3": {
-			"281 Approach Medium": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"290a Restricting": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "3",
-				"cycle2": ""
-			},
-			"284 Limited Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "7",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"291 Stop And Proceed": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"278 Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"test": true,
-			"290b Grade Signal": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"288 Slow Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "6",
-				"cycle2": ""
-			},
-			"282 Approach Slow": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"289 Slow Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"286 Medium Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "6",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"283 Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"287 Medium Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"280 Approach Limited": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"292 Stop": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"279 Advance Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"285 Limited Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "5",
-				"bg3": "1",
+				"bg3": "0",
 				"cycle2": ""
 			}
 		},
@@ -1576,8 +1654,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0.5"
 			},
 			"290a Restricting": {
 				"cycle1": "0",
@@ -1587,8 +1665,8 @@
 				"cycle3": "0.5",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "3"
+				"bg3": "3",
+				"cycle2": "0"
 			},
 			"284 Limited Clear": {
 				"cycle1": "0",
@@ -1598,8 +1676,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "7",
-				"cycle2": "1",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "1"
 			},
 			"291 Stop And Proceed": {
 				"cycle1": "0",
@@ -1609,8 +1687,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0"
 			},
 			"278 Clear": {
 				"cycle1": "1",
@@ -1620,8 +1698,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0"
 			},
 			"test": true,
 			"290b Grade Signal": {
@@ -1632,96 +1710,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"279 Advance Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"282 Approach Slow": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"289 Slow Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"280 Approach Limited": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"283 Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"287 Medium Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"285 Limited Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"292 Stop": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0"
 			},
 			"288 Slow Clear": {
 				"cycle1": "0",
@@ -1731,8 +1721,63 @@
 				"cycle3": "1",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "6"
+				"bg3": "6",
+				"cycle2": "0"
+			},
+			"282 Approach Slow": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"289 Slow Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"280 Approach Limited": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"283 Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"287 Medium Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
 			},
 			"286 Medium Clear": {
 				"cycle1": "0",
@@ -1742,8 +1787,41 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "6",
-				"cycle2": "1",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"292 Stop": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"279 Advance Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "5",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"285 Limited Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
 			}
 		},
 		"cl_high": {
@@ -1755,8 +1833,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"290a Restricting": {
 				"cycle1": "",
@@ -1766,8 +1844,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"284 Limited Clear": {
 				"cycle1": "",
@@ -1777,8 +1855,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "7",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"291 Stop And Proceed": {
 				"cycle1": "",
@@ -1788,8 +1866,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"278 Clear": {
 				"cycle1": "",
@@ -1799,8 +1877,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"test": true,
 			"290b Grade Signal": {
@@ -1811,96 +1889,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"288 Slow Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "6",
-				"cycle2": ""
-			},
-			"282 Approach Slow": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"289 Slow Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"286 Medium Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "6",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"283 Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"287 Medium Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"280 Approach Limited": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"292 Stop": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"279 Advance Approach": {
 				"cycle1": "",
@@ -1910,99 +1900,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"285 Limited Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
-			}
-		},
-		"cl_high_l1": {
-			"281 Approach Medium": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"290a Restricting": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "3",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"284 Limited Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "7",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"291 Stop And Proceed": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"278 Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"test": true,
-			"290b Grade Signal": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"288 Slow Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "6",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"282 Approach Slow": {
 				"cycle1": "",
@@ -2012,8 +1911,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "4"
 			},
 			"289 Slow Approach": {
 				"cycle1": "",
@@ -2023,41 +1922,8 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "1",
-				"bg3": "4",
-				"cycle2": ""
-			},
-			"286 Medium Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "6",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"283 Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"287 Medium Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "4",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "4"
 			},
 			"280 Approach Limited": {
 				"cycle1": "",
@@ -2067,30 +1933,30 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
 			},
-			"292 Stop": {
+			"283 Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"287 Medium Approach": {
 				"cycle1": "",
 				"skin1": "",
 				"bg1": "1",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
-			},
-			"279 Advance Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "1",
-				"bg3": "1",
-				"cycle2": ""
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"285 Limited Approach": {
 				"cycle1": "",
@@ -2100,8 +1966,41 @@
 				"cycle3": "",
 				"skin3": "",
 				"bg2": "5",
-				"bg3": "1",
-				"cycle2": ""
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"292 Stop": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"288 Slow Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "6"
+			},
+			"286 Medium Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "6",
+				"cycle2": "",
+				"bg3": "1"
 			}
 		},
 		"uq_high_l2": {
@@ -2113,8 +2012,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0.5"
 			},
 			"290a Restricting": {
 				"cycle1": "0",
@@ -2124,8 +2023,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "3",
-				"cycle2": "0.5",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0.5"
 			},
 			"284 Limited Clear": {
 				"cycle1": "0",
@@ -2135,8 +2034,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "7",
-				"cycle2": "1",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "1"
 			},
 			"291 Stop And Proceed": {
 				"cycle1": "0",
@@ -2146,8 +2045,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0"
 			},
 			"278 Clear": {
 				"cycle1": "1",
@@ -2157,8 +2056,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0"
 			},
 			"test": true,
 			"290b Grade Signal": {
@@ -2169,96 +2068,8 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"279 Advance Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "5",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"282 Approach Slow": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"289 Slow Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0.5",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "4"
-			},
-			"280 Approach Limited": {
-				"cycle1": "1",
-				"skin1": "",
-				"bg1": "6",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"283 Approach": {
-				"cycle1": "0.5",
-				"skin1": "",
-				"bg1": "4",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
-			},
-			"287 Medium Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "4",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"285 Limited Approach": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "5",
-				"cycle2": "0.5",
-				"bg3": "1"
-			},
-			"292 Stop": {
-				"cycle1": "0",
-				"skin1": "",
-				"bg1": "1",
-				"skin2": "",
-				"cycle3": "0",
-				"skin3": "",
-				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "0"
 			},
 			"288 Slow Clear": {
 				"cycle1": "0",
@@ -2268,8 +2079,63 @@
 				"cycle3": "1",
 				"skin3": "",
 				"bg2": "1",
-				"cycle2": "0",
-				"bg3": "6"
+				"bg3": "6",
+				"cycle2": "0"
+			},
+			"282 Approach Slow": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"289 Slow Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0.5",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "4",
+				"cycle2": "0"
+			},
+			"280 Approach Limited": {
+				"cycle1": "1",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
+			},
+			"283 Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"287 Medium Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "4",
+				"bg3": "1",
+				"cycle2": "0.5"
 			},
 			"286 Medium Clear": {
 				"cycle1": "0",
@@ -2279,121 +2145,399 @@
 				"cycle3": "0",
 				"skin3": "",
 				"bg2": "6",
-				"cycle2": "1",
-				"bg3": "1"
+				"bg3": "1",
+				"cycle2": "1"
+			},
+			"292 Stop": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"279 Advance Approach": {
+				"cycle1": "0.5",
+				"skin1": "",
+				"bg1": "5",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "1",
+				"bg3": "1",
+				"cycle2": "0"
+			},
+			"285 Limited Approach": {
+				"cycle1": "0",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "0",
+				"skin3": "",
+				"bg2": "5",
+				"bg3": "1",
+				"cycle2": "0.5"
 			}
 		},
-		"cl_dwarf": {
-			"290a Restricting": {
+		"cl_high_l1": {
+			"281 Approach Medium": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "2 2 2 2",
+				"bg1": "6",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
+				"bg2": "4",
 				"cycle2": "",
-				"bg3": "0"
+				"bg3": "1"
+			},
+			"290a Restricting": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "3",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
 			},
 			"284 Limited Clear": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "1 7 7 7",
+				"bg1": "1",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
+				"bg2": "7",
 				"cycle2": "",
-				"bg3": "0"
+				"bg3": "1"
 			},
 			"291 Stop And Proceed": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "1 1 1 1",
+				"bg1": "1",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
-				"bg3": "0",
-				"cycle2": ""
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
 			},
-			"286 Medium Clear": {
+			"278 Clear": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "1 6 6 6",
+				"bg1": "6",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
+				"bg2": "1",
 				"cycle2": "",
-				"bg3": "0"
+				"bg3": "1"
 			},
 			"test": true,
-			"287 Medium Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1 4 4 4",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "0",
-				"cycle2": "",
-				"bg3": "0"
-			},
 			"290b Grade Signal": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "1 1 1 1",
+				"bg1": "1",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
-				"bg3": "0",
-				"cycle2": ""
-			},
-			"285 Limited Approach": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "1 5 5 5",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "0",
+				"bg2": "1",
 				"cycle2": "",
-				"bg3": "0"
+				"bg3": "1"
 			},
-			"292 Stop": {
+			"279 Advance Approach": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "1 1 1 1",
+				"bg1": "5",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
-				"bg3": "0",
-				"cycle2": ""
-			},
-			"288 Slow Clear": {
-				"cycle1": "",
-				"skin1": "",
-				"bg1": "6 6 6 6",
-				"skin2": "",
-				"cycle3": "",
-				"skin3": "",
-				"bg2": "0",
+				"bg2": "1",
 				"cycle2": "",
-				"bg3": "0"
+				"bg3": "1"
+			},
+			"282 Approach Slow": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "4"
 			},
 			"289 Slow Approach": {
 				"cycle1": "",
 				"skin1": "",
-				"bg1": "4 4 4 4",
+				"bg1": "1",
 				"skin2": "",
 				"cycle3": "",
 				"skin3": "",
-				"bg2": "0",
+				"bg2": "1",
 				"cycle2": "",
-				"bg3": "0"
+				"bg3": "4"
+			},
+			"280 Approach Limited": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "5",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"283 Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"287 Medium Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"285 Limited Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "5",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"292 Stop": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"288 Slow Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "6"
+			},
+			"286 Medium Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "6",
+				"cycle2": "",
+				"bg3": "1"
+			}
+		},
+		"cl_high_l3": {
+			"281 Approach Medium": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"290a Restricting": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "3"
+			},
+			"284 Limited Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "7",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"291 Stop And Proceed": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"278 Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"test": true,
+			"290b Grade Signal": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"279 Advance Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "5",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"282 Approach Slow": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "4"
+			},
+			"289 Slow Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "4"
+			},
+			"280 Approach Limited": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "6",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "5",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"283 Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "4",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"287 Medium Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "4",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"285 Limited Approach": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "5",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"292 Stop": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "1"
+			},
+			"288 Slow Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "1",
+				"cycle2": "",
+				"bg3": "6"
+			},
+			"286 Medium Clear": {
+				"cycle1": "",
+				"skin1": "",
+				"bg1": "1",
+				"skin2": "",
+				"cycle3": "",
+				"skin3": "",
+				"bg2": "6",
+				"cycle2": "",
+				"bg3": "1"
 			}
 		}
 	},
@@ -2406,7 +2550,7 @@
 		"medium": true,
 		"permissive": true
 	},
-	"func_text": "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC)\n\tif ( ( CTC == 2 ) ) then\n\t\treturn \"290a Restricting\"\n\telse\n\t\tif ( ( CTC == 0 ) ) then\n\t\t\treturn \"292 Stop\"\n\t\telse\n\t\t\tif ( ( OCCUPIED ) ) or ( ( SPEED == 0 ) ) then\n\t\t\t\tif ( ( TAGS.grade ) ) then\n\t\t\t\t\treturn \"290b Grade Signal\"\n\t\t\t\telse\n\t\t\t\t\tif ( ( TAGS.abs ) ) or ( ( TAGS.permissive ) ) then\n\t\t\t\t\t\treturn \"291 Stop And Proceed\"\n\t\t\t\t\telse\n\t\t\t\t\t\treturn \"292 Stop\"\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\telse\n\t\t\t\tif ( ( SPEED == 1 ) ) or ( ( TAGS.restricted ) ) then\n\t\t\t\t\treturn \"290a Restricting\"\n\t\t\t\telse\n\t\t\t\t\tif ( ( SPEED == 2 ) ) or ( ( TAGS.slow ) ) then\n\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\treturn \"289 Slow Approach\"\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\treturn \"288 Slow Clear\"\n\t\t\t\t\t\tend\n\t\t\t\t\telse\n\t\t\t\t\t\tif ( ( SPEED == 3 ) ) or ( ( TAGS.medium ) ) then\n\t\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\t\treturn \"287 Medium Approach\"\n\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 2 ) ) then\n\t\t\t\t\t\t\t\t\treturn \"288 Slow Clear\"\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\treturn \"286 Medium Clear\"\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\tif ( ( SPEED == 4 ) ) or ( ( TAGS.limited ) ) then\n\t\t\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\t\t\treturn \"285 Limited Approach\"\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 2 ) ) then\n\t\t\t\t\t\t\t\t\t\treturn \"288 Slow Clear\"\n\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 3 ) ) then\n\t\t\t\t\t\t\t\t\t\t\treturn \"286 Medium Clear\"\n\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\treturn \"284 Limited Clear\"\n\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\t\t\treturn \"283 Approach\"\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 2 ) ) then\n\t\t\t\t\t\t\t\t\t\treturn \"282 Approach Slow\"\n\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 3 ) ) then\n\t\t\t\t\t\t\t\t\t\t\treturn \"281 Approach Medium\"\n\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 4 ) ) then\n\t\t\t\t\t\t\t\t\t\t\t\treturn \"280 Approach Limited\"\n\t\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\t\tif ( ( NEXTASPECT == \"283 Approach\" ) ) then\n\t\t\t\t\t\t\t\t\t\t\t\t\treturn \"279 Advance Approach\"\n\t\t\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\t\t\treturn \"278 Clear\"\n\t\t\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\tend\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\tend\nend",
+	"func_text": "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC, NEXTDIV)\n\tif ( ( CTC == 2 ) ) then\n\t\treturn \"290a Restricting\"\n\telse\n\t\tif ( ( CTC == 0 ) ) then\n\t\t\treturn \"292 Stop\"\n\t\telse\n\t\t\tif ( ( OCCUPIED ) ) or ( ( SPEED == 0 ) ) then\n\t\t\t\tif ( ( TAGS.grade ) ) then\n\t\t\t\t\treturn \"290b Grade Signal\"\n\t\t\t\telse\n\t\t\t\t\tif ( ( TAGS.abs ) ) or ( ( TAGS.permissive ) ) then\n\t\t\t\t\t\treturn \"291 Stop And Proceed\"\n\t\t\t\t\telse\n\t\t\t\t\t\treturn \"292 Stop\"\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\telse\n\t\t\t\tif ( ( SPEED == 1 ) ) or ( ( TAGS.restricted ) ) then\n\t\t\t\t\treturn \"290a Restricting\"\n\t\t\t\telse\n\t\t\t\t\tif ( ( SPEED == 2 ) ) or ( ( TAGS.slow ) ) then\n\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\treturn \"289 Slow Approach\"\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\treturn \"288 Slow Clear\"\n\t\t\t\t\t\tend\n\t\t\t\t\telse\n\t\t\t\t\t\tif ( ( SPEED == 3 ) ) or ( ( TAGS.medium ) ) then\n\t\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\t\treturn \"287 Medium Approach\"\n\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 2 ) ) then\n\t\t\t\t\t\t\t\t\treturn \"288 Slow Clear\"\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\treturn \"286 Medium Clear\"\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\telse\n\t\t\t\t\t\t\tif ( ( SPEED == 4 ) ) or ( ( TAGS.limited ) ) then\n\t\t\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\t\t\treturn \"285 Limited Approach\"\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 2 ) ) then\n\t\t\t\t\t\t\t\t\t\treturn \"288 Slow Clear\"\n\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 3 ) ) then\n\t\t\t\t\t\t\t\t\t\t\treturn \"286 Medium Clear\"\n\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\treturn \"284 Limited Clear\"\n\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\tif ( ( NEXTSPEED < 2 ) ) then\n\t\t\t\t\t\t\t\t\treturn \"283 Approach\"\n\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 2 ) ) then\n\t\t\t\t\t\t\t\t\t\treturn \"282 Approach Slow\"\n\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 3 ) ) then\n\t\t\t\t\t\t\t\t\t\t\treturn \"281 Approach Medium\"\n\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\tif ( ( NEXTSPEED == 4 ) ) then\n\t\t\t\t\t\t\t\t\t\t\t\treturn \"280 Approach Limited\"\n\t\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\t\tif ( ( NEXTASPECT == \"283 Approach\" ) ) then\n\t\t\t\t\t\t\t\t\t\t\t\t\treturn \"279 Advance Approach\"\n\t\t\t\t\t\t\t\t\t\t\t\telse\n\t\t\t\t\t\t\t\t\t\t\t\t\treturn \"278 Clear\"\n\t\t\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\t\tend\n\t\t\t\t\t\t\tend\n\t\t\t\t\t\tend\n\t\t\t\t\tend\n\t\t\t\tend\n\t\t\tend\n\t\tend\n\tend\nend",
 	"rules": [
 		{
 			"description": "Stop.",

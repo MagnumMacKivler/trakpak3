@@ -10,7 +10,8 @@ if SERVER then
 
 	ENT.KeyValueMap = {
 		board = "string",
-		endpos = "vector"
+		endpos = "vector",
+		uiscale = "number"
 	}
 	
 	function ENT:Initialize()
@@ -18,21 +19,34 @@ if SERVER then
 		local disp = self.endpos - pos
 		local norm = disp:Cross(Vector(0,0,1)):GetNormalized()
 		
-		self:SetNWVector("campos",pos + norm*0.5)
+		self:SetNWVector("campos",pos + norm*0.5) --Origin of the rendered plane
 		
 		
 		local dx = Vector(disp.x, disp.y, 0)
+		local dxl = dx:Length()
 		local dy = Vector(0, 0, disp.z)
 		
-		self:SetNWFloat("dx",dx:Length())
+		--Calculate UI scale
+		local scl = dxl/1600
+		if self.uiscale and isnumber(self.uiscale) and (self.uiscale > 0) then
+			scl = uiscale
+		end
+		
+		--print("BOARD SIZE ",dx,dy)
+		self:SetNWFloat("dx",dxl)
 		self:SetNWFloat("dy",dy:Length())
 		self:SetNWAngle("camang", dx:AngleEx(dx:Cross(-dy)) )
-		self:SetNWFloat("camscale", 0.125 ) --Inches per Pixel
+		self:SetNWFloat("camscale", scl ) --Inches per Pixel formerly 0.125
 		
 		self:SetNWString("page",self.board)
 		
 		--Setpos to midpoint of the rectangle for better rendering due to frustrum culling
-		self:SetPos(0.5*pos + 0.5*self.endpos)
+		--This is handled by SetRenderBoundsWS instead.
+		--self:SetPos(0.5*pos + 0.5*self.endpos)
+		local rmins, rmaxs = pos, self.endpos
+		OrderVectors(rmins, rmaxs)
+		self:SetNWVector("rmins", rmins)
+		self:SetNWVector("rmaxs", rmaxs)
 	end
 end
 
@@ -49,8 +63,10 @@ if CLIENT then
 			self.scale = self:GetNWFloat("camscale",nil)
 			self.dx = self:GetNWFloat("dx",nil)
 			self.dy = self:GetNWFloat("dy",nil)
+			self.rmins = self:GetNWVector("rmins",nil)
+			self.rmaxs = self:GetNWVector("rmaxs",nil)
 			
-			if self.pos and self.ang and self.scale and self.dx and self.dy then self.hasparams = true end
+			if self.pos and self.ang and self.scale and self.dx and self.dy and self.rmins and self.rmaxs then self.hasparams = true end
 		end
 		
 		if not self.pagenum and (#self.Boards>0) then
@@ -64,7 +80,7 @@ if CLIENT then
 			if self.pagenum then
 				--print("Your page number is "..self.pagenum)
 			else
-				print("[Trakpak3] Could not find a page number for '"..page.."'")
+				ErrorNoHalt("[Trakpak3] Could not find a page number for '"..page.."'")
 			end
 		end
 		
@@ -150,6 +166,9 @@ if CLIENT then
 				end
 			end
 		end
+		
+		--Set Render Bounds
+		self:SetRenderBoundsWS(self.rmins, self.rmaxs)
 		
 		--Populate Page
 		timer.Simple(1, function() self:PopulatePage(canvas, self.pagenum) end)

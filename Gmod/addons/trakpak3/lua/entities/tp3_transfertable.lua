@@ -31,12 +31,16 @@ if SERVER then
 	function ENT:EnableMover(duration)
 		local savetable = self:GetSaveTable()
 		self:SetSaveValue("m_flMoveDoneTime", savetable.ltime + (duration or 1))
+		self:StopFixerPos()
 	end
 	
 	function ENT:DisableMover()
 		local savetable = self:GetSaveTable()
 		self:SetSaveValue("m_flMoveDoneTime", savetable.ltime)
 		self:SetLocalVelocity(Vector(0,0,0))
+		
+		local snap_pos = self.zeropos + (math.Clamp(self:GetTransPos(),self.minpos-2, self.maxpos+2))*self.table_axis --Wherever you are, snap it to the linear range of the transfer table.
+		self:SetFixerPos(snap_pos, self.fixerang)
 	end
 	
 	--util.AddNetworkString("TP3_TransTable_ControlInfo")
@@ -106,13 +110,13 @@ if SERVER then
 			self.enumr = IN_MOVERIGHT
 		end
 		
-		
+		self.TAL = self.table_axis:Length() --Oof owie square root
 	end
 	
 	--Get numeric position of transfer table
 	function ENT:GetTransPos()
 		local disp = self:GetPos() - self.zeropos
-		return disp:Dot(self.table_axis)/self.table_axis:LengthSqr()
+		return disp:Dot(self.table_axis)/self.TAL
 	end
 	
 	function ENT:TT_Driver()

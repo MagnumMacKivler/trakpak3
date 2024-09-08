@@ -106,14 +106,14 @@ if SERVER then
 			
 			if TP3Signals.systems[sysname] then
 				self.system = TP3Signals.systems[sysname]
-				--if self.system.signaltypes[signame] then
-				--	self.signaltype = self.system.signaltypes[signame]
-				--else
-				--	print("Invalid signal type '"..signame.."'!")
-				--end
-				self.signaltype = sigtype
+				if self.system.sigtypes[sigtype] then
+					self.signaltype = sigtype
+				else
+					ErrorNoHalt("[Trakpak3] Signal ",self," has an invalid signal type '"..sigtype.."'! This may cause problems until fixed in the map!")
+				end
+				--self.signaltype = sigtype
 			elseif sysname then
-				ErrorNoHalt("[Trakpak3] Signal ",self,"has an invalid signal system name '"..sysname.."'! This may cause problems until fixed in the map!")
+				ErrorNoHalt("[Trakpak3] Signal ",self," has an invalid signal system name '"..sysname.."'! This may cause problems until fixed in the map!")
 			else
 				ErrorNoHalt("[Trakpak3] Signal ",self," has no signal system set! This may cause problems until fixed in the map!")
 			end
@@ -310,9 +310,9 @@ if SERVER then
 				local data = self.system.sigtypes[self.sigtype][aspname]
 				if data then --This aspect is defined for this sigtype
 					return data.override or aspname
-				else return end
-			else return end
-		else return end
+				else ErrorNoHalt("[Trakpak3] Signal ",self," was assigned aspect '"..aspname.."' which is not defined for sigtype '"..self.signaltype.."'!") return end
+			else ErrorNoHalt("[Trakpak3] Signal ",self," was assigned rule '"..aspname.."' which is not defined for system '"..self.system.sysname.."'!") return end
+		else ErrorNoHalt("[Trakpak3] Signal ",self," has a missing or invalid system name or signal type!") return end
 	end
 	
 	--Set CTC State, Handle Interlocks

@@ -129,14 +129,17 @@ if SERVER then
 	function ENT:EnableMover(duration)
 		local savetable = self:GetSaveTable()
 		self:SetSaveValue("m_flMoveDoneTime", savetable.ltime + (duration or 1))
+		self:StopFixerPos()
 	end
 	
 	function ENT:DisableMover()
 		local savetable = self:GetSaveTable()
 		self:SetSaveValue("m_flMoveDoneTime", savetable.ltime)
 		self:SetLocalAngularVelocity(Angle(0,0,0))
+		self:SetFixerPos(self.fixerpos, self:GetAngles()) --Set new fixer angle, old fixer pos
 	end
 	
+	--[[
 	function ENT:MoveToRoll(target, speed)
 		local savetable = self:GetSaveTable()
 		local angdiff = math.NormalizeAngle(target - self:GetAngles().roll)
@@ -147,6 +150,7 @@ if SERVER then
 		
 		return duration
 	end
+	]]--
 	
 	--Measure car height and internal length, weld it
 	function ENT:MeasureCar()

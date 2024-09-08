@@ -221,6 +221,7 @@ if SERVER then
 		self.broken = true
 		self:PhysicsInit(SOLID_VPHYSICS)
 		self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+		self:StopFixerPos()
 		
 		vel = vel or 0
 		
@@ -250,12 +251,12 @@ if SERVER then
 	
 	function ENT:StandFix()
 		self.broken = false
-		self:SetCollisionGroup(COLLISION_GROUP_NONE)
-		self:PhysicsInitStatic(SOLID_VPHYSICS)
 		--self:SetSolid(SOLID_BSP)
 		self:SetPos(self.originalpos)
 		self:SetAngles(self.originalang)
-		
+		self:SetCollisionGroup(COLLISION_GROUP_NONE)
+		self:PhysicsInitStatic(SOLID_VPHYSICS)
+		self:SetFixerPos(self.originalpos, self.originalang)
 		local p1 = math.random(1,3)
 		local s_table = {"physics/wood/wood_box_impact_hard1.wav","physics/wood/wood_box_impact_hard2.wav","physics/wood/wood_box_impact_hard3.wav"}
 		self:EmitSound(s_table[p1])

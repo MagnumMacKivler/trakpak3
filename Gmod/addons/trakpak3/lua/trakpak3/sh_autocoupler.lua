@@ -172,7 +172,7 @@ if SERVER then
 			
 			local slack = (self.slack + coupler2.slack) / 2
 			local phys1 = self.truck:GetPhysicsObject()
-			local phys2 = self.truck:GetPhysicsObject()
+			local phys2 = coupler2.truck:GetPhysicsObject()
 			
 			local ropewidth = max(self.ropewidth, coupler2.ropewidth)
 			if not ( phys1 and phys2 and phys1:IsValid() and phys2:IsValid() ) then return false end
@@ -196,6 +196,17 @@ if SERVER then
 				self.coupled = coupler2
 				coupler2.coupled = self
 				self.truck:EmitSound("Trakpak3.autocoupler.couple") --Coupler Sound
+				
+				--Set Network Vars for RLC Delta Slack Sounds. Only set on one entity to avoid duplicating sounds
+				self.truck:SetNWEntity("tp3ac_coupledent", coupler2.truck)
+				self.truck:SetNWFloat("tp3ac_distance",(self.truck:GetPos() - coupler2.truck:GetPos()):Length())
+				self.truck:SetNWFloat("tp3ac_slack", slack)
+				
+				--These can be retrieved on the client as follows:
+				--local coupledent = entity:GetNWEntity("tp3ac_coupledent") --Entity that is autocoupled, or NULL entity if not
+				--local distance = entity:GetNWFloat("tp3ac_distance") --Linear distance between entity coordinate centers at the moment the coupling was made, or 0 if not coupled.
+				--local slack = entity:GetNWFloat("tp3ac_slack") --Amount of slack in the coupling. Default is 6. Will be 0 if not coupled or if the coupling is a solid drawbar.
+				
 				return true
 			end
 			return false
@@ -212,12 +223,19 @@ if SERVER then
 						self.decoupling = true
 						table.insert(AutoCoupler.DecoupleChecks, {self, self.coupled})
 						playsound = true
+						
+						--Clear Network Vars for RLC Delta Slack Sounds.
+						self.coupled.truck:SetNWEntity("tp3ac_coupledent", NULL)
+						self.coupled.truck:SetNWFloat("tp3ac_distance", 0)
+						self.coupled.truck:SetNWFloat("tp3ac_slack", 0)
 					end 
 					--Try to break ropes
 					local ropesremoved = constraint.RemoveConstraints(self.truck, "Rope")
 					if ropesremoved or playsound then
 						self.truck:EmitSound("Trakpak3.autocoupler.uncouple") --Decoupling Sound
 					end
+
+					--The couplers now no longer know each other
 					self.coupled.coupled = false
 					self.coupled = false
 				else --Not coupled to anything
@@ -227,6 +245,12 @@ if SERVER then
 						self.truck:EmitSound("Trakpak3.autocoupler.uncouple") --Decoupling Sound
 					end
 				end
+				
+				--Clear Network Vars for RLC Delta Slack Sounds.
+				self.truck:SetNWEntity("tp3ac_coupledent", NULL)
+				self.truck:SetNWFloat("tp3ac_distance", 0)
+				self.truck:SetNWFloat("tp3ac_slack", 0)
+				
 			else --You're invalid
 				if self.coupled then self.coupled.coupled = false end
 				self.coupled = false
@@ -566,7 +590,8 @@ if SERVER then
 							local unfrozen = physc:IsMotionEnabled() and physt:IsMotionEnabled()
 							local dir = coupler:GetDir()
 							if unfrozen and (coupler:GetSpeed(dir) > 1) then --Car is unfrozen and moving in the appropriate direction
-								local owner = car:CPPIGetOwner() --or nil if PP doesn't exist
+								local owner
+								if car.CPPIGetOwner then owner = car:CPPIGetOwner() end --or nil if PP doesn't exist
 								--Iterate over the other trucks
 								for index2, coupler2 in pairs(AutoCoupler.AllCouplers) do
 									local car2, truck2 = coupler2.car, coupler2.truck
@@ -735,7 +760,7 @@ if SERVER then
 					net.Send(ply)
 					return true --Fire Effect
 				else --Coupler data already exists
-					AutoCoupler.SendCouplerData(ent, ply, true)
+					AutoCoupler.SendCouplerData(ent, ply, false)
 					return true --Fire Effect
 				end
 			elseif stage==1 then --Pick truck
@@ -782,7 +807,11 @@ if SERVER then
 			if stage==0 then --Clear
 				
 				local ent = tr.Entity
-				if not (ent and ent:IsValid()) then return end
+				if not (ent and ent:IsValid()) then --Deselect
+					Trakpak3.NetStart("autocoupler_deselect")
+					net.Send(ply)
+					return true
+				end
 				--Prop Protection Check
 				if ent.CPPICanTool then
 					if not ent:CPPICanTool(ply, "tp3_autocoupler") then return end
@@ -795,8 +824,11 @@ if SERVER then
 						net.WriteString("physics/metal/metal_box_break1.wav")
 					net.Send(ply)
 					AutoCoupler.SendCouplerData(ent, ply, false)
-					return true --Fire Effect
 				end
+				
+				Trakpak3.NetStart("autocoupler_deselect") --Deselect
+				net.Send(ply)
+				return true --Fire Effect
 			elseif stage==1 then --Cancel
 				tool:SetStage(0)
 			end
@@ -912,6 +944,12 @@ if CLIENT then
 			end
 			if gui then AutoCoupler.OpenEditor(car) end
 		end
+	end
+	
+	Trakpak3.Net["autocoupler_deselect"] = function(len, ply)
+		AutoCoupler.SelectedCar = nil
+		AutoCoupler.SelectedData = {}
+		caraxis = nil
 	end
 	
 	Trakpak3.Net["autocoupler_openexisting"] = function(len, ply)

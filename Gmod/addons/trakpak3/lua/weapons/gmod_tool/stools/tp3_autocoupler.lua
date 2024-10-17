@@ -6,10 +6,10 @@ if CLIENT then
 	language.Add("Tool.tp3_autocoupler.name","Trakpak3 AutoCoupler")
 	language.Add("Tool.tp3_autocoupler.desc","Adds automatic couplers to rolling stock. Duplicator-Compatible!")
 	
-	language.Add("Tool.tp3_autocoupler.left_1","Add AutoCouplers Automatically. Works best for 'regular' locomotives/railcars.")
+	language.Add("Tool.tp3_autocoupler.left_1","Add AutoCouplers automatically. Works best for 'regular' locomotives/railcars. Displays existing AutoCouplers on cars that have them already.")
 	language.Add("Tool.tp3_autocoupler.left_2","Select the prop that will be roped when coupling (the truck/bogie/axle).")
 	language.Add("Tool.tp3_autocoupler.right_1","View/Edit a prop's AutoCouplers manually.")
-	language.Add("Tool.tp3_autocoupler.reload_1","Remove Autocouplers from a car.")
+	language.Add("Tool.tp3_autocoupler.reload_1","Remove Autocouplers from a car and/or deselect.")
 	language.Add("Tool.tp3_autocoupler.reload_2","Cancel prop selection.")
 	
 	TOOL.Information = {
@@ -27,6 +27,11 @@ if CLIENT then
 	
 	TOOL.BuildCPanel = function(pnl) Trakpak3.AutoCoupler.ToolPanel(pnl) end
 	--function TOOL:DrawHud() Trakpak3.AutoCoupler.DrawHUD() end
+	
+	--Forward to sh_autocoupler.lua
+	function TOOL:LeftClick(tr) return true end
+	function TOOL:RightClick(tr) return true end
+	function TOOL:Reload(tr) return true end
 end
 
 if SERVER then

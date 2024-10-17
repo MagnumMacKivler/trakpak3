@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+{
+	// Original shader: BaseTimesLightmap
+	"$basetexture" "Props/metalbreaker001a"
+	"$surfaceprop" "metal"
+}

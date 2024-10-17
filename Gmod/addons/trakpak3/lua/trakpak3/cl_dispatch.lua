@@ -1,14 +1,17 @@
 --Code for creating and displaying dispatch boards
 
-Trakpak3.Dispatch = {}
+if not Trakpak3.Dispatch then
+	Trakpak3.Dispatch = {}
+	Trakpak3.Dispatch.Boards = {} --table containing all board scripts for the vgui window
+	Trakpak3.Dispatch.Panels = {} --List of Derma Elements that need to be remembered
+	Trakpak3.Dispatch.showgrid = true
+	Trakpak3.Dispatch.selectnew = true
+	Trakpak3.Dispatch.RealData = {}
+	Trakpak3.Dispatch.LocalNotes = {} --Local notes for each train tag
+end
 local Dispatch = Trakpak3.Dispatch
 
-Dispatch.Boards = {} --table containing all board scripts for the vgui window
-Dispatch.Panels = {} --List of Derma Elements that need to be remembered
-Dispatch.showgrid = true
-Dispatch.selectnew = true
-Dispatch.RealData = {}
-Dispatch.LocalNotes = {} --Local notes for each train tag
+
 
 local black = Color(0,0,0)
 local dark = Color(31,31,31)
@@ -28,8 +31,32 @@ local green = Color(0,255,0)
 local blue = Color(0,127,255)
 
 local LocalPlayer = LocalPlayer
+local CurTime = CurTime
 
 Dispatch.elementsize = 20
+
+Dispatch.Tips = {
+	"Unless you're the designated dispatcher, always make sure to ask before changing signals and switches!",
+	"You can teleport to signals, switches, and block detectors by right clicking them.",
+	"Can't find what's triggering a signal block? Right click it to teleport to the triggering entity!",
+	"Switches can be set to throw after 1 to 4 trains pass over them. Right click them to set it up!",
+	"If you click a switch that is blocked by a train, it will throw as soon as it's clear!",
+	"Having trouble keeping track of trains? Click the block detectors with the train name to add a note only you can see!", --The longest message, don't go any longer
+	"Attach a Trakpak3 Cab Signal Box (Wire Tool) to your train to have your name show up on the dispatch board!",
+	"Pressing the Dispatch Board Keybind ("..input.LookupBinding("tp3_dispatch")..") will close the dispatch board too. It's quicker than clicking the [X]!",
+	"Want an easy way to throw switches in the field? Bind a key to +tp3_remote_switcher !",
+	"Having trouble understanding signals? Bind a key to +tp3_signal_vision !",
+	"Thank you for using the Trakpak3 Dispatch Board!"
+}
+
+table.Shuffle(Dispatch.Tips)
+
+Dispatch.TipShowTime = 10
+Dispatch.TipFadeTime = 1
+Dispatch.TipColor = Color(31,31,31,0)
+Dispatch.TipIndex = 1
+Dispatch.TipState = 0 --Fade In
+--Dispatch.TipTimeStamp = nil
 
 surface.CreateFont("tp3_dispatch_1",{
 	font = "Roboto",
@@ -56,6 +83,12 @@ surface.CreateFont("tp3_dispatch_5",{
 	size = 48,
 	weight = 700
 })
+
+surface.CreateFont("TP3_DispatchWarning",{ --Used for tips
+		font = "Roboto",
+		size = 22,
+		weight = 600
+	})
 
 function Dispatch.OpenEditor()
 	if not game.SinglePlayer() then
@@ -1054,7 +1087,38 @@ function Dispatch.OpenEditor()
 	]]--
 end
 
+--Manage the creation of a context menu object
+function Dispatch.CreateContextMenu(pnl, button, w, h)
+	--Delete old panel
+	if Dispatch.Panels.ContextMenu and Dispatch.Panels.ContextMenu:IsValid() then Dispatch.Panels.ContextMenu:Remove() end
+	
+	--Create New
+	local mpanel = vgui.Create("DPanel",pnl)
+	
+	mpanel:SetSize(w,h)
+	local cx, cy, sx, sy = button:GetBounds() --Button Pos (relative to canvas) and size
+	local psx, psy = pnl:GetSize() --Canvas Size
+	
+	cx = cx + sx/2
+	cy = cy + sy/2
+	
+	--Adjust position of CTC menu to ensure it doesn't go off screen
+	if cx > (psx - w) then cx = psx - w end
+	if cy > (psy - h) then cy = psy - h end
+	
+	mpanel:SetPos(cx,cy)
+	
+	Dispatch.Panels.ContextMenu = mpanel
+	return mpanel
+	
+end
 
+--Close it when no longer needed
+function Dispatch.CloseContextMenu()
+	--Delete old panel
+	if Dispatch.Panels.ContextMenu and Dispatch.Panels.ContextMenu:IsValid() then Dispatch.Panels.ContextMenu:Remove() end
+	Dispatch.Panels.ContextMenu = nil
+end
 
 --Create all the elements on the page
 function Dispatch.PopulatePage(canvas, page, nohelpers)
@@ -1239,7 +1303,7 @@ function Dispatch.Deselect()
 	Dispatch.selected = nil
 	Dispatch.editing = nil
 	Dispatch.placing = nil
-	
+	Dispatch.CloseContextMenu()
 	--Help Text
 	if Dispatch.Panels.editor then
 		Dispatch.Panels.help:SetText("")
@@ -1248,6 +1312,37 @@ function Dispatch.Deselect()
 	--Clear properties table
 	local ptable = Dispatch.Panels.ptable
 	if ptable and ptable:IsValid() then ptable:Remove() end
+end
+
+--Element Pass Indicator Helper Function
+local dr = surface.DrawRect
+local function drawnumber(n,x,y)
+	n = math.Clamp(n,0,4)
+	if n==1 then
+		dr(x+6, y+4, 2, 10)
+		dr(x+4, y+6, 4, 2)
+		dr(x+4, y+12, 6, 2)
+	elseif n==2 then
+		dr(x+4, y+4, 6, 2)
+		dr(x+4, y+8, 6, 2)
+		dr(x+4, y+12, 6, 2)
+		dr(x+8, y+4, 2, 6)
+		dr(x+4, y+8, 2, 6)
+	elseif n==3 then
+		dr(x+4, y+4, 6, 2)
+		dr(x+4, y+8, 6, 2)
+		dr(x+4, y+12, 6, 2)
+		dr(x+8, y+4, 2, 10)
+	elseif n==4 then
+		dr(x+8, y+4, 2, 10)
+		dr(x+4, y+8, 6, 2)
+		dr(x+4, y+4, 2, 6)
+	else --0
+		dr(x+4, y+4, 4, 2)
+		dr(x+4, y+4, 2, 10)
+		dr(x+8, y+4, 2, 10)
+		dr(x+4, y+12, 4, 2)
+	end
 end
 
 --Element Creation/Destruction
@@ -1350,20 +1445,9 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				Dispatch.PopulatePage(canvas, Dispatch.page, true)
 			end
 		elseif e.signal and (e.signal!="") then
-			local mpanel = vgui.Create("DPanel",canvas)
-			mpanel:SetSize(96,144)
-			local cx, cy, sx, sy = button:GetBounds() --Button Pos (relative to canvas) and size
-			local psx, psy = canvas:GetSize() --Canvas Size
+			local mpanel = Dispatch.CreateContextMenu(canvas,button,168,144)
 			
-			cx = cx + sx/2
-			cy = cy + sy/2
-			
-			--Adjust position of CTC menu to ensure it doesn't go off screen
-			if cx > (psx - 96) then cx = psx - 96 end
-			if cy > (psy - 144) then cy = psy - 144 end
-			
-			mpanel:SetPos(cx,cy)
-			self.menu = mpanel
+			--self.menu = mpanel
 			
 			local sig = Dispatch.RealData[e.signal]
 			local nopath = sig.nopath
@@ -1379,22 +1463,50 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 			end
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 0)
-				--mpanel:Remove()
-				--self.menu = nil
 				Dispatch.Deselect()
 			end
+			--Onces Panel
+			local op = vgui.Create("DPanel",mpanel)
+			op:SetSize(1,36)
+			op:Dock(TOP)
 			
-			local button = vgui.Create("DButton",mpanel)
-			button:SetSize(1,36)
-			button:Dock(TOP)
-			button:SetText("Once")
+			local button = vgui.Create("DButton",op)
+			button:SetSize(96,1)
+			button:Dock(LEFT)
+			button:SetText("       Once")
 			button:SetImage("trakpak3_common/icons/signal_yel_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 1)
-				--mpanel:Remove()
-				--self.menu = nil
 				Dispatch.Deselect()
 			end
+			--2
+			local btn = vgui.Create("DButton",op)
+			btn:SetSize(24,1)
+			btn:Dock(LEFT)
+			btn:SetText("2")
+			function btn:DoClick()
+				Dispatch.SendCommand(e.signal, "setpasses", 2)
+				Dispatch.Deselect()
+			end
+			--3
+			local btn = vgui.Create("DButton",op)
+			btn:SetSize(24,1)
+			btn:Dock(LEFT)
+			btn:SetText("3")
+			function btn:DoClick()
+				Dispatch.SendCommand(e.signal, "setpasses", 3)
+				Dispatch.Deselect()
+			end
+			--4
+			local btn = vgui.Create("DButton",op)
+			btn:SetSize(24,1)
+			btn:Dock(LEFT)
+			btn:SetText("4")
+			function btn:DoClick()
+				Dispatch.SendCommand(e.signal, "setpasses", 4)
+				Dispatch.Deselect()
+			end
+			
 			--if nopath==1 then button:SetEnabled(false) end
 			
 			local button = vgui.Create("DButton",mpanel)
@@ -1404,8 +1516,6 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 			button:SetImage("trakpak3_common/icons/signal_grn_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 2)
-				--mpanel:Remove()
-				--self.menu = nil
 				Dispatch.Deselect()
 			end
 			--if nopath==1 then button:SetEnabled(false) end
@@ -1417,8 +1527,6 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 			button:SetImage("trakpak3_common/icons/signal_lun_n.png")
 			function button:DoClick()
 				Dispatch.SendCommand(e.signal, "set_ctc", 3)
-				--mpanel:Remove()
-				--self.menu = nil
 				Dispatch.Deselect()
 			end
 		end
@@ -1439,10 +1547,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 				if self.entity then self.entity:Select(e:GetIndex()) else Dispatch.Select(e:GetIndex(),true) end
 			end
 		else
-			if self.menu and self.menu:IsValid() then
-				self.menu:Remove()
-				self.menu = nil
-			end
+			--nothing
 		end
 		
 	end
@@ -1459,6 +1564,7 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 	end
 	
 	function element:Generate(pnl,nohelpers,selected,editor)
+		local e = self
 		local button = vgui.Create("DImageButton",pnl)
 		self.button = button
 		button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
@@ -1489,11 +1595,20 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 						button:SetImage("trakpak3_common/icons/signal_lun_"..dir..alt..".png")
 					end
 					
-					--Teleport to object on right click
+					
 					function button:DoRightClick()
-						local pos = sig.pos
-						if pos then
-							Dispatch.Teleport(pos)
+						local mpanel = Dispatch.CreateContextMenu(pnl, self, 144, 36)
+						--Teleport to object
+						local tpbutton = vgui.Create("DButton",mpanel)
+						tpbutton:Dock(FILL)
+						tpbutton:SetText("Teleport")
+						tpbutton:SetIcon("trakpak3_common/icons/nav.png")
+						function tpbutton:DoClick()
+							local pos = sig.pos
+							if pos then
+								Dispatch.Teleport(pos)
+							end
+							Dispatch.CloseContextMenu()
 						end
 					end
 					
@@ -1505,7 +1620,29 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 			end
 		end
 		
-		local e = self
+		--Draw Passes Marker
+		button:NoClipping(true)
+		function button:PaintOver(w, h)
+			local passes = Dispatch.RealData[e.signal]["passes"]
+			if passes > 0 then
+				local fw = 14
+				local fh = 18
+				draw.NoTexture()
+				
+				--Frame
+				surface.SetDrawColor(white)
+				surface.DrawRect(w - fw/2, h - fh/2, fw, fh)
+				--Black Backing
+				surface.SetDrawColor(black)
+				surface.DrawRect(w - fw/2 + 1, h - fh/2 + 1, fw-2, fh-2)
+				--Numeral
+				surface.SetDrawColor(white)
+				drawnumber(passes,w - fw/2, h - fh/2)
+				
+			end
+		end
+		
+		
 		function button:DoClick() 
 			if e.entity then e.entity:Select(e:GetIndex()) else Dispatch.Select(e:GetIndex(),true) end
 		end
@@ -1633,6 +1770,7 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 	end
 	
 	function element:Generate(pnl,nohelpers,selected,editor)
+		local e = self
 		local button = vgui.Create("DImageButton",pnl)
 		self.button = button
 		button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
@@ -1671,11 +1809,81 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 						button:SetImage("trakpak3_common/icons/switch_hourglass_lit.png")
 					end
 					
-					--Teleport to object on right click
 					function button:DoRightClick()
-						local pos = sig.pos
-						if pos then
-							Dispatch.Teleport(pos)
+						local mpanel = Dispatch.CreateContextMenu(pnl, self, 144, 96)
+						--Passes Controls
+						local label = vgui.Create("DLabel",mpanel)
+						label:SetSize(1,24)
+						label:DockMargin(4,0,0,0)
+						label:Dock(TOP)
+						label:SetText("Set Passes:")
+						label:SetTextColor(dark)
+						
+						local passpanel = vgui.Create("DPanel",mpanel)
+						passpanel:SetSize(1,36)
+						passpanel:Dock(TOP)
+						
+						--Clear
+						local btn = vgui.Create("DButton",passpanel)
+						btn:SetSize(48,1)
+						btn:Dock(LEFT)
+						btn:SetText("None")
+						function btn:DoClick()
+							Dispatch.SendCommand(e.switch, "setpasses", -1)
+							Dispatch.CloseContextMenu()
+						end
+						
+						--1
+						local btn = vgui.Create("DButton",passpanel)
+						btn:SetSize(24,1)
+						btn:Dock(LEFT)
+						btn:SetText("1")
+						function btn:DoClick()
+							Dispatch.SendCommand(e.switch, "setpasses", 1)
+							Dispatch.CloseContextMenu()
+						end
+						
+						--2
+						local btn = vgui.Create("DButton",passpanel)
+						btn:SetSize(24,1)
+						btn:Dock(LEFT)
+						btn:SetText("2")
+						function btn:DoClick()
+							Dispatch.SendCommand(e.switch, "setpasses", 2)
+							Dispatch.CloseContextMenu()
+						end
+						
+						--3
+						local btn = vgui.Create("DButton",passpanel)
+						btn:SetSize(24,1)
+						btn:Dock(LEFT)
+						btn:SetText("3")
+						function btn:DoClick()
+							Dispatch.SendCommand(e.switch, "setpasses", 3)
+							Dispatch.CloseContextMenu()
+						end
+						
+						--4
+						local btn = vgui.Create("DButton",passpanel)
+						btn:SetSize(24,1)
+						btn:Dock(LEFT)
+						btn:SetText("4")
+						function btn:DoClick()
+							Dispatch.SendCommand(e.switch, "setpasses", 4)
+							Dispatch.CloseContextMenu()
+						end
+						
+						--Teleport to object
+						local tpbutton = vgui.Create("DButton",mpanel)
+						tpbutton:Dock(FILL)
+						tpbutton:SetText("Teleport")
+						tpbutton:SetIcon("trakpak3_common/icons/nav.png")
+						function tpbutton:DoClick()
+							local pos = sig.pos
+							if pos then
+								Dispatch.Teleport(pos)
+							end
+							Dispatch.CloseContextMenu()
 						end
 					end
 				else
@@ -1692,6 +1900,7 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 				local state = Dispatch.RealData[e.switch]["state"]
 				local blocked = bit.bor(Dispatch.RealData[e.switch]["blocked"], Dispatch.RealData[e.switch]["interlocked"])
 				local broken = Dispatch.RealData[e.switch]["broken"]
+				local passes = Dispatch.RealData[e.switch]["passes"]
 				
 				if (blocked==0) and (broken==0) then
 					if state==0 then
@@ -1699,9 +1908,38 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 					elseif state==1 then
 						Dispatch.SendCommand(e.switch, "throw", 0)
 					end
+				elseif (blocked==1) then
+					if passes==-1 then --Set one pass
+						Dispatch.SendCommand(e.switch, "setpasses", 1)
+					else --Clear Passes
+						Dispatch.SendCommand(e.switch, "setpasses", -1)
+					end
 				end
 			end
 		end
+		
+		--Draw Passes Marker
+		button:NoClipping(true)
+		function button:PaintOver(w, h)
+			local passes = Dispatch.RealData[e.switch]["passes"]
+			if passes > -1 then
+				local fw = 14
+				local fh = 18
+				draw.NoTexture()
+				
+				--Frame
+				if passes==0 then surface.SetDrawColor(cursor2) else surface.SetDrawColor(white) end
+				surface.DrawRect(w - fw/2, h - fh/2, fw, fh)
+				--Black Backing
+				surface.SetDrawColor(black)
+				surface.DrawRect(w - fw/2 + 1, h - fh/2 + 1, fw-2, fh-2)
+				--Numeral
+				if passes==0 then surface.SetDrawColor(cursor2) else surface.SetDrawColor(white) end
+				drawnumber(passes,w - fw/2, h - fh/2)
+				
+			end
+		end
+		
 	end
 	
 	function element:GenerateEditor(pnl,nohelpers,selected)
@@ -1726,11 +1964,14 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 		--Update Pos
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
 		local size = Dispatch.elementsize
-		if self.button and self.button:IsValid() then self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2) end
+		if self.button and self.button:IsValid() then
+			self.button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+		end
 		if Dispatch.Panels.editor and (Dispatch.selected == self:GetIndex()) then
 			surface.SetDrawColor(color_sel)
 			surface.DrawOutlinedRect(px - size/2 - 2, py - size/2 - 2, size + 4, size + 4, 2)
 		end
+		
 	end
 	
 	--Receive Info from World (State and Occupancy)
@@ -1738,30 +1979,21 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 		if (name==self.switch) then
 			local button = self.button
 			if button and button:IsValid() then
-				local state
-				local blocked
-				local interlocked
-				local broken
+				local state = Dispatch.RealData[name]["state"] or 0
+				local blocked = Dispatch.RealData[name]["blocked"] or 0
+				local interlocked = Dispatch.RealData[name]["interlocked"] or 0
+				local broken = Dispatch.RealData[name]["broken"] or 0
+				local passes = Dispatch.RealData[name]["passes"] or -1
 				if parm=="state" then
 					state = value
-					blocked = Dispatch.RealData[name]["blocked"] or 0
-					interlocked = Dispatch.RealData[name]["interlocked"] or 0
-					broken = Dispatch.RealData[name]["broken"] or 0
 				elseif parm=="blocked" then
-					state = Dispatch.RealData[name]["state"] or 0
 					blocked = value
-					interlocked = Dispatch.RealData[name]["interlocked"] or 0
-					broken = Dispatch.RealData[name]["broken"] or 0
 				elseif parm=="interlocked" then
-					state = Dispatch.RealData[name]["state"] or 0
-					blocked = Dispatch.RealData[name]["blocked"] or 0
 					interlocked = value
-					broken = Dispatch.RealData[name]["broken"] or 0
 				elseif parm=="broken" then
-					state = Dispatch.RealData[name]["state"] or 0
-					blocked = Dispatch.RealData[name]["blocked"] or 0
-					interlocked = Dispatch.RealData[name]["interlocked"] or 0
 					broken = value
+				elseif parm=="passes" then --doesn't actually do anything here oops
+					passes = value
 				end
 				
 				if (broken==1) and ((blocked==1) or (interlocked==1)) then --Broken Blocked
@@ -1906,11 +2138,17 @@ function Dispatch.AddBlock(ent, x, y, block)
 						button:SetImage("trakpak3_common/icons/block_clear.png")
 					end
 					
-					--Teleport to object on right click
 					function button:DoRightClick()
-
-						Dispatch.Teleport(sb)
-
+						local mpanel = Dispatch.CreateContextMenu(pnl, self, 144, 36)
+						--Teleport to object
+						local tpbutton = vgui.Create("DButton",mpanel)
+						tpbutton:Dock(FILL)
+						tpbutton:SetText("Teleport")
+						tpbutton:SetIcon("trakpak3_common/icons/nav.png")
+						function tpbutton:DoClick()
+							Dispatch.Teleport(sb)
+							Dispatch.CloseContextMenu()
+						end
 					end
 					
 					--Open Note Editor
@@ -2184,11 +2422,19 @@ function Dispatch.AddProxy(ent, x, y, proxy, icon0, icon1, icon2, icon3, icon4, 
 						Dispatch.SendCommand(e.proxy, "fire", e.state)
 					end
 					
-					--Teleport to object on right click
 					function button:DoRightClick()
-						local pos = proxy.pos
-						if pos then
-							Dispatch.Teleport(pos)
+						local mpanel = Dispatch.CreateContextMenu(pnl, self, 144, 36)
+						--Teleport to object
+						local tpbutton = vgui.Create("DButton",mpanel)
+						tpbutton:Dock(FILL)
+						tpbutton:SetText("Teleport")
+						tpbutton:SetIcon("trakpak3_common/icons/nav.png")
+						function tpbutton:DoClick()
+							local pos = proxy.pos
+							if pos then
+								Dispatch.Teleport(pos)
+							end
+							Dispatch.CloseContextMenu()
 						end
 					end
 					
@@ -3403,6 +3649,9 @@ function Dispatch.LoadBoards(fromdata, ent)
 	end
 end
 
+--Reload the dispatch boards from map-provided data; required in order to get hotloading working.
+--concommand.Add("tp3_dispatch_reload",function() Dispatch.LoadBoards() end)
+
 --Receive Dispatch Status data from server
 Trakpak3.ReceiveDSPack = function(data)
 	Dispatch.RealData = data
@@ -3421,7 +3670,7 @@ function Dispatch.SendCommand(target, cmd, arg)
 	Trakpak3.NetStart("tp3_dispatch_comm")
 		net.WriteString(target)
 		net.WriteString(cmd)
-		net.WriteUInt(arg,3)
+		net.WriteInt(arg,16)
 	net.SendToServer()
 	LocalPlayer():EmitSound("buttons/lightswitch2.wav")
 end
@@ -3445,7 +3694,7 @@ Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 		local dtype = net.ReadString()
 		local value
 		if dtype=="int" then
-			value = net.ReadUInt(16)
+			value = net.ReadInt(16)
 		elseif dtype=="string" then
 			value = net.ReadString()
 		end
@@ -3763,19 +4012,28 @@ function Dispatch.OpenDispatcher()
 		end
 	end
 	
-	--Bottom Bar Reminder
+	--Bottom Bar Dispatch Tips
+	Dispatch.TipColor.a = 0 --Start faded out
 	
 	local label = vgui.Create("DLabel",bottombar)
 	label:Dock(FILL)
 	label:SetContentAlignment(5)
-	label:SetText("Unless you're the designated dispatcher, always make sure to ask before changing signals and switches!")
-	label:SetTextColor(dark)
-	surface.CreateFont("TP3_DispatchWarning",{
-		font = "Roboto",
-		size = 24,
-		weight = 600
-	})
+	label:SetText(Dispatch.Tips[Dispatch.TipIndex])
+	label:SetTextColor(Dispatch.TipColor)
 	label:SetFont("TP3_DispatchWarning")
+	label:SetMouseInputEnabled(true)
+	
+	function label:DoClick() --Cycle to the next tip when clicked
+		if Dispatch.TipState==1 then
+			Dispatch.TipState = 2
+			Dispatch.TipTimeStamp = CurTime()
+			surface.PlaySound("garrysmod/content_downloaded.wav")
+		end
+	end
+	
+	Dispatch.Panels.Tip = label
+	Dispatch.TipTimeStamp = CurTime()
+	Dispatch.TipState = 0 --Fade In
 	
 	local lpanel = vgui.Create("DPanel",frame)
 	function lpanel:Paint() end
@@ -3963,3 +4221,58 @@ Trakpak3.Net["tp3_dispatch_admin"] = function()
 		end
 	end
 end
+
+--Cycle Dispatch Tips
+--[[
+Dispatch.Tips = {
+	"Unless you're the designated dispatcher, always make sure to ask before changing signals and switches!",
+	"Right click on signals, switches, and block detectors to teleport to them!",
+	"This is a test tip. Boop!"
+}
+
+Dispatch.TipShowTime = 10
+Dispatch.TipFadeTime = 1
+Dispatch.TipColor = Color(31,31,31,0)
+Dispatch.TipIndex = 1
+Dispatch.TipState = 0 --Fade In
+Dispatch.TipTimeStamp = nil
+]]--
+local approach = math.Approach
+local tickinterval = engine.TickInterval
+hook.Add("Think","TP3_Dispatch_TipHandler",function()
+	if Dispatch.Panels.Tip and Dispatch.Panels.Tip:IsValid() and Dispatch.TipTimeStamp then
+		if Dispatch.TipState==0 then --Fade In
+			local alpha = Dispatch.TipColor.a
+			alpha = 255*(CurTime() - Dispatch.TipTimeStamp)/Dispatch.TipFadeTime
+			if alpha >= 255 then
+				alpha = 255
+				Dispatch.TipState = 1
+				Dispatch.TipTimeStamp = CurTime()
+			end
+			Dispatch.TipColor.a = alpha
+			Dispatch.Panels.Tip:SetTextColor(Dispatch.TipColor)
+		elseif Dispatch.TipState==1 then --Hold
+			if (CurTime() - Dispatch.TipTimeStamp) > Dispatch.TipShowTime then
+				Dispatch.TipState = 2
+				Dispatch.TipTimeStamp = CurTime()
+			end
+		elseif Dispatch.TipState==2 then --Fade Out
+			local alpha = Dispatch.TipColor.a
+			alpha = 255*(1 - (CurTime() - Dispatch.TipTimeStamp)/Dispatch.TipFadeTime)
+			if alpha <= 0 then
+				alpha = 0
+				Dispatch.TipState = 0
+				Dispatch.TipTimeStamp = CurTime()
+				--Get next tip
+				Dispatch.TipIndex = Dispatch.TipIndex + 1
+				if Dispatch.TipIndex > #Dispatch.Tips then Dispatch.TipIndex = 1 end
+				Dispatch.Panels.Tip:SetText(Dispatch.Tips[Dispatch.TipIndex])
+			end
+			Dispatch.TipColor.a = alpha
+			Dispatch.Panels.Tip:SetTextColor(Dispatch.TipColor)
+		end
+	end
+end)
+
+--Hot Load
+if Trakpak3.Dispatch.MapBoards then Trakpak3.Dispatch.LoadBoards() end

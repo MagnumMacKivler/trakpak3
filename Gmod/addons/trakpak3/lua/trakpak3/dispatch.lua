@@ -22,8 +22,8 @@ function Trakpak3.Dispatch.IPE() --InitPostEntity
 			for id, ent in pairs(ents.FindByClass("tp3_signal_master")) do
 				local name = ent:GetName()
 				local nopath
-				if ent.interlock and not ent.pindex then nopath = 1 else nopatch = 0 end
-				if name and (name!="") then Trakpak3.Dispatch.InitData[name] = { ctc_state = ent.ctc_state, nopath = nopath, pos = ent:GetPos() } end
+				if ent.interlock and not ent.pindex then nopath = 1 else nopath = 0 end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[name] = { ctc_state = ent.ctc_state, nopath = nopath, pos = ent:GetPos(), passes = 0 } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_switch_lever_anim")) do
@@ -31,7 +31,7 @@ function Trakpak3.Dispatch.IPE() --InitPostEntity
 				if ent.state then st = 1 else st = 0 end
 				if ent.interlocked then il = 1 else il = 0 end
 				local name = ent:GetName()
-				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { state = st, broken = 0, blocked = 0, interlocked = il, pos = ent:GetPos() } end
+				if name and (name!="") then Trakpak3.Dispatch.InitData[ent:GetName()] = { state = st, broken = 0, blocked = 0, interlocked = il, pos = ent:GetPos(), passes = -1 } end
 			end
 			
 			for id, ent in pairs(ents.FindByClass("tp3_signal_block")) do
@@ -133,7 +133,7 @@ function Trakpak3.Dispatch.SendDeltas()
 					net.WriteString(parm) --parm
 					net.WriteString(dtype) --dtype
 					if dtype=="int" then
-						net.WriteUInt(value,16) --value
+						net.WriteInt(value,16) --value
 					elseif dtype=="string" then
 						net.WriteString(value) --value (string)
 					end
@@ -156,7 +156,7 @@ Trakpak3.Dispatch.CommandLog = {}
 Trakpak3.Net.tp3_dispatch_comm = function(len,ply)
 	local entname = net.ReadString()
 	local cmd = net.ReadString()
-	local arg = net.ReadUInt(3)
+	local arg = net.ReadInt(16)
 	local tt = string.FormattedTime(CurTime()) --time table
 	table.insert(Trakpak3.Dispatch.CommandLog, "[" .. tt.h .. "h:" .. tt.m .."m:" .. tt.s .. "s] " .. ply:GetName() .. " ENT " .. entname .. " CMD " .. cmd .. " ARG " .. arg)
 	hook.Run("TP3_Dispatch_Command", entname, cmd, arg)

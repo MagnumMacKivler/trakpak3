@@ -97,6 +97,7 @@ if SERVER then
 			--print("YAAAAAAAA")
 		end
 		
+		self.passes = 0 --Passes System
 		--Trakpak3.Dispatch.SendInfo(self:GetName(),"ctc_state",self.ctc_state)
 	end
 	
@@ -318,7 +319,12 @@ if SERVER then
 	--Set CTC State, Handle Interlocks
 	
 	function ENT:SetCTCState(state, init) --Init is only fired by the Block/Gate initial broadcast.
-		if not state then state = self.ctc_state end --Default to current if no parameter is provided. 
+		local wipe_passes = true
+		
+		if not state then --Default to current and don't wipe passes if no parameter is provided.
+			state = self.ctc_state
+			wipe_passes = false
+		end  
 		
 		if self.interlock and self.paths then --Signal has paths and is interlocked
 			if self.pindex then --There is a valid path lined up
@@ -346,11 +352,35 @@ if SERVER then
 		if state != self.ctc_state then
 			self.ctc_state = state
 			Dispatch.SendInfo(self:GetName(),"ctc_state",state)
+			
+			
+		end
+		
+		--Wipe Passes if the new CTC state is Not Once, or if we're just refreshing the aspect.
+		if wipe_passes or (self.ctc_state != 1) then
+			self:SetPasses(0)
 		end
 		
 		--Calculate and Set new aspect if applicable
 		self:GetNewAspect(init)
 		
+	end
+	
+	--Set Passes
+	function ENT:SetPasses(passes)
+		--print(self, " Setting passes: ", passes)
+		--debug.Trace()
+		passes = math.Clamp(passes,0,4)
+		if passes > 0 then
+			self:SetCTCState(1) --Try to get into Once
+			if self.ctc_state==1 then --Success
+				self.passes = passes
+			end --No Else required, SetCTCState already sets it to 0
+		else
+			self.passes = 0
+		end
+		
+		Dispatch.SendInfo(self:GetName(),"passes",self.passes)
 	end
 	
 	--Update when block occupancy changes
@@ -360,10 +390,15 @@ if SERVER then
 				--CTC Trip Once to Hold
 				if (signal.ctc_state==1) and occupied and (not signal.my_occupied) then
 					signal.my_occupied = occupied
-					signal:SetCTCState(0)
+					--Tick down passes
+					if signal.passes and (signal.passes > 1) then --4 3 2 but not 1
+						signal:SetPasses(signal.passes - 1) --Includes a SetCTCState to get a new aspect
+					else
+						signal:SetCTCState(0)
+					end
 				else
 					signal.my_occupied = occupied
-					signal:SetCTCState() --Calculate new Aspect
+					signal:SetCTCState() --Calculate new Aspect; don't wipe passes
 				end
 			end
 		end
@@ -613,14 +648,18 @@ if SERVER then
 	--Receive DS commands
 	hook.Add("TP3_Dispatch_Command","Trakpak3_DS_Signals", function(name, cmd, val)
 		for _, signal in pairs(ents.FindByClass("tp3_signal_master")) do --For Each Signal,
-			if (name==signal:GetName()) and (cmd=="set_ctc") then
-				if val<=3 then
-					--signal.ctc_state = val
-					signal:SetCTCState(val)
-					if signal.automatic then
-						local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv)
-						if newaspect then signal:HandleNewAspect(newaspect) end
+			if name==signal:GetName() then
+				if cmd=="set_ctc" then
+					if val<=3 then
+						--signal.ctc_state = val
+						signal:SetCTCState(val)
+						if signal.automatic then
+							local newaspect = signal:CalculateAspect(signal.my_occupied, signal.my_diverging, signal.my_speed, signal.my_nextaspect, signal.my_nextspeed, signal.tags, signal.ctc_state, signal.my_nextdiv)
+							if newaspect then signal:HandleNewAspect(newaspect) end
+						end
 					end
+				elseif cmd=="setpasses" then
+					signal:SetPasses(val)
 				end
 			end
 		end

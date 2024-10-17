@@ -103,7 +103,6 @@ if SERVER then
 		--Auto Setup Hammer Outputs to Trigger
 		self:RegisterEntity("mytrigger",self.mytrigger)
 		
-		
 		--Wire I/O
 		if WireLib then
 			if not self.nowire then
@@ -198,6 +197,7 @@ if SERVER then
 		if #self.switches==1 then --First Switch
 			self.switch = ent
 			ent:SwitchSetup(self.behavior or 1, self.autoscan)
+			ent:SwitchSetLocked(self.locked) --Set timeout delay
 		else --Second or More Switch
 			if not self.overflow then
 				self.overflow = true
@@ -240,17 +240,26 @@ if SERVER then
 		--Broadcast
 		hook.Run("TP3_SwitchUpdate",self:GetName(),2,true)
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"broken",1)
-		
 		if WireLib then WireLib.TriggerOutput(self,"Broken",1) end
+		self:SetNWBool("broken",true)
+		
+		--Copy to Linked Stand
+		if self.linked_stand_valid then
+			self.linked_stand_ent.broken = true
+			hook.Run("TP3_SwitchUpdate",self.linked_stand_ent:GetName(),2,true)
+			Trakpak3.Dispatch.SendInfo(self.linked_stand_ent:GetName(),"broken",1)
+			if WireLib then WireLib.TriggerOutput(self.linked_stand_ent,"Broken",1) end
+			self.linked_stand_ent:SetNWBool("broken",true)
+		end
 		
 		timer.Simple(60,function()
 			if self.broken then self:StandFix() end
 		end)
-		self:SetNWBool("broken",true)
+		
 	end
 	
-	function ENT:StandFix()
-		self.broken = false
+	function ENT:StandFix(fromlinked)
+		self.broken = false --The "fromlinked" arg is to prevent neverending loops
 		--self:SetSolid(SOLID_BSP)
 		self:SetPos(self.originalpos)
 		self:SetAngles(self.originalang)
@@ -261,14 +270,23 @@ if SERVER then
 		local s_table = {"physics/wood/wood_box_impact_hard1.wav","physics/wood/wood_box_impact_hard2.wav","physics/wood/wood_box_impact_hard3.wav"}
 		self:EmitSound(s_table[p1])
 		
+		--Broadcast
 		if WireLib then WireLib.TriggerOutput(self,"Broken",0) end
 		Trakpak3.Dispatch.SendInfo(self:GetName(),"broken",0)
-		
-		if self.state then self:CompleteThrowDV() else self:CompleteThrowMN() end
 		self:SetNWBool("broken",false)
+		if self.state then self:CompleteThrowDV() else self:CompleteThrowMN() end --Runs switch update
+		
+		--Copy to Linked Stand; only run once each time
+		if not fromlinked and self.linked_stand_valid then
+			self.linked_stand_ent:StandFix(true)
+			self.resync = true --Once clear, re-sync with the linked stand
+		end
+		
+		
+		
 	end
 	
-	--Receive occupancy status
+	--Receive occupancy status from switch
 	function ENT:StandSetOccupied(occ)
 		self.my_occ = occ
 		if self.linked_stand_valid then
@@ -286,12 +304,14 @@ if SERVER then
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"blocked",1)
 		else
 			Trakpak3.Dispatch.SendInfo(self:GetName(),"blocked",0)
-			
+			if self.passmaster and self.passes and (self.passes > 0) then --Tick down passes only if you are the master; the pass master will set it for you in SetPasses.
+				self:SetPasses(self.passes - 1)
+			end
 		end
 		local occn = 0
 		if self.occupied then occn = 1 end
 		if WireLib then WireLib.TriggerOutput(self,"Blocked",occn) end
-		if self.autoreset and self.targetstate and not self.broken then
+		if self.autoreset and self.targetstate and not self.broken and not self.passes then
 			self:SetTargetState(false)
 		end
 		self:SetNWBool("blocked",self.occupied)
@@ -476,6 +496,7 @@ if SERVER then
 		local b = me_blocker or linked_blocker
 		
 		if not me_occupied and not linked_occupied then --Set your self.targetstate for the stand code to pick up automatically
+			self:SetPasses(nil)
 			self.targetstate = state
 			if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
 		elseif ply and b then --Notify player of the blocking entity
@@ -526,9 +547,48 @@ if SERVER then
 				if self.switch then self.switch:SwitchThrow(self.targetstate) end
 				self:Actuate(self.targetstate)
 			end
+			
+			--Auto Throw if passes have expired
+			if self.passes and (self.passes==0) then
+				local icant = self.blocked or self.broken or self.interlocked
+				local lcant = false
+				if self.linked_stand_valid then lcant = self.linked_stand_ent.blocked or self.linked_stand_ent.broken or self.linked_stand_ent.interlocked end
+				if not icant and not lcant then --All conditions clear to throw the switch
+					self:SetPasses(nil)
+					local state = not self.targetstate
+					self.targetstate = state
+					if self.linked_stand_valid then self.linked_stand_ent.targetstate = state end --Update linked stand
+					--print("Throwing! ",self)
+				end
+			end
+			
+			--Auto throw if out of sync due to a broken switch
+			if self.resync then
+				local icant = self.blocked or self.broken
+				local lcant = false
+				if self.linked_stand_valid then lcant = self.linked_stand_ent.blocked or self.linked_stand_ent.broken end
+				if not icant and not lcant then --All conditions clear to throw the switch
+					self.targetstate = self.linked_stand_ent.targetstate
+					self.resync = nil
+				end
+			end
+			
+			
 			self:NextThink(CurTime())
 			return true
 		end
+	end
+	
+	--Set Passes
+	function ENT:SetPasses(passes) --nil to clear
+		self.passes = passes
+		Trakpak3.Dispatch.SendInfo(self:GetName(), "passes", passes or -1)
+		self.passmaster = true
+		if self.linked_stand_valid then --Copy to Linked Stand
+			if self.linked_stand_ent.passmaster then self.passmaster = false end --defer to the master stand, (the stand acted upon first by the code)
+			self.linked_stand_ent.passes = passes
+			Trakpak3.Dispatch.SendInfo(self.linked_stand_ent:GetName(), "passes", passes or -1)
+		end 
 	end
 	
 	--Hammer Input Handler
@@ -542,10 +602,12 @@ if SERVER then
 		elseif inputname=="SetAutoOnly" then
 			self.locked = true
 			self:SetNWBool("locked",true)
+			if self.switch_valid then self.switch_ent:SwitchSetLocked(true) end --Set timeout delay
 			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",1) end
 		elseif inputname=="SetAllowManual" then
 			self.locked = false
 			self:SetNWBool("locked",false)
+			if self.switch_valid then self.switch_ent:SwitchSetLocked(false) end --Set timeout delay
 			if WireLib then WireLib.TriggerOutput(self,"AutomaticOnly",0) end
 		elseif inputname=="SetOccupancy" and self.switch then
 			self.switch:SwitchSetOccupied(data=="1")
@@ -620,11 +682,20 @@ if SERVER then
 	hook.Add("TP3_Dispatch_Command", "Trakpak3_DS_Switches", function(name, cmd, val)
 		for _, stand in pairs(ents.FindByClass("tp3_switch_lever_anim")) do --For Each Stand,
 			--print(stand:GetName(), cmd, val)
-			if (name==stand:GetName()) and (cmd=="throw") then
-				if val==1 then
-					stand:SetTargetState(true)
-				else
-					stand:SetTargetState(false)
+			if name==stand:GetName() then
+				if cmd=="throw" then
+					if val==1 then
+						stand:SetTargetState(true)
+					else
+						stand:SetTargetState(false)
+					end
+				elseif cmd=="setpasses" then
+					if val <= 0 then
+						stand:SetPasses(nil)
+					else
+						stand:SetPasses(val)
+					end
+					--print(val)
 				end
 			end
 		end

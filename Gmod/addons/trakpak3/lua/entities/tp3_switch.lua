@@ -150,7 +150,7 @@ if SERVER then
 			
 		end
 
-
+		self.timeoutdelay = 1 --Will be set by switch stand in StandSetup below:
 
 		--Prop Init Stuff
 		self:Switch(false,true)
@@ -166,6 +166,7 @@ if SERVER then
 		end
 
 		self.behavior = self.behavior or 0 --Will be set later by switch stand
+		
 	end
 
 	--Functions called by switch stand
@@ -192,7 +193,12 @@ if SERVER then
 		if (self.behavior==-1) or not self.autoscan then self:SetNWBool("dumb",true) end
 		--print("Behavior setup: "..behavior)
 	end
-
+	
+	--Set timeout delay and/or any future functions dependent on the switch stand being Auto Only
+	function ENT:SwitchSetLocked(locked)
+		if locked then self.timeoutdelay = 5 else self.timeoutdelay = 1 end
+	end
+	
 	--Instruct the switch to throw
 	function ENT:SwitchThrow(state)
 		if self.animated then --Smoothly animate; otherwise, do nothing and wait for the switch stand to finish
@@ -212,12 +218,13 @@ if SERVER then
 			if self.trailing then
 				self:Switch(self.switchstate, true)
 			end
-
+			--[[
 			if self.hardoccupied then
 				self.hardoccupied = false
 				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 			end
-			
+			]]--
+			if self.hardoccupied and not self.timeout then self.timeout = CurTime() end
 		end
 	end
 	
@@ -244,9 +251,10 @@ if SERVER then
 	
 	--Disable Physgun
 	function ENT:PhysgunPickup() return false end
+	
+	local CurTime = CurTime
 
-
-	--Scan for auto-switching and frogs
+	--Scan for auto-switching, occupancy, and frogs
 	function ENT:Think()
 
 		--Detect approach of incoming trailing props
@@ -287,25 +295,46 @@ if SERVER then
 		--rangerpoint1 = blade or origin
 		--rangerpoint2 = frog
 		if (self.softoccupied or self.forceoccupied) and self.rangerpoint1 and self.rangerpoint2 then
-			local trace = {
-				start = self.rangerpoint1,
-				endpos = self.rangerpoint2,
-				filter = Trakpak3.TraceFilter,
-				ignoreworld = true,
-				mins = Vector(-48,-48,-8),
-				maxs = Vector(48,48,2)
-			}
+			local trace
+			--Alternate between horizontal and vertical checks to try and solve the long car problem
+			if self.vertscan then
+				local sp = (self.rangerpoint1 + self.rangerpoint2)/2
+				trace = {
+					start = sp,
+					endpos = sp + Vector(0,0,64),
+					filter = Trakpak3.TraceFilter,
+					ignoreworld = true,
+					mins = Vector(-48,-48,-8),
+					maxs = Vector(48,48,2)
+				}
+			else
+				trace = {
+					start = self.rangerpoint1,
+					endpos = self.rangerpoint2,
+					filter = Trakpak3.TraceFilter,
+					ignoreworld = true,
+					mins = Vector(-48,-48,-8),
+					maxs = Vector(48,48,2)
+				}
+			end
+			self.vertscan = not self.vertscan
 
 			local tr = util.TraceHull(trace)
 			if tr.Hit then self.clicker = tr.Entity end
 			--print(tr.Hit)
 			if tr.Hit then self.blocking_ent = tr.Entity else self.blocking_ent = nil end
-			if tr.Hit and not self.hardoccupied then
-				self.hardoccupied = true
-				if self.lever_valid then self.lever_ent:StandSetOccupied(true) end
-			elseif not tr.Hit and self.hardoccupied then
-				self.hardoccupied = false
-				if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+			if tr.Hit then
+				if not self.hardoccupied then
+					self.hardoccupied = true
+					if self.lever_valid then self.lever_ent:StandSetOccupied(true) end
+				end
+				self.timeout = nil
+				--if self:EntIndex()==6 then print("Hit!") end
+			elseif self.hardoccupied and not self.timeout then
+				--self.hardoccupied = false
+				--if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+				self.timeout = CurTime() --See below for timeout completion
+				--if self:EntIndex()==6 then print("No Hit!") end
 			end
 
 			if self.trailing then
@@ -436,6 +465,16 @@ if SERVER then
 				turbothink = true
 			end
 		end
+		
+		--Timeout Completion
+		if self.timeout and (CurTime() > (self.timeout + self.timeoutdelay)) then
+			self.timeout = nil
+			self.hardoccupied = false
+			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
+			--print("Switch timed out!")
+			--self:EmitSound("ambient/alarms/klaxon1.wav")
+		end
+		
 		if not self.trailing and self.animating then --Normal Animated Stand throwing, follow the stand cycle
 			--get current frame
 			--print("AAA")
@@ -652,11 +691,14 @@ if SERVER then
 		if self.trailing then
 			self:Switch(self.switchstate, true)
 		end
-
+		
+		--[[
 		if self.hardoccupied then
 			self.hardoccupied = false
 			if self.lever_valid then self.lever_ent:StandSetOccupied(false) end
 		end
+		]]--
+		if self.hardoccupied and not self.timeout then self.timeout = CurTime() end
 		--print("SW EndTouchAll")
 		--self:SetColor(Color(255,255,255))
 	end

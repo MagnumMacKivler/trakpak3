@@ -17,6 +17,7 @@ function  PathConfig.IPE() --InitPostEntity
 	local filepath = "trakpak3/pathconfig/"..game.GetMap()..".lua"
 	local json = file.Read(filepath,"LUA")
 	if json then --found a file!
+		--print("###############\nFOUND A PATH FILE\n#################")
 		local ftable = util.JSONToTable(json)
 		if ftable then
 			
@@ -27,6 +28,8 @@ function  PathConfig.IPE() --InitPostEntity
 			end
 			
 		end
+	else
+		--print("###############\nFOUND NO PATH FILE\n#################")
 	end
 end 
 
@@ -35,7 +38,9 @@ end
 
 function PathConfig.ProcessLogic(signame, paths) --Set Up Signal with Path Info
 	local signal, valid = Trakpak3.FindByTargetname(signame)
-	--print(signal, valid)
+	--print(signal, valid
+	--print("\n"..signame)
+	--PrintTable(paths)
 	if not valid then return end
 	
 	--ENT:AddPath(pathname, diverging, speed, block, nextsignal, active)

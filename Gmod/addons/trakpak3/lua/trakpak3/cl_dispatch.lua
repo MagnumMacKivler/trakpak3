@@ -43,7 +43,7 @@ Dispatch.Tips = {
 	"If you click a switch that is blocked by a train, it will throw as soon as it's clear!",
 	"Having trouble keeping track of trains? Click the block detectors with the train name to add a note only you can see!", --The longest message, don't go any longer
 	"Attach a Trakpak3 Cab Signal Box (Wire Tool) to your train to have your name show up on the dispatch board!",
-	"Pressing the Dispatch Board Keybind ("..input.LookupBinding("tp3_dispatch")..") will close the dispatch board too. It's quicker than clicking the [X]!",
+	"Pressing the Dispatch Board Keybind ("..(input.LookupBinding("tp3_dispatch") or "not bound")..") will close the dispatch board too. It's quicker than clicking the [X]!",
 	"Want an easy way to throw switches in the field? Bind a key to +tp3_remote_switcher !",
 	"Having trouble understanding signals? Bind a key to +tp3_signal_vision !",
 	"Thank you for using the Trakpak3 Dispatch Board!"

@@ -6,7 +6,7 @@
 List of all things that get sent to the client on join:
 
 nodesetup.lua:
-	Blockpack, Signal Pack, Switchpack, Logic Gatepack, Pathconfigpack, Cabsignal Pospack (tp3_request_blockpack) from cl_nodesetup.lua. This is the big one!
+	Blockpack, Signal Pack, Switchpack, Logic Gatepack, Pathconfigpack, Cabsignal Pospack (tp3_request_blockpack), Dispatch Proxypack from cl_nodesetup.lua. This is the big one!
 	
 signalsetup.lua
 	Signal Systems Pack (trakpak3_getsignalsystems) from cl_signalvision.lua
@@ -36,6 +36,7 @@ Loada.Schedule = {
 	Trakpak3.GetDSPack,		--8
 	Trakpak3.GetDSBoards,	--9
 	Trakpak3.GetSignPack,	--10
+	Trakpak3.GetProxyPack,	--11
 }
 --[index] = Callback
 

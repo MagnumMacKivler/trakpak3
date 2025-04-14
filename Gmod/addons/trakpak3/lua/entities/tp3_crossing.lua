@@ -79,7 +79,7 @@ if SERVER then
 	function ENT:HandleNewState(trigger, skiphysteresis)
 		if trigger and not self.triggered then
 			self.triggered = true
-			self.block_island_ent.run = true
+			if self.block_island_valid then self.block_island_ent.run = true end
 			
 			--Stop hysteresis timer
 			timer.Remove("tp3_xing_"..self:EntIndex().."_hysteresis")
@@ -92,7 +92,7 @@ if SERVER then
 			self:TriggerOutput("OnTrigger",self)
 		elseif not trigger and self.triggered then
 			self.triggered = false
-			self.block_island_ent.run = false
+			if self.block_island_valid then self.block_island_ent.run = false end
 			
 			local hdelay = 5
 			if skiphysteresis then hdelay = 0 end

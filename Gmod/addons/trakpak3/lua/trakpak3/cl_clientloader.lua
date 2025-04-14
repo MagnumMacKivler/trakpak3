@@ -28,7 +28,8 @@ Loada.PacketDestinations = {
 	Trakpak3.ReceiveSignalSystemPack,	--7
 	Trakpak3.ReceiveDSPack,		--8
 	Trakpak3.ReceiveDSBoards,	--9
-	Trakpak3.ReceiveSignPack	--10
+	Trakpak3.ReceiveSignPack,	--10
+	Trakpak3.ReceiveProxyPack	--11
 }
 
 

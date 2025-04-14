@@ -231,6 +231,11 @@ Trakpak3.ReceiveGatePack = function(data)
 	Trakpak3.LogicGates = data
 end
 
+--Receive Dispatch Proxies
+Trakpak3.ReceiveProxyPack = function(data)
+	Trakpak3.DispatchProxies = data
+end
+
 --Occupancy Update
 --[[
 net.Receive("tp3_block_hull_update", function()
@@ -691,6 +696,42 @@ hook.Add("PostDrawTranslucentRenderables","TP3_NE_DRAW", function()
 					
 					cam.Start2D()
 						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, swicolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
+					cam.End2D()
+				end
+			end
+		end
+		
+		--Dispatch Proxies
+		if Trakpak3.DispatchProxies and (Trakpak3.ShowHulls==2) then
+			local proxcolor = Color(255,127,0)
+			for name, pos in pairs(Trakpak3.DispatchProxies) do
+				if mypos:DistToSqr(pos) < rdist then
+					local mins = Vector(-64,-64,-8)
+					local maxs = Vector(64,64,128)
+					
+					render.DrawWireframeBox(pos,Angle(),mins,maxs,proxcolor)
+					
+					local text
+					local tpos
+					
+					if mypos:WithinAABox(pos+mins, pos+maxs) then --Inside the box
+						text = "Dispatch Proxy '"..name.."' (Press E to Copy to Clipboard)"
+						tpos = { x = ScrW()/2, y = ScrH()/2, visible = true }
+						
+						incopyzone = true
+						if not Trakpak3.Clipboard then
+							Trakpak3.Clipboard = name
+							--net.Start("tp3_clipboard")
+								--net.WriteString(name)
+							--net.SendToServer()
+						end
+					else --Outside the box
+						text = "Dispatch Proxy '"..name.."'"
+						tpos = (pos + Vector(0,0,64)):ToScreen()
+					end
+					
+					cam.Start2D()
+						if tpos.visible then draw.SimpleTextOutlined(text,"DermaDefault",tpos.x, tpos.y, proxcolor, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, Color(0,0,0)) end
 					cam.End2D()
 				end
 			end

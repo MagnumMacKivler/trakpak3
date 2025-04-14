@@ -184,6 +184,29 @@ function Trakpak3.GetPathPack() --Path Configs
 	
 end
 
+function Trakpak3.GetProxyPack() --Dispatch Proxies
+	if Trakpak3.ProxyPack then return Trakpak3.ProxyPack end
+	
+	Trakpak3.ProxyPack = {}
+	local proxies = Trakpak3.ProxyPack
+	
+	local allproxies = ents.FindByClass("tp3_dispatch_proxy")
+	if allproxies then
+		for _, proxy in pairs(allproxies) do
+			local name = proxy:GetName()
+			if name and (name!="") then
+				proxies[name] = proxy:GetPos()
+			end
+		end
+	end
+	
+	if table.IsEmpty(proxies) then --There were no proxies. Return nil
+		return nil
+	else
+		return proxies
+	end
+end
+
 --Clipboard
 --[[
 util.AddNetworkString("tp3_clipboard")

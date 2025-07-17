@@ -1619,10 +1619,22 @@ if CLIENT then
 			end
 		
 		--Decoupling HUD
-		
 		if Trakpak3.InitPostEntity and not (key_e and key_m1) then
-			key_e = string.upper(input.LookupBinding("+use"))
-			key_m1 = string.upper(input.LookupBinding("+attack"))
+			local bind_use = input.LookupBinding("+use")
+			local bind_attack = input.LookupBinding("+attack")
+			if bind_use then
+				key_e = string.upper(bind_use)
+			else
+				key_e = "+USE NOT BOUND!!!"
+				ErrorNoHalt("[Trakpak3] You have no key bound to +use! This is an important binding and you should really fix it. To fix, type this in console, without quotes: \"bind e +use\" or edit the key binds in Garry's Mod's options menu.\n")
+			end
+			
+			if bind_attack then
+				key_m1 = string.upper(bind_attack)
+			else
+				key_m1 = "+ATTACK NOT BOUND!!!"
+				ErrorNoHalt("[Trakpak3] You have no key bound to +attack! This is an important binding and you should really fix it. To fix, type this in console, without quotes: \"bind mouse1 +attack\" or edit the key binds in Garry's Mod's options menu.\n")
+			end
 		end
 		
 		local vehicle_ok = nil

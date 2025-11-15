@@ -182,31 +182,31 @@ if SERVER then
 			local rope
 			if slack > 0 then --Slack-style coupling
 				local midpoint = ( self.truck:LocalToWorld(phys1:GetMassCenter()) + coupler2.truck:LocalToWorld(phys2:GetMassCenter()) )/2
-				rope = constraint.Rope(self.truck, coupler2.truck, 0, 0, self.truck:WorldToLocal(midpoint), coupler2.truck:WorldToLocal(midpoint), slack, 0, 0, ropewidth, "")
+				rope = constraint.Rope(self.truck, coupler2.truck, 0, 0, self.truck:WorldToLocal(midpoint), coupler2.truck:WorldToLocal(midpoint), slack, 0, 0, ropewidth, "cable/cable")
 			else --Traditional drawbar
 				local mc1 = self.truck:LocalToWorld(phys1:GetMassCenter())
 				local mc2 = coupler2.truck:LocalToWorld(phys2:GetMassCenter())
 				local p1 = mc1 + 0.25*(mc2 - mc1)
 				local p2 = mc2 + 0.25*(mc1 - mc2)
 				local length = (p2-p1):Length()
-				rope = constraint.Rope(self.truck, coupler2.truck, 0, 0, self.truck:WorldToLocal(p1), coupler2.truck:WorldToLocal(p2), length, 0, 0, ropewidth, "", true)
+				rope = constraint.Rope(self.truck, coupler2.truck, 0, 0, self.truck:WorldToLocal(p1), coupler2.truck:WorldToLocal(p2), length, 0, 0, ropewidth, "cable/cable", true)
 			end
 			
+			--Set the coupler as coupled so that even if the rope fails, it won't spam errors or inflate phys_lengthconstraint counts.
+			self.coupled = coupler2
+			coupler2.coupled = self
+			self.truck:EmitSound("Trakpak3.autocoupler.couple") --Coupler Sound
+			
+			--Set Network Vars for RLC Delta Slack Sounds. Only set on one entity to avoid duplicating sounds
+			self.truck:SetNWEntity("tp3ac_coupledent", coupler2.truck)
+			self.truck:SetNWFloat("tp3ac_distance",(self.truck:GetPos() - coupler2.truck:GetPos()):Length())
+			self.truck:SetNWFloat("tp3ac_slack", slack)
+			--These can be retrieved on the client as follows:
+			--local coupledent = entity:GetNWEntity("tp3ac_coupledent") --Entity that is autocoupled, or NULL entity if not
+			--local distance = entity:GetNWFloat("tp3ac_distance") --Linear distance between entity coordinate centers at the moment the coupling was made, or 0 if not coupled.
+			--local slack = entity:GetNWFloat("tp3ac_slack") --Amount of slack in the coupling. Default is 6. Will be 0 if not coupled or if the coupling is a solid drawbar.
+			
 			if rope then --success!
-				self.coupled = coupler2
-				coupler2.coupled = self
-				self.truck:EmitSound("Trakpak3.autocoupler.couple") --Coupler Sound
-				
-				--Set Network Vars for RLC Delta Slack Sounds. Only set on one entity to avoid duplicating sounds
-				self.truck:SetNWEntity("tp3ac_coupledent", coupler2.truck)
-				self.truck:SetNWFloat("tp3ac_distance",(self.truck:GetPos() - coupler2.truck:GetPos()):Length())
-				self.truck:SetNWFloat("tp3ac_slack", slack)
-				
-				--These can be retrieved on the client as follows:
-				--local coupledent = entity:GetNWEntity("tp3ac_coupledent") --Entity that is autocoupled, or NULL entity if not
-				--local distance = entity:GetNWFloat("tp3ac_distance") --Linear distance between entity coordinate centers at the moment the coupling was made, or 0 if not coupled.
-				--local slack = entity:GetNWFloat("tp3ac_slack") --Amount of slack in the coupling. Default is 6. Will be 0 if not coupled or if the coupling is a solid drawbar.
-				
 				return true
 			end
 			return false

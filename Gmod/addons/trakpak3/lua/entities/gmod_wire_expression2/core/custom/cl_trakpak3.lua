@@ -4,3 +4,4 @@ E2Helper.Descriptions["quickSetupAutoCouplers(e:nnn)"] = "Quickly adds AutoCoupl
 E2Helper.Descriptions["clearAutoCouplers(e:)"] = "Removes AutoCouplers from the selected entity. Does not decouple cars. Returns 1 on success."
 E2Helper.Descriptions["hasAutoCouplers(e:)"] = "Returns 1 if the selected entity has AutoCouplers."
 E2Helper.Descriptions["isAutoCoupled(e:n)"] = "Returns 1 if the specified coupler is coupled to another car. Use 1 for the front coupler, -1 for the rear coupler. If you use 0, returns the total number of couplers which are coupled to another car."
+E2Helper.Descriptions["getAutoCoupled(e:n)"] = "Returns car entity of the specified coupler that it is coupled to. Use 1 for the front coupler, -1 for the rear coupler. 0 Return NULL"

@@ -73,3 +73,21 @@ e2function number entity:isAutoCoupled(number direction)
 end
 
 __e2setcost(5)
+
+e2function entity entity:getAutoCoupled(number direction)
+	if not validPhysics(this) then return NULL end
+	
+	if not this.TP3AC then return NULL end
+	
+	if direction > 0 then 
+		if not this.TP3AC[1] then return NULL end
+		if this.TP3AC[1].coupled and validPhysics(this.TP3AC[1].coupled.car) then return this.TP3AC[1].coupled.car else return NULL end
+	elseif direction < 0 then
+		if not this.TP3AC[-1] then return NULL end
+		if this.TP3AC[-1].coupled and validPhysics(this.TP3AC[-1].coupled.car) then return this.TP3AC[-1].coupled.car else return NULL end
+	end
+	
+	return NULL
+end
+
+__e2setcost(5)

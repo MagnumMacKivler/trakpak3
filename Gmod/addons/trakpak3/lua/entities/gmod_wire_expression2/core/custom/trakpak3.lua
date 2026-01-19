@@ -72,4 +72,45 @@ e2function number entity:isAutoCoupled(number direction)
 	
 end
 
-__e2setcost(5)
+__e2setcost(1)
+
+--CAR TAG FUNCTIONS
+local white = Color(255,255,255)
+
+--Add car tags, basic
+e2function void entity:setCarTag(string tag, vector color1)
+	if not (validPhysics(this) and isOwner(self, this)) then return end
+	Trakpak3.CarTags.Set(this, tag, color1/255)
+	return
+end
+--Add car tags, height option
+e2function void entity:setCarTag(string tag, vector color1, number height)
+	if not (validPhysics(this) and isOwner(self, this)) then return end
+	Trakpak3.CarTags.Set(this, tag, color1/255, nil, height)
+	return
+end
+--Add car tags, with outline color
+e2function void entity:setCarTag(string tag, vector color1, vector color2)
+	if not (validPhysics(this) and isOwner(self, this)) then return end
+	Trakpak3.CarTags.Set(this, tag, color1/255, color2/255)
+	return
+end
+--Add car tags, with  everything
+e2function void entity:setCarTag(string tag, vector color1, vector color2, number height)
+	if not (validPhysics(this) and isOwner(self, this)) then return end
+	Trakpak3.CarTags.Set(this, tag, color1/255, color2/255, height)
+	return
+end
+--Clear Car Tags
+e2function void entity:clearCarTag()
+	if not (validPhysics(this) and isOwner(self, this)) then return end
+	Trakpak3.CarTags.Set(this, nil)
+	return
+end
+--Read Car Tag
+e2function string entity:readCarTag()
+	if not (validPhysics(this) and isOwner(self, this)) then return "" end
+	local tag = Trakpak3.CarTags.Get(this)
+	if not tag then tag = "" end
+	return tag
+end

@@ -1618,81 +1618,81 @@ if CLIENT then
 				end
 			end
 		
-		--Decoupling HUD
-		if Trakpak3.InitPostEntity and not (key_e and key_m1) then
-			local bind_use = input.LookupBinding("+use")
-			local bind_attack = input.LookupBinding("+attack")
-			if bind_use then
-				key_e = string.upper(bind_use)
-			else
-				key_e = "+USE NOT BOUND!!!"
-				ErrorNoHalt("[Trakpak3] You have no key bound to +use! This is an important binding and you should really fix it. To fix, type this in console, without quotes: \"bind e +use\" or edit the key binds in Garry's Mod's options menu.\n")
+			--Decoupling HUD
+			if Trakpak3.InitPostEntity and not (key_e and key_m1) then
+				local bind_use = input.LookupBinding("+use")
+				local bind_attack = input.LookupBinding("+attack")
+				if bind_use then
+					key_e = string.upper(bind_use)
+				else
+					key_e = "+USE NOT BOUND!!!"
+					ErrorNoHalt("[Trakpak3] You have no key bound to +use! This is an important binding and you should really fix it. To fix, type this in console, without quotes: \"bind e +use\" or edit the key binds in Garry's Mod's options menu.\n")
+				end
+				
+				if bind_attack then
+					key_m1 = string.upper(bind_attack)
+				else
+					key_m1 = "+ATTACK NOT BOUND!!!"
+					ErrorNoHalt("[Trakpak3] You have no key bound to +attack! This is an important binding and you should really fix it. To fix, type this in console, without quotes: \"bind mouse1 +attack\" or edit the key binds in Garry's Mod's options menu.\n")
+				end
 			end
 			
-			if bind_attack then
-				key_m1 = string.upper(bind_attack)
-			else
-				key_m1 = "+ATTACK NOT BOUND!!!"
-				ErrorNoHalt("[Trakpak3] You have no key bound to +attack! This is an important binding and you should really fix it. To fix, type this in console, without quotes: \"bind mouse1 +attack\" or edit the key binds in Garry's Mod's options menu.\n")
+			local vehicle_ok = nil
+			
+			if ply:InVehicle() then
+				local veh = ply:GetVehicle()
+				if veh and veh:IsValid() and veh:GetNWBool( "TP3AC_AllowDecouple" ) then
+					vehicle_ok = true
+				else
+					vehicle_ok = false
+				end
 			end
-		end
-		
-		local vehicle_ok = nil
-		
-		if ply:InVehicle() then
-			local veh = ply:GetVehicle()
-			if veh and veh:IsValid() and veh:GetNWBool( "TP3AC_AllowDecouple" ) then
-				vehicle_ok = true
+			
+			local key
+			if vehicle_ok then
+				key = key_m1
 			else
-				vehicle_ok = false
+				key = key_e
 			end
-		end
-		
-		local key
-		if vehicle_ok then
-			key = key_m1
-		else
-			key = key_e
-		end
-		
-		local sx, sy = 128, 24
-		
-		if decouplingcar then
-			if decouplingtime then --In Process
-				if not decoupling_prog then --Create Progress Bar
-					decoupling_prog = vgui.Create("DProgress")
+			
+			local sx, sy = 128, 24
+			
+			if decouplingcar then
+				if decouplingtime then --In Process
+					if not decoupling_prog then --Create Progress Bar
+						decoupling_prog = vgui.Create("DProgress")
+						
+						decoupling_prog:SetPos(ScrW()/2 - sx/2, ScrH()/2 - sy/2 + 88)
+						decoupling_prog:SetSize(sx,sy)
+					end
 					
-					decoupling_prog:SetPos(ScrW()/2 - sx/2, ScrH()/2 - sy/2 + 88)
-					decoupling_prog:SetSize(sx,sy)
+					local holdtime = 1
+					
+					if not dct_cvar then
+						dct_cvar = GetConVar("tp3_autocoupler_decoupletime")
+					end
+					if dct_cvar then
+						holdtime = math.Clamp(0.5, dct_cvar:GetFloat(), 5)
+					end
+					
+					local frac = math.Clamp((CurTime() - decouplingtime)/holdtime, 0, 1)
+					decoupling_prog:SetFraction(frac)
+					
+					draw.SimpleTextOutlined("Decoupling...", "DermaDefault",ScrW()/2, ScrH()/2 + 64, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, black)
+					
+				else --Not decoupling
+					if decoupling_prog and decoupling_prog:IsValid() then
+						decoupling_prog:Remove()
+						decoupling_prog = nil
+					end
+					draw.SimpleTextOutlined("Hold "..key.." to decouple...", "DermaDefault", ScrW()/2, ScrH()/2 + 64, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, black)
 				end
-				
-				local holdtime = 1
-				
-				if not dct_cvar then
-					dct_cvar = GetConVar("tp3_autocoupler_decoupletime")
-				end
-				if dct_cvar then
-					holdtime = math.Clamp(0.5, dct_cvar:GetFloat(), 5)
-				end
-				
-				local frac = math.Clamp((CurTime() - decouplingtime)/holdtime, 0, 1)
-				decoupling_prog:SetFraction(frac)
-				
-				draw.SimpleTextOutlined("Decoupling...", "DermaDefault",ScrW()/2, ScrH()/2 + 64, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, black)
-				
-			else --Not decoupling
+			else
 				if decoupling_prog and decoupling_prog:IsValid() then
 					decoupling_prog:Remove()
 					decoupling_prog = nil
 				end
-				draw.SimpleTextOutlined("Hold "..key.." to decouple...", "DermaDefault", ScrW()/2, ScrH()/2 + 64, white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, black)
 			end
-		else
-			if decoupling_prog and decoupling_prog:IsValid() then
-				decoupling_prog:Remove()
-				decoupling_prog = nil
-			end
-		end
 		
 		cam.End2D()
 		

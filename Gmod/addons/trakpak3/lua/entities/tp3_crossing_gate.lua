@@ -46,6 +46,11 @@ if SERVER then
 		if self.skin then self:SetSkin(self.skin) end
 		if self.bodygroups then self:SetBodygroups(self.bodygroups) end
 		
+		if self.anim_idle == "none" or self:LookupSequence(self.anim_idle)== -1 then self.anim_idle = nil end
+		if self.anim_idle2 == "none" or self:LookupSequence(self.anim_idle2)== -1 then self.anim_idle2 = nil end
+		if self.anim_trans == "none" or self:LookupSequence(self.anim_trans)== -1 then self.anim_trans = nil end
+		if self.anim_trans2 == "none" or self:LookupSequence(self.anim_trans2)== -1 then self.anim_trans2 = nil end
+		
 		if self.anim_idle then self:ResetSequence(self.anim_idle) end
 		
 		--Wire Setup
@@ -57,12 +62,15 @@ if SERVER then
 		
 		if self.xing_valid then self.randomoffset = self.xing_ent:RequestDelay() else self.randomoffset = 0 end --Used for slightly desynchronizing the opening/closing action <3
 		
+		self.working = false
+		
 		--print(self, self.anim_trans, self.anim_trans2, self.anim_idle, self.anim_idle2)
 	end
 	
 	
 	--Lights turn on
 	function ENT:LightsOn()
+		
 		if self.skin2 then
 			--Change Lights
 			self:SetSkin(self.skin2)
@@ -75,7 +83,10 @@ if SERVER then
 		if WireLib then
 			WireLib.TriggerOutput(self, "Lights", 1)
 		end
-		self.working = true
+		
+		if self.bellmode != 0 then timer.Simple(self.randomoffset, function() self:BellStart() end) end --Bell
+				
+		timer.Simple((self.warning or 0) + self.randomoffset, function() self:GateClose() end) --Gate
 	end
 	
 	--Lights turn off
@@ -91,7 +102,7 @@ if SERVER then
 		if WireLib then
 			WireLib.TriggerOutput(self, "Lights", 0)
 		end
-		self.working = false
+		
 	end
 	
 	--Gate starts moving down
@@ -109,7 +120,7 @@ if SERVER then
 			timedelay = self:SequenceDuration(self:LookupSequence(self.anim_trans2)) or 0
 		end
 		
-		--Setup the timer for Close Idle Animation
+		--Setup the timer for Close Idle Animation (gate finished closing)
 		timer.Simple(timedelay, function()
 			if self.anim_idle2 then self:ResetSequence(self.anim_idle2) end
 			if (self.bellmode==1) or (self.bellmode==4) then timer.Simple(self.randomoffset, function() self:BellStop() end) end --BM 1/4: Bell stops once gates are fully down
@@ -127,7 +138,6 @@ if SERVER then
 	
 	--Gate starts moving back up
 	function ENT:GateOpen()
-		self.working = true
 		local timedelay = 0
 		
 		--Bodygroups
@@ -144,6 +154,7 @@ if SERVER then
 		--Setup timer for Idle Open Animation
 		timer.Simple(timedelay, function()
 			if self.anim_idle then self:ResetSequence(self.anim_idle) end
+			self.working = false
 		end)
 		
 		--Bellmode 3
@@ -182,37 +193,44 @@ if SERVER then
 		if not self.working then
 			if self.xing_ent.TriggerGates and not self.triggered then --Begin crossing sequence
 				self.triggered = true
-				
-				self:LightsOn() --Lights
-				
-				if self.bellmode != 0 then timer.Simple(self.randomoffset, function() self:BellStart() end) end --Bell
-				
-				timer.Simple((self.warning or 0) + self.randomoffset, function() self:GateClose() end) --Gate
-				
+				self.working = true
+				--print(self, "On")
+				self:LightsOn() --Lights, and sequence the bell and gates
+
 			elseif not self.xing_ent.TriggerGates and self.triggered then --Release crossing sequence
 				self.triggered = false
-				
+				self.working = true
 				local timedelay = 0
 				if self.anim_trans then
 					timedelay = self:SequenceDuration(self:LookupSequence(self.anim_trans)) or 0
+					--print(timedelay)
+					if timedelay < 0 then timedelay = 0 end
 				end
 				
-				if (self.bellmode==0) or (self.bellmode==1) then --BM0/1: No Bell ringing at this time
+				if (self.bellmode==0) or (self.bellmode==1) then --BM0/1: Bell should not be ringing
+				
 					timer.Simple(self.randomoffset, function() self:GateOpen() end) --Gate
 					timer.Simple(timedelay + 0.5, function() self:LightsOff() end) --Lights
+					
 				elseif self.bellmode==2 then --BM 2: Bell stops once gates are fully up
+				
 					timer.Simple(self.randomoffset, function() self:GateOpen() end) --Gate
 					timer.Simple(timedelay + 0.5, function() self:LightsOff() end) --Lights
 					timer.Simple(timedelay + self.randomoffset + 0.5, function() self:BellStop() end) --Bell
+					
 				elseif self.bellmode==3 then --BM 3: Bell stops once gates begin to go up
+				
 					timer.Simple(self.randomoffset, function() self:BellStop() end) --Bell
 					timer.Simple(timedelay + 0.5, function() self:LightsOff() end) --Lights
 					timer.Simple(self.randomoffset + 0.5, function() self:GateOpen() end) --Gate
+					
 				elseif self.bellmode==4 then --BM 4: Bell rings while gates in motion
+				
 					timer.Simple(self.randomoffset, function() self:BellStart() end) --Bell
 					timer.Simple(timedelay + self.randomoffset + 1, function() self:BellStop() end)
 					timer.Simple(self.randomoffset + 0.5, function() self:GateOpen() end) --Gate
 					timer.Simple(timedelay + self.randomoffset + 0.5, function() self:LightsOff() end) --Lights
+					
 				end
 			end
 		end

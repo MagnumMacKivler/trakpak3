@@ -80,7 +80,7 @@ The "samplemat" element is for flashing signal aspects only. It should point to 
 
 The "xing_a" element is similar to samplemat but for Crossing Light materials (A).
 The "xing_b" element is for (B) Crossing Light materials.
-If you set an element "backwards" = true, the sprite will render facing the rear of the model (instead of the front).
+If you set an element "backward" = true, the sprite will render facing the rear of the model (instead of the front).
 
 ]]--
 
@@ -105,6 +105,7 @@ local isstring = isstring
 local istable = istable
 local EyePos = EyePos
 local atable = {} --a table we will be reusing to feed into the following function:
+local isfunc = isfunction
 
 --Function to draw a list of aspects
 function RenderAspects(ent, sprite_table, aspect_list)
@@ -143,22 +144,40 @@ function RenderAspects(ent, sprite_table, aspect_list)
 				local draw = alpha>0
 				local framealpha = 1
 				
-				if sprite.samplemat then
+				if sprite.samplemat then --Flashing signals
 					draw = sprite.samplemat:GetInt("$frame")==1
 					--print(draw)
-				elseif sprite.xing_a then
-					local frame = sprite.xing_a:GetInt("$frame")
-					if (frame==7) or (frame==13) then
-						framealpha = 0.5
-					elseif (frame>=0) and (frame<=6) then
+				elseif sprite.xing_a then --Crossing A
+					local mat
+					if isfunc(sprite.xing_a) then --It's a function, call it
+						mat = sprite.xing_a(ent)
+					else --It's a static value
+						mat = sprite.xing_a
+					end
+					if mat then
+					local frame = mat:GetInt("$frame")
+						if (frame==7) or (frame==13) then
+							framealpha = 0.5
+						elseif (frame>=0) and (frame<=6) then
+							framealpha = 0
+						end
+					else
 						framealpha = 0
 					end
-				elseif sprite.xing_b then
-					local frame = sprite.xing_b:GetInt("$frame")
-					if (frame==0) or (frame==6) then
-						framealpha = 0.5
-					elseif (frame>=7) and (frame<=13) then
-						framealpha = 0
+				elseif sprite.xing_b then --Crossing B
+					local mat
+					if isfunc(sprite.xing_b) then --It's a function, call it
+						mat = sprite.xing_b(ent)
+					else --It's a static value
+						mat = sprite.xing_b
+					end
+					if mat then
+						local frame = mat:GetInt("$frame")
+						if (frame==0) or (frame==6) then
+							framealpha = 0.5
+						elseif (frame>=7) and (frame<=13) then
+							framealpha = 0
+						end
 					end
 				end
 				

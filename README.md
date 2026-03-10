@@ -1,6 +1,7 @@
 # Trakpak 3 Developer Resources
 
 Trakpak 3.0 Release Version, Copyright 2019-2021 by Magnum MacKivler
+Trakpak3ft made by Toastur using John Henry, included here with permission.
 
 Trakpak3 is officially released! If you're trying to install it just to use it in-game, please use the [Workshop Addon](https://steamcommunity.com/sharedfiles/filedetails/?id=2379202601) instead. The files on this Github are intended for mappers and developers.
 

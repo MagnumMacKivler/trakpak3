@@ -81,13 +81,6 @@ if SERVER then
 	-- 24" ( Joe's 2ft )
 	list.Set("Trakpak3_AxleCountOverride", "models/hfb_unterwagen_alte_p2ft.mdl", 2)
 	
-	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_16.mdl", 2)
-	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_32.mdl", 2)
-	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_48.mdl", 3)
-	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_64.mdl", 3)
-	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_96.mdl", 4)
-	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_128.mdl", 4)
-	
 	-- 32" ( Ron's 2ft / 1 gauge )
 	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/coachbogey2.mdl", 2)
 	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/freightbogey2.mdl", 2)

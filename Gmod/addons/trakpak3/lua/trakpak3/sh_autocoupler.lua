@@ -1726,6 +1726,11 @@ if CLIENT then
 		
 		if not decouplingtime then
 			local tr = ply:GetEyeTrace()
+			if !tr then 
+				decouplingcar = nil
+				return 
+			end
+			
 			local car = tr.Entity
 			
 			if car and car:IsValid() and (vehicle_ok != false) then

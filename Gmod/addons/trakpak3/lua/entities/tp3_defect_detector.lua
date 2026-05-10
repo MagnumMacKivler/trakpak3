@@ -254,7 +254,7 @@ if SERVER then
 		end
 		
 		--Dragging Equipment Scan
-		if self.running and self.endtime then return end
+		if !self.running or !self.endtime then return end
 		
 		if CurTime() < self.endtime then --Scan
 			local blist = Trakpak3.TraceFilter
@@ -381,130 +381,128 @@ if SERVER then
 	
 	--Hammer Input Handler
 	function ENT:AcceptInput( iname, activator, caller, data )
-		if iname=="AddProp" then return end
+		if iname == "AddProp" then
 		
-		--Determine if prop is in the detector's "track line" or not
-		local Pos_2d = activator:GetPos()*V110
-		local DispToStart = self.centerpos - Pos_2d
-		
-		
-		--print(self.start_c, self.end_c, self.norm_c, Pos_2d)
-		
-		local DistToLine = DispToStart:Cross(self.norm_c):LengthSqr()
-		
-		if DistToLine > (64*64) then return end
-	
-		local phys = activator:GetPhysicsObject()
-		if !phys:IsValid() then return end
-		
-		local velv = phys:GetVelocity()
-		local vel2 = velv:LengthSqr()
-		if vel2 < (self.minspeed*self.minspeed) then return end --It passes the speed threshold
-		
-		--Determine if the object is a truck or not
-		local validtruck = false
-		
-		--Determine direction of motion
-		local vx = math.abs(velv:Dot(activator:GetForward()))
-		local vy = math.abs(velv:Dot(activator:GetRight()))
-		local vz = math.abs(velv:Dot(activator:GetUp()))
-		local mins = activator:OBBMins()
-		local maxs = activator:OBBMaxs()
-		
-		local proplength
-		local propspeed
-		
-		if (vy > vx) and (vy > vz) then --Moving in Local Y
-			proplength = maxs.y - mins.y
-			propspeed = vy
-		elseif (vz > vx) and (vz > vy) then --Moving in Local Z
-			proplength = maxs.z - mins.z
-			propspeed = vz
-		else --Moving in Local X
-			proplength = maxs.x - mins.x
-			propspeed = vx
-		end
-		
-		if proplength > self.axlelength_t[ #self.axlelength_t ] and 
-			!list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() ) then return end
-		
-		--Activate Detector
-		if not self.running then
-			self.running = true
-			self.lastent = nil
-			self.trainaxles = 0
-			self.ropes = 0
-			self.traincars = 0
-			self.trainlength = 0
-			self.defect_axle = nil
-			self.defect_car = nil
-			self.dtype = nil
+			--Determine if prop is in the detector's "track line" or not
+			local Pos_2d = activator:GetPos()*V110
+			local DispToStart = self.centerpos - Pos_2d
 			
-			if not self.temp then self.temp = math.random(self.mintemp, self.maxtemp) end --Do this once the first time a train rolls over it
 			
-			--Broadcast intro when train first drives over
-			if self.speakintro then
-				self:Transmit(1, self.soundfont, self.s_intro)
+			--print(self.start_c, self.end_c, self.norm_c, Pos_2d)
+			
+			local DistToLine = DispToStart:Cross(self.norm_c):LengthSqr()
+			
+			if DistToLine > (64*64) then return end
+		
+			local phys = activator:GetPhysicsObject()
+			if !phys:IsValid() then return end
+			
+			local velv = phys:GetVelocity()
+			local vel2 = velv:LengthSqr()
+			if vel2 < (self.minspeed*self.minspeed) then return end --It passes the speed threshold
+			
+			--Determine direction of motion
+			local vx = math.abs(velv:Dot(activator:GetForward()))
+			local vy = math.abs(velv:Dot(activator:GetRight()))
+			local vz = math.abs(velv:Dot(activator:GetUp()))
+			local mins = activator:OBBMins()
+			local maxs = activator:OBBMaxs()
+			
+			local proplength
+			local propspeed
+			
+			if (vy > vx) and (vy > vz) then --Moving in Local Y
+				proplength = maxs.y - mins.y
+				propspeed = vy
+			elseif (vz > vx) and (vz > vy) then --Moving in Local Z
+				proplength = maxs.z - mins.z
+				propspeed = vz
+			else --Moving in Local X
+				proplength = maxs.x - mins.x
+				propspeed = vx
+			end
+			
+			if proplength > self.axlelength_t[ #self.axlelength_t ] and 
+				!list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() ) then return end
+			
+			--Activate Detector
+			if not self.running then
+				self.running = true
+				self.lastent = nil
+				self.trainaxles = 0
+				self.ropes = 0
+				self.traincars = 0
+				self.trainlength = 0
+				self.defect_axle = nil
+				self.defect_car = nil
+				self.dtype = nil
+				
+				if not self.temp then self.temp = math.random(self.mintemp, self.maxtemp) end --Do this once the first time a train rolls over it
+				
+				--Broadcast intro when train first drives over
+				if self.speakintro then
+					self:Transmit(1, self.soundfont, self.s_intro)
+				else
+					self:Transmit(0)
+				end
+			end
+			
+			--Measure speed and count axles
+			
+			if list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() ) then
+				self.trainaxles = self.trainaxles + list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() )
 			else
-				self:Transmit(0)
+				for k, v in ipairs( string.Split( self.axlelength, "," ) ) do
+					if proplength < v then
+						self.trainaxles = self.trainaxles + k
+						break
+					end								
+				end
 			end
-		end
-		
-		--Measure speed and count axles
-		
-		if list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() ) then
-			self.trainaxles += list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() )
-		else
-			for k, v in ipairs( string.Split( self.axlelength, "," ) ) do
-				if proplength < v then
-					self.trainaxles += k
-					break
-				end								
-			end
-		end
-		
-		self.trainspeed = propspeed
-		
-		--Determine if this truck/axle is coupled or not
-		
-		local coupled = constraint.FindConstraint(activator, "Rope")
-		--PrintTable(coupled)
-		
-		if coupled then
-			self.ropes = self.ropes + 1
 			
-			self.traincars = math.floor(self.ropes/2) + 1
-		end
-		
-		--Measure Distance to previous prop
-		if self.lastent and self.lastent:IsValid() then
-			self.trainlength = self.trainlength + activator:GetPos():Distance(self.lastent:GetPos())
-		end
-		
-		self.lastent = activator
-		
-		--Test for Hot Box
-		if activator:IsOnFire() then
-			self.defect_axle = self.trainaxles
-			self.defect_car = self.traincars
-			self.dtype = "hotbox"
+			self.trainspeed = propspeed
 			
-			--Broadcast defect alarm immediately
-			if self.instantreport and not self.ireported then
-				self.ireported = true
-				local sentence = self.s_hotbox
+			--Determine if this truck/axle is coupled or not
+			
+			local coupled = constraint.FindConstraint(activator, "Rope")
+			--PrintTable(coupled)
+			
+			if coupled then
+				self.ropes = self.ropes + 1
 				
-				sentence = self:SubstituteVars(sentence)
-				
-				--print("DEFECT")
-				
-				--Broadcast Sentence
-				self:Transmit(2, self.soundfont, sentence)
+				self.traincars = math.floor(self.ropes/2) + 1
 			end
+			
+			--Measure Distance to previous prop
+			if self.lastent and self.lastent:IsValid() then
+				self.trainlength = self.trainlength + activator:GetPos():Distance(self.lastent:GetPos())
+			end
+			
+			self.lastent = activator
+			
+			--Test for Hot Box
+			if activator:IsOnFire() then
+				self.defect_axle = self.trainaxles
+				self.defect_car = self.traincars
+				self.dtype = "hotbox"
+				
+				--Broadcast defect alarm immediately
+				if self.instantreport and not self.ireported then
+					self.ireported = true
+					local sentence = self.s_hotbox
+					
+					sentence = self:SubstituteVars(sentence)
+					
+					--print("DEFECT")
+					
+					--Broadcast Sentence
+					self:Transmit(2, self.soundfont, sentence)
+				end
+			end
+			
+			
+			self.endtime = CurTime() + 5 --If another prop doesn't enter the trigger by this time, the detector will consider the train finished.
 		end
-		
-		
-		self.endtime = CurTime() + 5 --If another prop doesn't enter the trigger by this time, the detector will consider the train finished.
 	end
 	
 end

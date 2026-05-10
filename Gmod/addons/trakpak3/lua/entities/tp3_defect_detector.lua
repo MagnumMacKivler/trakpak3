@@ -8,6 +8,121 @@ ENT.Instructions = "Place in Hammer"
 
 if SERVER then
 	
+	-- RSG
+	list.Set("Trakpak3_AxleCountOverride", "models/anthonysmodels/uk/12t van/lner 12t van.mdl", 2)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/bogies/emd_htc_rsg.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/bogies/emd_htcr-e_rsg.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/battle/centipede/centipede_truck_d_front.mdl", 4)
+	list.Set("Trakpak3_AxleCountOverride", "models/battle/centipede/centipede_truck_d_rear.mdl", 4)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/wheels/standard/double_108.mdl", 1)
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/wheels/standard/double_96.mdl", 1)
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/wheels/standard/double_90.mdl", 1)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/stock/uk/chassis/12t_10ft_wb_chassis_rtr.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/stock/uk/chassis/12t_9ft_wb_chassis_rtr.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/stock/uk/wagons/6t_3_plank.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/stock/uk/wagons/standard_1_plank.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/bobsters_trains_2/stock/uk/wagons/standard_5_plank.mdl", 2)
+
+	list.Set("Trakpak3_AxleCountOverride", "models/daylight/cw3axletender_cbq118.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/daylight/delta2w.mdl", 1)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/joe/bogies/arch_bar_truck.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/joe/bogies/arch_bar_truck_2.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/joe/bogies/wood_beam_truck.mdl", 2)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/phantom_one/fox_pressed_truck_30in.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/phantom_one/heavyweight_sixwheeler.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/gsgtrainprops/trains/propper/trucks/dofasco_hi-ad.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/gsgtrainprops/trains/propper/trucks/dofasco_hi-ad_42in.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/rika/truck/alco_freight_a1a_late.mdl", 3)
+	
+	-- yes this is in fact too short to be a 3 axle
+	list.Set("Trakpak3_AxleCountOverride", "models/rod's_stuff/bogie_sliders/3axle/hyperslider_rsg3axle.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/buckeye/buckeye.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/doggard/ge_hiad_40in_a1a_late.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/doggard/ge_hiad_40in_c_late.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/doggard/ge_hiad_42in_a1a_late.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/doggard/ge_hiad_42in_c_late.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/trucks/aar_b_westinghouse.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/trucks/aar_b_westinghouse_40inch.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/trucks/commonwealth_a1a_long.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/iore/bogie_iore_tp3.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/nhff/bogie_gloucester_dca.mdl", 2)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/bruss/lima_trailing_truck.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/bruss/trucks/usra_50t_archbar.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/parkmanpack/pullmans/heavytruck.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/parkmanpack/trucks/battleship_buckeye_truck_hyperslider.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/parkmanpack/trucks/gs2trailer.mdl", 2)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/usa/bogies/baldwin_commonwealth_truck.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/usa/bogies/buckeye_truck.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/usa/bogies/pichler_truck.mdl", 3)
+	
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/uk/br/class_31_bogie.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/uk/br/class_58_bogie.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/usa/alco/alco_pa_a1a_bogie.mdl", 3)
+	
+	-- 3ft
+	list.Set("Trakpak3_AxleCountOverride", "models/rod's_stuff/bogie_sliders/3ft/hyperslider_3ft.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/kustom/3ftstock/3ft_truck.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/zexciv_train_stuff/usa/trucks/archbar_3ft.mdl", 2)
+	
+	-- 24" ( Joe's 2ft )
+	list.Set("Trakpak3_AxleCountOverride", "models/hfb_unterwagen_alte_p2ft.mdl", 2)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_16.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_32.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_48.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_64.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_96.mdl", 4)
+	list.Set("Trakpak3_AxleCountOverride", "models/qwertyaaa/2ft/slider_128.mdl", 4)
+	
+	-- 32" ( Ron's 2ft / 1 gauge )
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/coachbogey2.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/freightbogey2.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/heavybogey1.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/locobogey1.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/locobogey2.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains1ga/locobogey3.mdl", 3)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/joe/bogies/2ft_1.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/joe/bogies/2ft_2.mdl", 2)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/rod's_stuff/bogie_sliders/2ft/hyperslider_2ft.mdl", 2)
+	
+	-- PHX
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/trucks/aar_b_westinghouse_phx.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/lazpack/trucks/commonwealth_a1a_long_phx.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/rod's_stuff/bogie_sliders/3axle/hyperslider_phx3axle.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/gsgtrainprops/trains/propper/trucks/dofasco_hi-ad_phxgauge.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/gsgtrainprops/trains/propper/trucks/dofasco_hi-ad_42in_phxgauge.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/rika/truck/broad/alco_freight_a1a_late.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/hanksabutt/trucks/dd_truck/dd_truck_phx.mdl", 4)
+	list.Set("Trakpak3_AxleCountOverride", "models/iore/bogie_iore_phx.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/nhff/bogie_gloucester_dca_phx.mdl", 2)
+	list.Set("Trakpak3_AxleCountOverride", "models/unionslocos/centipede_bogie_c.mdl", 4)
+	list.Set("Trakpak3_AxleCountOverride", "models/unionslocos/centipede_bogie_d.mdl", 4)
+	
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains/heavybogey1.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains/locobogey4.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains/locobogey11.mdl", 3)
+	list.Set("Trakpak3_AxleCountOverride", "models/magtrains/locobogey13.mdl", 3)
+	
+	-- Breitspur
+	list.Set("Trakpak3_AxleCountOverride", "models/breitspurbahn/henschel_pxi_2-131_3-axle-truck.mdl", 3)
+	
+	
 	ENT.KeyValueMap = {
 		boxsize = "number",
 		boxdepth = "number",
@@ -22,6 +137,7 @@ if SERVER then
 		soundfont = "string",
 		speakintro = "boolean",
 		instantreport = "boolean",
+		axlelength = "string",
 		
 		s_intro = "string",
 		s_nodefects = "string",
@@ -92,6 +208,14 @@ if SERVER then
 		if self.s_generic3 then self.s_generic3 = string.lower(self.s_generic3) end
 		if self.s_generic4 then self.s_generic4 = string.lower(self.s_generic4) end
 		
+		self.axlelength_t = { 100, 200, 240, 300 }
+		
+		if ( #self.axlelength > 0 ) then
+			table.clear( self.axlelength_t )
+			for k, v in ipairs( string.Split( self.axlelength, "," ) ) do
+				self.axlelength_t[k] = tonumber(v)
+			end
+		end
 		--self.temp = math.random(self.mintemp, self.maxtemp) --For some reason, putting this here always comes up with the maximum number.
 		
 	end
@@ -272,6 +396,8 @@ if SERVER then
 			if DistToLine < (64*64) then
 			
 				local phys = activator:GetPhysicsObject()
+				if !phys:IsValid() then return end
+				
 				local velv = phys:GetVelocity()
 				local vel2 = velv:LengthSqr()
 				if vel2 >= (self.minspeed*self.minspeed) then --It passes the speed threshold
@@ -300,7 +426,7 @@ if SERVER then
 						propspeed = vx
 					end
 					
-					if proplength<300 then
+					if proplength < self.axlelength_t[ #self.axlelength_t ] or list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() ) then
 						validtruck = true
 					end
 					
@@ -329,14 +455,16 @@ if SERVER then
 						end
 						
 						--Measure speed and count axles
-						if proplength<100 then
-							self.trainaxles = self.trainaxles + 1
-						elseif proplength<200 then
-							self.trainaxles = self.trainaxles + 2
-						elseif proplength<240 then
-							self.trainaxles = self.trainaxles + 3
-						elseif proplength<300 then --Anything longer than 300 isn't a truck
-							self.trainaxles = self.trainaxles + 4
+						
+						if list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() ) then
+							self.trainaxles += list.GetEntry( "Trakpak3_AxleCountOverride", activator:GetModel() )
+						else
+							for k, v in ipairs( string.Split( self.axlelength, "," ) ) do
+								if proplength < v then
+									self.trainaxles += k
+									break
+								end								
+							end
 						end
 						
 						self.trainspeed = propspeed

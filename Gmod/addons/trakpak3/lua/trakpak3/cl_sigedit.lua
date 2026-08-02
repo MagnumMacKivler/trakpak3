@@ -2413,6 +2413,7 @@ function Trakpak3.SigEdit.WriteConditionText(ntable)
 	return out.." )"
 end
 
+local con_index = 1
 function Trakpak3.SigEdit.ExploreNode(ntable,ilevel)
 	local nodes = Trakpak3.SigEdit.panels.nodes
 	local indent = string.rep("\t", ilevel)
@@ -2424,7 +2425,8 @@ function Trakpak3.SigEdit.ExploreNode(ntable,ilevel)
 		return indent.."return \""..(ntable.aspect).."\""
 	elseif ntable.isconditional then --Node is a conditional - RECURSION TIME
 		
-		local out = indent.."if "..Trakpak3.SigEdit.WriteConditionText(ntable).." then\n"
+		local out = indent.."if "..Trakpak3.SigEdit.WriteConditionText(ntable).." then\n"--..indent.."print(\""..con_index.."\")\n"
+		con_index = con_index + 1
 		local thentable = nodes[nodes[ntable.id_then].nextnode]
 		local nextresult = Trakpak3.SigEdit.ExploreNode(thentable,ilevel+1)
 		if nextresult then
@@ -2448,9 +2450,10 @@ end
 function Trakpak3.SigEdit.WriteLogicFunction(bitch)
 	print("Writing Logic Function...")
 	local nodes = Trakpak3.SigEdit.panels.nodes
-	local func_text = "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC, NEXTDIV)\n"
+	local func_text = "function(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC, NEXTDIV)\n"--.."print(OCCUPIED, DIVERGING, SPEED, NEXTASPECT, NEXTSPEED, TAGS, CTC, NEXTDIV)\n"
 	local func_body = Trakpak3.SigEdit.ExploreNode(nodes[2],1)
-	print(func_body)
+	con_index = 1
+	--print(func_body)
 	if func_body then --function wrote successfully
 		func_text = func_text..func_body.."\nend"
 		RunString("Trakpak3.SigEdit.LogicFunction = "..func_text)

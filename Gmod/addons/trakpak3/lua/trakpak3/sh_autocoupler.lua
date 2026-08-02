@@ -53,7 +53,7 @@ if SERVER then
 		--print("Auto Coupler Stats:\n",table.Count(AutoCoupler.AllCouplers).." couplers total, "..#AutoCoupler.FastChecks.." fast check pairs, "..math.Round(AutoCoupler.CPUTimeInst).."/"..math.Round(AutoCoupler.CPUTimeAvg).." microseconds CPU time (instantaneous/avg).")
 	end
 	
-	concommand.Add("tp3_autocoupler_perf", printperf, nil, "Display the current performance stats of the Trakpak3 Autocoupler system.")
+	--concommand.Add("tp3_autocoupler_perf", printperf, nil, "Display the current performance stats of the Trakpak3 Autocoupler system.")
 	concommand.Add("tp3_autocoupler_printall",function() for n = 1, AutoCoupler.LastIndex do print(n, AutoCoupler.AllCouplers[n]) end end)
 	
 	--Create a new autocoupler object

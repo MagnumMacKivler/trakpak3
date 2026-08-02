@@ -32,7 +32,7 @@ if SERVER then
 	Trakpak3.SwitchStandPlots = {}
 	Trakpak3.SignalPlots = {}
 	
-	
+	include("trakpak3/shared.lua") --
 	include("trakpak3/tp3lib.lua") --
 	include("trakpak3/nodesetup.lua") --
 	include("trakpak3/signalsetup.lua") --
@@ -46,10 +46,10 @@ if SERVER then
 	include("trakpak3/signalsprites.lua") --
 	include("trakpak3/clientloader.lua")
 	include("trakpak3/positionfixer.lua") --
-	include("trakpak3/shared.lua") --
 	include("trakpak3/sh_autocoupler.lua") --
 	include("trakpak3/sh_cartags.lua") --
 	
+	AddCSLuaFile("trakpak3/shared.lua") --
 	AddCSLuaFile("trakpak3/cl_autosave.lua") --
 	AddCSLuaFile("trakpak3/cl_nodesetup.lua") --
 	AddCSLuaFile("trakpak3/cl_sigedit.lua") --
@@ -64,9 +64,9 @@ if SERVER then
 	AddCSLuaFile("trakpak3/cl_defect_detector.lua") --
 	AddCSLuaFile("trakpak3/cl_signalsprites.lua") --
 	AddCSLuaFile("trakpak3/cl_clientloader.lua") --
-	AddCSLuaFile("trakpak3/shared.lua") --
 	AddCSLuaFile("trakpak3/sh_autocoupler.lua") --
 	AddCSLuaFile("trakpak3/sh_cartags.lua") --
+	--AddCSLuaFile("trakpak3/cl_wheelsounds.lua") --
 	
 	--Function to run all the InitPostEntity requirements. Order matters for some of these so I might as well put everything in one function.
 	function Trakpak3.InitPostEntityLoad()
@@ -111,6 +111,7 @@ end
 --CLIENT Initialization
 if CLIENT then
 	
+	include("trakpak3/shared.lua")
 	include("trakpak3/cl_autosave.lua")
 	include("trakpak3/cl_nodesetup.lua")
 	include("trakpak3/cl_sigedit.lua")
@@ -125,9 +126,9 @@ if CLIENT then
 	include("trakpak3/cl_defect_detector.lua")
 	include("trakpak3/cl_signalsprites.lua")
 	include("trakpak3/cl_clientloader.lua")
-	include("trakpak3/shared.lua")
 	include("trakpak3/sh_autocoupler.lua")
 	include("trakpak3/sh_cartags.lua")
+	--include("trakpak3/cl_wheelsounds.lua")
 	
 	--Fix EyePos, EyeAngles, and EyeVector functions
 	hook.Add("PreDrawTranslucentRenderables", "Trakpak3_FixEyeFunctions", function()

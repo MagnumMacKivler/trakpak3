@@ -76,7 +76,7 @@ if SERVER then
 			glow = glow,
 			--nocull = nocull
 		}
-		
+		--print(self, pos, self.text)
 		Trakpak3.SignText.UpdateSign(self, self.text_data_1, 1)
 		
 		--Disable Shadows

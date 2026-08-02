@@ -56,14 +56,13 @@ if SERVER then
 		elseif datatype=="output" then
 			self:StoreOutput(key, value)
 		end
-
-		--Automatically set up fixer pos
-		if key=="origin" then
+		
+		if key=="origin" then --Automatically set up fixer pos
 			self.fixerpos = Trakpak3.HammerStringToVector(value)
 			if self.fixerang then
 				self:SetFixerPos(self.fixerpos, self.fixerang)
 			end
-		elseif key=="angles" then
+		elseif key=="angles" then --Automatically set up fixer angle
 			self.fixerang = Trakpak3.HammerStringToAngle(value)
 			if self.fixerpos then
 				self:SetFixerPos(self.fixerpos, self.fixerang)

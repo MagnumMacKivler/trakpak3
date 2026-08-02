@@ -1,5 +1,12 @@
 --Clientside Node Setup as well as debug and "pack" receiving functions
 
+--Initialize in case the map lacks any of these components.
+Trakpak3.CS_Positions = {}
+Trakpak3.Signals = {}
+Trakpak3.Switches = {}
+Trakpak3.LogicGates = {}
+Trakpak3.DispatchProxies = {}
+
 --Functions for editing individual nodes
 function Trakpak3.GetUniqueNodeID()
 	if not Trakpak3.NodeList then

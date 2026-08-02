@@ -328,7 +328,7 @@ end
 local function autocomplete2(cmd, args)
 	return {"ctc", "map"}
 end
-concommand.Add("tp3_dispatch_resetswitches", setswitches, autocomplete2, "Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
+concommand.Add("tp3_dispatch_resetswitches", resetswitches, autocomplete2, "Resets all CTC switches (the ones on the dispatch board) or all switches in the map. Accepted arguments are 'ctc' and 'map'. Only works for Admins.")
 
 --[[
 concommand.Add("tp3_dispatch_printlog", function(ply, cmd, args)

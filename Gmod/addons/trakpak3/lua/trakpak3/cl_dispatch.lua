@@ -480,7 +480,7 @@ function Dispatch.OpenEditor()
 		if Dispatch.page > 1 then
 			Dispatch.PopulatePage(Dispatch.Panels.canvas, Dispatch.page - 1)
 		else
-			Dispatch.PopulatePage(Dispatch.Panels.canvas, #Dispatch.boards)
+			Dispatch.PopulatePage(Dispatch.Panels.canvas, #Dispatch.Boards)
 		end
 	end
 	
@@ -1614,31 +1614,43 @@ function Dispatch.AddSignal(ent, x, y, orientation, signal, style)
 					
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Signal name '"..self.signal.."' does not match an existing entity.")
+					button:SetImage("trakpak3_common/icons/signal_nopath_"..dir..alt..".png")
 				end
 			else
 				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Signal with no signal name.")
+				button:SetImage("trakpak3_common/icons/signal_nopath_"..dir..alt..".png")
 			end
 		end
 		
-		--Draw Passes Marker
+		--Draw Passes Marker/Undefined Name Marker
 		button:NoClipping(true)
 		function button:PaintOver(w, h)
-			local passes = Dispatch.RealData[e.signal]["passes"]
-			if passes > 0 then
-				local fw = 14
-				local fh = 18
-				draw.NoTexture()
-				
-				--Frame
-				surface.SetDrawColor(white)
-				surface.DrawRect(w - fw/2, h - fh/2, fw, fh)
-				--Black Backing
-				surface.SetDrawColor(black)
-				surface.DrawRect(w - fw/2 + 1, h - fh/2 + 1, fw-2, fh-2)
-				--Numeral
-				surface.SetDrawColor(white)
-				drawnumber(passes,w - fw/2, h - fh/2)
-				
+			if (not e.signal) or (e.signal and e.signal=="") then --Name Undefined
+				if (CurTime()%2 > 1) then
+					draw.SimpleTextOutlined("?","tp3_dispatch_2",w/2, h/2, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+				end
+			elseif e.signal and Dispatch.RealData and not Dispatch.RealData[e.signal] then --Name is defined, but doesn't match a signal
+					if (CurTime()%2 > 1) then
+						draw.SimpleTextOutlined("!","tp3_dispatch_2",w/2, h/2, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+					end
+			elseif Dispatch.RealData and Dispatch.RealData[e.signal] then
+				local passes = Dispatch.RealData[e.signal]["passes"]
+				if passes > 0 then
+					local fw = 14
+					local fh = 18
+					draw.NoTexture()
+					
+					--Frame
+					surface.SetDrawColor(white)
+					surface.DrawRect(w - fw/2, h - fh/2, fw, fh)
+					--Black Backing
+					surface.SetDrawColor(black)
+					surface.DrawRect(w - fw/2 + 1, h - fh/2 + 1, fw-2, fh-2)
+					--Numeral
+					surface.SetDrawColor(white)
+					drawnumber(passes,w - fw/2, h - fh/2)
+					
+				end
 			end
 		end
 		
@@ -1888,15 +1900,17 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 					end
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Switch name '"..self.switch.."' does not match an existing entity.")
+					button:SetImage("trakpak3_common/icons/switch_x_unlit.png")
 				end
 			else
 				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Switch with no switch name.")
+				button:SetImage("trakpak3_common/icons/switch_x_unlit.png")
 			end
 			
 		end
 		local e = element
 		function button:DoClick()
-			if e.switch and (e.switch!="") then
+			if e.switch and (e.switch!="") and Dispatch.RealData[e.switch] then
 				local state = Dispatch.RealData[e.switch]["state"]
 				local blocked = bit.bor(Dispatch.RealData[e.switch]["blocked"], Dispatch.RealData[e.switch]["interlocked"])
 				local broken = Dispatch.RealData[e.switch]["broken"]
@@ -1918,25 +1932,35 @@ function Dispatch.AddSwitch(ent, x, y, switch)
 			end
 		end
 		
-		--Draw Passes Marker
+		--Draw Passes Marker/Name Undefined Marker
 		button:NoClipping(true)
 		function button:PaintOver(w, h)
-			local passes = Dispatch.RealData[e.switch]["passes"]
-			if passes > -1 then
-				local fw = 14
-				local fh = 18
-				draw.NoTexture()
-				
-				--Frame
-				if passes==0 then surface.SetDrawColor(cursor2) else surface.SetDrawColor(white) end
-				surface.DrawRect(w - fw/2, h - fh/2, fw, fh)
-				--Black Backing
-				surface.SetDrawColor(black)
-				surface.DrawRect(w - fw/2 + 1, h - fh/2 + 1, fw-2, fh-2)
-				--Numeral
-				if passes==0 then surface.SetDrawColor(cursor2) else surface.SetDrawColor(white) end
-				drawnumber(passes,w - fw/2, h - fh/2)
-				
+			if (not e.switch) or (e.switch and e.switch=="") then --Name Undefined
+				if (CurTime()%2 > 1) then
+					draw.SimpleTextOutlined("?","tp3_dispatch_2",w/2, h/2, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+				end
+			elseif e.switch and Dispatch.RealData and not Dispatch.RealData[e.switch] then --Name is defined, but doesn't match a switch
+					if (CurTime()%2 > 1) then
+						draw.SimpleTextOutlined("!","tp3_dispatch_2",w/2, h/2, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+					end
+			elseif Dispatch.RealData and Dispatch.RealData[e.switch] then
+				local passes = Dispatch.RealData[e.switch]["passes"]
+				if passes > -1 then
+					local fw = 14
+					local fh = 18
+					draw.NoTexture()
+					
+					--Frame
+					if passes==0 then surface.SetDrawColor(cursor2) else surface.SetDrawColor(white) end
+					surface.DrawRect(w - fw/2, h - fh/2, fw, fh)
+					--Black Backing
+					surface.SetDrawColor(black)
+					surface.DrawRect(w - fw/2 + 1, h - fh/2 + 1, fw-2, fh-2)
+					--Numeral
+					if passes==0 then surface.SetDrawColor(cursor2) else surface.SetDrawColor(white) end
+					drawnumber(passes,w - fw/2, h - fh/2)
+					
+				end
 			end
 		end
 		
@@ -2080,6 +2104,7 @@ function Dispatch.AddBlock(ent, x, y, block)
 		button:SetSize(Dispatch.elementsize,Dispatch.elementsize)
 		local px, py = pnl:GetPanelCoords(self.x, self.y)
 		button:SetPos(px - Dispatch.elementsize/2, py - Dispatch.elementsize/2)
+		local e = self
 		if editor then
 			if selected then 
 				button:SetImage("trakpak3_common/icons/block_occupied.png")
@@ -2112,21 +2137,8 @@ function Dispatch.AddBlock(ent, x, y, block)
 						end
 					end
 					]]--
-					local e = self
-					button:NoClipping(true)
-					function button:PaintOver(w, h)
-						if e.occupied and e.tag and e.speed then
-							local cvar = GetConVar("tp3_dispatch_usemetric")
-							local metric = cvar:GetBool()
-							local units = " MPH"
-							if metric then units = " km/h" end
-							draw.SimpleTextOutlined(e.tag..", "..e.speed..units, "tp3_dispatch_1", w/2, -h/2, white ,TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
-							local note = Dispatch.LocalNotes[e.tag]
-							if note and note!="" then
-								draw.SimpleTextOutlined(Dispatch.LocalNotes[e.tag],"tp3_dispatch_1",w/2,h*1.5, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
-							end
-						end
-					end
+					
+					
 					
 					if self.occupied and self.tag and (self.speed!=0) then
 						button:SetImage("trakpak3_common/icons/block_moving.png")
@@ -2158,12 +2170,40 @@ function Dispatch.AddBlock(ent, x, y, block)
 					
 				else
 					ErrorNoHalt("[Trakpak3] Dispatch Board Block name '"..self.block.."' does not match an existing entity.")
+					button:SetImage("trakpak3_common/icons/block_clear.png")
 				end
 			else
 				ErrorNoHalt("[Trakpak3] Attempted to generate a Dispatch Board Block Detector with no block name.")
+				button:SetImage("trakpak3_common/icons/block_clear.png")
 			end
 			
 		end
+		
+		button:NoClipping(true)
+		function button:PaintOver(w, h)
+			if (not e.block) or (e.block and e.block=="") then --Name Undefined
+				if (CurTime()%2 > 1) then
+					draw.SimpleTextOutlined("?","tp3_dispatch_2",w/2, h/2, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+				end
+			elseif e.block and Dispatch.RealData and not Dispatch.RealData[e.block] then --Name is defined, but doesn't match a block
+				if (CurTime()%2 > 1) then
+					draw.SimpleTextOutlined("!","tp3_dispatch_2",w/2, h/2, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+				end
+			elseif Dispatch.RealData and Dispatch.RealData[e.block] then
+				if e.occupied and e.tag and e.speed then
+					local cvar = GetConVar("tp3_dispatch_usemetric")
+					local metric = cvar:GetBool()
+					local units = " MPH"
+					if metric then units = " km/h" end
+					draw.SimpleTextOutlined(e.tag..", "..e.speed..units, "tp3_dispatch_1", w/2, -h/2, white ,TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+					local note = Dispatch.LocalNotes[e.tag]
+					if note and note!="" then
+						draw.SimpleTextOutlined(Dispatch.LocalNotes[e.tag],"tp3_dispatch_1",w/2,h*1.5, cursor2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, black)
+					end
+				end
+			end
+		end
+		
 	end
 	
 	function element:GenerateEditor(pnl,nohelpers,selected)

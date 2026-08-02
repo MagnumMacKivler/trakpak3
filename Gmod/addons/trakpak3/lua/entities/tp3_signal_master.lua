@@ -306,6 +306,7 @@ if SERVER then
 	--Returns aspect and appearance tables, or nil
 	function ENT:CalculateAspect(occupied, diverging, speed, nextrule, nextspeed, tags, ctc, nextdiv)
 		if self.system and self.signaltype then
+			--print("Starting: ", self)
 			local aspname = self.system.logic(occupied, diverging, speed or Trakpak3.FULL, nextrule, nextspeed or Trakpak3.FULL, tags, ctc_dict[ctc or 2], nextdiv) --aspect to request
 			if self.system.rules[aspname] then --if rule exists in rulebook
 				local data = self.system.sigtypes[self.sigtype][aspname]

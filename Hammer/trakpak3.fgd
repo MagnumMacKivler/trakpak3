@@ -880,6 +880,13 @@
 	line2(axis) : "Scan Line 2" : : "Second Scan Line. This point should be positioned about 2 units below the top of the railhead on the other side of the tracks. An axis-aligned square box the size of 'Scan Box Size' will be swept from start to end along this line to check for dragging equipment. This box will hit everything except world geometry and static props. Longer lines allow faster trains."
 	
 	trigger(target_destination) : "Trigger" : : "A trigger_multiple to use as an axle counter. The detector will not work unless this is present. The trigger should be set to detect Physics Objects only and should be at or below the railhead."
+	axlelength(choices) : "Gauge" : 1 : "Prop lengths for axle counting. For 3ft6/PHX/5ft use RSG, for 32in use 3ft."
+	[
+		"100,200,240,300" : "RSG"
+		"54,110,200,300" : "3ft"
+		"32,96,192,256" : "24in"
+	]
+	
 	
 	minspeed(float) : "Minimum Detection Speed" : "176" : "Minimum speed (units per second) for the detector to actually 'see' a prop. 10 Player Scale MPH = 176 units/sec."
 	

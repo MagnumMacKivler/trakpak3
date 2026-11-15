@@ -65,6 +65,7 @@ if SERVER then
 			self.tags = {}
 		end
 		
+		--Assign signal system
 		self:SetScript(self.sysname, self.sigtype)
 		--Default aspect assignment
 		self.aspect = self:CalculateAspect(false, false, nil, nil, nil, self.tags)
@@ -105,21 +106,25 @@ if SERVER then
 		--Grab the default signal system
 		if TP3Signals then
 			
-			if TP3Signals.systems[sysname] then
+			if sysname and TP3Signals.systems[sysname] then
+				sysname = string.lower(sysname)
 				self.system = TP3Signals.systems[sysname]
-				if self.system.sigtypes[sigtype] then
+				if sigtype and self.system.sigtypes[sigtype] then
+					sigtype = string.lower(sigtype)
 					self.signaltype = sigtype
+				elseif sigtype then
+					ErrorNoHalt("[Trakpak3] Signal ",self," '",self:GetName(),"' has an invalid signal type '"..sigtype.."'! This may cause problems until fixed in the map!")
 				else
-					ErrorNoHalt("[Trakpak3] Signal ",self," has an invalid signal type '"..sigtype.."'! This may cause problems until fixed in the map!")
+					ErrorNoHalt("[Trakpak3] Signal ",self," '",self:GetName(),"' has no signal type set! This may cause problems until fixed in the map!")
 				end
 				--self.signaltype = sigtype
 			elseif sysname then
-				ErrorNoHalt("[Trakpak3] Signal ",self," has an invalid signal system name '"..sysname.."'! This may cause problems until fixed in the map!")
+				ErrorNoHalt("[Trakpak3] Signal ",self," '",self:GetName(),"' has an invalid signal system name '"..sysname.."'! This may cause problems until fixed in the map!")
 			else
-				ErrorNoHalt("[Trakpak3] Signal ",self," has no signal system set! This may cause problems until fixed in the map!")
+				ErrorNoHalt("[Trakpak3] Signal ",self," '",self:GetName(),"' has no signal system set! This may cause problems until fixed in the map!")
 			end
 		else
-			ErrorNoHalt("[Trakpak3] Signal ",self," tried to initialize, but the TP3Signals table does not exist!")
+			ErrorNoHalt("[Trakpak3] Signal ",self," '",self:GetName(),"' tried to initialize, but the TP3Signals table does not exist!")
 		end
 	end
 	
@@ -195,7 +200,7 @@ if SERVER then
 	--Handle New Aspect if applicable
 	function ENT:HandleNewAspect(aspect, force) --aspect is string. Force is fired only by the Block/Gate initial broadcast.
 		if aspect then
-			--print("Signal "..self:EntIndex().." aspect "..aspect)
+			--if self:EntIndex()==1168 then print("Signal "..self:EntIndex().." aspect "..aspect) end
 			if force or (aspect != self.aspect) or self.first_anim then
 				
 				
@@ -210,7 +215,7 @@ if SERVER then
 							WireLib.TriggerOutput(self,"CabSignalAspect",aspect)
 						end
 					end)
-					
+					--if self:EntIndex()==1168 then print(aspect) PrintTable(colordata) end
 					local data = {}
 					if colordata.skin1!="" then data.skin1 = tonumber(colordata.skin1) end
 					if colordata.skin2!="" then data.skin2 = tonumber(colordata.skin2) end
@@ -227,12 +232,12 @@ if SERVER then
 					local oldcolor = self.effectivecolor
 					
 					--Set Self
-					
+					local animated = self:LookupSequence("range") != -1
 					if data.bg1 then
 						--print(data.bg1)
 						local bga = string.Explode(" ",data.bg1)
 						if bga then
-							if data.cycle1 and not self.first_anim then --store for later
+							if animated and data.cycle1 and not self.first_anim then --store for later if the model is animated
 								self.target_bg = bga
 							else --apply now
 								for k, v in pairs(bga) do
@@ -242,7 +247,7 @@ if SERVER then
 							self.effectivecolor = tonumber(bga[1]) or 0
 						end
 					end
-					if data.cycle1 then
+					if animated and data.cycle1 then --Set cycle only if the model is animate-able, otherwise ignore
 						self.old_target = self.target_cycle
 						self.target_cycle = data.cycle1
 						self.anim_stage = 0
@@ -251,7 +256,7 @@ if SERVER then
 						--print(data.cycle1)
 					end
 					if data.skin1 and not self.first_anim then
-						if data.cycle1 then --store for later
+						if animated and data.cycle1 then --store for later if the model is animated
 							self.target_skin = data.skin1
 						else --apply now
 							self:SetSkin(data.skin1)

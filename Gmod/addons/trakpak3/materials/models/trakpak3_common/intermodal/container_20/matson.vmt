@@ -1,0 +1,9 @@
+"VertexLitGeneric"
+{
+	"$basetexture" "trakpak3_common/intermodal/container_20/matson"
+	"$surfaceprop" "Metal"
+	"$detail" "trakpak3_common/intermodal/container_20/container_overlay"
+	"$detailscale" "1"
+	"$detailblendfactor" "1"
+	"$detailblendmode" "0" //DecalModulate aka Overlay
+}

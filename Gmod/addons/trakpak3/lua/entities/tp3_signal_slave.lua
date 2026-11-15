@@ -107,12 +107,12 @@ if SERVER then
 	--Handle new color
 	function ENT:HandleNewColor(skin, bg, cycle)
 		local oldcolor = self.effectivecolor
-		
+		local animated = self:LookupSequence("range") != -1
 		--Set Self
 		if bg then
 			local bga = string.Explode(" ",bg)
 			if bga then
-				if cycle and not self.first_anim then --save for later
+				if animated and cycle and not self.first_anim then --save for later if the model is animated
 					self.target_bg = bga
 				else --apply now
 					for k, v in pairs(bga) do self:SetBodygroup(k,tonumber(v)) end
@@ -121,7 +121,7 @@ if SERVER then
 				self.effectivecolor = tonumber(bga[1]) or 0
 			end
 		end
-		if cycle then
+		if animated and cycle then --apply animation cycle only if the model is actually animated, otherwise ignore.
 			self.old_target = self.target_cycle
 			self.anim_stage = 0
 			self.anim_power = math.Rand(0.75,1.25)
@@ -129,7 +129,7 @@ if SERVER then
 			self.effectivecolor = cycle
 		end
 		if skin and not self.first_anim then
-			if cycle then --save for later
+			if animated and cycle then --save for later if the model is animated
 				--print("Setting ",self," Skin to ",self.target_skin)
 				self.target_skin = skin
 			else --apply now

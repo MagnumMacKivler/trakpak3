@@ -47,7 +47,7 @@ for k, filename in pairs(file.Find("trakpak3/signalsystems/"..map.."/*.lua","LUA
 				RunString("TP3Signals.TempLogic = "..ftable.func_text)
 				--print("TP3Signals.TempLogic = "..ftable.func_text) 
 				currentsys.logic = TP3Signals.TempLogic
-				TP3Signals.systems[sysname] = currentsys
+				TP3Signals.systems[string.lower(sysname)] = currentsys
 				print("[TP3Signals] Loaded signal system '"..sysname.."' successfully!")
 			end
 		else

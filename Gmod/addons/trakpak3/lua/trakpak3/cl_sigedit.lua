@@ -2610,12 +2610,16 @@ end
 
 --Save/Load
 function Trakpak3.SigEdit.SaveSigEdit(sysname)
-	Trakpak3.SigEdit.WriteLogicFunction(false)
 	local ftable = {}
-	ftable.sysname = sysname
+	Trakpak3.SigEdit.WriteLogicFunction(false)
+	ftable.sysname = string.lower(sysname) --Convert signal system name to lowercase
 	ftable.rules = Trakpak3.SigEdit.rules
 	ftable.tags = Trakpak3.SigEdit.tags
-	ftable.sigtypes = Trakpak3.SigEdit.sigtypes
+	ftable.sigtypes = {}
+	for k, v in pairs(Trakpak3.SigEdit.sigtypes) do --Convert all signal types to lowercase
+		local kl = string.lower(k)
+		ftable.sigtypes[kl] = v
+	end
 	ftable.panels = {nodes = Trakpak3.SigEdit.panels.nodes}
 	ftable.func_text = Trakpak3.SigEdit.func_text
 	
